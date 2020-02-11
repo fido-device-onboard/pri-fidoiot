@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.sdo</groupId>
+  <artifactId>protocol</artifactId>
+  <name>SDO Protocol</name>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.sdo</groupId>
+    <artifactId>sdo</artifactId>
+    <version>${revision}</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <!--
+  to update all library and plugin versions to latest releases, use
+
+  mvn versions:update-properties
+  -->
+  <properties>
+    <bcprov-jdk15on.version>1.64</bcprov-jdk15on.version>
+    <bcpkix-jdk15on.version>1.64</bcpkix-jdk15on.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bcprov-jdk15on.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bcpkix-jdk15on.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
