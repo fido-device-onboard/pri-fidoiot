@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.sdo.cri.RendezvousInstr.Only;
@@ -52,6 +53,42 @@ public class OwnerTransferOwnershipClient implements Callable<Optional<Duration>
   private final Function<OwnershipVoucher, Duration> myWaitSecondsBuilder;
   private final OwnerLocationInfo myLocationInfo;
   private final Function<KeyType, KeyPair> myKeysProvider;
+  private final BiPredicate<OwnershipVoucher, Integer> myRetryPredicate;
+
+  /**
+   * Construct a new object.
+   *
+   * @param httpClient         The HttpClient to use for outgoing connections.
+   * @param ownershipVoucher   The ownership voucher to register with the SDO service.
+   * @param certPathValidator  A Predicate tested to validate any device certificate chain, may be
+   *                           null.
+   * @param ownerLocationInfo  The owner location info to advertise with the SDO service.
+   * @param keysProvider       A provider of owner signing keys.
+   * @param waitSecondsBuilder The factory providing our wait-second values.
+   * @param retryPredicate     A predicate which, if it fails, will interrupt the retry loop.
+   *                           Arguments are the voucher for which we are currently retrying and the
+   *                           current retry count (0 = first try)
+   */
+  public OwnerTransferOwnershipClient(
+      HttpClient httpClient,
+      OwnershipVoucher ownershipVoucher,
+      Predicate<CertPath> certPathValidator,
+      OwnerLocationInfo ownerLocationInfo,
+      Function<KeyType, KeyPair> keysProvider,
+      Function<OwnershipVoucher, Duration> waitSecondsBuilder,
+      BiPredicate<OwnershipVoucher, Integer> retryPredicate) {
+
+    if (!(ownershipVoucher instanceof OwnershipVoucher113)) {
+      throw new IllegalArgumentException();
+    }
+    myVoucher = (OwnershipVoucher113) ownershipVoucher;
+    myHttpClient = Objects.requireNonNull(httpClient);
+    myCertPathValidator = certPathValidator;
+    myWaitSecondsBuilder = waitSecondsBuilder;
+    myLocationInfo = ownerLocationInfo;
+    myKeysProvider = keysProvider;
+    myRetryPredicate = Objects.requireNonNull(retryPredicate);
+  }
 
   /**
    * Construct a new object.
@@ -72,15 +109,14 @@ public class OwnerTransferOwnershipClient implements Callable<Optional<Duration>
       Function<KeyType, KeyPair> keysProvider,
       Function<OwnershipVoucher, Duration> waitSecondsBuilder) {
 
-    if (!(ownershipVoucher instanceof OwnershipVoucher113)) {
-      throw new IllegalArgumentException();
-    }
-    myVoucher = (OwnershipVoucher113) ownershipVoucher;
-    myHttpClient = Objects.requireNonNull(httpClient);
-    myCertPathValidator = certPathValidator;
-    myWaitSecondsBuilder = waitSecondsBuilder;
-    myLocationInfo = ownerLocationInfo;
-    myKeysProvider = keysProvider;
+    this(
+        httpClient,
+        ownershipVoucher,
+        certPathValidator,
+        ownerLocationInfo,
+        keysProvider,
+        waitSecondsBuilder,
+        (voucher, count) -> (count < 3)); // if we're given no retry predicate, retry three times
   }
 
   @Override
@@ -103,8 +139,8 @@ public class OwnerTransferOwnershipClient implements Callable<Optional<Duration>
 
     Duration waitSeconds = null;
     long delay = -1;
-
-    for (int retry = maxRetries(); null == waitSeconds && 0 < retry; retry--) {
+    int retryCount = 0;
+    while (null == waitSeconds && myRetryPredicate.test(myVoucher, retryCount++)) {
       for (RendezvousInstr rendezvous : myVoucher.getOh().getR()) {
 
         Iterator<URI> it = rendezvous.toUris(Only.owner).iterator();
@@ -190,10 +226,6 @@ public class OwnerTransferOwnershipClient implements Callable<Optional<Duration>
 
   private Logger logger() {
     return LoggerFactory.getLogger(getClass());
-  }
-
-  private int maxRetries() {
-    return 3;
   }
 
   private Duration to0(URI serverUri) throws

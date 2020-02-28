@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.sdo</groupId>
     <artifactId>sdo</artifactId>
-    <version>${revision}</version>
+    <version>1.8</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -26,7 +26,7 @@
   mvn versions:update-properties
   -->
   <properties>
-    <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
   </properties>
 
   <dependencyManagement>
@@ -45,7 +45,7 @@
     <dependency>
       <groupId>org.sdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>${revision}</version>
+      <version>1.8</version>
     </dependency>
 
     <dependency>
@@ -65,6 +65,32 @@
             <goals>
               <goal>repackage</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-installed</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <type>${project.packaging}</type>
+                  <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
+                  <destFileName>${project.artifactId}.${project.packaging}</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
           </execution>
         </executions>
       </plugin>

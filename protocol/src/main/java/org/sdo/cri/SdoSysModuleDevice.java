@@ -56,7 +56,7 @@ public final class SdoSysModuleDevice implements ServiceInfoSource, ServiceInfoS
   private final CharBuffer b64Buf = CharBuffer.allocate(BASE64_ENCODED_BLOCKSIZE);
   private StringBuilder execBuilder = new StringBuilder();
   private Redirect execOutputRedirect = Redirect.PIPE;
-  private Duration execTimeout = Duration.ofSeconds(60);
+  private Duration execTimeout = Duration.ofHours(2);
   private Predicate<Integer> exitValueTest = val -> (0 == val);
   private StringBuilder filenameBuilder = new StringBuilder();
   private Path path = null;

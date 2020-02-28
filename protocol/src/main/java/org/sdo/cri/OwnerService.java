@@ -39,7 +39,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.crypto.SecretKey;
 import org.bouncycastle.crypto.DataLengthException;
-import org.sdo.cri.AsymmetricKeyExchange.Owner;
 import org.sdo.cri.EpidLib.EpidStatus;
 import org.sdo.cri.EpidLib.HashAlg;
 import org.slf4j.Logger;
@@ -71,6 +70,95 @@ public class OwnerService implements ProtocolService, Serializable {
   private Iterator<Supplier<ServiceInfo>> myServiceInfoIterator = null;
   private transient Collection<ServiceInfoModule> myServiceInfoModules = List.of();
   private transient Function<KeyType, KeyPair> myKeysProvider = null;
+
+  @Override
+  public boolean isDone() {
+    return myIsDone;
+  }
+
+  @Override
+  public boolean isHello(ProtocolMessage message) {
+    return Version.VERSION_1_13 == message.getVersion()
+        && MessageType.TO2_HELLO_DEVICE == message.getType();
+  }
+
+  public void setDeviceErrorHandler(BiConsumer<OwnershipVoucher, Error> errorHandler) {
+    myDeviceErrorHandler = Objects.requireNonNull(errorHandler);
+  }
+
+  public void setEpidServiceUrl(URL url) {
+    myEpidServiceUrl = Objects.requireNonNull(url);
+  }
+
+  public void setG3Function(Function<OwnershipVoucher, UUID> g3Function) {
+    myG3Function = Objects.requireNonNull(g3Function);
+  }
+
+  public void setHttpClient(HttpClient httpClient) {
+    myHttpClient = Objects.requireNonNull(httpClient);
+  }
+
+  public void setKeysProvider(Function<KeyType, KeyPair> provider) {
+    myKeysProvider = Objects.requireNonNull(provider);
+  }
+
+  public void setOwnershipVoucherStorage(ObjectStorage<UUID, OwnershipVoucher> storage) {
+    this.myOwnershipVoucherStorage = Objects.requireNonNull(storage);
+  }
+
+  public void setR3Function(Function<OwnershipVoucher, RendezvousInfo> r3Function) {
+    myR3Function = Objects.requireNonNull(r3Function);
+  }
+
+  public void setSecureRandom(SecureRandom secureRandom) {
+    this.mySecureRandom = Objects.requireNonNull(secureRandom);
+  }
+
+  public void setServiceInfoModules(Collection<ServiceInfoModule> serviceInfoModules) {
+    myServiceInfoModules =
+        Collections.unmodifiableList(List.copyOf(Objects.requireNonNull(serviceInfoModules)));
+  }
+
+  private KeyExchange buildAsym2KKeyExchange() {
+    KeyPair keys = myKeysProvider.apply(KeyType.RSA2048RESTR);
+    if (null == keys) {
+      // If we can't get a restricted (exponent = F4) key pair, we might still be able
+      // to get a short unrestricted keypair
+      keys = myKeysProvider.apply(KeyType.RSA_UR);
+      if (null != keys) {
+        // RSA_UR doesn't strictly define key length, so we have to check if it's the right length
+        RSAPublicKey rsaKey = (RSAPublicKey) keys.getPublic();
+        if (TWO_K != rsaKey.getModulus().bitLength()) {
+          // no good, toss this result out
+          keys = null;
+        }
+      }
+    }
+
+    if (null != keys) { // we found a usable keypair
+      return new AsymmetricKeyExchange.Owner(keys, mySecureRandom);
+    } else {
+      return null;
+    }
+  }
+
+  private KeyExchange buildAsym3KKeyExchange() {
+    KeyPair keys = myKeysProvider.apply(KeyType.RSA_UR);
+    if (null != keys) {
+      // RSA_UR doesn't strictly define key length, so we have to check if it's the right length
+      RSAPublicKey rsaKey = (RSAPublicKey) keys.getPublic();
+      if (THREE_K != rsaKey.getModulus().bitLength()) {
+        // no good, toss this result out
+        keys = null;
+      }
+    }
+
+    if (null != keys) { // we found a usable keypair
+      return new AsymmetricKeyExchange.Owner(keys, mySecureRandom);
+    } else {
+      return null;
+    }
+  }
 
   private EpidLib buildEpidLib() throws URISyntaxException {
     return new EpidLib(
@@ -204,15 +292,12 @@ public class OwnerService implements ProtocolService, Serializable {
     return myN6;
   }
 
-  @Override
-  public boolean isDone() {
-    return myIsDone;
+  private ResourceBundle loadResourceBundle() {
+    return ResourceBundle.getBundle(getClass().getPackageName() + ".OwnerService");
   }
 
-  @Override
-  public boolean isHello(ProtocolMessage message) {
-    return Version.VERSION_1_13 == message.getVersion()
-        && MessageType.TO2_HELLO_DEVICE == message.getType();
+  private Logger logger() {
+    return LoggerFactory.getLogger(getClass());
   }
 
   @Override
@@ -499,7 +584,7 @@ public class OwnerService implements ProtocolService, Serializable {
 
     try (Buffers.Eraser eraser =
         new Buffers.Eraser(myKeyExchange.generateSharedSecret(
-          ByteBuffer.wrap(to2ProveDevice.getXb())))) {
+            ByteBuffer.wrap(to2ProveDevice.getXb())))) {
 
       // Which SEK/SVK derivation we use depends on the crypto level the device is using,
       // and therefore on its crypto level.  We can deduce this by looking at KX.
@@ -799,91 +884,5 @@ public class OwnerService implements ProtocolService, Serializable {
   private EncodedProtocolMessage next(Error error) throws ProtocolException {
     myDeviceErrorHandler.accept(myOwnershipVoucher, error);
     return null;
-  }
-
-  private KeyExchange buildAsym2KKeyExchange() {
-    KeyPair keys = myKeysProvider.apply(KeyType.RSA2048RESTR);
-    if (null == keys) {
-      // If we can't get a restricted (exponent = F4) key pair, we might still be able
-      // to get a short unrestricted keypair
-      keys = myKeysProvider.apply(KeyType.RSA_UR);
-      if (null != keys) {
-        // RSA_UR doesn't strictly define key length, so we have to check if it's the right length
-        RSAPublicKey rsaKey = (RSAPublicKey) keys.getPublic();
-        if (TWO_K != rsaKey.getModulus().bitLength()) {
-          // no good, toss this result out
-          keys = null;
-        }
-      }
-    }
-
-    if (null != keys) { // we found a usable keypair
-      return new Owner(keys, mySecureRandom);
-    } else {
-      return null;
-    }
-  }
-
-  private KeyExchange buildAsym3KKeyExchange() {
-    KeyPair keys = myKeysProvider.apply(KeyType.RSA_UR);
-    if (null != keys) {
-      // RSA_UR doesn't strictly define key length, so we have to check if it's the right length
-      RSAPublicKey rsaKey = (RSAPublicKey) keys.getPublic();
-      if (THREE_K != rsaKey.getModulus().bitLength()) {
-        // no good, toss this result out
-        keys = null;
-      }
-    }
-
-    if (null != keys) { // we found a usable keypair
-      return new Owner(keys, mySecureRandom);
-    } else {
-      return null;
-    }
-  }
-
-  private ResourceBundle loadResourceBundle() {
-    return ResourceBundle.getBundle(getClass().getPackageName() + ".OwnerService");
-  }
-
-  private Logger logger() {
-    return LoggerFactory.getLogger(getClass());
-  }
-
-  public void setDeviceErrorHandler(BiConsumer<OwnershipVoucher, Error> errorHandler) {
-    myDeviceErrorHandler = Objects.requireNonNull(errorHandler);
-  }
-
-  public void setEpidServiceUrl(URL url) {
-    myEpidServiceUrl = Objects.requireNonNull(url);
-  }
-
-  public void setG3Function(Function<OwnershipVoucher, UUID> g3Function) {
-    myG3Function = Objects.requireNonNull(g3Function);
-  }
-
-  public void setHttpClient(HttpClient httpClient) {
-    myHttpClient = Objects.requireNonNull(httpClient);
-  }
-
-  public void setOwnershipVoucherStorage(ObjectStorage<UUID, OwnershipVoucher> storage) {
-    this.myOwnershipVoucherStorage = Objects.requireNonNull(storage);
-  }
-
-  public void setR3Function(Function<OwnershipVoucher, RendezvousInfo> r3Function) {
-    myR3Function = Objects.requireNonNull(r3Function);
-  }
-
-  public void setSecureRandom(SecureRandom secureRandom) {
-    this.mySecureRandom = Objects.requireNonNull(secureRandom);
-  }
-
-  public void setServiceInfoModules(Collection<ServiceInfoModule> serviceInfoModules) {
-    myServiceInfoModules =
-        Collections.unmodifiableList(List.copyOf(Objects.requireNonNull(serviceInfoModules)));
-  }
-
-  public void setKeysProvider(Function<KeyType, KeyPair> provider) {
-    myKeysProvider = Objects.requireNonNull(provider);
   }
 }

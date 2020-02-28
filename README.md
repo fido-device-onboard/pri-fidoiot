@@ -10,27 +10,27 @@ build and assume familiarity with
 To build SDO, run `mvn package` from the root directory of the SDO source.
 The build creates files which will be used in the rest of this guide, including:
 
-`device/target/device-1.7.jar`
+`device/target/device-1.8.jar`
 
 An implementation of the SDO Device described in the Secure Device Onboard Protocol 
 Specification v1.13b, section 2.3.  Referred to in this document as 'the device', this JAR
 can be executed via the `java -jar` command.
 
-`owner/target/owner-1.7.war`
+`owner/target/owner-1.8.war`
 
 An implementation of the SDO Owner Server described in the Secure Device Onboard Protocol 
 Specification v1.13b, section 2.3.  Referred to in this document as 'the owner server', this WAR
 can be deployed in a servlet container like [Apache Tomcat](http://tomcat.apache.org/)
 or executed via the `java -jar` command.
 
-`rendezvous/target/rendezvous-1.7.war`
+`rendezvous/target/rendezvous-1.8.war`
 
 An implementation of the SDO Rendezvous Server described in the Secure Device Onboard Protocol 
 Specification v1.13b, section 2.3.  Referred to in this document as 'the rendezvous server', this 
 WAR can be deployed in a servlet container like [Apache Tomcat](http://tomcat.apache.org/)
 or executed via the `java -jar` command.
 
-`to0client/target/to0client-1.7.jar`
+`to0client/target/to0client-1.8.jar`
 
 An implementation of the SDO Owner Client described in the Secure Device Onboard Protocol 
 Specification v1.13b, section 2.3.  Referred to in this document as 'the owner client', this JAR
@@ -209,11 +209,11 @@ you built in a previous step.
 For example:
 
 ```
-$ java -jar rendezvous/target/rendezvous-1.7.war
-2019-12-19 11:52:49.981  INFO 12148 --- [           main] org.rendezvous.RendezvousApp   : Starting RendezvousApp
+$ java -jar rendezvous/target/rendezvous-1.8.war
+2020-03-13 11:52:49.981  INFO 12148 --- [           main] org.rendezvous.RendezvousApp   : Starting RendezvousApp
 ...
-2019-12-19 11:52:55.170  INFO 12148 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8040 (http) with context path ''
-2019-12-19 11:52:55.180  INFO 12148 --- [           main] org.sdo.rendezvous.RendezvousApp   : Started RendezvousApp in 6.199 seconds (JVM running for 7.1)
+2020-03-13 11:52:55.170  INFO 12148 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8040 (http) with context path ''
+2020-03-13 11:52:55.180  INFO 12148 --- [           main] org.sdo.rendezvous.RendezvousApp   : Started RendezvousApp in 6.199 seconds (JVM running for 7.1)
 ```
 
 Record the server port from the log messages for the next step.
@@ -271,12 +271,12 @@ you built in a previous step.
 For example:
 
 ```
-$ java -jar owner/target/owner-1.7.war
+$ java -jar owner/target/owner-1.8.war
 Picked up _JAVA_OPTIONS: -Djava.net.preferIPv4Stack=true
-2019-12-19 12:08:16.769  INFO 3524 --- [           main] org.sdo.owner.OwnerApp             : Starting OwnerApp
+2020-03-13 12:08:16.769  INFO 3524 --- [           main] org.sdo.owner.OwnerApp             : Starting OwnerApp
 ...
-2019-12-19 12:08:21.766  INFO 3524 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8042 (http) with context path ''
-2019-12-19 12:08:21.772  INFO 3524 --- [           main] org.sdo.owner.OwnerApp             : Started OwnerApp in 5.934 seconds (JVM running for 6.786)
+2020-03-13 12:08:21.766  INFO 3524 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8042 (http) with context path ''
+2020-03-13 12:08:21.772  INFO 3524 --- [           main] org.sdo.owner.OwnerApp             : Started OwnerApp in 5.934 seconds (JVM running for 6.786)
 ```
 
 You can stop the owner server by interrupting it (`Ctrl-C` on most platforms).
@@ -297,18 +297,18 @@ The device will run the Device Initialization (DI) protocol and exit.
 For example:
 
 ```
-$ java -jar device/target/device-1.7.jar
+$ java -jar device/target/device-1.8.jar
 Picked up _JAVA_OPTIONS: -Djava.net.preferIPv4Stack=true
-2019-12-19 12:16:10.726  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : Starting DeviceApp
+2020-03-13 12:16:10.726  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : Starting DeviceApp
 ...
-2019-12-19 12:16:13.662  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : Started DeviceApp in 3.741 seconds (JVM running for 4.493)
+2020-03-13 12:16:13.662  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : Started DeviceApp in 3.741 seconds (JVM running for 4.493)
 ...
-2019-12-19 12:16:12.103  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : property org.sdo.device.serial = 12345678
+2020-03-13 12:16:12.103  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : property org.sdo.device.serial = 12345678
 ...
-2019-12-19 12:16:13.664  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : device initialization begins
+2020-03-13 12:16:13.664  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : device initialization begins
 ...
-2019-12-19 12:16:17.371  INFO 3032 --- [           main] c.i.sdo.device.DeviceCredentialsStorage  : credentials saved to ./sdo-data/616d5ba0-d139-426f-9cbf-4997d644268a.oc
-2019-12-19 12:16:17.373  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : device initialization ends
+2020-03-13 12:16:17.371  INFO 3032 --- [           main] c.i.sdo.device.DeviceCredentialsStorage  : credentials saved to ./sdo-data/616d5ba0-d139-426f-9cbf-4997d644268a.oc
+2020-03-13 12:16:17.373  INFO 3032 --- [           main] org.sdo.device.DeviceApp           : device initialization ends
 ```
 
 Record the device's serial number and the path of the stored device credentials from the log.  
@@ -359,12 +359,12 @@ Replace the text `<YOUR OWNER INPUT HERE>` with the path of your working directo
 For example:
 
 ```
-$ java -jar target/to0client-1.7.jar ./sdo-data/readme.op
+$ java -jar target/to0client-1.8.jar ./sdo-data/readme.op
 Picked up _JAVA_OPTIONS: -Djava.net.preferIPv4Stack=true
-2019-12-19 12:16:21.830  INFO 17300 --- [           main] org.sdo.to0client.To0ClientApp     : Starting To0ClientApp
+2020-03-13 12:16:21.830  INFO 17300 --- [           main] org.sdo.to0client.To0ClientApp     : Starting To0ClientApp
 ...
-2019-12-19 12:16:25.506  INFO 17300 --- [           main] c.i.sdo.OwnerTransferOwnershipClient     : HttpResponse: (POST http://localhost:8040/mp/113/msg/22) 200
-{content-length=[11], content-type=[text/plain;charset=UTF-8], date=[Thu, 19 Dec 2019 20:16:24 GMT]}
+2020-03-13 12:16:25.506  INFO 17300 --- [           main] c.i.sdo.OwnerTransferOwnershipClient     : HttpResponse: (POST http://localhost:8040/mp/113/msg/22) 200
+{content-length=[11], content-type=[text/plain;charset=UTF-8], date=[Fri, 13 Mar 2020 20:16:24 GMT]}
 {"ws":3600}
 ```
 
@@ -390,10 +390,10 @@ you built in a previous step.
 For example:
 
 ```
-$ java -Dorg.sdo.device.credentials=./sdo-data/616d5ba0-d139-426f-9cbf-4997d644268a.oc -jar device/target/device-1.7.jar
-2019-12-19 12:16:28.544  INFO 14368 --- [           main] org.sdo.device.DeviceApp           : Starting DeviceApp
+$ java -Dorg.sdo.device.credentials=./sdo-data/616d5ba0-d139-426f-9cbf-4997d644268a.oc -jar device/target/device-1.8.jar
+2020-03-13 12:16:28.544  INFO 14368 --- [           main] org.sdo.device.DeviceApp           : Starting DeviceApp
 ...
-2019-12-19 12:16:33.996  INFO 14368 --- [           main] org.sdo.device.DeviceApp           : device onboarding ends
+2020-03-13 12:16:33.996  INFO 14368 --- [           main] org.sdo.device.DeviceApp           : device onboarding ends
 ```
 
 The device is now onboarded.
