@@ -8,10 +8,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>sdo</artifactId>
-  <groupId>org.sdo</groupId>
-  <version>1.8</version>
-  <name>SDO</name>
+  <artifactId>fido-iot</artifactId>
+  <groupId>org.fido</groupId>
+  <version>1.9</version>
+  <name>fido-iot</name>
   <packaging>pom</packaging>
 
   <!--
@@ -40,11 +40,10 @@
   </properties>
 
   <modules>
+    <module>cert-utils</module>
     <module>protocol</module>
-    <module>device</module>
-    <module>owner</module>
-    <module>rendezvous</module>
-    <module>to0client</module>
+    <module>service</module>
+    <module>storage</module>
   </modules>
 
   <dependencyManagement>
@@ -59,6 +58,7 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -124,7 +124,7 @@
           <configLocation>google_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <encoding>UTF-8</encoding>
-          <failsOnError>true</failsOnError>
+          <failsOnError>false</failsOnError>
           <includeTestResources>false</includeTestResources>
           <linkXRef>false</linkXRef>
           <sourceDirectories>${project.build.sourceDirectory}</sourceDirectories>

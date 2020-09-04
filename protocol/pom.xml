@@ -1,54 +1,32 @@
-<?xml version="1.0"?>
-
-<!--
-     Copyright 2020 Intel Corporation
-     SPDX-License-Identifier: Apache 2.0
--->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.sdo</groupId>
-  <artifactId>protocol</artifactId>
-  <name>SDO Protocol</name>
-  <packaging>jar</packaging>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>org.sdo</groupId>
-    <artifactId>sdo</artifactId>
-    <version>1.8</version>
-    <relativePath>..</relativePath>
+    <artifactId>fido-iot</artifactId>
+    <groupId>org.fido</groupId>
+    <version>1.9</version>
   </parent>
 
-  <!--
-  to update all library and plugin versions to latest releases, use
+  <modelVersion>4.0.0</modelVersion>
 
-  mvn versions:update-properties
-  -->
+  <artifactId>protocol</artifactId>
+  <groupId>org.fido.iot</groupId>
+  <packaging>jar</packaging>
+
+
   <properties>
-    <bcprov-jdk15on.version>1.64</bcprov-jdk15on.version>
-    <bcpkix-jdk15on.version>1.64</bcpkix-jdk15on.version>
-    <jackson.version>2.10.3</jackson.version>
+    <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
+    <jackson-datatype-jdk8.version>2.11.0</jackson-datatype-jdk8.version>
+    <commons-codec.version>1.14</commons-codec.version>
+    <tomcat.version>9.0.24</tomcat.version>
+    <bcprov.version>1.65.01</bcprov.version>
+    <bcpkix.version>1.65</bcpkix.version>
   </properties>
 
+
+
   <dependencies>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-      <version>${bcprov-jdk15on.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>${bcpkix-jdk15on.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -57,17 +35,26 @@
     </dependency>
 
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>cert-utils</artifactId>
+      <version>1.9</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-cbor</artifactId>
-      <version>${jackson.version}</version>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons-codec.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bcpkix.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
+
 </project>

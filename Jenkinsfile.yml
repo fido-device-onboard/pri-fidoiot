@@ -9,6 +9,6 @@ node('ubuntu18.04-OnDemand'){
 
   // Stage to build the project
   stage('build'){
-    sh 'mvn clean package'
+    sh 'mvn clean install'
   }
 }
