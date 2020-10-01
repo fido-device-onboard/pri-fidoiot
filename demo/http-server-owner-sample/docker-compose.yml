@@ -1,0 +1,35 @@
+# Copyright 2020 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+version: "2.4"
+
+services:
+
+  pri-fidoiot-owner:
+    image: pri-fidoiot-owner
+    container_name: pri-fidoiot-owner
+    expose:
+      - "8042"
+    ports:
+      - "8042:8042"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - _JAVA_OPTIONS
+    restart: on-failure:5
+    # Mapping to the user workspace of 'fidoiotowner' as created in the Dockerfile.
+    # If the username is updated in the Dockerfile, please replace 'fidoiotowner' with the same.
+    volumes:
+      - ./target:/home/fidoiotowner/target
+    mem_limit: 500m
+    mem_reservation: 200m
+    cpu_shares: 1024
+    pids_limit: 100
+    networks:
+      - pri-fidoiot-owner_network
+
+networks:
+  pri-fidoiot-owner_network:
+    driver: bridge
+    name: pri-fidoiot-owner_network
