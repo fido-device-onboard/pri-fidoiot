@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>http-dispatchers</artifactId>
+    <artifactId>protocol-samples</artifactId>
     <groupId>org.fido.iot</groupId>
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP Client Dispatcher</name>
-  <artifactId>http-client-dispatcher</artifactId>
+  <name>HTTP TO0 Client Sample</name>
+  <artifactId>http-client-to0-sample</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -23,6 +23,7 @@
   </properties>
 
   <dependencies>
+
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
@@ -33,6 +34,30 @@
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
       <version>0.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>http-client-dispatcher</artifactId>
+      <version>0.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>storage-rv-sample</artifactId>
+      <version>0.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>${dbcp2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.200</version>
     </dependency>
 
     <dependency>
@@ -86,9 +111,11 @@
           </execution>
         </executions>
         <configuration>
-           <executable>java</executable>
+          <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>${project.build.outputDirectory}</workingDirectory>
+          <workingDirectory>${project.build.outputDirectory}</workingDirectory>
+          <mainClass>org.fido.iot.web.To0ClientApp</mainClass>
+          <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
     </plugins>

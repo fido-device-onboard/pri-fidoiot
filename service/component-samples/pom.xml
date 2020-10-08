@@ -10,13 +10,8 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP Dispatchers</name>
-  <artifactId>http-dispatchers</artifactId>
+  <name>Component Service Samples</name>
+  <artifactId>component-samples</artifactId>
   <packaging>pom</packaging>
-
-  <modules>
-    <module>http-server-dispatcher</module>
-    <module>http-client-dispatcher</module>
-  </modules>
 
 </project>
