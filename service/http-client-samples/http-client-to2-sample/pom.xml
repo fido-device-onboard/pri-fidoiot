@@ -2,19 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <artifactId>http-client-samples</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>1.9</version>
+    <version>0.3-SNAPSHOT</version>
   </parent>
-
-  <modelVersion>4.0.0</modelVersion>
-
 
   <name>HTTP To2 Client</name>
   <artifactId>http-client-to2-sample</artifactId>
   <packaging>jar</packaging>
-
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
@@ -24,30 +22,29 @@
     <dbcp2.version>2.7.0</dbcp2.version>
   </properties>
 
-
   <dependencies>
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>storage-owner-sample</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -62,13 +59,11 @@
       <version>1.4.200</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -102,6 +97,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>

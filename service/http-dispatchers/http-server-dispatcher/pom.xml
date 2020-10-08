@@ -2,19 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <artifactId>http-dispatchers</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>1.9</version>
+    <version>0.3-SNAPSHOT</version>
   </parent>
-
-  <modelVersion>4.0.0</modelVersion>
-
 
   <name>Http server dispatcher</name>
   <artifactId>http-server-dispatcher</artifactId>
   <packaging>jar</packaging>
-
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
@@ -24,23 +22,18 @@
     <bcpkix.version>1.65</bcpkix.version>
   </properties>
 
-
-
   <dependencies>
-
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -49,12 +42,10 @@
       <scope>provided</scope>
     </dependency>
 
-
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>${bcpkix.version}</version>
-
     </dependency>
 
     <dependency>
@@ -63,7 +54,6 @@
       <version>${tomcat.version}</version>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
@@ -92,10 +82,5 @@
       <version>${tomcat.version}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
-
-
-
-
 </project>

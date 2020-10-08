@@ -2,19 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <artifactId>http-server-samples</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>1.9</version>
+    <version>0.3-SNAPSHOT</version>
   </parent>
-
-  <modelVersion>4.0.0</modelVersion>
-
 
   <name>Http Device Initialization server</name>
   <artifactId>http-server-di-sample</artifactId>
   <packaging>jar</packaging>
-
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
@@ -25,32 +23,29 @@
     <exec.mainClass>org.fido.iot.web.DiApp</exec.mainClass>
   </properties>
 
-
-
   <dependencies>
-
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>http-server-dispatcher</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>storage-di-sample</artifactId>
-      <version>1.9</version>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -65,13 +60,11 @@
       <version>1.4.200</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -84,9 +77,6 @@
       <artifactId>tomcat-embed-core</artifactId>
       <version>${tomcat.version}</version>
     </dependency>
-
-
-
   </dependencies>
 
   <build>
