@@ -88,8 +88,12 @@ The H2 database will listen on TCP port 8050.
 ### Starting the FIDO IoT Owner HTTP Server
 ```
 $ cd <fido-iot-src>/service/http-server-samples/http-server-owner-sample/
-$ mvn exec:java
+$ mvn -Dfido.iot.pem.own=<owner-PEM-file> exec:java
 ```
+
+The PEM file must contain the following PEM-encoded data:
+- The owner's private key
+- The owner's public key or certificate
 
 The server will listen for FIDO IoT HTTP messages on port 8042.
 The H2 database will listen on TCP port 8051.
@@ -97,8 +101,15 @@ The H2 database will listen on TCP port 8051.
 ### Starting the FIDO IoT Device Initialization (DI) HTTP Server
 ```
 $ cd <fido-iot-src>/service/http-server-samples/http-server-di-sample/
-$ mvn exec:java
+$ mvn -Dfido.iot.pem.mfg=<mfg-PEM-file> -Dfido.iot.pem.own=<owner-PEM-file> exec:java
 ```
+
+The manufacturer (mfg) PEM file must contain the following PEM-encoded data:
+- The manufacturer's private key
+- The manufacturer's public key or certificate.
+
+The owner (own) PEM file must contain the following PEM-encoded data:
+- The owner's public key or certificate
 
 The server will listen for FIDO IoT HTTP messages on port 8039.
 The H2 database will listen on TCP port 8049.
@@ -141,8 +152,14 @@ SELECT * FROM MT_DEVICES will show the current vouchers created by DI messages.
 ### Running the FIDO IoT To0 HTTP client
 ```
 $ cd <fido-iot-src>/service/http-client-samples/http-client-to0-sample
-$ mvn exec:java
+$ cat <voucher-file> | mvn -Dfido.iot.pem.own=<owner-PEM-file> exec:java
+
 ```
+
+The owner (own) PEM file must contain the following PEM-encoded data:
+- The owner's private key
+
+The voucher-file must contain the binary voucher, as described in the previous section.
 
 To0 Response Wait: 3600
 TO0 Client finished.
@@ -163,3 +180,26 @@ $ mvn exec:java
 ```
 
 TO2 Client finished.
+
+### Running the FIDO IoT Java Device
+```
+$ cd <fido-iot-src>/device
+$ mvn -Dfido.iot.url.di=<di-server-URL> -Dfido.iot.pem.dev=<device-PEM-file> exec:java
+```
+
+The `device-PEM-file` must contain the following PEM-encoded data:
+- The device's private key
+- The device's public key or certificate.
+
+The device will initialize and exit.  A `credential.bin` file will be created containing the device state.
+Removing this file will make the device re-initialize the next time it runs.
+
+The initialization (manufacturer) server must be available during this step.
+
+```
+$ mvn -Dfido.iot.pem.dev=<device-PEM-file> exec:java
+```
+
+The device will be onboarded.
+
+The rendezvous and owner servers must be available during this step.
