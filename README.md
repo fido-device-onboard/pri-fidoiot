@@ -36,6 +36,44 @@ $ mvn clean install
 
 The build creates artifacts which will be used in the rest of this guide.
 
+## Configuring FIDO IoT Software
+
+Some software settings are runtime-configurable via Java properties.  They include:
+
+- `fido.iot.randoms`
+
+  A comma-separated list of Java `SecureRandom` algorithm names for random number generation.
+  Values are in order from least to most preferred.
+  
+  Default is `"NativePRNG,Windows-PRNG"`.
+
+- `fido.iot.url.di`
+
+  The URL at which the Device Initialization (DI) server may be found.
+  
+  Default is `http://localhost:8039/`.
+  
+- `fido.iot.pem.mfg`
+
+  The location of the PEM file containing the manufacturer's key and certificate.
+  If not set, a hardcoded key is used - see the Java source for details.
+ 
+  There is no default.
+
+- `fido.iot.pem.own`
+
+  The location of the PEM file containing the owner key and certificate.
+  If not set, a hardcoded key is used - see the Java source for details.
+ 
+  There is no default.
+
+- `fido.iot.pem.dev`
+
+  The location of the PEM file containing the device keys (private and public).
+  If not set, a hardcoded key is used - see the Java source for details.
+ 
+  There is no default.
+  
 ## Starting FIDO IoT HTTP Servers
 
 ### Starting the FIDO IoT Rendezvous (RV) HTTP Server

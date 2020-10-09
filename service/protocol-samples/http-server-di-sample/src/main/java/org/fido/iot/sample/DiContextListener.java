@@ -3,10 +3,17 @@
 
 package org.fido.iot.sample;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.cert.Certificate;
 import java.util.List;
+import java.util.Properties;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -30,7 +37,10 @@ import org.fido.iot.storage.DiDbStorage;
  */
 public class DiContextListener implements ServletContextListener {
 
-  private static final String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
+  private static final String PROPERTY_MFG_PEM = "fido.iot.pem.mfg";
+  private static final String PROPERTY_OWN_PEM = "fido.iot.pem.own";
+
+  private String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
       + "Q0EwIBcNMTkwNDI0MTQ0NjQ3WhgPMjA1NDA0MTUxNDQ2NDdaMA0xCzAJBgNVBAMM\n"
       + "AkNBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELAJwkDKz/BaWq1Wx7PjkR5W5\n"
@@ -48,15 +58,40 @@ public class DiContextListener implements ServletContextListener {
       + "EbDzKu924TX4as3WVjMmfekysx30PlDGJQ==\n"
       + "-----END EC PRIVATE KEY-----";
 
-  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+  private String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END PUBLIC KEY-----\n";
 
   CertificateResolver keyResolver;
 
+  void configure() throws Exception {
+
+    Properties properties = System.getProperties();
+
+    if (properties.containsKey(PROPERTY_MFG_PEM)) {
+      mfgKeyPem = Files.readString(Paths.get(properties.getProperty(PROPERTY_MFG_PEM)));
+    }
+
+    if (properties.containsKey(PROPERTY_OWN_PEM)) {
+      ownerKeysPem = Files.readString(Paths.get(properties.getProperty(PROPERTY_OWN_PEM)));
+    }
+  }
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
+
+    try {
+      configure();
+
+    } catch (Exception e) {
+      if (e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      } else {
+        throw new RuntimeException(e);
+      }
+    }
+
     BasicDataSource ds = new BasicDataSource();
 
     ServletContext sc = sce.getServletContext();
