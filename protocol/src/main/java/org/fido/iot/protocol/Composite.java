@@ -382,7 +382,7 @@ public class Composite {
    * @param buffer The cbor byte buffer.
    * @return A Composite created from the cbor buffer.
    */
-  private static Composite fromBytes(byte[] buffer) {
+  public static Composite fromBytes(byte[] buffer) {
 
     ByteArrayInputStream in = new ByteArrayInputStream(buffer);
 
