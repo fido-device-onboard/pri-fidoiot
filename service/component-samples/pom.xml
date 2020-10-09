@@ -16,6 +16,7 @@
 
   <modules>
     <module>rv</module>
+    <module>http-device-sample</module>
   </modules>
 
 </project>

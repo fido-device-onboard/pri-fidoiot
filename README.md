@@ -13,9 +13,11 @@ FIDO IoT source code is organized into following sub-folders.
 
 - `protocol`: It contains implementations related to protocol message processing.
 
-- `service`: It contains implementations for Fido IoT HTTP servers and clients.
+- `service`: It contains implementations for FIDO IoT HTTP servers and clients.
 
 - `storage`: It contains SQL based storage implementations for Fido IoT Servers.
+
+- `device` : It contains a Java implementation of a FIDO IoT HTTP device.
 
 ## Building FIDO IoT source
 
@@ -125,3 +127,53 @@ $ mvn exec:java
 ```
 
 TO2 Client finished.
+
+## Using component samples
+
+### Configuring the FIDO IoT HTTP Java Device Sample
+
+Some software settings are runtime-configurable via Java properties.  They include:
+
+- `fido.iot.randoms`
+
+  A comma-separated list of Java `SecureRandom` algorithm names for random number generation.
+  Values are in order from least to most preferred.
+  
+  Default is `"NativePRNG,Windows-PRNG"`.
+
+- `fido.iot.url.di`
+
+  The URL at which the Device Initialization (DI) server may be found.
+  
+  Default is `http://localhost:8039/`.
+
+- `fido.iot.pem.dev`
+
+  The location of the PEM file containing the device keys (private and public).
+  If not set, a hardcoded key is used - see the Java source for details.
+ 
+  There is no default.
+  
+
+### Running the FIDO IoT HTTP Java Device Sample
+```
+$ cd <fido-iot-src>/device
+$ mvn -Dfido.iot.url.di=<di-server-URL> -Dfido.iot.pem.dev=<device-PEM-file> exec:java
+```
+
+The `device-PEM-file` must contain the following PEM-encoded data:
+- The device's private key
+- The device's public key or certificate.
+
+The device will initialize and exit.  A `credential.bin` file will be created containing the device state.
+Removing this file will make the device re-initialize the next time it runs.
+
+The initialization (manufacturer) server must be available during this step.
+
+```
+$ mvn -Dfido.iot.pem.dev=<device-PEM-file> exec:java
+```
+
+The device will be onboarded.
+
+The rendezvous and owner servers must be available during this step.
