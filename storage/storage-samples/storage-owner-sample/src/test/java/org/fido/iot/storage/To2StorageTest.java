@@ -225,7 +225,7 @@ public class To2StorageTest {
       }
 
       @Override
-      public Composite getReplacementHmac() {
+      public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
         return null;
       }
 

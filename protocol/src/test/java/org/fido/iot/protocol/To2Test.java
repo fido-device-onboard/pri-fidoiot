@@ -78,7 +78,7 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
-      public Composite getReplacementHmac() {
+      public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
         return null;
       }
 
