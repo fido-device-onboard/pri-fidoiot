@@ -12,6 +12,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -65,9 +66,13 @@ public class PemLoader {
         if (obj == null) {
           break;
         }
+
         if (obj instanceof PEMKeyPair) {
           PEMKeyPair kp = (PEMKeyPair) obj;
           return new JcaPEMKeyConverter().getPrivateKey(kp.getPrivateKeyInfo());
+
+        } else if (obj instanceof PrivateKeyInfo) {
+          return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo)obj);
         }
       }
     } catch (IOException e) {
@@ -91,8 +96,12 @@ public class PemLoader {
         if (obj == null) {
           break;
         }
+
         if (obj instanceof SubjectPublicKeyInfo) {
           keys.add(jcac.getPublicKey((SubjectPublicKeyInfo) obj));
+
+        } else if (obj instanceof X509CertificateHolder) {
+          keys.add(jcac.getPublicKey(((X509CertificateHolder)obj).getSubjectPublicKeyInfo()));
         }
       }
     } catch (IOException e) {
