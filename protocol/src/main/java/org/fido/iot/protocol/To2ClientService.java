@@ -103,7 +103,8 @@ public abstract class To2ClientService extends DeviceService {
 
       Composite signature = null;
       try (CloseableKey key = new CloseableKey(getStorage().getSigningKey())) {
-        signature = getCryptoService().sign(key.get(), payload.toBytes());
+        signature = getCryptoService().sign(
+            key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(key.get()));
       } catch (IOException e) {
         throw new DispatchException(e);
       }
