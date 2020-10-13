@@ -140,8 +140,9 @@ public abstract class To2ServerService extends MessagingService {
     }
 
     Composite payload = Const.EMPTY_MESSAGE;
-    body = getCryptoService().encrypt(payload.toBytes(),
-        getStorage().getOwnerState());
+    Composite cipherState = getStorage().getOwnerState();
+    body = getCryptoService().encrypt(payload.toBytes(), cipherState);
+    getStorage().setOwnerState(cipherState);
     reply.set(Const.SM_MSG_ID, Const.TO2_AUTH_DONE2);
     reply.set(Const.SM_BODY, body);
 
@@ -165,8 +166,9 @@ public abstract class To2ServerService extends MessagingService {
     }
 
     Composite payload = getStorage().getNextServiceInfo();
-
-    body = getCryptoService().encrypt(payload.toBytes(), getStorage().getOwnerState());
+    Composite cipherState = getStorage().getOwnerState();
+    body = getCryptoService().encrypt(payload.toBytes(), cipherState);
+    getStorage().setOwnerState(cipherState);
     reply.set(Const.SM_MSG_ID, Const.TO2_OWNER_SERVICE_INFO);
     reply.set(Const.SM_BODY, body);
     getStorage().continued(request, reply);
