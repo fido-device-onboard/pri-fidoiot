@@ -62,7 +62,8 @@ public class VoucherExtensionService {
     payload.set(Const.OVE_HASH_PREV_ENTRY, prevHash);
     payload.set(Const.OVE_HASH_HDR_INFO, hdrHash);
     payload.set(Const.OVE_PUB_KEY, cryptoService.encode(newOwner, Const.PK_ENC_COSEEC));
-    Composite cos = cryptoService.sign(prevOwner, payload.toBytes());
+    Composite cos = cryptoService.sign(
+        prevOwner, payload.toBytes(), cryptoService.getCoseAlgorithm(prevOwner));
 
     //The current recommended maximum is ten entries.
     entries.set(entries.size(), cos);

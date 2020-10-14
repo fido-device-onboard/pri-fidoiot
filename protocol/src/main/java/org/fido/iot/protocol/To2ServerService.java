@@ -54,7 +54,8 @@ public abstract class To2ServerService extends MessagingService {
     Composite cose = null;
     try (CloseableKey key = new CloseableKey(
         getStorage().geOwnerSigningKey(ownerPublicKey))) {
-      cose = getCryptoService().sign(key.get(), payload.toBytes());
+      cose = getCryptoService().sign(
+          key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
       throw new DispatchException(e);
     }
