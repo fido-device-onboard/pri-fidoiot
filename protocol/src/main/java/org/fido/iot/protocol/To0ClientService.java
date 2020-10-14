@@ -48,7 +48,8 @@ public abstract class To0ClientService extends ClientService {
     Composite singedBlob = null;
     try (CloseableKey key = new CloseableKey(
         getStorage().getOwnerSigningKey(ownerPublicKey))) {
-      singedBlob = getCryptoService().sign(key.get(), to01Payload.toBytes());
+      singedBlob = getCryptoService().sign(
+          key.get(), to01Payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
       throw new DispatchException(e);
     }
