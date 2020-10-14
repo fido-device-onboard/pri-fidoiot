@@ -20,7 +20,7 @@ public interface To2ClientStorage extends StorageEvents, DeviceCredentials {
 
   String getCipherSuiteName();
 
-  Composite getReplacementHmac();
+  byte[] getReplacementHmacSecret(Composite newCredentials,boolean isReuse);
 
   void prepareServiceInfo();
 

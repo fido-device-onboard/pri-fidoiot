@@ -6,7 +6,9 @@ package org.fido.iot.protocol;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.UUID;
 
 /**
  * To2 Client message processing service.
@@ -34,6 +36,10 @@ public abstract class To2ClientService extends DeviceService {
 
   protected Composite getVoucherHeader() {
     return voucherHdr;
+  }
+
+  protected Composite getHeaderHash() {
+    return hdrHash;
   }
 
   protected void verifyEntry(int entryNum, Composite entry) {
@@ -222,10 +228,80 @@ public abstract class To2ClientService extends DeviceService {
   protected void doSetupDevice(Composite request, Composite reply) {
     getStorage().continuing(request, reply);
 
-    Composite payload = Composite.newArray()
-        .set(Const.FIRST_KEY, getStorage().getReplacementHmac());
+    Composite body = request.getAsComposite(Const.SM_BODY);
+    Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    Composite body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
+    byte[] receivedNonce7 = message.getAsBytes(Const.THIRD_KEY);
+    getCryptoService().verifyBytes(receivedNonce7, nonce7);
+
+    Composite ownerKey2 = message.getAsComposite(Const.FOURTH_KEY);
+    Composite oldCreds = getStorage().getDeviceCredentials();
+    Composite newCreds = Composite.newArray()
+
+        .set(Const.DC_PROTVER,
+            oldCreds.getAsNumber(Const.DC_PROTVER))
+        .set(Const.DC_HMAC_SECRET,
+            oldCreds.getAsBytes(Const.DC_HMAC_SECRET))
+        .set(Const.DC_DEVICE_INFO,
+            oldCreds.getAsString(Const.DC_DEVICE_INFO))
+        .set(Const.DC_GUID,
+            oldCreds.getAsBytes(Const.DC_GUID))
+        .set(Const.DC_RENDEZVOUS_INFO,
+            oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
+
+    PublicKey mfgPubKey = getCryptoService().decode(ownerKey2);
+    int hashType = getCryptoService().getCompatibleHashType(mfgPubKey);
+    Composite pubKeyHash = getCryptoService().hash(hashType, ownerKey2.toBytes());
+    getStorage().getDeviceCredentials().set(Const.DC_PUBLIC_KEY_HASH,
+        pubKeyHash);
+
+    //check for credential reuse
+    boolean isReuse = true;
+
+    //check if GUIDs equal
+    UUID guid1 = oldCreds.getAsUuid((Const.DC_GUID));
+    UUID guid2 = newCreds.getAsUuid(Const.DC_GUID);
+    if (guid1.compareTo(guid2) != 0) {
+      isReuse = false;
+    }
+    //check if owner key equal
+    if (isReuse) {
+      PublicKey publicKey1 = getCryptoService().decode(cupKey);
+      PublicKey publicKey2 = getCryptoService().decode(ownerKey2);
+      if (getCryptoService().compare(publicKey1, publicKey2) != 0) {
+        isReuse = false;
+      }
+    }
+
+    //check if rvinfo equal
+    if (isReuse) {
+      byte[] info1 = oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
+      byte[] info2 = newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
+      if (Arrays.compare(info1, info2) != 0) {
+        isReuse = false;
+      }
+    }
+
+    byte[] secret = getStorage().getReplacementHmacSecret(newCreds, isReuse);
+    Composite newHash = null;
+
+    if (secret != null) {
+      Composite headerCopy = Composite.newArray();
+      headerCopy.set(Const.OVH_VERSION, voucherHdr.get(Const.OVH_VERSION));
+      headerCopy.set(Const.OVH_GUID, message.getAsUuid(Const.SECOND_KEY));
+      headerCopy.set(Const.OVH_RENDEZVOUS_INFO, message.getAsUuid(Const.FIRST_KEY));
+      headerCopy.set(Const.OVH_DEVICE_INFO, voucherHdr.get(Const.OVH_DEVICE_INFO));
+      headerCopy.set(Const.OVH_PUB_KEY, ownerKey2);
+      headerCopy.set(Const.OVH_CERT_CHAIN_HASH, voucherHdr.get(Const.OVH_CERT_CHAIN_HASH));
+      hashType = getHeaderHash().getAsNumber(Const.HASH_TYPE).intValue();
+      newHash = getCryptoService().hash(hashType, secret, headerCopy.toBytes());
+    }
+
+    Composite payload = Composite.newArray()
+        .set(Const.FIRST_KEY,
+            newHash);
+
+    body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
 
     reply.set(Const.SM_MSG_ID, Const.TO2_AUTH_DONE);
     reply.set(Const.SM_BODY, body);
