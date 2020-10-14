@@ -41,7 +41,7 @@ public class Ec256Test {
     PublicKey p2 = service.decode(pub);
     assertTrue(service.compare(publicKey, p2) == 0);
 
-    Composite cos = service.sign(privateKey, payload);
+    Composite cos = service.sign(privateKey, payload, service.getCoseAlgorithm(privateKey));
 
     assertTrue(service.verify(publicKey, cos));
 

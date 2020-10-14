@@ -160,7 +160,7 @@ public class To2ClientApp {
     }
 
     @Override
-    public Composite getReplacementHmac() {
+    public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
       return null;
     }
 

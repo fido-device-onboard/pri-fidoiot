@@ -584,18 +584,18 @@ public class CryptoService {
    *
    * @param signingKey The signing key.
    * @param payload    The payload to sign.
+   * @param coseSignatureAlg The COSE algorithm that determines the signature algorithm.
    * @return The resulting COSE Signature.
    */
-  public Composite sign(PrivateKey signingKey, byte[] payload) {
+  public Composite sign(PrivateKey signingKey, byte[] payload, int coseSignatureAlg) {
 
-    final int algId = getCoseAlgorithm(signingKey);
     final Composite cos = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap().set(Const.COSE_ALG, algId))
+        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap().set(Const.COSE_ALG, coseSignatureAlg))
         .set(Const.COSE_SIGN1_UNPROTECTED, Const.EMPTY_BYTE)
         .set(Const.COSE_SIGN1_PAYLOAD, payload);
 
     try {
-      final String algName = getSignatureAlgorithm(algId);
+      final String algName = getSignatureAlgorithm(coseSignatureAlg);
 
       final Signature signer = getSignatureInstance(algName);
       signer.initSign(signingKey);
