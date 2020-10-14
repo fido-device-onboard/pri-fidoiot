@@ -10,7 +10,7 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>Http server dispatcher</name>
+  <name>HTTP Server Dispatcher</name>
   <artifactId>http-server-dispatcher</artifactId>
   <packaging>jar</packaging>
 

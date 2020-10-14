@@ -10,6 +10,7 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
+  <name>Protocol Core</name>
   <artifactId>protocol</artifactId>
   <groupId>org.fido.iot</groupId>
   <packaging>jar</packaging>
