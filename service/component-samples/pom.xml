@@ -14,4 +14,7 @@
   <artifactId>component-samples</artifactId>
   <packaging>pom</packaging>
 
+  <modules>
+    <module>owner</module>
+  </modules>
 </project>
