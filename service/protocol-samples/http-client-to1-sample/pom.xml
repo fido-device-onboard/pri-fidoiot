@@ -113,7 +113,7 @@
           <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
           <workingDirectory>${project.build.outputDirectory}</workingDirectory>
-          <mainClass>org.fido.iot.web.To1ClientApp</mainClass>
+          <mainClass>org.fido.iot.sample.To1ClientApp</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
