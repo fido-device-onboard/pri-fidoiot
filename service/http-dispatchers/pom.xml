@@ -10,6 +10,7 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
+  <name>HTTP Dispatchers</name>
   <artifactId>http-dispatchers</artifactId>
   <packaging>pom</packaging>
 

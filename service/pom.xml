@@ -10,14 +10,14 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>service</name>
+  <name>Service Samples</name>
   <artifactId>service</artifactId>
   <groupId>org.fido.iot</groupId>
   <packaging>pom</packaging>
 
   <modules>
     <module>http-dispatchers</module>
-    <module>http-client-samples</module>
-    <module>http-server-samples</module>
+    <module>protocol-samples</module>
+    <module>component-samples</module>
   </modules>
 </project>

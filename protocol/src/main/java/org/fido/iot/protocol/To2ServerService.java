@@ -54,7 +54,8 @@ public abstract class To2ServerService extends MessagingService {
     Composite cose = null;
     try (CloseableKey key = new CloseableKey(
         getStorage().geOwnerSigningKey(ownerPublicKey))) {
-      cose = getCryptoService().sign(key.get(), payload.toBytes());
+      cose = getCryptoService().sign(
+          key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
       throw new DispatchException(e);
     }
@@ -114,10 +115,27 @@ public abstract class To2ServerService extends MessagingService {
     getStorage().setNonce7(nonce7);
 
     payload = Composite.newArray();
-    payload.set(Const.FIRST_KEY, getStorage().getReplacementRvInfo());
-    payload.set(Const.SECOND_KEY, getStorage().getReplacementGuid());
-    payload.set(Const.THIRD_KEY, getStorage().getNonce6());
-    payload.set(Const.FOURTH_KEY, getStorage().getReplacementOwnerKey());
+
+    Composite replacementRvInfo = getStorage().getReplacementRvInfo();
+    if (replacementRvInfo == null) {
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      replacementRvInfo = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
+    }
+
+    UUID replacementGuid = getStorage().getReplacementGuid();
+    if (replacementGuid == null) {
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      replacementGuid = ovh.getAsUuid(Const.OVH_GUID);
+    }
+    Composite replacementKey = getStorage().getReplacementOwnerKey();
+    if (replacementKey == null) {
+      replacementKey = getCryptoService().getOwnerPublicKey(voucher);
+    }
+
+    payload.set(Const.FIRST_KEY, replacementRvInfo);
+    payload.set(Const.SECOND_KEY, replacementGuid);
+    payload.set(Const.THIRD_KEY, nonce7);
+    payload.set(Const.FOURTH_KEY, replacementKey);
 
     body = getCryptoService().encrypt(
         payload.toBytes(),

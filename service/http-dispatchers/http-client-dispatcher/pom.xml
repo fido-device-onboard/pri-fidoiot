@@ -10,7 +10,7 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>Http Client Dispatcher</name>
+  <name>HTTP Client Dispatcher</name>
   <artifactId>http-client-dispatcher</artifactId>
   <packaging>jar</packaging>
 
@@ -20,7 +20,6 @@
     <tomcat.version>9.0.37</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
-    <exec.mainClass>org.sdo.web.RvApp</exec.mainClass>
   </properties>
 
   <dependencies>
