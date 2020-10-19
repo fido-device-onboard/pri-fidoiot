@@ -17,6 +17,7 @@
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
     <commons-codec.version>1.14</commons-codec.version>
+    <jaxb.version>2.3.1</jaxb.version>
     <tomcat.version>9.0.37</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
@@ -46,6 +47,12 @@
       <artifactId>h2</artifactId>
       <version>1.4.200</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>${jaxb.version}</version>
     </dependency>
 
     <dependency>
