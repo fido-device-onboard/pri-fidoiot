@@ -35,6 +35,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private byte[] nonce7;
   private Composite voucher;
   private String sessionId;
+  private byte[] replacementHmac;
 
   /**
    * Constructs a OwnerDbStorage instance.
@@ -115,6 +116,28 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
+  public void storeVoucher(Composite replacementVoucher) {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "UPDATE TO2_DEVICES "
+        + "SET REPLACEMENT_VOUCHER = ? "
+        + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setBytes(1, replacementVoucher.toBytes());
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public void setNonce7(byte[] nonce7) {
     this.nonce7 = nonce7;
     String sql = "UPDATE TO2_SESSIONS "
@@ -150,7 +173,24 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public Composite getReplacementRvInfo() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT REPLACEMENT_RVINFO FROM TO2_DEVICES WHERE GUID = ?;";
 
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          return Composite.fromObject(rs.getBinaryStream(1));
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    // by default, return the same rv info
     return voucher
         .getAsComposite(Const.OV_HEADER)
         .getAsComposite(Const.OVH_RENDEZVOUS_INFO);
@@ -158,14 +198,39 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public UUID getReplacementGuid() {
-    return voucher
-        .getAsComposite(Const.OV_HEADER)
-        .getAsUuid(Const.OVH_GUID);
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT REPLACEMENT_GUID FROM TO2_DEVICES WHERE GUID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          return UUID.fromString(rs.getString(1));
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    // by default, return the same guid for reuse scenario
+    return guid;
   }
 
   @Override
   public Composite getReplacementOwnerKey() {
     return getCryptoService().getOwnerPublicKey(voucher);
+  }
+
+  @Override
+  public void discardReplacementOwnerKey() {
+  }
+
+  @Override
+  public boolean getOwnerResaleSupport() {
+    return true;
   }
 
   @Override
@@ -216,8 +281,47 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public void setReplacementHmac(Composite hmac) {
+  public byte[] getReplacementHmac() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT REPLACEMENT_HMAC FROM TO2_DEVICES WHERE GUID = ?;";
 
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          replacementHmac = rs.getBytes(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return this.replacementHmac;
+  }
+
+  @Override
+  public void setReplacementHmac(byte[] hmac) {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "UPDATE TO2_DEVICES "
+        + "SET REPLACEMENT_HMAC = ? "
+        + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setBytes(1, hmac);
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

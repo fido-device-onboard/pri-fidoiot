@@ -235,7 +235,7 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
-      public void setReplacementHmac(Composite hmac) {
+      public void setReplacementHmac(byte[] hmac) {
 
       }
 
@@ -290,6 +290,24 @@ public class To2Test extends BaseTemplate {
       @Override
       public void failed(Composite request, Composite reply) {
 
+      }
+
+      @Override
+      public void storeVoucher(Composite voucher) {
+      }
+
+      @Override
+      public void discardReplacementOwnerKey() {
+      }
+
+      @Override
+      public byte[] getReplacementHmac() {
+        return null;
+      }
+
+      @Override
+      public boolean getOwnerResaleSupport() {
+        return true;
       }
     };
 

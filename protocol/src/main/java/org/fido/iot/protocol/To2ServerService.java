@@ -3,10 +3,19 @@
 
 package org.fido.iot.protocol;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import org.fido.iot.protocol.cbor.Decoder;
+import org.fido.iot.protocol.cbor.Decoder.Builder;
+import org.fido.iot.protocol.cbor.Encoder;
 
 /**
  * To2 Server message processing service.
@@ -116,6 +125,7 @@ public abstract class To2ServerService extends MessagingService {
 
     payload = Composite.newArray();
 
+    // TO-DO: revisit this approach of triggering reuse in case of null entries from storage
     Composite replacementRvInfo = getStorage().getReplacementRvInfo();
     if (replacementRvInfo == null) {
       Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
@@ -153,8 +163,17 @@ public abstract class To2ServerService extends MessagingService {
 
     Object hmacObj = message.get(Const.FIRST_KEY);
     if (!hmacObj.equals(Optional.empty())) {
-      Composite hmac = Composite.fromObject(hmacObj);
-      getStorage().setReplacementHmac(hmac);
+      try {
+        // check if its Composite type
+        Composite hmac = Composite.fromObject(hmacObj);
+        getStorage().setReplacementHmac(hmac.toBytes());
+      } catch (IllegalArgumentException r) {
+        // check if its Cbor Null. if yes, set the Cbor null bytes as replacement hmac
+        // TO-DO: throw exception if comparison yields false
+        if (PrimitivesUtil.isCborNull(hmacObj)) {
+          getStorage().setReplacementHmac(PrimitivesUtil.getCborNullBytes());
+        }
+      }
     }
 
     Composite payload = Const.EMPTY_MESSAGE;
@@ -199,6 +218,30 @@ public abstract class To2ServerService extends MessagingService {
 
     getCryptoService().verifyBytes(nonce6, getStorage().getNonce6());
 
+    Composite voucher = getStorage().getVoucher();
+    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+    Composite pubKey = getCryptoService().getOwnerPublicKey(voucher);
+    // if reuse, do nothing.
+    // create replacement ownership voucher otherwise
+    if (!isReuseSelected(ovh, pubKey)) {
+      // replacement info being set in the replacement voucher header
+      ovh.set(Const.OVH_GUID, getStorage().getReplacementGuid());
+      ovh.set(Const.OVH_RENDEZVOUS_INFO, getStorage().getReplacementRvInfo());
+      ovh.set(Const.OVH_PUB_KEY, getStorage().getReplacementOwnerKey());
+
+      // check if owner supports Resale
+      // if supported, replacement hmac is set in the replacement voucher
+      // if not supported, replacement hmac is discarded
+      if (getStorage().getOwnerResaleSupport()) {
+        voucher.set(Const.OV_HMAC, getStorage().getReplacementHmac());
+      } else {
+        voucher.set(Const.OV_HMAC, PrimitivesUtil.getCborNullBytes());
+        getStorage().discardReplacementOwnerKey();
+      }
+      voucher.set(Const.OV_ENTRIES, Composite.newArray());
+      getStorage().storeVoucher(voucher);
+    }
+
     Composite payload = Composite.newArray()
         .set(Const.FIRST_KEY, getStorage().getNonce7());
 
@@ -213,6 +256,19 @@ public abstract class To2ServerService extends MessagingService {
   protected void doError(Composite request, Composite reply) {
     reply.clear();
     getStorage().failed(request, reply);
+  }
+
+  private boolean isReuseSelected(Composite ovh, Composite pubKey) {
+    if (Arrays.equals(PrimitivesUtil.getCborNullBytes(), getStorage().getReplacementHmac())
+        && ovh.getAsUuid(Const.OVH_GUID).equals(getStorage().getReplacementGuid())
+        && (null != getStorage().getReplacementRvInfo()
+        && Arrays.equals(ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes(),
+            getStorage().getReplacementRvInfo().toBytes()))
+        && (null != getStorage().getReplacementOwnerKey()
+        && Arrays.equals(pubKey.toBytes(), getStorage().getReplacementOwnerKey().toBytes()))) {
+      return true;
+    }
+    return false;
   }
 
   @Override

@@ -32,6 +32,8 @@ public interface To2ServerStorage extends StorageEvents {
 
   void setGuid(UUID guid);
 
+  void storeVoucher(Composite voucher);
+
   Composite getVoucher();
 
   Composite getSigInfoB(Composite sigInfoA);
@@ -42,7 +44,11 @@ public interface To2ServerStorage extends StorageEvents {
 
   Composite getReplacementOwnerKey();
 
-  void setReplacementHmac(Composite hmac);
+  void discardReplacementOwnerKey();
+
+  byte[] getReplacementHmac();
+
+  void setReplacementHmac(byte[] hmac);
 
   void prepareServiceInfo();
 
@@ -50,4 +56,5 @@ public interface To2ServerStorage extends StorageEvents {
 
   void setServiceInfo(Composite info, boolean isMore);
 
+  boolean getOwnerResaleSupport();
 }
