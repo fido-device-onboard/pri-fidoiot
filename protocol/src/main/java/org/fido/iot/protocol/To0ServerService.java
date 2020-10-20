@@ -47,8 +47,13 @@ public abstract class To0ServerService extends MessagingService {
     byte[] to0dNonce3 = to0d.getAsBytes(Const.TO0D_NONCE3);
     to0d.verifyMaxKey(Const.TO0D_NONCE3);
 
-    //todo:verify voucher
-    //cryptoService.verifyVoucher(voucher);
+    //verifying voucher
+    PublicKey publicKey = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
+    if ((cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP256R1)
+        || (cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP384R1)) {
+      cryptoService.verifyVoucher(voucher);
+    }
+
     byte[] nonce3 = getStorage().getNonce3();
     cryptoService.verifyBytes(nonce3, to0dNonce3);
 

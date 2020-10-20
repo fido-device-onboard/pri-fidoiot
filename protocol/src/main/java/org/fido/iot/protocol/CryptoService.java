@@ -6,6 +6,7 @@ package org.fido.iot.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -46,6 +47,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -577,6 +579,113 @@ public class CryptoService {
         | CertificateException | CertPathValidatorException e) {
       throw new CryptoServiceException(e);
     }
+  }
+
+  /**
+   * Verifies certificate algorithm.
+   *
+   * @param algorithmName Public key algorithm
+   */
+  public void verifyAlgorithm(String algorithmName) throws InvalidOwnershipVoucherException {
+    if (!(algorithmName.equals(Const.EC_ALG_NAME))) {
+      throw new InvalidOwnershipVoucherException(
+          "Wrong public key algorithm inside the device certificate - supported: ECDSA, received: "
+              + algorithmName);
+    }
+  }
+
+  /**
+   * Verifies certificate public key curve.
+   *
+   * @param ecdsaCurveName ECDSA curve name
+   */
+  private void verifyCurveName(String ecdsaCurveName) throws InvalidOwnershipVoucherException {
+    if (!(ecdsaCurveName.contains(Const.SECP256R1_CURVE_NAME)
+        || ecdsaCurveName.contains(Const.SECP384R1_CURVE_NAME))) {
+      throw new InvalidOwnershipVoucherException("Mismatch of ECDSA curve type.");
+    }
+  }
+
+  /**
+   * Verifies certificate public key size.
+   *
+   * @param pubKeySize Public key size
+   */
+  private void verifyKeySize(int pubKeySize) throws InvalidOwnershipVoucherException {
+    if (pubKeySize != Const.BIT_LEN_256 && pubKeySize != Const.BIT_LEN_384) {
+      throw new InvalidOwnershipVoucherException(
+          "Wrong public key size. Received public key size: {}." + pubKeySize);
+    }
+  }
+
+  /**
+   * Verifies leaf certificate public key in ownership voucher.
+   *
+   * @param cert leaf certificate from ownership voucher
+   */
+  private void verifyLeafPubKeyData(X509Certificate cert) throws InvalidOwnershipVoucherException {
+    String publicKeyAlgorithm = cert.getPublicKey().getAlgorithm();
+    verifyAlgorithm(publicKeyAlgorithm);
+
+    String ecdsaCurveName = ((ECPublicKey) cert.getPublicKey()).getParams().toString();
+    verifyCurveName(ecdsaCurveName);
+
+    int pubKeySize =
+        ((ECPublicKey) cert.getPublicKey()).getParams().getCurve().getField().getFieldSize();
+    verifyKeySize(pubKeySize);
+  }
+
+  /**
+   * Verifies leaf certificate in ownership voucher.
+   *
+   * @param cert leaf certificate from ownership voucher
+   */
+  private void verifyLeafCertPrivileges(X509Certificate cert)
+      throws InvalidOwnershipVoucherException {
+    if (cert.getKeyUsage() != null) {
+      if (!(cert.getKeyUsage()[0])) {
+        throw new InvalidOwnershipVoucherException(
+            "Digital signature is not allowed for the device certificate");
+      }
+    }
+  }
+
+  /**
+   * Verifies certificate chain.
+   *
+   * @param certChain ownership voucher device certificate chain
+   */
+  public void verifyCertChain(Composite certChain) {
+    LinkedList<X509Certificate> x509certs = new LinkedList<>();
+
+    try {
+      final CertPath cp = getCertPath(certChain);
+
+      for (int i = 1; i < certChain.size(); i++) {
+        X509Certificate x509Certificate = (X509Certificate) cp.getCertificates().get(i);
+        x509certs.add(x509Certificate);
+      }
+    } catch (CertificateException e) {
+      throw new CryptoServiceException(e);
+    }
+
+    X509Certificate leafCertificate = x509certs.getFirst();
+    verifyLeafPubKeyData(leafCertificate);
+    verifyLeafCertPrivileges(leafCertificate);
+  }
+
+  /**
+   * Verifies ownership voucher.
+   *
+   * @param voucher ownership voucher
+   */
+  public void verifyVoucher(Composite voucher) {
+
+    verifyHash(
+        voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
+        voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
+    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+    verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 
   /**
