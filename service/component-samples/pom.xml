@@ -16,5 +16,7 @@
 
   <modules>
     <module>owner</module>
+    <module>rv</module>
   </modules>
+
 </project>
