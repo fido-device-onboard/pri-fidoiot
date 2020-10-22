@@ -25,7 +25,7 @@ import org.fido.iot.protocol.To0ServerStorage;
 public class To0DbStorage implements To0ServerStorage {
 
   private final CryptoService cryptoService;
-  private final DataSource dataSource;
+  protected final DataSource dataSource;
   private byte[] nonce3;
 
   /**
@@ -181,7 +181,7 @@ public class To0DbStorage implements To0ServerStorage {
 
   }
 
-  private CryptoService getCryptoService() {
+  protected CryptoService getCryptoService() {
     return cryptoService;
   }
 
