@@ -200,10 +200,12 @@ public final class Const {
   public static final String PUBKEY = "PUBKEY";
 
   //EPID Verification Service REST API keywords
-  public static final String EPID_PROTOCOL_VERSION = "v2/";
+  public static final String EPID_PROTOCOL_VERSION_V1 = "v1/";
+  public static final String EPID_PROTOCOL_VERSION_V2 = "v2/";
   public static final String EPID_11 = "epid11";
   public static final String EPID_20 = "epid20";
   public static final String URL_PATH_SEPARATOR = "/";
+  public static final String EPID_PROOF_URI_PATH = "proof";
 
   //OwnershipVoucher
   public static final int OV_HEADER = 0;

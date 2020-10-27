@@ -1,7 +1,12 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.protocol.epid;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,8 +15,6 @@ import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.InvalidMessageException;
 
 public class EpidMaterialService {
-
-  private final EpidUtils epidUtils = new EpidUtils();
 
   /**
    * Combines list of byte array into a single byte array.
@@ -46,17 +49,17 @@ public class EpidMaterialService {
 
   private byte[] getPublicKey(Composite sigInfo) {
     return getEpidVerificationServiceResource(
-        sigInfo, Const.PUBKEY, (Const.EPID_PROTOCOL_VERSION + Const.EPID_20));
+        sigInfo, Const.PUBKEY, (Const.EPID_PROTOCOL_VERSION_V2 + Const.EPID_20));
   }
 
   private byte[] getGroupCertSigma10(Composite sigInfo) {
     return getEpidVerificationServiceResource(
-        sigInfo, Const.GROUPCERTSIGMA10, (Const.EPID_PROTOCOL_VERSION + Const.EPID_11));
+        sigInfo, Const.GROUPCERTSIGMA10, (Const.EPID_PROTOCOL_VERSION_V2 + Const.EPID_11));
   }
 
   private byte[] getGroupCertSigma11(Composite sigInfo) {
     return getEpidVerificationServiceResource(
-        sigInfo, Const.GROUPCERTSIGMA11, (Const.EPID_PROTOCOL_VERSION + Const.EPID_11));
+        sigInfo, Const.GROUPCERTSIGMA11, (Const.EPID_PROTOCOL_VERSION_V2 + Const.EPID_11));
   }
 
   private byte[] getEpidVerificationServiceResource(
@@ -67,8 +70,18 @@ public class EpidMaterialService {
             Arrays.asList(
                 epidVersion, Composite.toString(sigInfo.toBytes()), resource.toLowerCase()));
 
-    // todo: Call HTTP Client that will return byte array. Replace return value
-    return null;
+    String url;
+    try {
+      url =
+          new URL(EpidUtils.getEpidOnlineUrl().toString())
+              .toURI()
+              .resolve(Const.URL_PATH_SEPARATOR + path)
+              .toString();
+      return EpidHttpClient.doGet(url);
+    } catch (URISyntaxException | IOException e) {
+      System.out.println(e.getMessage());
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -81,7 +94,7 @@ public class EpidMaterialService {
 
     int sgType = (int) sigA.getAsNumber(Const.FIRST_KEY);
 
-    if (sigA.getAsBytes(Const.FIRST_KEY).length != epidUtils.getEpidGroupIdLength(sgType)) {
+    if (sigA.getAsBytes(Const.FIRST_KEY).length != EpidUtils.getEpidGroupIdLength(sgType)) {
       throw new InvalidMessageException("Invalid group ID from SigInfo");
     }
 
