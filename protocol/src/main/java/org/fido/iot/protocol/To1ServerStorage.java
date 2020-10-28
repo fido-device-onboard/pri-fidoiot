@@ -19,6 +19,10 @@ public interface To1ServerStorage extends StorageEvents {
 
   void setNonce4(byte[] nonce4);
 
+  public Composite getSigInfoA();
+
+  public void setSigInfoA(Composite sigInfoA);
+
   Composite getSigInfoB(Composite signInfoA);
 
   PublicKey getVerificationKey();

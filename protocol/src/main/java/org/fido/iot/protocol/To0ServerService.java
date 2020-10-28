@@ -59,7 +59,7 @@ public abstract class To0ServerService extends MessagingService {
 
     Composite pubKeyEntry = getCryptoService().getOwnerPublicKey(voucher);
     PublicKey verificationKey = cryptoService.decode(pubKeyEntry);
-    if (!cryptoService.verify(verificationKey, to1d)) {
+    if (!cryptoService.verify(verificationKey, to1d, null)) {
       throw new InvalidOwnerSignBodyException();
     }
 

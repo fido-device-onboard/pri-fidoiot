@@ -180,6 +180,16 @@ public class To1Test extends BaseTemplate {
       public void failed(Composite request, Composite reply) {
 
       }
+
+      @Override
+      public Composite getSigInfoA() {
+        return null;
+      }
+
+      @Override
+      public void setSigInfoA(Composite sigInfoA) {
+
+      }
     };
 
     serverService = new To1ServerService() {
