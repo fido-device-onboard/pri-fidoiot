@@ -41,13 +41,9 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
    */
   public long storeRedirectBlob(Composite voucher, long requestedWait, byte[] signedBlob) {
 
-    String ovhGuid =
+    checkGuidAgainstDenyList(
         DatatypeConverter.printHexBinary(
-            voucher.getAsComposite(Const.OV_HEADER).getAsBytes(Const.OVH_GUID));
-    List<String> guidDenyList = getGuidFromDenyList();
-    if (guidDenyList.indexOf(ovhGuid) != -1) {
-      throw new InvalidGuidException(new MessageBodyException());
-    }
+            voucher.getAsComposite(Const.OV_HEADER).getAsBytes(Const.OVH_GUID)));
 
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
     UUID guid = ovh.getAsUuid(Const.OVH_GUID);
@@ -94,27 +90,28 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
   }
 
   /**
-   * Gets list of GUID denylist.
+   * Check GUID against GUID_DENYLIST table entries.
    *
-   * @return list of GUID stored in GUID_DENYLIST table
+   * @param guid Device GUID
    */
-  public List<String> getGuidFromDenyList() {
-    List<String> guidInDenyList = new ArrayList<>();
+  public void checkGuidAgainstDenyList(String guid) {
 
-    String sql = "SELECT GUID FROM GUID_DENYLIST";
+    String sql = "SELECT * FROM GUID_DENYLIST WHERE GUID = ?";
 
+    int rowCount = 0;
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+      pstmt.setString(1, guid);
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          guidInDenyList.add(rs.getString(1));
-        }
+        rs.last();
+        rowCount = rs.getRow();
       }
-
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    } catch (SQLException sqlException) {
+      throw new RuntimeException(sqlException);
     }
-    return guidInDenyList;
+
+    if (rowCount > 0) {
+      throw new InvalidGuidException(new MessageBodyException());
+    }
   }
 }
