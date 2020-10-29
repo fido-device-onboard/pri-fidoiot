@@ -23,8 +23,6 @@ public interface To1ServerStorage extends StorageEvents {
 
   public void setSigInfoA(Composite sigInfoA);
 
-  Composite getSigInfoB(Composite signInfoA);
-
   PublicKey getVerificationKey();
 
   Composite getRedirectBlob();

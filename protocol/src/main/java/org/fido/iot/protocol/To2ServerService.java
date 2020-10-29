@@ -39,7 +39,7 @@ public abstract class To2ServerService extends MessagingService {
         .set(Const.SECOND_KEY, voucher.getAsComposite(Const.OV_ENTRIES).size())
         .set(Const.THIRD_KEY, voucher.getAsComposite(Const.OV_HMAC))
         .set(Const.FOURTH_KEY, nonce5)
-        .set(Const.FIFTH_KEY, getStorage().getSigInfoB(sigInfoA))
+        .set(Const.FIFTH_KEY, getCryptoService().getSigInfoB(sigInfoA))
         .set(Const.SIXTH_KEY, ownerState.getAsBytes(Const.FIRST_KEY));
 
     byte[] nonce6 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);

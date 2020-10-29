@@ -215,11 +215,6 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
-      public Composite getSigInfoB(Composite sigInfoA) {
-        return sigInfoA;
-      }
-
-      @Override
       public Composite getReplacementRvInfo() {
         return null;
       }

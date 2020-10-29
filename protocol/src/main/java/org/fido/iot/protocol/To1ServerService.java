@@ -31,7 +31,7 @@ public abstract class To1ServerService extends MessagingService {
     body = Composite.newArray()
         .set(Const.FIRST_KEY, nonce4)
         .set(Const.SECOND_KEY,
-            getStorage().getSigInfoB(sigA));
+            getCryptoService().getSigInfoB(sigA));
 
     reply.set(Const.SM_MSG_ID, Const.TO1_HELLO_RV_ACK);
     reply.set(Const.SM_BODY, body);

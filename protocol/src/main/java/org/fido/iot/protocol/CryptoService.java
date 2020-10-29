@@ -60,6 +60,8 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.fido.iot.protocol.epid.EpidMaterialService;
 import org.fido.iot.protocol.epid.EpidSignatureVerifier;
 
 /**
@@ -400,6 +402,26 @@ public class CryptoService {
       //todo: file in RSA type for EPID
     }
     throw new CryptoServiceException(new NoSuchAlgorithmException());
+  }
+
+  /**
+   * Returns actual signature.
+   *
+   * @param sigInfoA initial device based information
+   * @return signature
+   */
+  public Composite getSigInfoB(Composite sigInfoA) {
+    if (null != sigInfoA
+            && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+            .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      EpidMaterialService epidMaterialService = new EpidMaterialService();
+      try {
+        return epidMaterialService.getSigInfo(sigInfoA);
+      } catch (IOException ioException) {
+        throw new RuntimeException(ioException);
+      }
+    }
+    return sigInfoA;
   }
 
   protected byte[] adjustBigBuffer(byte[] buffer, int byteLength) {

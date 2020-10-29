@@ -136,11 +136,6 @@ public class To1Test extends BaseTemplate {
       }
 
       @Override
-      public Composite getSigInfoB(Composite signInfoA) {
-        return signInfoA;
-      }
-
-      @Override
       public PublicKey getVerificationKey() {
         return PemLoader.loadCerts(devKeyPem).get(0).getPublicKey();
       }

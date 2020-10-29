@@ -155,11 +155,6 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public Composite getSigInfoB(Composite sigInfoA) {
-    return sigInfoA;
-  }
-
-  @Override
   public Composite getReplacementRvInfo() {
 
     return voucher

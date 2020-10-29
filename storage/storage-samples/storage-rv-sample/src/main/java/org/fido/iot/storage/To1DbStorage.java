@@ -56,11 +56,6 @@ public class To1DbStorage implements To1ServerStorage {
   }
 
   @Override
-  public Composite getSigInfoB(Composite signInfoA) {
-    return signInfoA; //for ecdsa we just echo
-  }
-
-  @Override
   public PublicKey getVerificationKey() {
     String sql = "SELECT DEVICE_KEY FROM RV_REDIRECTS WHERE GUID = ?";
 
