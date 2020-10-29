@@ -17,6 +17,7 @@
   <modules>
     <module>owner</module>
     <module>rv</module>
+    <module>http-device-sample</module>
   </modules>
 
 </project>
