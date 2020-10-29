@@ -40,6 +40,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
@@ -59,6 +60,7 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 /**
  * Cryptography Service.
@@ -601,6 +603,7 @@ public class CryptoService {
    */
   private void verifyCurveName(String ecdsaCurveName) throws InvalidOwnershipVoucherException {
     if (!(ecdsaCurveName.contains(Const.SECP256R1_CURVE_NAME)
+        || ecdsaCurveName.contains(Const.PRIME256V1_CURVE_NAME)
         || ecdsaCurveName.contains(Const.SECP384R1_CURVE_NAME))) {
       throw new InvalidOwnershipVoucherException("Mismatch of ECDSA curve type.");
     }
@@ -627,7 +630,15 @@ public class CryptoService {
     String publicKeyAlgorithm = cert.getPublicKey().getAlgorithm();
     verifyAlgorithm(publicKeyAlgorithm);
 
-    String ecdsaCurveName = ((ECPublicKey) cert.getPublicKey()).getParams().toString();
+    String ecdsaCurveName;
+    ECParameterSpec p = ((ECPublicKey) cert.getPublicKey()).getParams();
+    if (p instanceof ECNamedCurveSpec) {
+      ECNamedCurveSpec ncs = (ECNamedCurveSpec)p;
+      ecdsaCurveName = ncs.getName();
+    } else {
+      ecdsaCurveName = p.toString();
+    }
+
     verifyCurveName(ecdsaCurveName);
 
     int pubKeySize =
