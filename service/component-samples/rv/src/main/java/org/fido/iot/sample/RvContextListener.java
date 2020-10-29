@@ -88,6 +88,8 @@ public class RvContextListener implements ServletContextListener {
     RvsDbManager manager = new RvsDbManager();
     manager.createTables(ds);
     manager.createAllowListDenyListTables(ds);
+    manager.importAllowListKeyHash(ds);
+    manager.importDenyListKeyHash(ds);
     manager.importGuidFromDenyList(ds);
   }
 
