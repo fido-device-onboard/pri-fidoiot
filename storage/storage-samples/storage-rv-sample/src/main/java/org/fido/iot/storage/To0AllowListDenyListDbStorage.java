@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
-import javax.xml.bind.DatatypeConverter;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.CryptoService;
@@ -47,8 +46,8 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
   public long storeRedirectBlob(Composite voucher, long requestedWait, byte[] signedBlob) {
 
     checkGuidAgainstDenyList(
-        DatatypeConverter.printHexBinary(
-            voucher.getAsComposite(Const.OV_HEADER).getAsBytes(Const.OVH_GUID)));
+        Composite.toString(voucher.getAsComposite(Const.OV_HEADER).getAsBytes(Const.OVH_GUID))
+            .toUpperCase());
 
     List<String> ovKeys = new ArrayList<>();
 

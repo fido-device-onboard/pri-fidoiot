@@ -139,7 +139,7 @@ public class RvsDbManager {
       properties.load(inputStream);
       denylist = Arrays.asList(properties.getProperty("guid.denylist").split(","));
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
 
     String sql = "MERGE INTO GUID_DENYLIST (GUID) VALUES (?);";
