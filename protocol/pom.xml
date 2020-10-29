@@ -20,7 +20,7 @@
     <jackson-datatype-jdk8.version>2.11.0</jackson-datatype-jdk8.version>
     <commons-codec.version>1.14</commons-codec.version>
     <tomcat.version>9.0.24</tomcat.version>
-    <bcprov.version>1.65.01</bcprov.version>
+    <bcprov.version>1.66</bcprov.version>
     <bcpkix.version>1.65</bcpkix.version>
   </properties>
 
@@ -43,6 +43,12 @@
       <artifactId>commons-codec</artifactId>
       <version>${commons-codec.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bcprov.version}</version>
     </dependency>
 
     <dependency>
