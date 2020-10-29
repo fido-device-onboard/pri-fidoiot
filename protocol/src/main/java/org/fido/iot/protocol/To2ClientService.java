@@ -83,10 +83,12 @@ public abstract class To2ClientService extends DeviceService {
 
   protected void nextMessage(Composite request, Composite reply) {
     if (this.numEntries == 0 || entryNum == (this.numEntries - 1)) {
-      Composite deviceState = getCryptoService()
-          .getKeyExchangeMessage(Const.ECDH_ALG_NAME, Const.KEY_EXCHANGE_B);
 
-      byte[] ownSecret = getCryptoService().getSharedSecret(this.kexA, deviceState);
+      PublicKey ownerKey = getCryptoService().decode(cupKey);
+      Composite deviceState = getCryptoService()
+          .getKeyExchangeMessage(getStorage().getKexSuiteName(), Const.KEY_EXCHANGE_B, ownerKey);
+
+      byte[] ownSecret = getCryptoService().getSharedSecret(this.kexA, deviceState, null);
 
       this.ownState = getCryptoService()
           .getEncryptionState(ownSecret,

@@ -26,7 +26,7 @@ public abstract class To2ServerService extends MessagingService {
     Composite sigInfoA = body.getAsComposite(Const.FIFTH_KEY);
 
     Composite ownerState = getCryptoService()
-        .getKeyExchangeMessage(kexName, Const.KEY_EXCHANGE_A);
+        .getKeyExchangeMessage(kexName, Const.KEY_EXCHANGE_A, null);
 
     getStorage().setOwnerState(ownerState);
     getStorage().setCipherName(cipherName);
@@ -54,7 +54,7 @@ public abstract class To2ServerService extends MessagingService {
     PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
     Composite cose = null;
     try (CloseableKey key = new CloseableKey(
-        getStorage().geOwnerSigningKey(ownerPublicKey))) {
+        getStorage().getOwnerSigningKey(ownerPublicKey))) {
       cose = getCryptoService().sign(
           key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
@@ -106,8 +106,11 @@ public abstract class To2ServerService extends MessagingService {
     Composite iotClaim = payload.getAsComposite(Const.EAT_SDO_IOT);
     byte[] kexB = iotClaim.getAsBytes(Const.FIRST_KEY);
 
+    Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
+    PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
     byte[] devSecret = getCryptoService().getSharedSecret(kexB,
-        getStorage().getOwnerState());
+        getStorage().getOwnerState(), getStorage().getOwnerSigningKey(ownerPublicKey));
+
     Composite cipherState = getCryptoService().getEncryptionState(devSecret,
         getStorage().getCipherName());
     getStorage().setOwnerState(cipherState);

@@ -51,7 +51,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public PrivateKey geOwnerSigningKey(PublicKey key) {
+  public PrivateKey getOwnerSigningKey(PublicKey key) {
     return keyResolver.getKey(key);
   }
 

@@ -6,10 +6,10 @@ package org.fido.iot.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -61,6 +62,7 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 import org.fido.iot.protocol.epid.EpidMaterialService;
@@ -73,6 +75,7 @@ import org.fido.iot.protocol.epid.EpidSignatureVerifier;
  */
 public class CryptoService {
 
+  private static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
   private final SecureRandom secureRandom;
 
   /**
@@ -230,12 +233,16 @@ public class CryptoService {
       int bitLength = ((ECKey) key).getParams().getCurve().getField().getFieldSize();
       if (bitLength == Const.BIT_LEN_256) {
         return Const.COSE_ES256;
-      }
-      if (bitLength == Const.BIT_LEN_384) {
+      } else if (bitLength == Const.BIT_LEN_384) {
         return Const.COSE_ES384;
       }
-      //} else if (key instanceof RSAKey) {
-      //todo: rsa key size
+    } else if (key instanceof RSAKey) {
+      int bitLength = ((RSAKey) key).getModulus().bitLength();
+      if (Const.BIT_LEN_2K == bitLength) {
+        return Const.COSE_RS256;
+      } else if (Const.BIT_LEN_3K == bitLength) {
+        return Const.COSE_RS384;
+      }
     }
     throw new RuntimeException(new NoSuchAlgorithmException());
   }
@@ -278,6 +285,17 @@ public class CryptoService {
       if (bitLength == Const.BIT_LEN_384) {
         return Composite.newArray()
             .set(Const.SG_TYPE, Const.PK_SECP384R1)
+            .set(Const.SG_INFO, Const.EMPTY_BYTE);
+      }
+    } else if (key instanceof RSAKey) {
+      int bitLength = ((RSAKey)key).getModulus().bitLength();
+      if (Const.BIT_LEN_2K == bitLength) {
+        return Composite.newArray()
+            .set(Const.SG_TYPE, Const.PK_RSA2048RESTR)
+            .set(Const.SG_INFO, Const.EMPTY_BYTE);
+      } else if (Const.BIT_LEN_3K == bitLength) {
+        return Composite.newArray()
+            .set(Const.SG_TYPE, Const.PK_RSA)
             .set(Const.SG_INFO, Const.EMPTY_BYTE);
       }
     }
@@ -378,7 +396,11 @@ public class CryptoService {
       }
     } else if (key instanceof RSAPublicKey) {
       int bitLength = ((RSAPublicKey) key).getModulus().bitLength();
-      //todo:  find in RSA type for EPID keys
+      if (2 * 1024 == bitLength) {
+        return Const.SHA_256;
+      } else {
+        return Const.SHA_384;
+      }
     }
     throw new RuntimeException(new InvalidKeyException());
   }
@@ -401,7 +423,11 @@ public class CryptoService {
       }
     } else if (key instanceof RSAPublicKey) {
       int bitLength = ((RSAPublicKey) key).getModulus().bitLength();
-      //todo: file in RSA type for EPID
+      if (2 * 1024 == bitLength) {
+        return Const.HMAC_SHA_256;
+      } else {
+        return Const.HMAC_SHA_384;
+      }
     }
     throw new CryptoServiceException(new NoSuchAlgorithmException());
   }
@@ -1035,15 +1061,20 @@ public class CryptoService {
    *
    * @param message  The key exchange message.
    * @param ownState The state of the key exchange.
+   * @param decryptionKey The decryption key for use in asymmetric exchanges
    * @return The shared secrete based on the state and message.
    */
-  public byte[] getSharedSecret(byte[] message, Composite ownState) {
+  public byte[] getSharedSecret(byte[] message, Composite ownState, Key decryptionKey) {
 
     final String alg = ownState.getAsString(Const.SECOND_KEY);
-    if (alg.equals(Const.ECDH_ALG_NAME)) {
-      return getEcdhSharedSecret(message, ownState);
+    switch (alg) {
+      case Const.ECDH_ALG_NAME:
+        return getEcdhSharedSecret(message, ownState);
+      case Const.ASYMKEX2048_ALG_NAME:
+        return getAsymkexSharedSecret(message, ownState, decryptionKey);
+      default:
+        throw new CryptoServiceException(new NoSuchAlgorithmException(alg));
     }
-    throw new CryptoServiceException(new NoSuchAlgorithmException(alg));
   }
 
   /**
@@ -1053,16 +1084,98 @@ public class CryptoService {
    *
    * @param kexSuiteName The name of the Key Exchange Suite.
    * @param party        The party to the Key Ecxhange (A or B)
+   * @param ownerKey     The owner key, required for some asymmetric exchanges
    * @return A composite state value with the fist key set to the message.
    */
-  public Composite getKeyExchangeMessage(String kexSuiteName, String party) {
+  public Composite getKeyExchangeMessage(String kexSuiteName, String party, Key ownerKey) {
 
-    if (kexSuiteName.equals(Const.ECDH_ALG_NAME)) {
-      return getEcdhMessage(Const.SECP256R1_CURVE_NAME, Const.ECDH_256_RANDOM_SIZE, party);
-    } else if (kexSuiteName.equals(Const.ECDH384_ALG_NAME)) {
-      return getEcdhMessage(Const.SECP384R1_CURVE_NAME, Const.ECDH_384_RANDOM_SIZE, party);
+    switch (kexSuiteName) {
+      case Const.ECDH_ALG_NAME:
+        return getEcdhMessage(Const.SECP256R1_CURVE_NAME, Const.ECDH_256_RANDOM_SIZE, party);
+      case Const.ECDH384_ALG_NAME:
+        return getEcdhMessage(Const.SECP384R1_CURVE_NAME, Const.ECDH_384_RANDOM_SIZE, party);
+      case Const.ASYMKEX2048_ALG_NAME:
+        return getAsymkexMessage(Const.ASYMKEX2048_RANDOM_SIZE, party, ownerKey);
+      default:
+        throw new CryptoServiceException(new NoSuchAlgorithmException(kexSuiteName));
     }
-    throw new CryptoServiceException(new NoSuchAlgorithmException(kexSuiteName));
+  }
+
+  protected Composite getAsymkexMessage(int randomSize, String party, Key encryptionKey) {
+
+    switch (party) {
+
+      case Const.KEY_EXCHANGE_A:
+
+        byte[] a = new byte[randomSize];
+        getSecureRandom().nextBytes(a);
+
+        return Composite.newArray()
+            .set(Const.FIRST_KEY, a)
+            .set(Const.SECOND_KEY, Const.ASYMKEX2048_ALG_NAME)
+            .set(Const.THIRD_KEY, Const.KEY_EXCHANGE_A)
+            .set(Const.FOURTH_KEY, randomSize);
+
+      case Const.KEY_EXCHANGE_B:
+
+        byte[] b = new byte[randomSize];
+        getSecureRandom().nextBytes(b);
+
+        byte[] xb;
+        try {
+          Cipher cipher = Cipher.getInstance(Const.ASYMKEX_CIPHER_NAME, BCPROV);
+          cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, getSecureRandom());
+          xb = cipher.doFinal(b);
+        } catch (GeneralSecurityException e) {
+          throw new RuntimeException(e);
+        }
+
+        return Composite.newArray()
+            .set(Const.FIRST_KEY, xb)
+            .set(Const.SECOND_KEY, Const.ASYMKEX2048_ALG_NAME)
+            .set(Const.THIRD_KEY, Const.KEY_EXCHANGE_B)
+            .set(Const.FOURTH_KEY, randomSize)
+            .set(Const.FIFTH_KEY, b);
+
+      default:
+        throw new IllegalArgumentException(party);
+    }
+  }
+
+  protected byte[] getAsymkexSharedSecret(byte[] message, Composite ownState, Key decryptionKey) {
+
+    String party = ownState.getAsString(Const.THIRD_KEY);
+    int len = ownState.getAsNumber(Const.FOURTH_KEY).intValue();
+
+    byte[] shSe = new byte[2 * len];
+    ByteBuffer bb = ByteBuffer.wrap(shSe);
+
+    switch (party) {
+      case Const.KEY_EXCHANGE_A:
+
+        bb.put(ownState.getAsBytes(Const.FIRST_KEY));
+
+        byte[] b;
+        try {
+          Cipher cipher = Cipher.getInstance(Const.ASYMKEX_CIPHER_NAME, BCPROV);
+          cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
+          b = cipher.doFinal(message);
+        } catch (GeneralSecurityException e) {
+          throw new RuntimeException(e);
+        }
+        bb.put(b);
+        break;
+
+      case Const.KEY_EXCHANGE_B:
+        bb.put(message);
+        bb.put(ownState.getAsBytes(Const.FIFTH_KEY));
+        break;
+
+      default:
+        throw new IllegalArgumentException(party);
+    }
+
+    return shSe;
   }
 
   protected Composite encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv, String cipherName) {
