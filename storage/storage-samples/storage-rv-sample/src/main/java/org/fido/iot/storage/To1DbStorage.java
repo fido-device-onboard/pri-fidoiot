@@ -28,6 +28,7 @@ public class To1DbStorage implements To1ServerStorage {
   private final DataSource dataSource;
   private byte[] nonce4;
   private UUID guid;
+  private Composite sigInfoA;
 
   public To1DbStorage(CryptoService cryptoService, DataSource dataSource) {
     this.cryptoService = cryptoService;
@@ -52,11 +53,6 @@ public class To1DbStorage implements To1ServerStorage {
   @Override
   public UUID getGuid() {
     return guid;
-  }
-
-  @Override
-  public Composite getSigInfoB(Composite signInfoA) {
-    return signInfoA; //for ecdsa we just echo
   }
 
   @Override
@@ -116,7 +112,7 @@ public class To1DbStorage implements To1ServerStorage {
         Composite.newMap().set(Const.PI_TOKEN, sessionId));
 
     String sql = "INSERT INTO TO1_SESSIONS "
-        + "(SESSION_ID,GUID,NONCE,CREATED) VALUES (?,?,?,?);";
+        + "(SESSION_ID,GUID,NONCE,SIGINFOA,CREATED) VALUES (?,?,?,?,?);";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -124,8 +120,9 @@ public class To1DbStorage implements To1ServerStorage {
       pstmt.setString(1, sessionId);
       pstmt.setString(2, getGuid().toString());
       pstmt.setBytes(3, nonce4);
+      pstmt.setBytes(4, sigInfoA.toBytes());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(4, created);
+      pstmt.setTimestamp(5, created);
 
       pstmt.executeUpdate();
 
@@ -138,7 +135,7 @@ public class To1DbStorage implements To1ServerStorage {
   public void continuing(Composite request, Composite reply) {
     String token = getToken(request);
 
-    String sql = "SELECT GUID, NONCE, FROM TO1_SESSIONS WHERE SESSION_ID = ?";
+    String sql = "SELECT GUID, NONCE, SIGINFOA FROM TO1_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -149,6 +146,7 @@ public class To1DbStorage implements To1ServerStorage {
         while (rs.next()) {
           guid = UUID.fromString(rs.getString(1));
           nonce4 = rs.getBytes(2);
+          sigInfoA = Composite.fromObject(rs.getBinaryStream(3));
         }
       }
 
@@ -197,5 +195,15 @@ public class To1DbStorage implements To1ServerStorage {
       throw new InvalidJwtException();
     }
     return protocolInfo.getAsString(Const.PI_TOKEN);
+  }
+
+  @Override
+  public Composite getSigInfoA() {
+    return sigInfoA;
+  }
+
+  @Override
+  public void setSigInfoA(Composite sigInfoA) {
+    this.sigInfoA = sigInfoA;
   }
 }

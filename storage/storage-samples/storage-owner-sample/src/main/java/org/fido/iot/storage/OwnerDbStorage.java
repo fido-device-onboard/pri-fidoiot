@@ -35,6 +35,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private byte[] nonce7;
   private Composite voucher;
   private String sessionId;
+  private Composite sigInfoA;
 
   /**
    * Constructs a OwnerDbStorage instance.
@@ -91,6 +92,16 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
+  public Composite getSigInfoA() {
+    return sigInfoA;
+  }
+
+  @Override
+  public void setSigInfoA(Composite sigInfoA) {
+    this.sigInfoA = sigInfoA;
+  }
+
+  @Override
   public Composite getVoucher() {
     if (voucher == null) {
       String sql = "SELECT VOUCHER FROM TO2_DEVICES WHERE GUID = ?;";
@@ -144,11 +155,6 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public Composite getSigInfoB(Composite sigInfoA) {
-    return sigInfoA;
-  }
-
-  @Override
   public Composite getReplacementRvInfo() {
 
     return voucher
@@ -176,7 +182,7 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new InvalidJwtException();
     }
 
-    String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7 "
+    String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7, SIGINFOA, "
         + "FROM TO2_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -191,6 +197,7 @@ public class OwnerDbStorage implements To2ServerStorage {
           cipherName = rs.getString(3);
           nonce6 = rs.getBytes(4);
           nonce7 = rs.getBytes(5);
+          sigInfoA = Composite.fromObject(rs.getBinaryStream(6));
         }
       }
 
@@ -243,9 +250,10 @@ public class OwnerDbStorage implements To2ServerStorage {
         + "CIPHER_NAME, "
         + "NONCE6,"
         + "NONCE7,"
+        + "SIGINFOA,"
         + "CREATED,"
         + "UPDATED) "
-        + "VALUES (?,?,?,?,?,?,?,?);";
+        + "VALUES (?,?,?,?,?,?,?,?,?);";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -256,9 +264,10 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setString(4, cipherName);
       pstmt.setBytes(5, nonce6);
       pstmt.setBytes(6, nonce7);
+      pstmt.setBytes(7, sigInfoA.toBytes());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(7, created);
       pstmt.setTimestamp(8, created);
+      pstmt.setTimestamp(9, created);
 
       pstmt.executeUpdate();
 

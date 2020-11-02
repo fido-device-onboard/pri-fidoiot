@@ -26,11 +26,12 @@ public abstract class To1ServerService extends MessagingService {
     byte[] nonce4 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
     getStorage().setNonce4(nonce4);
     Composite sigA = body.getAsComposite(Const.SECOND_KEY);
+    getStorage().setSigInfoA(sigA);
 
     body = Composite.newArray()
         .set(Const.FIRST_KEY, nonce4)
         .set(Const.SECOND_KEY,
-            getStorage().getSigInfoB(sigA));
+            getCryptoService().getSigInfoB(sigA));
 
     reply.set(Const.SM_MSG_ID, Const.TO1_HELLO_RV_ACK);
     reply.set(Const.SM_BODY, body);
@@ -42,8 +43,9 @@ public abstract class To1ServerService extends MessagingService {
     Composite body = request.getAsComposite(Const.SM_BODY);
     CryptoService cryptoService = getCryptoService();
     PublicKey deviceKey = getStorage().getVerificationKey();
+    Composite sigA = getStorage().getSigInfoA();
 
-    if (!cryptoService.verify(deviceKey, body)) {
+    if (!cryptoService.verify(deviceKey, body, sigA)) {
       throw new InvalidMessageException();
     }
     Composite payload = Composite.fromObject(

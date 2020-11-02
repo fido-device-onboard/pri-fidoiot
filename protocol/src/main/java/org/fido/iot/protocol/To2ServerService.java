@@ -39,11 +39,12 @@ public abstract class To2ServerService extends MessagingService {
         .set(Const.SECOND_KEY, voucher.getAsComposite(Const.OV_ENTRIES).size())
         .set(Const.THIRD_KEY, voucher.getAsComposite(Const.OV_HMAC))
         .set(Const.FOURTH_KEY, nonce5)
-        .set(Const.FIFTH_KEY, getStorage().getSigInfoB(sigInfoA))
+        .set(Const.FIFTH_KEY, getCryptoService().getSigInfoB(sigInfoA))
         .set(Const.SIXTH_KEY, ownerState.getAsBytes(Const.FIRST_KEY));
 
     byte[] nonce6 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
     getStorage().setNonce6(nonce6);
+    getStorage().setSigInfoA(sigInfoA);
     Composite ownerKey = getCryptoService().getOwnerPublicKey(voucher);
     Composite uph = Composite.newMap()
         .set(Const.CUPH_NONCE, nonce6)
@@ -93,8 +94,9 @@ public abstract class To2ServerService extends MessagingService {
     Composite body = request.getAsComposite(Const.SM_BODY);
 
     Composite voucher = getStorage().getVoucher();
+    Composite sigInfoA = getStorage().getSigInfoA();
     PublicKey deviceKey = getCryptoService().getDevicePublicKey(voucher);
-    if (!getCryptoService().verify(deviceKey, body)) {
+    if (!getCryptoService().verify(deviceKey, body, sigInfoA)) {
       throw new InvalidMessageException();
     }
 

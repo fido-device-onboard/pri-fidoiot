@@ -47,6 +47,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,6 +62,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+
+import org.fido.iot.protocol.epid.EpidMaterialService;
+import org.fido.iot.protocol.epid.EpidSignatureVerifier;
 
 /**
  * Cryptography Service.
@@ -402,6 +406,26 @@ public class CryptoService {
     throw new CryptoServiceException(new NoSuchAlgorithmException());
   }
 
+  /**
+   * Returns actual signature.
+   *
+   * @param sigInfoA initial device based information
+   * @return signature
+   */
+  public Composite getSigInfoB(Composite sigInfoA) {
+    if (null != sigInfoA
+            && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+            .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      EpidMaterialService epidMaterialService = new EpidMaterialService();
+      try {
+        return epidMaterialService.getSigInfo(sigInfoA);
+      } catch (IOException ioException) {
+        throw new RuntimeException(ioException);
+      }
+    }
+    return sigInfoA;
+  }
+
   protected byte[] adjustBigBuffer(byte[] buffer, int byteLength) {
     final ByteBuffer result = ByteBuffer.allocate(byteLength);
     int skip = 0;
@@ -533,9 +557,14 @@ public class CryptoService {
    *
    * @param verificationKey The verification key to use.
    * @param cose            The COSE message.
+   * @param sigInfoA        The sigInfo object representing eA
    * @return True if the signature matches otherwise false.
    */
-  public boolean verify(PublicKey verificationKey, Composite cose) {
+  public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
+    if (null != sigInfoA && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+        .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      return EpidSignatureVerifier.verify(cose, sigInfoA);
+    }
     final Composite header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
     final int algId = header1.getAsNumber(Const.COSE_ALG).intValue();
     final ByteBuffer payload = cose.getAsByteBuffer(Const.COSE_SIGN1_PAYLOAD);

@@ -32,9 +32,11 @@ public interface To2ServerStorage extends StorageEvents {
 
   void setGuid(UUID guid);
 
-  Composite getVoucher();
+  public Composite getSigInfoA();
 
-  Composite getSigInfoB(Composite sigInfoA);
+  public void setSigInfoA(Composite sigInfoA);
+
+  Composite getVoucher();
 
   Composite getReplacementRvInfo();
 
