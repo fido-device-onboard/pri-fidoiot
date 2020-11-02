@@ -176,6 +176,7 @@ public final class Const {
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
   //EC curve names
+  public static final String PRIME256V1_CURVE_NAME = "prime256v1";
   public static final String SECP256R1_CURVE_NAME = "secp256r1";
   public static final String SECP384R1_CURVE_NAME = "secp384r1";
 
