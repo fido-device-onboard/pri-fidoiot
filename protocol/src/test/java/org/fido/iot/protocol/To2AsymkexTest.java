@@ -266,14 +266,18 @@ public class To2AsymkexTest extends BaseTemplate {
       }
 
       @Override
-      public Composite getVoucher() {
-        assertTrue(storedGuid != null);
-        return voucher;
+      public Composite getSigInfoA() {
+        return null;
       }
 
       @Override
-      public Composite getSigInfoB(Composite sigInfoA) {
-        return sigInfoA;
+      public void setSigInfoA(Composite sigInfoA) {
+      }
+
+      @Override
+      public Composite getVoucher() {
+        assertTrue(storedGuid != null);
+        return voucher;
       }
 
       @Override
