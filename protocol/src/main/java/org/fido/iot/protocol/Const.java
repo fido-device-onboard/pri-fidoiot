@@ -183,6 +183,8 @@ public final class Const {
   //bit lengths of keys
   public static final int BIT_LEN_256 = 256;
   public static final int BIT_LEN_384 = 384;
+  public static final int BIT_LEN_2K = 2 * 1024;
+  public static final int BIT_LEN_3K = 3 * 1024;
 
   //EPID SigInfo Types
   public static final int SG_EPIDv10 = 90; // Intel EPID, version 1.0
@@ -380,6 +382,11 @@ public final class Const {
   public static final String ECDH384_ALG_NAME = "ECDH384";
   public static final int ECDH_256_RANDOM_SIZE = 128 / 8;
   public static final int ECDH_384_RANDOM_SIZE = 384 / 8;
+
+  public static final String ASYMKEX2048_ALG_NAME = "ASYMKEX2048";
+  public static final int ASYMKEX2048_RANDOM_SIZE = 256 / 8;
+
+  public static final String ASYMKEX_CIPHER_NAME = "RSA/NONE/OAEPWithSHA256AndMGF1Padding";
 
   public static final String AES128_CTR_HMAC256_ALG_NAME = "AES128/CTR/HMAC-SHA256";
   public static final String AES128_CBC_HMAC256_ALG_NAME = "AES128/CBC/HMAC-SHA256";

@@ -22,7 +22,7 @@ public class BaseTemplate {
 
   protected static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
 
-  protected static final String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
+  protected static String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
       + "Q0EwIBcNMTkwNDI0MTQ0NjQ3WhgPMjA1NDA0MTUxNDQ2NDdaMA0xCzAJBgNVBAMM\n"
       + "AkNBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELAJwkDKz/BaWq1Wx7PjkR5W5\n"
@@ -40,7 +40,7 @@ public class BaseTemplate {
       + "EbDzKu924TX4as3WVjMmfekysx30PlDGJQ==\n"
       + "-----END EC PRIVATE KEY-----";
 
-  protected static final String devKeyPem = "-----BEGIN CERTIFICATE-----\n"
+  protected static String devKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBdjCCAR0CCQCNo1W35xxR9TAKBggqhkjOPQQDAjANMQswCQYDVQQDDAJDQTAg\n"
       + "Fw0xOTExMjIxNTU0MDFaGA8yMDU0MTExMzE1NTQwMVoweDELMAkGA1UEBhMCVVMx\n"
       + "DzANBgNVBAgMBk9yZWdvbjESMBAGA1UEBwwJSGlsbHNib3JvMQ4wDAYDVQQKDAVJ\n"
@@ -108,7 +108,7 @@ public class BaseTemplate {
 
     Composite pub = cryptoService.encode(
         PemLoader.loadCerts(mfgKeyPem).get(0).getPublicKey(),
-        Const.PK_ENC_COSEEC);
+        Const.PK_ENC_X509);
 
     Composite hash = cryptoService.hash(Const.SHA_256, chain.toBytes());
 

@@ -6,6 +6,7 @@ package org.fido.iot.protocol;
 import java.nio.ByteBuffer;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECKey;
 
 /**
  * Extends Ownership vouchers.
@@ -61,7 +62,9 @@ public class VoucherExtensionService {
 
     payload.set(Const.OVE_HASH_PREV_ENTRY, prevHash);
     payload.set(Const.OVE_HASH_HDR_INFO, hdrHash);
-    payload.set(Const.OVE_PUB_KEY, cryptoService.encode(newOwner, Const.PK_ENC_COSEEC));
+    payload.set(Const.OVE_PUB_KEY, cryptoService.encode(
+            newOwner,
+            newOwner instanceof ECKey ? Const.PK_ENC_COSEEC : Const.PK_ENC_X509));
     Composite cos = cryptoService.sign(
         prevOwner, payload.toBytes(), cryptoService.getCoseAlgorithm(prevOwner));
 
