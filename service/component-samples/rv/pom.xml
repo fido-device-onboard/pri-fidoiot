@@ -96,6 +96,47 @@
               <includeScope>runtime</includeScope>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-installed</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <type>${project.packaging}</type>
+                  <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
+                  <destFileName>${project.artifactId}.${project.packaging}</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>copy-lib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project-demo-directory}/${project.artifactId}/lib/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>target/lib/</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -127,6 +168,27 @@
               <classpathPrefix>lib</classpathPrefix>
             </manifest>
           </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}/lib</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <includes>
+                <include>rv.jar</include>
+              </includes>
+            </fileset>
+          </filesets>
         </configuration>
       </plugin>
     </plugins>
