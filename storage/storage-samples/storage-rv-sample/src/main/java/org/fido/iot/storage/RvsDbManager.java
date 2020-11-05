@@ -48,6 +48,7 @@ public class RvsDbManager {
           + "SESSION_ID CHAR(36), "
           + "GUID CHAR(36), "
           + "NONCE BINARY(16), "
+          + "SIGINFOA BLOB, "
           + "CREATED TIMESTAMP, "
           + "PRIMARY KEY (SESSION_ID), "
           + "UNIQUE (SESSION_ID) "

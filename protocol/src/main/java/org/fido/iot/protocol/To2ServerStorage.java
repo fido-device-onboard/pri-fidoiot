@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public interface To2ServerStorage extends StorageEvents {
 
-  PrivateKey geOwnerSigningKey(PublicKey key);
+  PrivateKey getOwnerSigningKey(PublicKey key);
 
   byte[] getNonce6();
 
@@ -36,7 +36,9 @@ public interface To2ServerStorage extends StorageEvents {
 
   Composite getVoucher();
 
-  Composite getSigInfoB(Composite sigInfoA);
+  public Composite getSigInfoA();
+
+  public void setSigInfoA(Composite sigInfoA);
 
   Composite getReplacementRvInfo();
 

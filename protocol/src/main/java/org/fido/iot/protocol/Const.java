@@ -155,9 +155,7 @@ public final class Const {
   public static final int PK_RSA = 4; // RSA key (unrestricted)
   public static final int PK_SECP256R1 = 13; // ECDSA secp256r1 = NIST-P-256 = prime256v1
   public static final int PK_SECP384R1 = 14; // ECDSA secp384r1 = NIST-P-384
-  public static final int PK_EPIDv10 = 90; // Intel EPID, version 1.0
-  public static final int PK_EPIDv11 = 91; // Intel EPID, version 1.1
-  public static final int PK_EPIDv20 = 92; // Intel EPID, version 2.0
+
 
   //Java Algorithm names for Signatures
   public static final String RSA_256_ALG_NAME = "SHA256withRSA";
@@ -185,6 +183,32 @@ public final class Const {
   //bit lengths of keys
   public static final int BIT_LEN_256 = 256;
   public static final int BIT_LEN_384 = 384;
+  public static final int BIT_LEN_2K = 2 * 1024;
+  public static final int BIT_LEN_3K = 3 * 1024;
+
+  //EPID SigInfo Types
+  public static final int SG_EPIDv10 = 90; // Intel EPID, version 1.0
+  public static final int SG_EPIDv11 = 91; // Intel EPID, version 1.1
+  public static final int SG_EPIDv20 = 92; // Intel EPID, version 2.0
+
+  //EPID GroupID lengths
+  public static final int GID_LEN_EPIDv10 = 4;
+  public static final int GID_LEN_EPIDv11 = 4;
+  public static final int GID_LEN_EPIDv20 = 16;
+
+  //EPID Resources
+  public static final String GROUPCERTSIGMA10 = "PUBKEY.CRT.BIN";
+  public static final String GROUPCERTSIGMA11 = "PUBKEY.CRT";
+  public static final String SIGRL = "SIGRL";
+  public static final String PUBKEY = "PUBKEY";
+
+  //EPID Verification Service REST API keywords
+  public static final String EPID_PROTOCOL_VERSION_V1 = "v1/";
+  public static final String EPID_PROTOCOL_VERSION_V2 = "v2/";
+  public static final String EPID_11 = "epid11";
+  public static final String EPID_20 = "epid20";
+  public static final String URL_PATH_SEPARATOR = "/";
+  public static final String EPID_PROOF_URI_PATH = "proof";
 
   //OwnershipVoucher
   public static final int OV_HEADER = 0;
@@ -358,6 +382,11 @@ public final class Const {
   public static final String ECDH384_ALG_NAME = "ECDH384";
   public static final int ECDH_256_RANDOM_SIZE = 128 / 8;
   public static final int ECDH_384_RANDOM_SIZE = 384 / 8;
+
+  public static final String ASYMKEX2048_ALG_NAME = "ASYMKEX2048";
+  public static final int ASYMKEX2048_RANDOM_SIZE = 256 / 8;
+
+  public static final String ASYMKEX_CIPHER_NAME = "RSA/NONE/OAEPWithSHA256AndMGF1Padding";
 
   public static final String AES128_CTR_HMAC256_ALG_NAME = "AES128/CTR/HMAC-SHA256";
   public static final String AES128_CBC_HMAC256_ALG_NAME = "AES128/CBC/HMAC-SHA256";

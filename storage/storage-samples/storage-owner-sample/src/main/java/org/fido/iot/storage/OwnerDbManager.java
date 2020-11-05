@@ -57,6 +57,7 @@ public class OwnerDbManager {
           + "CIPHER_NAME VARCHAR(36), "
           + "NONCE6 BINARY(16), "
           + "NONCE7 BINARY(16), "
+          + "SIGINFOA BLOB, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"
           + "PRIMARY KEY (SESSION_ID), "

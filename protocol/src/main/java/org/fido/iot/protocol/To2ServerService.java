@@ -35,7 +35,7 @@ public abstract class To2ServerService extends MessagingService {
     Composite sigInfoA = body.getAsComposite(Const.FIFTH_KEY);
 
     Composite ownerState = getCryptoService()
-        .getKeyExchangeMessage(kexName, Const.KEY_EXCHANGE_A);
+        .getKeyExchangeMessage(kexName, Const.KEY_EXCHANGE_A, null);
 
     getStorage().setOwnerState(ownerState);
     getStorage().setCipherName(cipherName);
@@ -48,11 +48,12 @@ public abstract class To2ServerService extends MessagingService {
         .set(Const.SECOND_KEY, voucher.getAsComposite(Const.OV_ENTRIES).size())
         .set(Const.THIRD_KEY, voucher.getAsComposite(Const.OV_HMAC))
         .set(Const.FOURTH_KEY, nonce5)
-        .set(Const.FIFTH_KEY, getStorage().getSigInfoB(sigInfoA))
+        .set(Const.FIFTH_KEY, getCryptoService().getSigInfoB(sigInfoA))
         .set(Const.SIXTH_KEY, ownerState.getAsBytes(Const.FIRST_KEY));
 
     byte[] nonce6 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
     getStorage().setNonce6(nonce6);
+    getStorage().setSigInfoA(sigInfoA);
     Composite ownerKey = getCryptoService().getOwnerPublicKey(voucher);
     Composite uph = Composite.newMap()
         .set(Const.CUPH_NONCE, nonce6)
@@ -62,7 +63,7 @@ public abstract class To2ServerService extends MessagingService {
     PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
     Composite cose = null;
     try (CloseableKey key = new CloseableKey(
-        getStorage().geOwnerSigningKey(ownerPublicKey))) {
+        getStorage().getOwnerSigningKey(ownerPublicKey))) {
       cose = getCryptoService().sign(
           key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
@@ -102,8 +103,9 @@ public abstract class To2ServerService extends MessagingService {
     Composite body = request.getAsComposite(Const.SM_BODY);
 
     Composite voucher = getStorage().getVoucher();
+    Composite sigInfoA = getStorage().getSigInfoA();
     PublicKey deviceKey = getCryptoService().getDevicePublicKey(voucher);
-    if (!getCryptoService().verify(deviceKey, body)) {
+    if (!getCryptoService().verify(deviceKey, body, sigInfoA)) {
       throw new InvalidMessageException();
     }
 
@@ -113,8 +115,11 @@ public abstract class To2ServerService extends MessagingService {
     Composite iotClaim = payload.getAsComposite(Const.EAT_SDO_IOT);
     byte[] kexB = iotClaim.getAsBytes(Const.FIRST_KEY);
 
+    Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
+    PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
     byte[] devSecret = getCryptoService().getSharedSecret(kexB,
-        getStorage().getOwnerState());
+        getStorage().getOwnerState(), getStorage().getOwnerSigningKey(ownerPublicKey));
+
     Composite cipherState = getCryptoService().getEncryptionState(devSecret,
         getStorage().getCipherName());
     getStorage().setOwnerState(cipherState);
