@@ -8,9 +8,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.tools.Server;
@@ -28,6 +34,7 @@ import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.fido.iot.serviceinfo.SdoSys;
 
 public class To2StorageTest {
 
@@ -111,6 +118,19 @@ public class To2StorageTest {
       "target", "data",
       "ops").toString();
 
+  private static final String packageContent =
+      "#!/bin/bash\r\n"
+      + "filename=payload.bin\r\n"
+      + "cksum_tx=1612472339\r\n"
+      + "cksum_rx=$(cksum $filename | cut -d ' ' -f 1)\r\n"
+      + "if [ $cksum_tx -eq $cksum_rx  ]; then\r\n"
+      + "  echo \"Device onboarded successfully.\"\r\n"
+      + "  echo \"Device onboarded successfully.\" > result.txt\r\n"
+      + "else\r\n"
+      + "  echo \"ServiceInfo file transmission failed.\"\r\n"
+      + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
+      + "fi\r\n";
+
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
     public PrivateKey getKey(PublicKey key) {
@@ -138,6 +158,109 @@ public class To2StorageTest {
         return cs;
       }
     };
+  }
+
+  private void insertSampleServiceInfo(UUID uuid, DataSource ds) {
+
+    String packageName = "linux64.sh";
+    String boolName = "bool";
+      String sql = ""
+          + "MERGE INTO OWNER_SERVICEINFO  "
+          + "KEY (SVI_ID) "
+          + "VALUES (?,?,?,?,?,?); ";
+
+      try (Connection conn = ds.getConnection();
+          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        pstmt.setString(1, "packageContent".toString());
+        pstmt.setString(2, SdoSys.NAME);
+        pstmt.setString(3, SdoSys.KEY_WRITE);
+        pstmt.setBytes(4, packageContent.getBytes());
+        pstmt.setInt(5, packageContent.length());
+        pstmt.setString(6, OwnerServiceInfoSequence.PLAIN_TYPE);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, "packageName".toString());
+        pstmt.setString(2, SdoSys.NAME);
+        pstmt.setString(3, SdoSys.KEY_FILEDESC);
+        pstmt.setBytes(4, packageName.getBytes());
+        pstmt.setInt(5, packageName.length());
+        pstmt.setString(6, OwnerServiceInfoSequence.PLAIN_TYPE);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, "cborBooleanValue".toString());
+        pstmt.setString(2, SdoSys.NAME);
+        pstmt.setString(3, SdoSys.KEY_WRITE);
+        pstmt.setBytes(4, Composite.decodeHex("F5"));
+        pstmt.setInt(5, Composite.decodeHex("F5").length);
+        pstmt.setString(6, OwnerServiceInfoSequence.CBOR_TYPE);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, "cborBooleanId".toString());
+        pstmt.setString(2, SdoSys.NAME);
+        pstmt.setString(3, SdoSys.KEY_FILEDESC);
+        pstmt.setBytes(4, boolName.getBytes());
+        pstmt.setInt(5, boolName.length());
+        pstmt.setString(6, OwnerServiceInfoSequence.CBOR_TYPE);
+        pstmt.addBatch();
+
+        pstmt.executeBatch();
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+
+      sql = "DELETE FROM GUID_OWNERSVI  "
+          + "WHERE GUID = ?; ";
+      try (Connection conn = ds.getConnection();
+          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        pstmt.setString(1, uuid.toString());
+
+        pstmt.executeUpdate();
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+
+      sql = "INSERT INTO GUID_OWNERSVI  "
+          + "VALUES (?,?,?); ";
+      try (Connection conn = ds.getConnection();
+          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        int counter = 0;
+        pstmt.setString(1, uuid.toString());
+        pstmt.setString(2, "packageName");
+        Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis() + (++counter));
+        pstmt.setTimestamp(3, created);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, uuid.toString());
+        pstmt.setString(2, "packageContent");
+        created = new Timestamp(Calendar.getInstance().getTimeInMillis() + (++counter));
+        pstmt.setTimestamp(3, created);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, uuid.toString());
+        pstmt.setString(2, "cborBooleanId");
+        created = new Timestamp(Calendar.getInstance().getTimeInMillis() + (++counter));
+        pstmt.setTimestamp(3, created);
+        pstmt.addBatch();
+
+        pstmt.clearParameters();
+        pstmt.setString(1, uuid.toString());
+        pstmt.setString(2, "cborBooleanValue");
+        created = new Timestamp(Calendar.getInstance().getTimeInMillis() + (++counter));
+        pstmt.setTimestamp(3, created);
+        pstmt.addBatch();
+
+        pstmt.executeBatch();
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
   }
 
   @Test
@@ -297,6 +420,9 @@ public class To2StorageTest {
       OwnerDbManager dbsManager = new OwnerDbManager();
       dbsManager.createTables(ds);
       dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+      insertSampleServiceInfo(Composite.fromObject(VOUCHER)
+          .getAsComposite(Const.OV_HEADER)
+          .getAsUuid(Const.OVH_GUID), ds);
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 

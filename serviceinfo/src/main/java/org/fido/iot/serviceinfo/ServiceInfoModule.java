@@ -4,25 +4,25 @@
 package org.fido.iot.serviceinfo;
 
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 public interface ServiceInfoModule {
 
   /**
-   * Supplies an ordered sequence of ServiceInfo key/value pairs for transmission to the remote end
-   * of the protocol.
+   * Supplies an ordered sequence of {@link ServiceInfoEntry} to {@link ServiceInfoMarshaller}.
+   * Implementation must provide mechanism to fetch service info on-demand.
    *
    * @param uuid UUID
-   * @return List of key-value pairs
+   * @return List of key-value pairs as {@link ServiceInfoEntry}
    */
-  List<Entry<CharSequence, CharSequence>> getServiceInfo(UUID uuid);
+  List<ServiceInfoEntry> getServiceInfo(UUID uuid);
 
   /**
-   * Consumes received ServiceInfo data.
+   * Consumes received ServiceInfo data. Implementation should provide mechanism to consume the
+   * received service info.
    *
    * @param uuid UUID
    * @param entry key-value pair of serviceinfo
    */
-  void putServiceInfo(UUID uuid, Entry<CharSequence, CharSequence> entry);
+  void putServiceInfo(UUID uuid, ServiceInfoEntry entry);
 }
