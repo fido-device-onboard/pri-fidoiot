@@ -296,11 +296,6 @@ public class To2AsymkexTest extends BaseTemplate {
       }
 
       @Override
-      public void setReplacementHmac(Composite hmac) {
-
-      }
-
-      @Override
       public void prepareServiceInfo() {
         Composite value = ServiceInfoEncoder.encodeValue("sysmod:active", "true");
         List<Composite> list = new ArrayList<>();
@@ -351,6 +346,31 @@ public class To2AsymkexTest extends BaseTemplate {
       @Override
       public void failed(Composite request, Composite reply) {
 
+      }
+
+      @Override
+      public void storeVoucher(Composite voucher) {
+
+      }
+
+      @Override
+      public void discardReplacementOwnerKey() {
+
+      }
+
+      @Override
+      public byte[] getReplacementHmac() {
+        return null;
+      }
+
+      @Override
+      public void setReplacementHmac(byte[] hmac) {
+
+      }
+
+      @Override
+      public boolean getOwnerResaleSupport() {
+        return false;
       }
     };
 
