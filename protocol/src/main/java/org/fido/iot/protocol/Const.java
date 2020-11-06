@@ -210,6 +210,9 @@ public final class Const {
   public static final String URL_PATH_SEPARATOR = "/";
   public static final String EPID_PROOF_URI_PATH = "proof";
 
+  // MAROE Prefix List
+  public static final String[] MAROE_PREFIX_LIST = {"e2cb06bd11a323419d1d3563b809bc46"};
+
   //OwnershipVoucher
   public static final int OV_HEADER = 0;
   public static final int OV_HMAC = 1;
