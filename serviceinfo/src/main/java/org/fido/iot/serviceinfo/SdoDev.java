@@ -8,7 +8,7 @@ package org.fido.iot.serviceinfo;
  */
 public final class SdoDev {
 
-  public static final String NAME = "sdodev";
+  public static final String NAME = "devmod";
   public static final String KEY_ACTIVE = NAME + ":active";
   public static final String KEY_OS = NAME + ":os";
   public static final String KEY_ARCH = NAME + ":arch";
@@ -21,4 +21,8 @@ public final class SdoDev {
   public static final String KEY_NL = NAME + ":nl";
   public static final String KEY_TMP = NAME + ":tmp";
   public static final String KEY_DIR = NAME + ":dir";
+  public static final String KEY_PROGENV = NAME + ":progenv";
+  public static final String KEY_MUDURL = NAME + ":mudurl";
+  public static final String KEY_NUMMODULES = NAME + ":nummodules";
+  public static final String KEY_MODULES = NAME + ":modules";
 }
