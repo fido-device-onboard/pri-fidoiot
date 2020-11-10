@@ -58,6 +58,10 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppConstants.OWNER_KEYSTORE_PWD));
     ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_ENABLED));
+    ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_INTREVAL,
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_INTREVAL));
+    ctx.addParameter(OwnerAppConstants.TO0_RV_BLOB,
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_RV_BLOB));
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
