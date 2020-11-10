@@ -579,6 +579,26 @@ public class CryptoService {
   }
 
   /**
+   * Verifies MAROE Prefix.
+   *
+   * @param cose The COSE message
+   */
+  public void verifyMaroePrefix(Composite cose) {
+    Composite uph = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED);
+    String maroePrefix = Composite.toString(uph.getAsBytes(Const.EAT_MAROE_PREFIX));
+    boolean isMaroePrefixValid = false;
+    for (final String maroePrefixItem : Const.MAROE_PREFIX_LIST) {
+      if (maroePrefix.equals(maroePrefixItem)) {
+        isMaroePrefixValid = true;
+        break;
+      }
+    }
+    if (!isMaroePrefixValid) {
+      throw new RuntimeException("Invalid MAROE Prefix");
+    }
+  }
+
+  /**
    * Verifies a COSE signature.
    *
    * @param verificationKey The verification key to use.
@@ -589,6 +609,7 @@ public class CryptoService {
   public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
     if (null != sigInfoA && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      verifyMaroePrefix(cose);
       return EpidSignatureVerifier.verify(cose, sigInfoA);
     }
     final Composite header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
