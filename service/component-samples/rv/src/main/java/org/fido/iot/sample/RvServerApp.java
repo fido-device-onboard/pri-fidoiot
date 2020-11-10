@@ -13,40 +13,35 @@ import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
 
 public class RvServerApp {
-  private static final int RV_PORT = 8040;
-  private static final String DB_PORT = "8050";
-  private static final String DB_HOST = "localhost";
-  private static final String DB_USER = "sa";
-  private static final String DB_PASSWORD = "";
 
-  private static final String WEB_PATH = "/fido/100/msg";
-  private static final String DB_PATH = Path.of(System.getProperty("user.dir"),
-      "target", "data", "rvs").toString();
-  private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
-      "target", "tomcat").toString();
+  private static final int RV_PORT =
+      null != RvConfigLoader.loadConfig(RvAppSettings.TO0_TO1_PORT)
+          ? Integer.parseInt(RvConfigLoader.loadConfig(RvAppSettings.TO0_TO1_PORT))
+          : 8040;
 
   private static String getMessagePath(int msgId) {
-    return WEB_PATH + "/" + Integer.toString(msgId);
+    return RvAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
   }
 
-  /**
-   * Runs the Owner Application service.
-   */
+  /** Runs the RV Application service. */
   public static void main(String[] args) {
     Tomcat tomcat = new Tomcat();
 
     tomcat.setPort(RV_PORT);
 
-    System.setProperty("catalina.home", SERVER_PATH);
+    System.setProperty(
+        RvAppSettings.SERVER_PATH,
+        Path.of(RvConfigLoader.loadConfig(RvAppSettings.SERVER_PATH)).toAbsolutePath().toString());
 
     Context ctx = tomcat.addContext("", null);
 
-    ctx.addParameter("db.url",
-        "jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + DB_PATH);
-    ctx.addParameter("db.user", DB_USER);
-    ctx.addParameter("db.password", DB_PASSWORD);
-    ctx.addParameter("db.tcpServer",
-        "-tcp -tcpAllowOthers -ifNotExists -tcpPort " + DB_PORT);
+    ctx.addParameter(RvAppSettings.DB_URL, RvConfigLoader.loadConfig(RvAppSettings.DB_URL));
+    ctx.addParameter(RvAppSettings.DB_USER, RvConfigLoader.loadConfig(RvAppSettings.DB_USER));
+    ctx.addParameter(RvAppSettings.DB_PWD, RvConfigLoader.loadConfig(RvAppSettings.DB_PWD));
+    ctx.addParameter(
+        "db.tcpServer",
+        "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
+            + RvConfigLoader.loadConfig(RvAppSettings.DB_PORT));
 
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");

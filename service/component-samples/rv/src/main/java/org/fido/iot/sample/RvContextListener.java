@@ -32,10 +32,10 @@ public class RvContextListener implements ServletContextListener {
     BasicDataSource ds = new BasicDataSource();
 
     ServletContext sc = sce.getServletContext();
-    ds.setUrl(sc.getInitParameter("db.url"));
-    ds.setDriverClassName("org.h2.Driver");
-    ds.setUsername(sc.getInitParameter("db.user"));
-    ds.setPassword(sc.getInitParameter("db.password"));
+    ds.setUrl(sc.getInitParameter(RvAppSettings.DB_URL));
+    ds.setDriverClassName(RvAppSettings.H2_DRIVER);
+    ds.setUsername(sc.getInitParameter(RvAppSettings.DB_USER));
+    ds.setPassword(sc.getInitParameter(RvAppSettings.DB_PWD));
 
     System.out.println(ds.getUrl());
 
