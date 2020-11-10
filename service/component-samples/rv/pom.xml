@@ -20,6 +20,8 @@
     <tomcat.version>9.0.37</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
+    <commons.beanutils.version>1.9.4</commons.beanutils.version>
+    <commons.configuration2.version>2.7</commons.configuration2.version>
     <exec.mainClass>org.fido.iot.sample.RvServerApp</exec.mainClass>
   </properties>
 
@@ -52,6 +54,18 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
       <version>${dbcp2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${commons.configuration2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${commons.beanutils.version}</version>
     </dependency>
 
     <dependency>
