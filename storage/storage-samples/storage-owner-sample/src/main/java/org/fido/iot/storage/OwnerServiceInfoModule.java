@@ -71,13 +71,14 @@ public class OwnerServiceInfoModule implements ServiceInfoModule {
 
   @Override
   public void putServiceInfo(UUID uuid, ServiceInfoEntry entry) {
-    String sql = "MERGE INTO GUID_DEVICEDSI KEY (GUID) VALUES(?,?)";
+    String sql = "MERGE INTO GUID_DEVICEDSI KEY (GUID, DSI_KEY) VALUES(?, ?, ?)";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setString(1, uuid.toString());
-      pstmt.setBytes(2, (byte[]) entry.getValue().getContent());
+      pstmt.setString(2, entry.getKey());
+      pstmt.setBytes(3, (byte[]) entry.getValue().getContent());
 
       pstmt.executeUpdate();
 

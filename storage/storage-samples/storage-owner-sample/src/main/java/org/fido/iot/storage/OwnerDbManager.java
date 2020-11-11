@@ -95,8 +95,10 @@ public class OwnerDbManager {
 
       sql = "CREATE TABLE IF NOT EXISTS "
           + "GUID_DEVICEDSI("
-          + "GUID CHAR(36), "
-          + "DEVICE_DSI BLOB NOT NULL, "
+          + "GUID CHAR(36) NOT NULL, "
+          + "DSI_KEY CHAR(100) NOT NULL, "
+          + "DSI_VALUE BLOB NOT NULL, "
+          + "PRIMARY KEY (GUID, DSI_KEY), "
           + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) "
           + ");";
 

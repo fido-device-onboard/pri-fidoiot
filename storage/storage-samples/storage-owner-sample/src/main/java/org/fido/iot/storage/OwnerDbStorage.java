@@ -3,6 +3,11 @@
 
 package org.fido.iot.storage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.Connection;
@@ -26,6 +31,7 @@ import org.fido.iot.protocol.KeyResolver;
 import org.fido.iot.protocol.ResourceNotFoundException;
 import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.fido.iot.protocol.cbor.Encoder;
 import org.fido.iot.serviceinfo.ServiceInfo;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
@@ -328,12 +334,22 @@ public class OwnerDbStorage implements To2ServerStorage {
 
               @Override
               public long length() {
+                // Return 0 as length is not supposed to be used anywhere
                 return 0;
               }
 
               @Override
               public Object getContent() {
-                return info.toBytes();
+                // Returns CBOR encoded data so that it can be written into the database as bytes
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                WritableByteChannel wbc = Channels.newChannel(out);
+                Encoder encoder = new Encoder.Builder(wbc).build();
+                try {
+                  encoder.writeObject(info.get(Const.SECOND_KEY));
+                } catch (IOException e) {
+                  System.out.println("Invalid serviceinfo value" + e.getMessage());
+                }
+                return out.toByteArray();
               }
 
               @Override
