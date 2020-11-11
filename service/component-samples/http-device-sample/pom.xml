@@ -31,6 +31,8 @@
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
@@ -111,6 +113,8 @@
         <configuration>
           <archive>
             <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
               <mainClass>${exec.mainClass}</mainClass>
             </manifest>
           </archive>
@@ -132,7 +136,63 @@
               <includeScope>runtime</includeScope>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-installed</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <type>${project.packaging}</type>
+                  <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
+                  <destFileName>${project.artifactId}.${project.packaging}</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>copy-lib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project-demo-directory}/${project.artifactId}/lib/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>target/lib/</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven-clean-plugin.version}</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
 
       <plugin>
