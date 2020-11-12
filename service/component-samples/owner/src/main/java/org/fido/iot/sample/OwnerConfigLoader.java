@@ -48,9 +48,10 @@ public class OwnerConfigLoader {
       return systemConfiguration.interpolatedConfiguration().getString(property);
     } else if (environmentConfiguration.containsKey(property)) {
       return environmentConfiguration.getString(property);
-    } else if (fileBasedConfiguration.containsKey(property)) {
+    } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
       return fileBasedConfiguration.getString(property);
     }
-    throw new RuntimeException();
+    System.out.println("Could not load property: " + property);
+    return null;
   }
 }
