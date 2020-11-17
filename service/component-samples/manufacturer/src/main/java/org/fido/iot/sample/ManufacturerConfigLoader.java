@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import org.apache.commons.configuration2.EnvironmentConfiguration;
@@ -11,7 +14,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 /**
  * Utility class to load properties/configuration from system, environment and configuration file.
  */
-public class OwnerConfigLoader {
+public class ManufacturerConfigLoader {
 
   private static final String configurationFile = "application.properties";
   private static EnvironmentConfiguration environmentConfiguration;
@@ -48,7 +51,7 @@ public class OwnerConfigLoader {
       return systemConfiguration.interpolatedConfiguration().getString(property);
     } else if (environmentConfiguration.containsKey(property)) {
       return environmentConfiguration.getString(property);
-    } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
+    } else if (fileBasedConfiguration.containsKey(property)) {
       return fileBasedConfiguration.getString(property);
     }
     System.out.println("Could not load property: " + property);

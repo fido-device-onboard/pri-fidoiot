@@ -53,11 +53,19 @@ public class OwnerServerApp {
         + OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PORT));
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
-    
+
+    if (null != OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL)) {
+      ctx.addParameter(OwnerAppConstants.EPID_URL,
+          OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL));
+    }
     ctx.addParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.OWNER_KEYSTORE_PWD));
     ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_ENABLED));
+    ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_INTREVAL,
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_INTREVAL));
+    ctx.addParameter(OwnerAppConstants.TO0_RV_BLOB,
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_RV_BLOB));
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());

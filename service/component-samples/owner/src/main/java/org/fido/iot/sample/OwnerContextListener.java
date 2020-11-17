@@ -6,16 +6,11 @@ package org.fido.iot.sample;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +21,6 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.CryptoService;
@@ -35,8 +29,10 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.fido.iot.protocol.epid.EpidUtils;
 import org.fido.iot.storage.OwnerDbManager;
 import org.fido.iot.storage.OwnerDbStorage;
+import org.fido.iot.storage.OwnerDbTo0Util;
 
 /**
  * TO2 Servlet Context Listener.
@@ -72,6 +68,7 @@ public class OwnerContextListener implements ServletContextListener {
 
   private KeyResolver resolver;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+  private ExecutorService to0ExecutorService = Executors.newCachedThreadPool();
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -122,27 +119,34 @@ public class OwnerContextListener implements ServletContextListener {
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
+    String epidUrl = sc.getInitParameter(OwnerAppConstants.EPID_URL);
+    if (null != epidUrl) {
+      EpidUtils.setEpidOnlineUrl(epidUrl);
+    }
     // create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
     manager.importVoucher(ds, Composite.fromObject(VOUCHER));
-    
+
     // schedule devices for TO0 only if the flag is set
     if (Boolean.valueOf(sc.getInitParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED))) {
       scheduler.scheduleWithFixedDelay(new Runnable() {
         @Override
         public void run() {
           try {
-            // to-do: add code to search DB for devices that needs scheduling and update TO0Client
-            // accordingly
-            new OwnerTo0Client(new CryptoService(),
-                new OwnerKeyResolver(sc.getInitParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD)))
-                    .run();
+            OwnerDbTo0Util to0Util = new OwnerDbTo0Util();
+            List<UUID> uuids = to0Util.fetchDevicesForTo0(ds);
+            sc.log("Scheduling UUIDs for TO0: " + uuids.toString());
+            for (UUID guid : uuids) {
+              CompletableFuture.runAsync(() -> scheduleTo0(sc, ds, guid, to0Util),
+                  to0ExecutorService);
+            }
           } catch (Exception e) {
             sc.log(e.getMessage());
           }
         }
-      }, 5, 300, TimeUnit.SECONDS);
+      }, 5, Integer.parseInt(
+          sc.getInitParameter(OwnerAppConstants.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
     }
   }
 
@@ -167,5 +171,18 @@ public class OwnerContextListener implements ServletContextListener {
         return cs;
       }
     };
+  }
+
+  private void scheduleTo0(ServletContext sc, DataSource ds, UUID guid, OwnerDbTo0Util to0Util) {
+    try {
+      OwnerTo0Client to0Client = new OwnerTo0Client(new CryptoService(), ds,
+          new OwnerKeyResolver(sc.getInitParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD)),
+              guid, to0Util);
+      to0Client.setRvBlob(sc.getInitParameter(OwnerAppConstants.TO0_RV_BLOB));
+      to0Client.run();
+    } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
+      sc.log("Error during TO0 for GUID: " + guid.toString());
+      throw new RuntimeException(e);
+    }
   }
 }
