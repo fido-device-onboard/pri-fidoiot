@@ -22,6 +22,9 @@ public class OwnerAppConstants {
   // tomcat's catalaina.home
   public static final String SERVER_PATH = "catalina_home";
   
+  // EPID URL
+  public static final String EPID_URL = "epid_online_url";
+
   // the user pin for HSM keystore that contains the owner keys
   public static final String OWNER_KEYSTORE_PWD = "owner_keystore_password";
   

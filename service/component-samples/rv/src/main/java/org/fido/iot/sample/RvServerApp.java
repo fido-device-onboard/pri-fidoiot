@@ -45,6 +45,9 @@ public class RvServerApp {
 
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
+    if (null != RvConfigLoader.loadConfig(RvAppSettings.EPID_URL)) {
+      ctx.addParameter(RvAppSettings.EPID_URL, RvConfigLoader.loadConfig(RvAppSettings.EPID_URL));
+    }
 
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(RvContextListener.class.getName());

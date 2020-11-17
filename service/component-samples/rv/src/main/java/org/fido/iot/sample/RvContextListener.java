@@ -20,6 +20,7 @@ import org.fido.iot.protocol.To0ServerService;
 import org.fido.iot.protocol.To0ServerStorage;
 import org.fido.iot.protocol.To1ServerService;
 import org.fido.iot.protocol.To1ServerStorage;
+import org.fido.iot.protocol.epid.EpidUtils;
 import org.fido.iot.storage.RvsDbManager;
 import org.fido.iot.storage.To0AllowListDenyListDbStorage;
 import org.fido.iot.storage.To1DbStorage;
@@ -84,6 +85,10 @@ public class RvContextListener implements ServletContextListener {
           }
         };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
+    String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
+    if (null != epidUrl) {
+      EpidUtils.setEpidOnlineUrl(epidUrl);
+    }
     // create tables
     RvsDbManager manager = new RvsDbManager();
     manager.createTables(ds);

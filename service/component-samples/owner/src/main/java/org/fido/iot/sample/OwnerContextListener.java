@@ -35,6 +35,7 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.fido.iot.protocol.epid.EpidUtils;
 import org.fido.iot.storage.OwnerDbManager;
 import org.fido.iot.storage.OwnerDbStorage;
 
@@ -122,6 +123,10 @@ public class OwnerContextListener implements ServletContextListener {
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
+    String epidUrl = sc.getInitParameter(OwnerAppConstants.EPID_URL);
+    if (null != epidUrl) {
+      EpidUtils.setEpidOnlineUrl(epidUrl);
+    }
     // create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
