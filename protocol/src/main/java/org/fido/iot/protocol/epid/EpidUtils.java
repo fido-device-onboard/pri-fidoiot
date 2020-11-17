@@ -41,6 +41,7 @@ public class EpidUtils {
       throw new IllegalArgumentException();
     }
     epidOnlineUrl = URI.create(url);
+    System.out.println("EPID Online URL: " + epidOnlineUrl.toString());
   }
 
   /**
