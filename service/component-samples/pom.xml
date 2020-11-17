@@ -15,6 +15,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>manufacturer</module>
     <module>owner</module>
     <module>rv</module>
     <module>http-device-sample</module>

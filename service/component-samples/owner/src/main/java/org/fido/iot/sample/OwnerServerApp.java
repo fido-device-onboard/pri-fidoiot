@@ -53,7 +53,11 @@ public class OwnerServerApp {
         + OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PORT));
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
-    
+
+    if (null != OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL)) {
+      ctx.addParameter(OwnerAppConstants.EPID_URL,
+          OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL));
+    }
     ctx.addParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.OWNER_KEYSTORE_PWD));
     ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED,

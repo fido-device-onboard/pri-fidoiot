@@ -10,5 +10,8 @@ node('ubuntu18.04-OnDemand'){
   // Stage to build the project
   stage('build'){
     sh 'mvn clean install'
+    print "Archive the artifacts"
+    sh 'tar -czvf demo.tar.gz demo/'
+    archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
 }
