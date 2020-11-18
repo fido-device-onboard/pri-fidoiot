@@ -75,7 +75,7 @@ import org.fido.iot.protocol.epid.EpidSignatureVerifier;
  */
 public class CryptoService {
 
-  private static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
+  static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
   private final SecureRandom secureRandom;
 
   /**
@@ -172,11 +172,13 @@ public class CryptoService {
 
   protected Cipher getCipherInstance(String algName)
       throws NoSuchPaddingException, NoSuchAlgorithmException {
-    if (algName.equals(Const.AES128_CTR_HMAC256_ALG_NAME)) {
-      return Cipher.getInstance("AES/CTR/NoPadding");
+    switch (algName) {
+      case Const.AES128_CTR_HMAC256_ALG_NAME:
+      case Const.AES256_CTR_HMAC384_ALG_NAME:
+        return Cipher.getInstance("AES/CTR/NoPadding");
+      default:
+        throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
-
-    throw new CryptoServiceException(new NoSuchAlgorithmException());
   }
 
   protected String getHashAlgorithm(int algId) throws NoSuchAlgorithmException {
@@ -1092,6 +1094,7 @@ public class CryptoService {
       case Const.ECDH_ALG_NAME:
         return getEcdhSharedSecret(message, ownState);
       case Const.ASYMKEX2048_ALG_NAME:
+      case Const.ASYMKEX3072_ALG_NAME:
         return getAsymkexSharedSecret(message, ownState, decryptionKey);
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(alg));
@@ -1116,13 +1119,18 @@ public class CryptoService {
       case Const.ECDH384_ALG_NAME:
         return getEcdhMessage(Const.SECP384R1_CURVE_NAME, Const.ECDH_384_RANDOM_SIZE, party);
       case Const.ASYMKEX2048_ALG_NAME:
-        return getAsymkexMessage(Const.ASYMKEX2048_RANDOM_SIZE, party, ownerKey);
+        return getAsymkexMessage(
+            Const.ASYMKEX2048_ALG_NAME, Const.ASYMKEX2048_RANDOM_SIZE, party, ownerKey);
+      case Const.ASYMKEX3072_ALG_NAME:
+        return getAsymkexMessage(
+            Const.ASYMKEX3072_ALG_NAME, Const.ASYMKEX3072_RANDOM_SIZE, party, ownerKey);
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(kexSuiteName));
     }
   }
 
-  protected Composite getAsymkexMessage(int randomSize, String party, Key encryptionKey) {
+  protected Composite getAsymkexMessage(
+      String algName, int randomSize, String party, Key encryptionKey) {
 
     switch (party) {
 
@@ -1133,7 +1141,7 @@ public class CryptoService {
 
         return Composite.newArray()
             .set(Const.FIRST_KEY, a)
-            .set(Const.SECOND_KEY, Const.ASYMKEX2048_ALG_NAME)
+            .set(Const.SECOND_KEY, algName)
             .set(Const.THIRD_KEY, Const.KEY_EXCHANGE_A)
             .set(Const.FOURTH_KEY, randomSize);
 
@@ -1153,7 +1161,7 @@ public class CryptoService {
 
         return Composite.newArray()
             .set(Const.FIRST_KEY, xb)
-            .set(Const.SECOND_KEY, Const.ASYMKEX2048_ALG_NAME)
+            .set(Const.SECOND_KEY, algName)
             .set(Const.THIRD_KEY, Const.KEY_EXCHANGE_B)
             .set(Const.FOURTH_KEY, randomSize)
             .set(Const.FIFTH_KEY, b);

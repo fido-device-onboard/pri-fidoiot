@@ -388,6 +388,8 @@ public final class Const {
 
   public static final String ASYMKEX2048_ALG_NAME = "ASYMKEX2048";
   public static final int ASYMKEX2048_RANDOM_SIZE = 256 / 8;
+  public static final String ASYMKEX3072_ALG_NAME = "ASYMKEX3072";
+  public static final int ASYMKEX3072_RANDOM_SIZE = 768 / 8;
 
   public static final String ASYMKEX_CIPHER_NAME = "RSA/NONE/OAEPWithSHA256AndMGF1Padding";
 
@@ -424,5 +426,4 @@ public final class Const {
   public static final int DC_GUID = 4;
   public static final int DC_RENDEZVOUS_INFO = 5;
   public static final int DC_PUBLIC_KEY_HASH = 6;
-
 }
