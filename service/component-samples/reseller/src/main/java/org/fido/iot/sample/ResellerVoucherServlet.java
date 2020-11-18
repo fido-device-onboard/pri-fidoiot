@@ -1,9 +1,7 @@
-// Copyright 2020 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.security.KeyStore;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.sql.Connection;
@@ -21,21 +19,21 @@ import org.fido.iot.protocol.CloseableKey;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.CryptoService;
+import org.fido.iot.protocol.KeyResolver;
 import org.fido.iot.protocol.VoucherExtensionService;
-import org.fido.iot.storage.CertificateResolver;
 
 /**
- * Device Initialization API servlet..
+ * The Reseller voucher servlet.
  */
-public class DiApiSevlet extends HttpServlet {
+public class ResellerVoucherServlet extends HttpServlet {
 
   protected Composite queryVoucher(DataSource dataSource, String serialNo) {
 
-    String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS "
-        + "FROM MT_DEVICES "
-        + "LEFT JOIN MT_CUSTOMERS "
-        + "ON MT_CUSTOMERS.CUSTOMER_ID=MT_DEVICES.CUSTOMER_ID "
-        + "WHERE MT_DEVICES.SERIAL_NO = ?";
+    String sql = "SELECT RT_DEVICES.VOUCHER, RT_CUSTOMERS.KEYS "
+        + "FROM RT_DEVICES "
+        + "LEFT JOIN RT_CUSTOMERS "
+        + "ON RT_CUSTOMERS.CUSTOMER_ID=RT_DEVICES.CUSTOMER_ID "
+        + "WHERE RT_DEVICES.SERIAL_NO = ?";
     Composite result = Composite.newArray();
 
     try (Connection conn = dataSource.getConnection();
@@ -51,6 +49,7 @@ public class DiApiSevlet extends HttpServlet {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+
     return result;
   }
 
@@ -59,12 +58,14 @@ public class DiApiSevlet extends HttpServlet {
       throws ServletException, IOException {
 
     String uri = req.getRequestURI();
+    String id = req.getParameter("id");
     String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
-
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
-    CertificateResolver resolver =
-        (CertificateResolver) getServletContext().getAttribute("resolver");
+    KeyResolver resolver = (KeyResolver) getServletContext().getAttribute("keyresolver");
+
+    if (id != null) {
+      new ResellerDbManager().assignCustomer(ds, serialNo, id);
+    }
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
@@ -76,25 +77,22 @@ public class DiApiSevlet extends HttpServlet {
     List<PublicKey> certs =
         PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
 
+    //find the public key
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
-
-    int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
-    Certificate[] issuerChain =
-        resolver.getCertChain(keyType);
-
-    PublicKey ownerPub = null;
-    for (PublicKey pub : certs) {
-      int ownerType = cs.getPublicKeyType(pub);
-      if (ownerType == keyType) {
-        ownerPub = pub;
-        break;
-      }
+    Composite prevOwner = ovh.getAsComposite(Const.OVH_PUB_KEY);
+    Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
+    //can be zero
+    if (entries.size() > 0) {
+      Composite entry = entries.getAsComposite(entries.size() - 1);
+      Composite payload = Composite.fromObject(entry.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+      prevOwner = payload.getAsComposite(Const.OVE_PUB_KEY);
     }
 
+    CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
+    PublicKey ownerPub = cs.decode(prevOwner);
     VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
-    try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
-      vse.add(signer.get(), ownerPub);
+    try (CloseableKey signer = new CloseableKey(resolver.getKey(ownerPub))) {
+      vse.add(signer.get(), cs.decode(prevOwner));
     }
 
     resp.setContentType(Const.HTTP_APPLICATION_CBOR);
@@ -103,5 +101,31 @@ public class DiApiSevlet extends HttpServlet {
     resp.setContentLength(voucherBytes.length);
     resp.getOutputStream().write(voucherBytes);
 
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    if (req.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
+      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      return;
+    }
+
+    String uri = req.getRequestURI();
+    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+    String id = req.getParameter("id");
+    Composite voucher = Composite.fromObject(req.getInputStream());
+    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+    new ResellerDbManager().importVoucher(ds, voucher, serialNo, id);
+  }
+
+  @Override
+  protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    String uri = req.getRequestURI();
+    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+    new ResellerDbManager().deleteVoucher(ds, serialNo);
   }
 }

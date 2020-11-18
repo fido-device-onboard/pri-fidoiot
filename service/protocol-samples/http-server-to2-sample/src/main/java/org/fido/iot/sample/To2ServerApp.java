@@ -8,6 +8,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -28,6 +29,7 @@ public class To2ServerApp {
       "target", "data", "ops").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
       "target", "tomcat").toString();
+
 
   private static String getMessagePath(int msgId) {
     return WEB_PATH + "/" + Integer.toString(msgId);
@@ -73,6 +75,9 @@ public class To2ServerApp {
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
 
     wrapper.setAsyncSupported(true);
+
+    wrapper = tomcat.addServlet(ctx, "OwnerVoucher", new OwnerVoucherServlet());
+    wrapper.addMapping("/api/v1/device/vouchers");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");

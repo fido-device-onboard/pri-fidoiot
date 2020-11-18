@@ -112,4 +112,32 @@ public class OwnerDbManager {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Removes a Voucher.
+   *
+   * @param ds   A Datasource.
+   * @param guid The device guid.
+   * @return The number of database objects affected.
+   */
+  public int removeVoucher(DataSource ds, UUID guid) {
+
+    int result = 0;
+
+    String sql = ""
+        + "DELETE FROM TO2_DEVICES  WHERE GUID = ?";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+
+      result = pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    return result;
+  }
 }

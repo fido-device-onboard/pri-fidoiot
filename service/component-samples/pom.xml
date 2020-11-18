@@ -18,6 +18,7 @@
     <module>manufacturer</module>
     <module>owner</module>
     <module>rv</module>
+    <module>reseller</module>
     <module>http-device-sample</module>
   </modules>
 

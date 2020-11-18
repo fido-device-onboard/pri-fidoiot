@@ -5,52 +5,27 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>protocol-samples</artifactId>
+    <artifactId>http-api-samples</artifactId>
     <groupId>org.fido.iot</groupId>
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP TO2 Server Sample</name>
-  <artifactId>http-server-to2-sample</artifactId>
+  <name>HTTP Keystore API</name>
+  <artifactId>http-api-keystore-sample</artifactId>
   <packaging>jar</packaging>
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
     <commons-codec.version>1.14</commons-codec.version>
-    <tomcat.version>9.0.39</tomcat.version>
+    <tomcat.version>9.0.37</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
-    <exec.mainClass>org.fido.iot.sample.To2ServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>protocol</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>http-server-dispatcher</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>storage-owner-sample</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>http-api-owner-sample</artifactId>
       <version>0.3-SNAPSHOT</version>
     </dependency>
 
@@ -98,7 +73,7 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/lib</outputDirectory>
+              <outputDirectory>${project.build.directory}/lib/</outputDirectory>
               <includeScope>runtime</includeScope>
             </configuration>
           </execution>
@@ -117,9 +92,10 @@
           </execution>
         </executions>
         <configuration>
-           <executable>java</executable>
+          <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>target/classes</workingDirectory>
+          <workingDirectory>${project.build.outputDirectory}</workingDirectory>
+          <mainClass>org.fido.iot.sample.DiClientApp</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>

@@ -48,6 +48,16 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
     ctx.addParameter(OwnerAppConstants.DB_PWD,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
+
+    ctx.addParameter("db.url",
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_URL));
+    ctx.addParameter("db.user",
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
+    ctx.addParameter("db.user",
+        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
+
+
+
     // hard-coded H2 config
     ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
         + OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PORT));
@@ -84,7 +94,8 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
-    
+
+
     tomcat.getConnector();
     try {
       tomcat.start();
