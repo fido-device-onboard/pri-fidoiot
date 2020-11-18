@@ -69,7 +69,7 @@ public class EpidSignatureVerifier {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     baos.write(groupId);
     baos.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN)
-        .putShort((short) signedPayload.length).array());
+        .putShort((short) (signedPayload != null ? signedPayload.length : 0)).array());
     baos.write(signedPayload);
     baos.write(ByteBuffer.allocate(2).order(ByteOrder.BIG_ENDIAN).putShort((short) 0).array());
     baos.write(signature);

@@ -377,8 +377,9 @@ public class Device {
     try {
       Composite credentials = myCredStore.load();
       logger.info("credentials loaded, GUID is " + credentials.getAsUuid(Const.DC_GUID));
-      doTransferOwnership(credentials);
-
+      if (credentials != null) {
+        doTransferOwnership(credentials);
+      }
     } catch (IOException e) {
       doDeviceInit();
     }
