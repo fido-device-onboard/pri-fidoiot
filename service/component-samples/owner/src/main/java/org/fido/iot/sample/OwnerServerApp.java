@@ -53,7 +53,7 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_URL));
     ctx.addParameter("db.user",
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
-    ctx.addParameter("db.user",
+    ctx.addParameter("db.password",
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
 
 

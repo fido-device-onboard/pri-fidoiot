@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.nio.file.Path;
@@ -19,7 +22,6 @@ public class ResellerConfigLoader {
   private static SystemConfiguration systemConfiguration = new SystemConfiguration();
   private static FileBasedConfiguration fileBasedConfiguration = null;
   private static PropertiesConfiguration defaultConfiguration = null;
-
 
   /**
    * Load the given configuration value.
@@ -54,7 +56,6 @@ public class ResellerConfigLoader {
       defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PWD, "123456");
       defaultConfiguration.addProperty(ResellerAppConstants.API_USER, "admin");
       defaultConfiguration.addProperty(ResellerAppConstants.API_PWD, "test");
-
 
       final String url = "jdbc:h2:tcp://localhost:8071/"
           + Path.of(System.getProperty(ResellerAppConstants.USER_DIR),

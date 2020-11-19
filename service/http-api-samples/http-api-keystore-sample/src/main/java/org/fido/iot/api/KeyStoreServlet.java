@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.api;
 
 import java.io.IOException;
@@ -22,7 +25,6 @@ public class KeyStoreServlet extends HttpServlet {
 
   public static final String STORE_ATTRIBUTE = "keystore";
   public static final String STORE_PASSWORD = "keystore_password";
-
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)

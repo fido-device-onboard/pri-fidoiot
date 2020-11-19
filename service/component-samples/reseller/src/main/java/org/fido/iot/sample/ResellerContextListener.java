@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.io.IOException;
@@ -14,7 +17,6 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fido.iot.protocol.CryptoService;
 import org.fido.iot.protocol.KeyStoreResolver;
-
 
 public class ResellerContextListener implements ServletContextListener {
 
@@ -47,7 +49,6 @@ public class ResellerContextListener implements ServletContextListener {
       @Override
       protected String getKeyStoreType() {
         return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_TYPE);
-
       }
 
       @Override

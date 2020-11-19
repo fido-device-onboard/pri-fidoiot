@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.api;
 
 import java.io.IOException;
@@ -23,7 +26,6 @@ import org.fido.iot.storage.OwnerDbManager;
  * Manages Ownership vouchers for a To2 Server.
  */
 public class OwnerVoucherServlet extends HttpServlet {
-
 
   protected void getVouchers(DataSource ds, OutputStream out) {
     String sql = "SELECT VOUCHER FROM TO2_DEVICES;";
@@ -75,7 +77,6 @@ public class OwnerVoucherServlet extends HttpServlet {
     return result;
   }
 
-
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
@@ -104,7 +105,6 @@ public class OwnerVoucherServlet extends HttpServlet {
     }
 
   }
-
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)

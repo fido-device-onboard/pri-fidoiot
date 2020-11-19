@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.nio.file.Path;
@@ -13,11 +16,8 @@ import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
 
 public class ResellerServerApp {
-
-
   private static final String CATALINA_HOME = "catalina.home";
   private static final String AUTH_ROLE = "api";
-
 
   /**
    * Application main.

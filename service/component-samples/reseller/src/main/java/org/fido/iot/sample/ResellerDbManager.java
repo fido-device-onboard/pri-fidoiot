@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.sql.Connection;
@@ -46,12 +49,10 @@ public class ResellerDbManager {
 
       stmt.executeUpdate(sql);
 
-
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
-
 
   /**
    * Define a named Customer Key set.
