@@ -31,6 +31,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>serviceinfo</artifactId>
+      <version>0.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
@@ -58,6 +64,12 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
+      <version>0.3-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>device</artifactId>
       <version>0.3-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>

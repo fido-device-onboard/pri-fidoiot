@@ -41,6 +41,7 @@
     <module>cert-utils</module>
     <module>protocol</module>
     <module>service</module>
+    <module>serviceinfo</module>
     <module>storage</module>
   </modules>
 
