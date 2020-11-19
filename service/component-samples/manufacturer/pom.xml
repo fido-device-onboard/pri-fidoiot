@@ -10,8 +10,8 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>Component HTTP Owner Server Sample</name>
-  <artifactId>owner</artifactId>
+  <name>Component HTTP Manufacturer Sample</name>
+  <artifactId>manufacturer</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -22,7 +22,7 @@
     <dbcp2.version>2.7.0</dbcp2.version>
     <commons.configuration2.version>2.7</commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
-    <exec.mainClass>org.fido.iot.sample.OwnerServerApp</exec.mainClass>
+    <exec.mainClass>org.fido.iot.sample.ManufacturerApp</exec.mainClass>
   </properties>
 
   <dependencies>
@@ -46,7 +46,7 @@
 
     <dependency>
       <groupId>org.fido.iot</groupId>
-      <artifactId>storage-owner-sample</artifactId>
+      <artifactId>storage-di-sample</artifactId>
       <version>0.3-SNAPSHOT</version>
     </dependency>
 
@@ -54,12 +54,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
       <version>${dbcp2.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>http-client-dispatcher</artifactId>
-      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -137,6 +131,23 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <executable>java</executable>
+          <includeProjectDependencies>true</includeProjectDependencies>
+          <workingDirectory>target/classes</workingDirectory>
+        </configuration>
+      </plugin>
 
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -159,24 +170,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <goals>
-             <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-           <executable>java</executable>
-          <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>target/classes</workingDirectory>
-          <cleanupDaemonThreads>false</cleanupDaemonThreads>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -189,6 +182,27 @@
               <classpathPrefix>lib</classpathPrefix>
             </manifest>
           </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}/lib</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <includes>
+                <include>manufacturer.jar</include>
+              </includes>
+            </fileset>
+          </filesets>
         </configuration>
       </plugin>
     </plugins>

@@ -17,4 +17,7 @@ public class RvAppSettings {
 
   // tomcat's catalaina.home
   public static final String SERVER_PATH = "catalina_home";
+
+  // EPID URL
+  public static final String EPID_URL = "epid_online_url";
 }

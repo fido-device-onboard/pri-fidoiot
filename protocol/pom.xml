@@ -19,7 +19,7 @@
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
     <jackson-datatype-jdk8.version>2.11.0</jackson-datatype-jdk8.version>
     <commons-codec.version>1.14</commons-codec.version>
-    <tomcat.version>9.0.24</tomcat.version>
+    <tomcat.version>9.0.39</tomcat.version>
     <bcprov.version>1.66</bcprov.version>
     <bcpkix.version>1.65</bcpkix.version>
   </properties>
