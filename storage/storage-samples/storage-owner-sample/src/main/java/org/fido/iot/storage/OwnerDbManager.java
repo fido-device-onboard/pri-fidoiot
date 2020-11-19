@@ -58,6 +58,8 @@ public class OwnerDbManager {
           + "NONCE6 BINARY(16), "
           + "NONCE7 BINARY(16), "
           + "SIGINFOA BLOB, "
+          + "SERVICEINFO_COUNT BIGINT, "
+          + "SERVICEINFO_POSITION BIGINT, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"
           + "PRIMARY KEY (SESSION_ID), "
@@ -66,6 +68,41 @@ public class OwnerDbManager {
 
       stmt.executeUpdate(sql);
 
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "OWNER_SERVICEINFO("
+          + "SVI_ID CHAR(36) PRIMARY KEY, "
+          + "MODULE_NAME CHAR(36), "
+          + "MESSAGE_NAME CHAR(36),"
+          + "CONTENT BLOB, "
+          + "CONTENT_LENGTH BIGINT, "
+          + "CONTENT_TYPE CHAR(10), "
+          + "PRIMARY KEY (SVI_ID) "
+          + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "GUID_OWNERSVI("
+          + "GUID CHAR(36), "
+          + "SVI_ID CHAR(36), "
+          + "CREATED_AT TIMESTAMP, "
+          + "PRIMARY KEY (GUID, SVI_ID),"
+          + "FOREIGN KEY (GUID) references TO2_DEVICES(GUID), "
+          + "FOREIGN KEY (SVI_ID) REFERENCES OWNER_SERVICEINFO(SVI_ID) "
+          + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "GUID_DEVICEDSI("
+          + "GUID CHAR(36) NOT NULL, "
+          + "DSI_KEY CHAR(100) NOT NULL, "
+          + "DSI_VALUE BLOB NOT NULL, "
+          + "PRIMARY KEY (GUID, DSI_KEY), "
+          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) "
+          + ");";
+
+      stmt.executeUpdate(sql);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }

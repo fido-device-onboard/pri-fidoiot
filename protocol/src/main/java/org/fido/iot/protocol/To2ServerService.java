@@ -3,19 +3,11 @@
 
 package org.fido.iot.protocol;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
-import org.fido.iot.protocol.cbor.Decoder;
-import org.fido.iot.protocol.cbor.Decoder.Builder;
-import org.fido.iot.protocol.cbor.Encoder;
 
 /**
  * To2 Server message processing service.
@@ -199,7 +191,9 @@ public abstract class To2ServerService extends MessagingService {
             getCryptoService().decrypt(body, getStorage().getOwnerState()));
 
     boolean isMore = message.getAsBoolean(Const.FIRST_KEY);
-    Composite sviValues = message.getAsComposite(Const.SECOND_KEY);
+    Composite svi = message.getAsComposite(Const.SECOND_KEY);
+    Composite sviValues = svi.size() > 0 ? svi.getAsComposite(Const.FIRST_KEY)
+        : Composite.newArray();
 
     for (int i = 0; i < sviValues.size(); i++) {
       Composite sviValue = sviValues.getAsComposite(i);

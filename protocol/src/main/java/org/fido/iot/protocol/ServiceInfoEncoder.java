@@ -38,7 +38,7 @@ public class ServiceInfoEncoder {
 
     return Composite.newArray()
         .set(Const.FIRST_KEY, isMore)
-        .set(Const.SECOND_KEY, svi);
+        .set(Const.SECOND_KEY, Composite.newArray().set(Const.FIRST_KEY, svi));
   }
 
   /**
@@ -60,6 +60,6 @@ public class ServiceInfoEncoder {
     return Composite.newArray()
         .set(Const.FIRST_KEY, isMore)
         .set(Const.SECOND_KEY, isDone)
-        .set(Const.THIRD_KEY, svi);
+        .set(Const.THIRD_KEY, Composite.newArray().set(Const.FIRST_KEY, svi));
   }
 }
