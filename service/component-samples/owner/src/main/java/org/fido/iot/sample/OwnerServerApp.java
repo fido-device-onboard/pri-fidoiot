@@ -17,7 +17,7 @@ import org.h2.server.web.WebServlet;
  * Runs the Owner Application service.
  */
 public class OwnerServerApp {
-  
+
   private static final int TO2_PORT = null != OwnerConfigLoader
       .loadConfig(OwnerAppConstants.TO2_PORT)
           ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppConstants.TO2_PORT))
@@ -26,7 +26,7 @@ public class OwnerServerApp {
   private static String getMessagePath(int msgId) {
     return OwnerAppConstants.WEB_PATH + "/" + Integer.toString(msgId);
   }
-  
+
   /**
    * Application main.
    *
@@ -39,9 +39,9 @@ public class OwnerServerApp {
     System.setProperty(OwnerAppConstants.SERVER_PATH,
         Path.of(OwnerConfigLoader.loadConfig(OwnerAppConstants.SERVER_PATH)).toAbsolutePath()
             .toString());
-    
+
     Context ctx = tomcat.addContext("", null);
-    
+
     ctx.addParameter(OwnerAppConstants.DB_URL,
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_URL));
     ctx.addParameter(OwnerAppConstants.DB_USER,
@@ -55,8 +55,6 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
     ctx.addParameter("db.password",
         OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
-
-
 
     // hard-coded H2 config
     ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
@@ -79,22 +77,21 @@ public class OwnerServerApp {
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
-    
+
     Wrapper wrapper = tomcat.addServlet(ctx, "opsServlet", new ProtocolServlet());
-    
+
     wrapper.addMapping(getMessagePath(Const.TO2_HELLO_DEVICE));
     wrapper.addMapping(getMessagePath(Const.TO2_GET_OVNEXT_ENTRY));
     wrapper.addMapping(getMessagePath(Const.TO2_PROVE_DEVICE));
     wrapper.addMapping(getMessagePath(Const.TO2_AUTH_DONE));
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO));
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
-    
+
     wrapper.setAsyncSupported(true);
-    
+
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
-
 
     tomcat.getConnector();
     try {
