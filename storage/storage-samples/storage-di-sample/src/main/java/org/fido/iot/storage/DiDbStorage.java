@@ -250,7 +250,6 @@ public class DiDbStorage implements DiServerStorage {
 
       final X509EncodedKeySpec subjectKeySpec =
           new X509EncodedKeySpec(csr.getSubjectPublicKeyInfo().getEncoded());
-      final PublicKey subjectPublicKey = keyFactory.generatePublic(subjectKeySpec);
 
       final Certificate issuerCert = issuerChain[0];
 
@@ -288,8 +287,8 @@ public class DiDbStorage implements DiServerStorage {
       getCryptoService().verify(chain);
       return chain;
 
-    } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException
-        | OperatorCreationException | CertificateEncodingException e) {
+    } catch (NoSuchAlgorithmException | IOException | OperatorCreationException
+        | CertificateEncodingException e) {
       throw new DispatchException(e);
     } catch (CertificateException e) {
       throw new DispatchException(e);
