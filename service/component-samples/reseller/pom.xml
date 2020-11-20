@@ -4,27 +4,29 @@
     SPDX-License-Identifier: Apache 2.0
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>protocol-samples</artifactId>
+    <artifactId>component-samples</artifactId>
     <groupId>org.fido.iot</groupId>
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP TO2 Server Sample</name>
-  <artifactId>http-server-to2-sample</artifactId>
+  <name>HTTP Reseller Sample</name>
+  <artifactId>reseller</artifactId>
   <packaging>jar</packaging>
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
     <commons-codec.version>1.14</commons-codec.version>
+    <commons.configuration2.version>2.7</commons.configuration2.version>
+    <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <tomcat.version>9.0.39</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
-    <exec.mainClass>org.fido.iot.sample.To2ServerApp</exec.mainClass>
+    <exec.mainClass>org.fido.iot.sample.ResellerServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
@@ -42,19 +44,7 @@
 
     <dependency>
       <groupId>org.fido.iot</groupId>
-      <artifactId>http-server-dispatcher</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>storage-owner-sample</artifactId>
-      <version>0.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fido.iot</groupId>
-      <artifactId>http-api-owner-sample</artifactId>
+      <artifactId>http-api-keystore-sample</artifactId>
       <version>0.3-SNAPSHOT</version>
     </dependency>
 
@@ -74,6 +64,18 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${commons.configuration2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${commons.beanutils.version}</version>
     </dependency>
 
     <dependency>
@@ -116,15 +118,27 @@
         <executions>
           <execution>
             <goals>
-             <goal>exec</goal>
+              <goal>exec</goal>
             </goals>
           </execution>
         </executions>
         <configuration>
-           <executable>java</executable>
+          <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>target/classes</workingDirectory>
-          <cleanupDaemonThreads>false</cleanupDaemonThreads>
+          <workingDirectory>target/classes</workingDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${exec.mainClass}</mainClass>
+              <classpathPrefix>lib</classpathPrefix>
+            </manifest>
+          </archive>
         </configuration>
       </plugin>
     </plugins>

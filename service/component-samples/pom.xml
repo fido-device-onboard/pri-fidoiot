@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2020 Intel Corporation
+    SPDX-License-Identifier: Apache 2.0
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -18,6 +22,7 @@
     <module>manufacturer</module>
     <module>owner</module>
     <module>rv</module>
+    <module>reseller</module>
     <module>http-device-sample</module>
   </modules>
 

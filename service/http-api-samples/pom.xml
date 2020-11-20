@@ -14,15 +14,15 @@
     <version>0.3-SNAPSHOT</version>
   </parent>
 
-  <name>Service Samples</name>
-  <artifactId>service</artifactId>
+  <name>Http Api Samples</name>
+  <artifactId>http-api-samples</artifactId>
   <groupId>org.fido.iot</groupId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>http-dispatchers</module>
-    <module>http-api-samples</module>
-    <module>protocol-samples</module>
-    <module>component-samples</module>
+    <module>http-api-di-sample</module>
+    <module>http-api-owner-sample</module>
+    <module>http-api-rv-sample</module>
+    <module>http-api-keystore-sample</module>
   </modules>
 </project>

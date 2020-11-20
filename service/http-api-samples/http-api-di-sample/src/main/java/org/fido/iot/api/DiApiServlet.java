@@ -1,7 +1,7 @@
 // Copyright 2020 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
-package org.fido.iot.sample;
+package org.fido.iot.api;
 
 import java.io.IOException;
 import java.security.PublicKey;
@@ -27,7 +27,7 @@ import org.fido.iot.storage.CertificateResolver;
 /**
  * Device Initialization API servlet..
  */
-public class DiApiSevlet extends HttpServlet {
+public class DiApiServlet extends HttpServlet {
 
   protected Composite queryVoucher(DataSource dataSource, String serialNo) {
 
