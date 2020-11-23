@@ -5,6 +5,7 @@ package org.fido.iot.storage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -208,7 +209,10 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setString(1, guid.toString());
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          return Composite.fromObject(rs.getBinaryStream(1));
+          InputStream is = rs.getBinaryStream(1);
+          if (is != null) {
+            return Composite.fromObject(is);
+          }
         }
       }
     } catch (SQLException e) {
@@ -233,7 +237,10 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setString(1, guid.toString());
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          return UUID.fromString(rs.getString(1));
+          String uuid = rs.getString(1);
+          if (uuid != null) {
+            return UUID.fromString(uuid);
+          }
         }
       }
     } catch (SQLException e) {
