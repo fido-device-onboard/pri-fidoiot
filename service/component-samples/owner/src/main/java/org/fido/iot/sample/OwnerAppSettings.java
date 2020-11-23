@@ -1,10 +1,13 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 /**
  * Contains the configuration property keys and constants that are used by the sample application
  * specifically.
  */
-public class OwnerAppConstants {
+public class OwnerAppSettings {
 
   // the port at which Owner is listening for TO2
   public static final String TO2_PORT = "owner_to2_port";

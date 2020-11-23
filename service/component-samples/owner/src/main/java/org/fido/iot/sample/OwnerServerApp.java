@@ -19,12 +19,12 @@ import org.h2.server.web.WebServlet;
 public class OwnerServerApp {
 
   private static final int TO2_PORT = null != OwnerConfigLoader
-      .loadConfig(OwnerAppConstants.TO2_PORT)
-          ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppConstants.TO2_PORT))
+      .loadConfig(OwnerAppSettings.TO2_PORT)
+          ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppSettings.TO2_PORT))
           : 8042;
 
   private static String getMessagePath(int msgId) {
-    return OwnerAppConstants.WEB_PATH + "/" + Integer.toString(msgId);
+    return OwnerAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
   }
 
   /**
@@ -36,44 +36,44 @@ public class OwnerServerApp {
     Tomcat tomcat = new Tomcat();
     tomcat.setPort(TO2_PORT);
     // set the path of tomcat
-    System.setProperty(OwnerAppConstants.SERVER_PATH,
-        Path.of(OwnerConfigLoader.loadConfig(OwnerAppConstants.SERVER_PATH)).toAbsolutePath()
+    System.setProperty(OwnerAppSettings.SERVER_PATH,
+        Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SERVER_PATH)).toAbsolutePath()
             .toString());
 
     Context ctx = tomcat.addContext("", null);
 
-    ctx.addParameter(OwnerAppConstants.DB_URL,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_URL));
-    ctx.addParameter(OwnerAppConstants.DB_USER,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
-    ctx.addParameter(OwnerAppConstants.DB_PWD,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
+    ctx.addParameter(OwnerAppSettings.DB_URL,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_URL));
+    ctx.addParameter(OwnerAppSettings.DB_USER,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_USER));
+    ctx.addParameter(OwnerAppSettings.DB_PWD,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
 
     ctx.addParameter("db.url",
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_URL));
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_URL));
     ctx.addParameter("db.user",
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_USER));
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_USER));
     ctx.addParameter("db.password",
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PWD));
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
 
     // hard-coded H2 config
     ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-        + OwnerConfigLoader.loadConfig(OwnerAppConstants.DB_PORT));
+        + OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PORT));
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
 
-    if (null != OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL)) {
-      ctx.addParameter(OwnerAppConstants.EPID_URL,
-          OwnerConfigLoader.loadConfig(OwnerAppConstants.EPID_URL));
+    if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
+      ctx.addParameter(OwnerAppSettings.EPID_URL,
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));
     }
-    ctx.addParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.OWNER_KEYSTORE_PWD));
-    ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_ENABLED));
-    ctx.addParameter(OwnerAppConstants.TO0_SCHEDULING_INTREVAL,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_SCHEDULING_INTREVAL));
-    ctx.addParameter(OwnerAppConstants.TO0_RV_BLOB,
-        OwnerConfigLoader.loadConfig(OwnerAppConstants.TO0_RV_BLOB));
+    ctx.addParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_KEYSTORE_PWD));
+    ctx.addParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.TO0_SCHEDULING_ENABLED));
+    ctx.addParameter(OwnerAppSettings.TO0_SCHEDULING_INTREVAL,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.TO0_SCHEDULING_INTREVAL));
+    ctx.addParameter(OwnerAppSettings.TO0_RV_BLOB,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.TO0_RV_BLOB));
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());

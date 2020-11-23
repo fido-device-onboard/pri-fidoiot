@@ -75,10 +75,10 @@ public class OwnerContextListener implements ServletContextListener {
     BasicDataSource ds = new BasicDataSource();
     
     ServletContext sc = sce.getServletContext();
-    ds.setUrl(sc.getInitParameter(OwnerAppConstants.DB_URL));
-    ds.setDriverClassName(OwnerAppConstants.H2_DRIVER);
-    ds.setUsername(sc.getInitParameter(OwnerAppConstants.DB_USER));
-    ds.setPassword(sc.getInitParameter(OwnerAppConstants.DB_PWD));
+    ds.setUrl(sc.getInitParameter(OwnerAppSettings.DB_URL));
+    ds.setDriverClassName(OwnerAppSettings.H2_DRIVER);
+    ds.setUsername(sc.getInitParameter(OwnerAppSettings.DB_USER));
+    ds.setPassword(sc.getInitParameter(OwnerAppSettings.DB_PWD));
     
     sc.log(ds.getUrl());
     
@@ -91,7 +91,7 @@ public class OwnerContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
     
-    resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD));
+    resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
     
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
@@ -119,7 +119,7 @@ public class OwnerContextListener implements ServletContextListener {
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
-    String epidUrl = sc.getInitParameter(OwnerAppConstants.EPID_URL);
+    String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
     if (null != epidUrl) {
       EpidUtils.setEpidOnlineUrl(epidUrl);
     }
@@ -129,7 +129,7 @@ public class OwnerContextListener implements ServletContextListener {
     manager.importVoucher(ds, Composite.fromObject(VOUCHER));
 
     // schedule devices for TO0 only if the flag is set
-    if (Boolean.valueOf(sc.getInitParameter(OwnerAppConstants.TO0_SCHEDULING_ENABLED))) {
+    if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
       scheduler.scheduleWithFixedDelay(new Runnable() {
         @Override
         public void run() {
@@ -146,7 +146,7 @@ public class OwnerContextListener implements ServletContextListener {
           }
         }
       }, 5, Integer.parseInt(
-          sc.getInitParameter(OwnerAppConstants.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
+          sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
     }
   }
 
@@ -176,9 +176,9 @@ public class OwnerContextListener implements ServletContextListener {
   private void scheduleTo0(ServletContext sc, DataSource ds, UUID guid, OwnerDbTo0Util to0Util) {
     try {
       OwnerTo0Client to0Client = new OwnerTo0Client(new CryptoService(), ds,
-          new OwnerKeyResolver(sc.getInitParameter(OwnerAppConstants.OWNER_KEYSTORE_PWD)),
+          new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD)),
               guid, to0Util);
-      to0Client.setRvBlob(sc.getInitParameter(OwnerAppConstants.TO0_RV_BLOB));
+      to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();
     } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
       sc.log("Error during TO0 for GUID: " + guid.toString());
