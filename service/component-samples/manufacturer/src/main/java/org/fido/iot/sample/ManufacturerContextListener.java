@@ -3,16 +3,24 @@
 
 package org.fido.iot.sample;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.util.List;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+import java.util.Iterator;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.CloseableKey;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
@@ -30,30 +38,13 @@ import org.fido.iot.storage.DiDbStorage;
  */
 public class ManufacturerContextListener implements ServletContextListener {
 
-  private static final String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
-      + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
-      + "Q0EwIBcNMTkwNDI0MTQ0NjQ3WhgPMjA1NDA0MTUxNDQ2NDdaMA0xCzAJBgNVBAMM\n"
-      + "AkNBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELAJwkDKz/BaWq1Wx7PjkR5W5\n"
-      + "LLIbamgSZeVNUlyFM/t0sMAxAWbvEbDzKu924TX4as3WVjMmfekysx30PlDGJaMQ\n"
-      + "MA4wDAYDVR0TBAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiEApUGbgjYT0k63AeRA\n"
-      + "tPM2i+VnW6ckYaJyvFLuuWw+QUACIE5w0ntjHLbvwmqgwCfh5T6u8exQdCA2g9Hs\n"
-      + "u53hKcaS\n"
-      + "-----END CERTIFICATE-----\n"
-      + "-----BEGIN EC PARAMETERS-----\n"
-      + "BggqhkjOPQMBBw==\n"
-      + "-----END EC PARAMETERS-----\n"
-      + "-----BEGIN EC PRIVATE KEY-----\n"
-      + "MHcCAQEEIJTKW2/54N85RLJu0C5fEkAwQiKqxRqHzx5PUfd/M66UoAoGCCqGSM49\n"
-      + "AwEHoUQDQgAELAJwkDKz/BaWq1Wx7PjkR5W5LLIbamgSZeVNUlyFM/t0sMAxAWbv\n"
-      + "EbDzKu924TX4as3WVjMmfekysx30PlDGJQ==\n"
-      + "-----END EC PRIVATE KEY-----";
-
   private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END PUBLIC KEY-----\n";
 
   CertificateResolver keyResolver;
+  private static KeyStore mfgKeyStore;
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -76,20 +67,64 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    initManufacturerKeystore(sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     keyResolver = new CertificateResolver() {
       @Override
       public CloseableKey getPrivateKey(Certificate cert) {
 
-        return new CloseableKey(
-            PemLoader.loadPrivateKey(mfgKeyPem));
+        if (null != mfgKeyStore && null != cert) {
+          try {
+            Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
+            while (aliases.hasNext()) {
+              String alias = aliases.next();
+              Certificate certificate = mfgKeyStore.getCertificate(alias);
+              if (null == certificate) {
+                continue;
+              }
+              if (Arrays.equals(certificate.getEncoded(), cert.getEncoded())) {
+                return new CloseableKey((PrivateKey) mfgKeyStore.getKey(alias,
+                    sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD).toCharArray()));
+              }
+            }
+          } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
+              | CertificateEncodingException e) {
+            System.out.println("Unable to retrieve Private Key. " + e.getMessage());
+          }
+        }
+        throw new RuntimeException();
       }
 
       @Override
       public Certificate[] getCertChain(int publicKeyType) {
-        List<Certificate> list = PemLoader.loadCerts(mfgKeyPem);
-        Certificate[] certs = new Certificate[list.size()];
-        list.toArray(certs);
-        return certs;
+        String algName;
+        switch (publicKeyType) {
+          case 1:
+          case 4:
+            algName = Const.RSA_ALG_NAME;
+            break;
+          case 13:
+          case 14:
+            algName = Const.EC_ALG_NAME;
+            break;
+          default:
+            throw new RuntimeException();
+        }
+        if (null != mfgKeyStore) {
+          try {
+            Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
+            while (aliases.hasNext()) {
+              String alias = aliases.next();
+              Certificate[] certificateChain = mfgKeyStore.getCertificateChain(alias);
+              if (certificateChain != null && certificateChain.length > 0
+                  && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)) {
+                return certificateChain;
+              }
+            }
+          } catch (KeyStoreException e) {
+            System.out.println("Unable to retrieve Certificate chain. " + e.getMessage());
+          }
+        }
+        throw new RuntimeException();
       }
     };
 
@@ -151,5 +186,20 @@ public class ManufacturerContextListener implements ServletContextListener {
         return cs;
       }
     };
+  }
+
+  // load manufacturer keystore
+  private void initManufacturerKeystore(String mfgKeyStorePin) {
+    try {
+      if (null == mfgKeyStorePin) {
+        throw new IOException();
+      }
+      if (null == mfgKeyStore) {
+        mfgKeyStore = KeyStore.getInstance(ManufacturerAppSettings.MFG_KEYSTORE_TYPE);
+        mfgKeyStore.load(null, mfgKeyStorePin.toCharArray());
+      }
+    } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
+      System.out.println("Error in loading keystore. " + e.getMessage());
+    }
   }
 }
