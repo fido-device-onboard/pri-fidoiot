@@ -12,6 +12,7 @@
     <artifactId>fido-iot</artifactId>
     <groupId>org.fido</groupId>
     <version>0.3-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
   <name>Http Api Samples</name>

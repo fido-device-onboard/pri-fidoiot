@@ -1,17 +1,21 @@
 package org.fido.iot.sample;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -36,6 +40,11 @@ import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
 import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
+import org.fido.iot.protocol.cbor.Encoder;
+import org.fido.iot.serviceinfo.ServiceInfo;
+import org.fido.iot.serviceinfo.ServiceInfoEntry;
+import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
+import org.fido.iot.serviceinfo.ServiceInfoSequence;
 
 public class Device {
 
@@ -43,6 +52,7 @@ public class Device {
   private static final String PROPERTY_DEV_PEM = "fido.iot.pem.dev";
   private static final String PROPERTY_DI_URL = "fido.iot.url.di";
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
+  private static final int SERVICEINFO_MTU = 1300;
 
   private static final Logger logger = LogManager.getLogger();
 
@@ -103,6 +113,12 @@ public class Device {
 
   protected String getSerial() {
     return "0";
+  }
+
+  Composite buildSigInfoA() {
+    return Composite.newArray()
+        .set(Const.SG_TYPE, myCryptoService.getCoseAlgorithm(myKeys.getPublic()))
+        .set(Const.SG_INFO, new byte[0]);
   }
 
   byte[] createSecret() {
@@ -219,7 +235,7 @@ public class Device {
 
       @Override
       public Composite getSigInfoA() {
-        return Composite.newArray();
+        return buildSigInfoA();
       }
 
       @Override
@@ -301,7 +317,22 @@ public class Device {
 
       @Override
       public Composite getNextServiceInfo() {
-        return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.emptyList(), false);
+
+        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(
+            SERVICEINFO_MTU,
+            wrappedCreds.get().getAsUuid(Const.DC_GUID));
+        marshaller.register(new DeviceServiceInfoModule());
+        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
+        List<Composite> marshaledSvi = new LinkedList<>();
+
+        for (Supplier<ServiceInfo> supplier : serviceInfos) {
+          ServiceInfo si = supplier.get();
+          for (ServiceInfoEntry sie : si) {
+            Composite c = ServiceInfoEncoder.encodeValue(sie.getKey(), sie.getValue().getContent());
+            marshaledSvi.add(c);
+          }
+        }
+        return ServiceInfoEncoder.encodeDeviceServiceInfo(marshaledSvi, false);
       }
 
       @Override
@@ -319,7 +350,7 @@ public class Device {
 
       @Override
       public Composite getSigInfoA() {
-        return Composite.newArray();
+        return buildSigInfoA();
       }
 
       @Override
@@ -334,7 +365,27 @@ public class Device {
 
       @Override
       public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
+        new DeviceServiceInfoModule().putServiceInfo(
+            wrappedCreds.get().getAsUuid(Const.DC_GUID),
+            new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
+                new ServiceInfoSequence(info.getAsString(Const.FIRST_KEY)) {
 
+                  @Override
+                  public boolean canSplit() {
+                    return false;
+                  }
+
+                  @Override
+                  public Object getContent() {
+                    return info.get(Const.SECOND_KEY);
+                  }
+
+                  @Override
+                  public long length() {
+                    // Return 0 as length is not supposed to be used anywhere
+                    return 0;
+                  }
+                }));
       }
     };
 
