@@ -8,6 +8,12 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerServiceInfoValuesServlet;
+import org.fido.iot.api.OwnerSviServlet;
+import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.sample.ProtocolServlet;
 import org.h2.server.web.DbStarter;
@@ -40,20 +46,14 @@ public class OwnerServerApp {
         Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SERVER_PATH)).toAbsolutePath()
             .toString());
 
-    Context ctx = tomcat.addContext("", null);
+    tomcat.setAddDefaultWebXmlToWebapp(false);
+    Context ctx = tomcat.addWebapp("", System.getProperty(OwnerAppSettings.SERVER_PATH));
 
     ctx.addParameter(OwnerAppSettings.DB_URL,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_URL));
     ctx.addParameter(OwnerAppSettings.DB_USER,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_USER));
     ctx.addParameter(OwnerAppSettings.DB_PWD,
-        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
-
-    ctx.addParameter("db.url",
-        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_URL));
-    ctx.addParameter("db.user",
-        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_USER));
-    ctx.addParameter("db.password",
         OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
 
     // hard-coded H2 config
@@ -74,6 +74,10 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppSettings.TO0_SCHEDULING_INTREVAL));
     ctx.addParameter(OwnerAppSettings.TO0_RV_BLOB,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.TO0_RV_BLOB));
+    ctx.addParameter(OwnerAppSettings.SAMPLE_SVI_PATH,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.SAMPLE_SVI_PATH));
+    ctx.addParameter(OwnerAppSettings.SAMPLE_VALUES_PATH,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.SAMPLE_VALUES_PATH));
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
@@ -89,9 +93,36 @@ public class OwnerServerApp {
 
     wrapper.setAsyncSupported(true);
 
+    wrapper = tomcat.addServlet(ctx, "voucherServlet",
+        new OwnerVoucherServlet());
+    wrapper.addMapping("/api/v1/owner/vouchers/*");
+    wrapper = tomcat.addServlet(ctx, "serviceinfoServlet",
+        new OwnerServiceInfoValuesServlet());
+    wrapper.addMapping("/api/v1/owner/svivalues/*");
+    wrapper = tomcat.addServlet(ctx, "sviServlet",
+        new OwnerSviServlet());
+    wrapper.addMapping("/api/v1/owner/svi/*");
+    wrapper.setAsyncSupported(true);
+
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
+
+    //setup digest auth
+    LoginConfig config = new LoginConfig();
+    config.setAuthMethod(OwnerAppSettings.AUTH_METHOD);
+    ctx.setLoginConfig(config);
+    ctx.addSecurityRole(OwnerAppSettings.AUTH_ROLE);
+    SecurityConstraint constraint = new SecurityConstraint();
+    constraint.addAuthRole(OwnerAppSettings.AUTH_ROLE);
+    SecurityCollection collection = new SecurityCollection();
+    collection.addPattern("/api/v1/owner/*");
+    constraint.addCollection(collection);
+    ctx.addConstraint(constraint);
+    tomcat.addRole(OwnerConfigLoader.loadConfig(OwnerAppSettings.API_USER),
+        OwnerAppSettings.AUTH_ROLE);
+    tomcat.addUser(OwnerConfigLoader.loadConfig(OwnerAppSettings.API_USER),
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.API_PWD));
 
     tomcat.getConnector();
     try {

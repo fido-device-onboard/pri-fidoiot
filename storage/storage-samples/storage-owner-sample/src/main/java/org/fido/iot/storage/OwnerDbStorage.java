@@ -427,7 +427,23 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void starting(Composite request, Composite reply) {
+    String uuid = request.getAsComposite(Const.SM_BODY).getAsUuid(Const.FIRST_KEY).toString();
+    String sql = "UPDATE TO2_DEVICES "
+        + "SET TO2_STARTED = ? "
+        + "WHERE GUID = ?";
 
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
+      pstmt.setTimestamp(1, created);
+      pstmt.setString(2, uuid);
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -483,6 +499,22 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new RuntimeException(e);
     }
 
+    sql = "UPDATE TO2_DEVICES "
+        + "SET TO2_COMPLETED = ? "
+        + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
+      pstmt.setTimestamp(1, created);
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

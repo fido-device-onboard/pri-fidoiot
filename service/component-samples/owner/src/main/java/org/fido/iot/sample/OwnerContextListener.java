@@ -6,6 +6,7 @@ package org.fido.iot.sample;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
@@ -127,6 +128,13 @@ public class OwnerContextListener implements ServletContextListener {
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
     manager.importVoucher(ds, Composite.fromObject(VOUCHER));
+    // do a clean-up to avoid exception due to stale data.
+    manager.removeSviFromDevice(ds,
+        Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
+    manager.loadSampleServiceInfo(ds,
+        Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID),
+        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)),
+        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
 
     // schedule devices for TO0 only if the flag is set
     if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
