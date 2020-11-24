@@ -9,8 +9,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>fido-iot</artifactId>
-    <groupId>org.fido</groupId>
+    <artifactId>service</artifactId>
+    <groupId>org.fido.iot</groupId>
     <version>0.3-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>

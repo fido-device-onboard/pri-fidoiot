@@ -5,6 +5,7 @@ package org.fido.iot.storage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -208,7 +209,10 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setString(1, guid.toString());
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          return Composite.fromObject(rs.getBinaryStream(1));
+          InputStream is = rs.getBinaryStream(1);
+          if (is != null) {
+            return Composite.fromObject(is);
+          }
         }
       }
     } catch (SQLException e) {
@@ -233,7 +237,10 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setString(1, guid.toString());
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          return UUID.fromString(rs.getString(1));
+          String uuid = rs.getString(1);
+          if (uuid != null) {
+            return UUID.fromString(uuid);
+          }
         }
       }
     } catch (SQLException e) {
@@ -420,7 +427,23 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void starting(Composite request, Composite reply) {
+    String uuid = request.getAsComposite(Const.SM_BODY).getAsUuid(Const.FIRST_KEY).toString();
+    String sql = "UPDATE TO2_DEVICES "
+        + "SET TO2_STARTED = ? "
+        + "WHERE GUID = ?";
 
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
+      pstmt.setTimestamp(1, created);
+      pstmt.setString(2, uuid);
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -476,6 +499,22 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new RuntimeException(e);
     }
 
+    sql = "UPDATE TO2_DEVICES "
+        + "SET TO2_COMPLETED = ? "
+        + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
+      pstmt.setTimestamp(1, created);
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
