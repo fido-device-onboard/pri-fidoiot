@@ -193,9 +193,15 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <directory>${project-demo-directory}/${project.artifactId}/lib</directory>
               <includes>
                 <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <includes>
+                <include>device.jar</include>
               </includes>
             </fileset>
           </filesets>
