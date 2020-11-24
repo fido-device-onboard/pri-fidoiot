@@ -247,9 +247,9 @@ public abstract class To2ClientService extends DeviceService {
         .set(Const.DC_DEVICE_INFO,
             oldCreds.getAsString(Const.DC_DEVICE_INFO))
         .set(Const.DC_GUID,
-            oldCreds.getAsBytes(Const.DC_GUID))
+            message.getAsUuid(Const.SECOND_KEY))
         .set(Const.DC_RENDEZVOUS_INFO,
-            oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
+            message.getAsComposite(Const.FIRST_KEY));
 
     PublicKey mfgPubKey = getCryptoService().decode(ownerKey2);
     int hashType = getCryptoService().getCompatibleHashType(mfgPubKey);
@@ -301,7 +301,7 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite payload = Composite.newArray()
         .set(Const.FIRST_KEY,
-            newHash);
+            newHash != null ? newHash : PrimitivesUtil.getCborNullBytes());
 
     body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
 
