@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.io.IOException;
@@ -52,7 +55,7 @@ public class OwnerKeyResolver implements KeyResolver {
         throw new IOException();
       }
       if (null == ownerKeyStore) {
-        ownerKeyStore = KeyStore.getInstance(OwnerAppConstants.OWNER_KEYSTORE_TYPE);
+        ownerKeyStore = KeyStore.getInstance(OwnerAppSettings.OWNER_KEYSTORE_TYPE);
         ownerKeyStore.load(null, ownerKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {

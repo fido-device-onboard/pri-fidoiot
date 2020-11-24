@@ -10,11 +10,12 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm soft
 COPY java.security /etc/java-11-openjdk/security/
 COPY pkcs11.cfg /etc/softhsm/
 
-RUN mkdir -p /home/owner/lib
+RUN mkdir -p /home/owner/lib /home/owner/serviceinfo
 WORKDIR /home/owner/
 
 # Setup owner dependencies
 COPY ./lib ./lib/
+COPY ./serviceinfo ./serviceinfo/
 COPY owner.jar .
 COPY owner_keystore.p12 .
 COPY owner-entrypoint.sh .
