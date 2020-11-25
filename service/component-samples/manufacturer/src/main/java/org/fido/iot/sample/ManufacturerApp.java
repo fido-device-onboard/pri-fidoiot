@@ -10,7 +10,12 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.fido.iot.api.AssignCustomerServlet;
+import org.fido.iot.api.DiApiServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -55,7 +60,8 @@ public class ManufacturerApp {
         Path.of(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SERVER_PATH))
         .toAbsolutePath().toString());
 
-    Context ctx = tomcat.addContext("", null);
+    tomcat.setAddDefaultWebXmlToWebapp(false);
+    Context ctx = tomcat.addWebapp("", System.getProperty(ManufacturerAppSettings.SERVER_PATH));
 
     ctx.addParameter(ManufacturerAppSettings.DB_URL,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_URL));
@@ -69,19 +75,44 @@ public class ManufacturerApp {
     ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
 
+    ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(ManufacturerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
 
+    //setup digest auth
+    LoginConfig config = new LoginConfig();
+    config.setAuthMethod(ManufacturerAppSettings.AUTH_METHOD);
+    ctx.setLoginConfig(config);
+    ctx.addSecurityRole(ManufacturerAppSettings.AUTH_ROLE);
+    SecurityConstraint constraint = new SecurityConstraint();
+    constraint.addAuthRole(ManufacturerAppSettings.AUTH_ROLE);
+    SecurityCollection collection = new SecurityCollection();
+    collection.addPattern("/api/v1/*");
+    constraint.addCollection(collection);
+    ctx.addConstraint(constraint);
+    tomcat.addRole(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.API_USER),
+        ManufacturerAppSettings.AUTH_ROLE);
+    tomcat.addUser(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.API_USER),
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.API_PWD));
+
     Wrapper wrapper = tomcat.addServlet(ctx, "diServlet", new ProtocolServlet());
 
-    //wrapper.addInitParameter(Const.);
     wrapper.addMapping(getMessagePath(Const.DI_APP_START));
     wrapper.addMapping(getMessagePath(Const.DI_SET_HMAC));
     wrapper.setAsyncSupported(true);
 
-    wrapper = tomcat.addServlet(ctx, "DiApi", new ManufacturerApiSevlet());
+    wrapper = tomcat.addServlet(ctx, "DiApi", new DiApiServlet());
     wrapper.addMapping("/api/v1/vouchers/*");
+
+    wrapper = tomcat.addServlet(ctx, "mfgCustomer",
+        new ManufacturerCustomerServlet());
+    wrapper.addMapping("/api/v1/customers/*");
+    wrapper.setAsyncSupported(true);
+
+    wrapper = tomcat.addServlet(ctx, "AssignCustomerApi", new AssignCustomerServlet());
+    wrapper.addMapping("/api/v1/assign/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
