@@ -10,8 +10,4 @@ This will copy the required executables and libraries into <fido-iot-src>/demo/m
 
 # Starting the Manufacturer service
 
-Open a new terminal window and run the following from :
-```
-$ cd <fido-iot-src>/demo/manufacturer/
-$ docker-compose up --build
-```
+Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
