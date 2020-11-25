@@ -1,1 +1,1 @@
-sdosys:filedesc=payload_name,sdosys:write=payload.bin,sdosys:filedesc=package_name,sdosys:write=package.sh,sdosys:exec=binsh-linux64
+sdo_sys:filedesc=payload_name,sdo_sys:write=payload.bin,sdo_sys:filedesc=package_name,sdo_sys:write=package.sh,sdo_sys:exec=binsh-linux64
