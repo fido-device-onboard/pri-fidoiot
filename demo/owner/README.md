@@ -10,8 +10,4 @@ This will copy the required executables and libraries into <fido-iot-src>/demo/o
 
 # Starting the owner service
 
-Open a new terminal window and run the following from :
-```
-$ cd <fido-iot-src>/demo/owner/
-$ docker-compose up --build
-```
+Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
