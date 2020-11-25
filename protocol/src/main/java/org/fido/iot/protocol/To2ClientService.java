@@ -82,7 +82,7 @@ public abstract class To2ClientService extends DeviceService {
   }
 
   protected void nextMessage(Composite request, Composite reply) {
-    if (this.numEntries == 0 || entryNum == (this.numEntries - 1)) {
+    if (this.numEntries == 0 || (entryNum == (this.numEntries))) {
 
       PublicKey ownerKey = getCryptoService().decode(cupKey);
       Composite deviceState = getCryptoService()
@@ -132,7 +132,6 @@ public abstract class To2ClientService extends DeviceService {
       reply.set(Const.SM_BODY, signature);
 
     } else {
-      this.entryNum++;
       Composite body = Composite.newArray()
           .set(Const.FIRST_KEY, this.entryNum);
       reply.set(Const.SM_MSG_ID, Const.TO2_GET_OVNEXT_ENTRY);
@@ -223,6 +222,7 @@ public abstract class To2ClientService extends DeviceService {
 
     verifyEntry(entryNum, entry);
 
+    this.entryNum++;
     nextMessage(request, reply);
     getStorage().continued(request, reply);
   }
@@ -247,9 +247,9 @@ public abstract class To2ClientService extends DeviceService {
         .set(Const.DC_DEVICE_INFO,
             oldCreds.getAsString(Const.DC_DEVICE_INFO))
         .set(Const.DC_GUID,
-            oldCreds.getAsBytes(Const.DC_GUID))
+            message.getAsUuid(Const.SECOND_KEY))
         .set(Const.DC_RENDEZVOUS_INFO,
-            oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
+            message.getAsComposite(Const.FIRST_KEY));
 
     PublicKey mfgPubKey = getCryptoService().decode(ownerKey2);
     int hashType = getCryptoService().getCompatibleHashType(mfgPubKey);
@@ -301,7 +301,7 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite payload = Composite.newArray()
         .set(Const.FIRST_KEY,
-            newHash);
+            newHash != null ? newHash : PrimitivesUtil.getCborNullBytes());
 
     body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
 
