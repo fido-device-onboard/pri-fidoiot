@@ -53,7 +53,7 @@ public class ResellerConfigLoader {
       defaultConfiguration.addProperty(ResellerAppConstants.DB_PORT, "8071");
       defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_TYPE, "PKCS11");
       defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PATH, "");
-      defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PWD, "123456");
+      defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PWD, "RsrKs@3er");
       defaultConfiguration.addProperty(ResellerAppConstants.API_USER, "admin");
       defaultConfiguration.addProperty(ResellerAppConstants.API_PWD, "test");
 
