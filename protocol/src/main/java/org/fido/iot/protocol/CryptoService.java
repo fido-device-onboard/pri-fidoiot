@@ -441,7 +441,7 @@ public class CryptoService {
    * @return signature
    */
   public Composite getSigInfoB(Composite sigInfoA) {
-    if (null != sigInfoA
+    if (null != sigInfoA && sigInfoA.size() > 0
             && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
             .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       EpidMaterialService epidMaterialService = new EpidMaterialService();
@@ -609,7 +609,8 @@ public class CryptoService {
    * @return True if the signature matches otherwise false.
    */
   public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
-    if (null != sigInfoA && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+    if (null != sigInfoA && sigInfoA.size() > 0
+        && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       verifyMaroePrefix(cose);
       return EpidSignatureVerifier.verify(cose, sigInfoA);
