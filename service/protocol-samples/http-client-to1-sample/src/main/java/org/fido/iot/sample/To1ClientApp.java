@@ -56,6 +56,10 @@ public class To1ClientApp {
         clientStorage.getDeviceCredentials().getAsComposite(Const.DC_RENDEZVOUS_INFO),
         Const.RV_DEV_ONLY);
 
+    // Setting epid test mode enables epid signatures from debug and test
+    // devices to pass validation. In production, this should never be used.
+    cryptoService.setEpidTestMode();
+
     signedTo1Blob = null;
     for (String path : paths) {
 

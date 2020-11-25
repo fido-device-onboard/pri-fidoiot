@@ -66,9 +66,11 @@ public class VoucherExtensionService {
 
     payload.set(Const.OVE_HASH_PREV_ENTRY, prevHash);
     payload.set(Const.OVE_HASH_HDR_INFO, hdrHash);
+    Composite ownerPubkey = ovh.getAsComposite(Const.OVH_PUB_KEY);
+    final int ownerKeyEnc = ownerPubkey.getAsNumber(Const.PK_ENC).intValue();
     payload.set(Const.OVE_PUB_KEY, cryptoService.encode(
             newOwner,
-            newOwner instanceof ECKey ? Const.PK_ENC_COSEEC : Const.PK_ENC_X509));
+            ownerKeyEnc));
     Composite cos = cryptoService.sign(
         prevOwner, payload.toBytes(), cryptoService.getCoseAlgorithm(prevOwnerPubKey));
 

@@ -46,6 +46,9 @@ public class To0To1ContextListener implements ServletContextListener {
     ds.setMaxOpenPreparedStatements(100);
 
     final CryptoService cs = new CryptoService();
+    // Setting epid test mode enables epid signatures from debug and test
+    // devices to pass validation. In production, this should never be used.
+    cs.setEpidTestMode();
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
