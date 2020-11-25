@@ -6,6 +6,7 @@
 5. [Start Rendezvous Service](#start-rendezvous-service)
 6. [Start Owner Service](#start-owner-service)
 7. [Start Device Service](#start-device-service)
+8. [Inserting Keys into Keystore](#inserting-keys-into-keystore)
 
 # System Requirements
 
@@ -77,3 +78,21 @@ Refer [Demo Owner README](owner/README.md) to start the service.
 # Start Device Service
 
 Refer [Demo Device README](device/README.md) to start the service.
+
+# Inserting Keys into Keystore
+
+Assuming that there is already an existing certificate named 'certificate.pem' and the corresponding private key 'private-key.pem', follow these steps to insert them as 'PrivateKeyEntry' into the keystore 'dest-keystore.p12':
+
+**Step 1:** Convert the certificate and private key into 'PKCS12' format:
+
+`$ openssl pkcs12 -export -in certificate.pem -inkey private-key.pem -name newkeypair -out src-keystore.p12`
+
+**Step 2:** Delete an existing alias (only needed if there is a need to replace PrivateKeyEntry having a particular algorithm):
+
+`$ keytool -delete -alias newkeypair -keystore keystore.jks`
+
+**Step 3:** Import the above generated source PKCS12 file into the existing destination keystore file 'dest-keystore.p12' located with alias 'newkeypair'.
+
+`$ keytool -importkeystore -destkeystore path/to/dest-keystore.p12 -srckeystore src-keystore.p12 -srcstoretype PKCS12 -alias newkeypair`
+
+***NOTE*** The password entered in Step 1 to generate the src-keystore.p12 must be the same as that of dest-keystore.p12, that is, the password of the newly created keystore must match the existing keystore where it will be imported to.
