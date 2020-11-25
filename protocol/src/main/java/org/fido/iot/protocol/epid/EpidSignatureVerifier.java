@@ -26,8 +26,7 @@ public class EpidSignatureVerifier {
   }
 
   /**
-   * Verifies EPID signature. Returns boolean 'true' if the signature verification is successful.
-   * Returns boolean 'false' otherwise.
+   * Verifies EPID signature. Returns result of verification via enum Result.
    * 
    * @param signatureComposite {@link Composite} that represents the COSE signature object
    * @param sigInfoAComposite {@link Composite} that represents the SigInfo object
