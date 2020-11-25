@@ -1,0 +1,1 @@
+sdosys:filedesc=payload_name,sdosys:write=payload.bin,sdosys:filedesc=package_name,sdosys:write=package.sh,sdosys:exec=binsh-linux64

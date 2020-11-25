@@ -22,6 +22,7 @@
     <dbcp2.version>2.7.0</dbcp2.version>
     <commons.configuration2.version>2.7</commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
+    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <exec.mainClass>org.fido.iot.sample.ManufacturerApp</exec.mainClass>
   </properties>
 
@@ -47,6 +48,12 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>storage-di-sample</artifactId>
+      <version>0.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>http-api-di-sample</artifactId>
       <version>0.3-SNAPSHOT</version>
     </dependency>
 
@@ -187,7 +194,7 @@
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.5</version>
+        <version>${maven-clean-plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>

@@ -89,7 +89,8 @@ public class DiDbStorage implements DiServerStorage {
 
     Composite settings = getSettings();
     Integer validityDays = settings.getAsNumber(Const.FIRST_KEY).intValue();
-    if (settings.get(Const.THIRD_KEY) != Optional.empty()) {
+    if (settings.get(Const.THIRD_KEY) != null
+        && settings.get(Const.THIRD_KEY) != Optional.empty()) {
       customerId = settings.getAsString(Const.THIRD_KEY);
     }
 
@@ -181,6 +182,7 @@ public class DiDbStorage implements DiServerStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+    System.out.println("Voucher stored with GUID: " + guid.toString());
   }
 
   @Override

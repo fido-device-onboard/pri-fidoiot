@@ -129,4 +129,29 @@ public class DiDbManager {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Assign customer ID to voucher having the input GUID.
+   * 
+   * @param ds The datasource to use.
+   * @param id The id of the customer.
+   * @param guid The GUID of the device
+   */
+  public void assignCustomerToVoucher(DataSource ds, int id, String guid) {
+
+    String sql = ""
+        + "UPDATE MT_DEVICES   "
+        + "SET CUSTOMER_ID=? "
+        + "WHERE GUID=?; ";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setInt(1, id);
+      pstmt.setString(2, guid);
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

@@ -41,6 +41,7 @@ public class VoucherExtensionService {
     headerInfo.flip();
     Composite hdrHash = cryptoService.hash(hashType, Composite.unwrap(headerInfo));
     Composite prevHash;
+    PublicKey prevOwnerPubKey;
     //For the first entry, the hash is SHA[TO2.ProveOPHdr.OVHeader|\|TO2.ProveOPHdr.HMac].
     Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
     if (entries.size() == 0) {
@@ -51,11 +52,14 @@ public class VoucherExtensionService {
       prevInfo.put(macBytes);
       prevInfo.flip();
       prevHash = cryptoService.hash(hashType, Composite.unwrap(prevInfo));
+      prevOwnerPubKey = cryptoService.decode(voucher.getAsComposite(Const.OV_HEADER)
+          .getAsComposite(Const.OVH_PUB_KEY));
     } else {
       Composite prev = entries.getAsComposite(entries.size() - 1);
       Composite prevEntry = Composite.fromObject(prev.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
       prevHash = prevEntry.getAsComposite(Const.OVE_HASH_PREV_ENTRY);
       hdrHash = cryptoService.hash(hashType, prev.toBytes());
+      prevOwnerPubKey = cryptoService.decode(prevEntry.getAsComposite(Const.OVE_PUB_KEY));
     }
 
     Composite payload = Composite.newArray();
@@ -66,7 +70,7 @@ public class VoucherExtensionService {
             newOwner,
             newOwner instanceof ECKey ? Const.PK_ENC_COSEEC : Const.PK_ENC_X509));
     Composite cos = cryptoService.sign(
-        prevOwner, payload.toBytes(), cryptoService.getCoseAlgorithm(prevOwner));
+        prevOwner, payload.toBytes(), cryptoService.getCoseAlgorithm(prevOwnerPubKey));
 
     //The current recommended maximum is ten entries.
     entries.set(entries.size(), cos);
