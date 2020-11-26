@@ -450,7 +450,7 @@ public class CryptoService {
    * @return signature
    */
   public Composite getSigInfoB(Composite sigInfoA) {
-    if (null != sigInfoA
+    if (null != sigInfoA && sigInfoA.size() > 0
             && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
             .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       EpidMaterialService epidMaterialService = new EpidMaterialService();
@@ -523,8 +523,8 @@ public class CryptoService {
         final ByteBuffer exp = ByteBuffer.wrap(key.getPublicExponent().toByteArray());
 
         Composite pkbody = Composite.newArray()
-                .set(0, mod)
-                .set(1, exp);
+                .set(Const.FIRST_KEY, mod)
+                .set(Const.SECOND_KEY, exp);
 
         pm.set(Const.PK_BODY, pkbody);
         pm.set(Const.PK_TYPE, getPublicKeyType(publicKey));

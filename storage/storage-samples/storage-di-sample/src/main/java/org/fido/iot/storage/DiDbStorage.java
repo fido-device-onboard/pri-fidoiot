@@ -111,7 +111,7 @@ public class DiDbStorage implements DiServerStorage {
     int keyType = mstr.getAsNumber(Const.FIRST_KEY).intValue();
     String serialNo = mstr.getAsString(Const.SECOND_KEY);
 
-    if (keyType == Const.PK_SECP256R1 || keyType == Const.PK_SECP256R1) {
+    if (keyType == Const.PK_SECP256R1 || keyType == Const.PK_SECP384R1) {
       Certificate[] issuerChain = resolver.getCertChain(keyType);
       chain = createChain(
           mstr.getAsBytes(Const.FOURTH_KEY),
