@@ -641,7 +641,7 @@ public class CryptoService {
    * @return True if the signature matches otherwise false.
    */
   public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
-    if (null != sigInfoA && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
+    if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       verifyMaroePrefix(cose);
       EpidSignatureVerifier.Result verificationResult =
