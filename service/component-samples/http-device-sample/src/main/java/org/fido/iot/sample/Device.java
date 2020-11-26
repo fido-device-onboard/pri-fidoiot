@@ -59,6 +59,7 @@ public class Device {
   final CryptoService myCryptoService;
   final KeyPair myKeys;
   final CredentialStorage myCredStore;
+  final DeviceServiceInfoModule deviceServiceInfoModule;
 
   Device() throws IOException {
     Properties p = System.getProperties();
@@ -72,6 +73,7 @@ public class Device {
     String pem = Files.readString(
         Paths.get(p.getProperty(PROPERTY_DEV_PEM, "device.pem")));
     myKeys = new KeyPair(PemLoader.loadPublicKeys(pem).get(0), PemLoader.loadPrivateKey(pem));
+    deviceServiceInfoModule = new DeviceServiceInfoModule();
   }
 
   /**
@@ -365,7 +367,7 @@ public class Device {
 
       @Override
       public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
-        new DeviceServiceInfoModule().putServiceInfo(
+        deviceServiceInfoModule.putServiceInfo(
             wrappedCreds.get().getAsUuid(Const.DC_GUID),
             new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
                 new ServiceInfoSequence(info.getAsString(Const.FIRST_KEY)) {

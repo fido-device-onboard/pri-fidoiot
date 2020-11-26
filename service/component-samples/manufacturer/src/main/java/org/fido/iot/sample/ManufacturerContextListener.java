@@ -41,6 +41,20 @@ public class ManufacturerContextListener implements ServletContextListener {
   private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEkhES/RfsfzMFJP1N4xjlCoWTOtr/ay8b\n"
+      + "fFHlXftScQIzlK4/fR/eKYInMEoB5UsIkP6Yo+oJ1AEc4MzFN83N/1U7IYMkkzxy\n"
+      + "VeJJtKP1OA4NFliXFc6fC8ey6A+vthWJ\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu5Cyn1+lblNm9zXmKQPV\n"
+      + "Bhnl4K3lVYT7DJsedoqduk5tCZbinlG9/XYXvHGKFageh352xTck89LWXOTfCKUh\n"
+      + "xiSE6zugN1zKnEritPm/DiP38LNmiffttVApYBidwBw9Hgq3fdFdMYAF+aLMWCZe\n"
+      + "t0gLMoyrEBsg2k6Uaq5ES13G/Gvk8V8cDjFSIdidZe6P4xvHyVgkePqRfeHtJdEx\n"
+      + "hlyPOt2Jqf3+h3kGDJoz6WA7xycX2hbvZ1ZA6oTvKosw8PMbDb48CteXn6Cl0BKI\n"
+      + "5EC6Gjr5VtHdo0r8QCZvOw6kQPjkzqWZFDElm4aCIiixbjTH+NN8ncc9DaHCo27H\n"
+      + "4wIDAQAB\n"
       + "-----END PUBLIC KEY-----\n";
 
   CertificateResolver keyResolver;
