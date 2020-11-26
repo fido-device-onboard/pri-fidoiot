@@ -253,9 +253,11 @@ public class DeviceServiceInfoModule implements ServiceInfoModule {
       history[historyIx++] = execBuilder.charAt(execBuilder.length() - 1);
     }
 
-    while (SdoSys.CHARSET.decode(ByteBuffer.wrap(encodedValue)).hasRemaining()) {
+    ByteBuffer execBytes = ByteBuffer.wrap(encodedValue);
+    while (execBytes.hasRemaining()) {
 
-      char c = SdoSys.CHARSET.decode(ByteBuffer.wrap(encodedValue)).get();
+      byte[] execByte = new byte[] { execBytes.get() };
+      char c = SdoSys.CHARSET.decode(ByteBuffer.wrap(execByte)).get();
       execBuilder.append(c);
 
       // Does this character complete an instruction?
