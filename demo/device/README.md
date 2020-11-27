@@ -30,7 +30,7 @@ Some software settings are runtime-configurable via Java properties.  They inclu
   The location of the PEM file containing the device keys (private and public).
   If not set, a hardcoded key is used - see the Java source for details.
 
-  There is no default.
+  There is no default. Provide value `./device.pem` to use the existing default EC-256 key-pair.
 
 # Starting the Device service
 
