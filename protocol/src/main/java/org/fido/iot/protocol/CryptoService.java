@@ -45,6 +45,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -77,6 +77,7 @@ public class CryptoService {
 
   static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
   private final SecureRandom secureRandom;
+  private boolean epidTestMode = false;
 
   /**
    * Constructs a CryptoService from a list of algorithm names.
@@ -108,6 +109,14 @@ public class CryptoService {
    */
   public CryptoService() {
     secureRandom = new SecureRandom();
+  }
+
+  /**
+   * Sets the epid test mode.
+   *
+   */
+  public void setEpidTestMode() {
+    this.epidTestMode = true;
   }
 
   /**
@@ -442,7 +451,7 @@ public class CryptoService {
    */
   public Composite getSigInfoB(Composite sigInfoA) {
     if (null != sigInfoA && sigInfoA.size() > 0
-            && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+            && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
             .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       EpidMaterialService epidMaterialService = new EpidMaterialService();
       try {
@@ -483,6 +492,7 @@ public class CryptoService {
     final Composite pm = Composite.newArray();
     pm.set(Const.PK_ENC, encType);
     switch (encType) {
+
       case Const.PK_ENC_COSEEC: {
 
         final ECPublicKey ec = (ECPublicKey) publicKey;
@@ -503,9 +513,21 @@ public class CryptoService {
         } else {
           throw new CryptoServiceException(new InvalidKeyException());
         }
-
         pm.set(Const.PK_BODY, body);
 
+      }
+      break;
+      case Const.PK_ENC_CRYPTO: {
+        RSAPublicKey key = (RSAPublicKey) publicKey;
+        final ByteBuffer mod = ByteBuffer.wrap(key.getModulus().toByteArray());
+        final ByteBuffer exp = ByteBuffer.wrap(key.getPublicExponent().toByteArray());
+
+        Composite pkbody = Composite.newArray()
+                .set(Const.FIRST_KEY, mod)
+                .set(Const.SECOND_KEY, exp);
+
+        pm.set(Const.PK_BODY, pkbody);
+        pm.set(Const.PK_TYPE, getPublicKeyType(publicKey));
       }
       break;
       case Const.PK_ENC_X509: {
@@ -514,7 +536,7 @@ public class CryptoService {
         pm.set(Const.PK_BODY, x509.getEncoded());
         pm.set(Const.PK_TYPE, getPublicKeyType(publicKey));
       }
-      break;
+        break;
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
@@ -531,29 +553,39 @@ public class CryptoService {
 
     final int keyType = pub.getAsNumber(Const.PK_TYPE).intValue();
     final int keyEnc = pub.getAsNumber(Const.PK_ENC).intValue();
-    final byte[] body = pub.getAsBytes(Const.PK_BODY);
 
     KeyFactory factory;
     try {
       switch (keyEnc) {
+        case Const.PK_ENC_CRYPTO:
+          Composite cryptoBody = pub.getAsComposite(Const.PK_BODY);
+          BigInteger mod = new BigInteger(1, cryptoBody.getAsBytes(Const.FIRST_KEY));
+          BigInteger exp = new BigInteger(1, cryptoBody.getAsBytes(Const.SECOND_KEY));
+
+          RSAPublicKeySpec rsaPkSpec = new RSAPublicKeySpec(mod, exp);
+          factory = getKeyFactoryInstance(getKeyFactoryAlgorithm(keyType));
+          return factory.generatePublic(rsaPkSpec);
+
         case Const.PK_ENC_X509:
-          final X509EncodedKeySpec rsaSpec = new X509EncodedKeySpec(body);
+          final byte[] x509body = pub.getAsBytes(Const.PK_BODY);
+          final X509EncodedKeySpec rsaSpec = new X509EncodedKeySpec(x509body);
           factory = getKeyFactoryInstance(getKeyFactoryAlgorithm(keyType));
 
           return factory.generatePublic(rsaSpec);
 
         case Const.PK_ENC_COSEEC:
+          final byte[] coseEecBody = pub.getAsBytes(Const.PK_BODY);
           final ByteBuffer buf509;
           if (keyType == Const.PK_SECP256R1) {
-            buf509 = ByteBuffer.allocate(Const.X509_EC256_HEADER.length + body.length);
+            buf509 = ByteBuffer.allocate(Const.X509_EC256_HEADER.length + coseEecBody.length);
             buf509.put(Const.X509_EC256_HEADER);
           } else if (keyType == Const.PK_SECP384R1) {
-            buf509 = ByteBuffer.allocate(Const.X509_EC384_HEADER.length + body.length);
+            buf509 = ByteBuffer.allocate(Const.X509_EC384_HEADER.length + coseEecBody.length);
             buf509.put(Const.X509_EC384_HEADER);
           } else {
             throw new NoSuchAlgorithmException();
           }
-          buf509.put(body);
+          buf509.put(coseEecBody);
           buf509.flip();
 
           factory = getKeyFactoryInstance(getKeyFactoryAlgorithm(keyType));
@@ -609,11 +641,23 @@ public class CryptoService {
    * @return True if the signature matches otherwise false.
    */
   public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
-    if (null != sigInfoA && sigInfoA.size() > 0
-        && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11, Const.SG_EPIDv20)
+    if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
       verifyMaroePrefix(cose);
-      return EpidSignatureVerifier.verify(cose, sigInfoA);
+      EpidSignatureVerifier.Result verificationResult =
+              EpidSignatureVerifier.verify(cose, sigInfoA);
+      if (verificationResult == EpidSignatureVerifier.Result.VERIFIED) {
+        return true;
+      } else if (this.epidTestMode) {
+        // in test mode ignore the validation of EPID signatures but
+        // still perform the verification to check for non-signature issues
+        if (verificationResult == EpidSignatureVerifier.Result.UNKNOWN_ERROR
+                || verificationResult == EpidSignatureVerifier.Result.MALFORMED_REQUEST) {
+          return false;
+        }
+        return true;
+      }
+      return false;
     }
     final Composite header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
     final int algId = header1.getAsNumber(Const.COSE_ALG).intValue();

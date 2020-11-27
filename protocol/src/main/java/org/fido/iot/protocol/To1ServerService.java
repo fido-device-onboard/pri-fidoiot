@@ -4,6 +4,7 @@
 package org.fido.iot.protocol;
 
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -42,8 +43,12 @@ public abstract class To1ServerService extends MessagingService {
     getStorage().continuing(request, reply);
     Composite body = request.getAsComposite(Const.SM_BODY);
     CryptoService cryptoService = getCryptoService();
-    PublicKey deviceKey = getStorage().getVerificationKey();
     Composite sigA = getStorage().getSigInfoA();
+    PublicKey deviceKey = null;
+    if (null == sigA || !Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
+            .contains(sigA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      deviceKey = getStorage().getVerificationKey();
+    }
 
     if (!cryptoService.verify(deviceKey, body, sigA)) {
       throw new InvalidMessageException();

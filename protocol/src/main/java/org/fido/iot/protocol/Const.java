@@ -189,12 +189,10 @@ public final class Const {
   //EPID SigInfo Types
   public static final int SG_EPIDv10 = 90; // Intel EPID, version 1.0
   public static final int SG_EPIDv11 = 91; // Intel EPID, version 1.1
-  public static final int SG_EPIDv20 = 92; // Intel EPID, version 2.0
 
   //EPID GroupID lengths
   public static final int GID_LEN_EPIDv10 = 4;
   public static final int GID_LEN_EPIDv11 = 4;
-  public static final int GID_LEN_EPIDv20 = 16;
 
   //EPID Resources
   public static final String GROUPCERTSIGMA10 = "PUBKEY.CRT.BIN";
@@ -203,10 +201,9 @@ public final class Const {
   public static final String PUBKEY = "PUBKEY";
 
   //EPID Verification Service REST API keywords
-  public static final String EPID_PROTOCOL_VERSION_V1 = "v1/";
-  public static final String EPID_PROTOCOL_VERSION_V2 = "v2/";
+  public static final String EPID_PROTOCOL_VERSION_V1 = "v1";
+  public static final String EPID_PROTOCOL_VERSION_V2 = "v2";
   public static final String EPID_11 = "epid11";
-  public static final String EPID_20 = "epid20";
   public static final String URL_PATH_SEPARATOR = "/";
   public static final String EPID_PROOF_URI_PATH = "proof";
 

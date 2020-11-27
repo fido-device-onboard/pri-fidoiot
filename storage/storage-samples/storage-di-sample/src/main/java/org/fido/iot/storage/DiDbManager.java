@@ -26,14 +26,14 @@ public class DiDbManager {
 
       String sql = "CREATE TABLE IF NOT EXISTS "
           + "MT_DEVICES("
-          + "GUID CHAR(36) PRIMARY KEY, "
-          + "SERIAL_NO VARCHAR(255), "
+          + "GUID CHAR(36), "
+          + "SERIAL_NO VARCHAR(255) PRIMARY KEY, "
           + "VOUCHER BLOB, "
           + "CUSTOMER_ID INT NULL DEFAULT NULL, "
           + "M_STRING BLOB, "
           + "STARTED TIMESTAMP, "
           + "COMPLETED TIMESTAMP NULL DEFAULT NULL, "
-          + "PRIMARY KEY ( GUID), "
+          + "PRIMARY KEY ( SERIAL_NO), "
           + "UNIQUE ( SERIAL_NO), "
           + "UNIQUE ( GUID)"
           + ");";

@@ -25,9 +25,6 @@ public class EpidUtils {
     if (sgType == Const.SG_EPIDv11) {
       return Const.GID_LEN_EPIDv11;
     }
-    if (sgType == Const.SG_EPIDv20) {
-      return Const.GID_LEN_EPIDv20;
-    }
     throw new RuntimeException(new NoSuchAlgorithmException());
   }
 

@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -77,15 +75,24 @@ public class DiDbStorage implements DiServerStorage {
       throw new InvalidMessageException("mino must be an array");
     }
 
+    // Determine type of device and create appropriate voucher
+    // The M string (mstr) is a CBOR array of several values:
+    // FIRST_KEY (number): the key type requirement of the device, as an integer-coded KeyType
+    //   This is the type of owner key the device is prepared to parse, not the type
+    //   of the device's key.
+    // SECOND_KEY (string): the device serial number
+    // THIRD_KEY (string): a device info hint
+    // FOURTH_KEY (bstr):
+    // - if the device is using an EC keypair, a CSR.
+    // - if the device is OnDie ECDSA then the device cert chain and a
+    //   test signature is also present
+    // FIFTH_KEY (bstr): present only for OnDie ECDSA: the test signature
+
     Composite mstr = Composite.fromObject(createParams);
 
     voucher = Composite.newArray();
     Composite header = Composite.newArray();
     String customerId = null;
-
-    //setup cert hash and public key
-    Composite chain = null;
-    Composite chainHash = null;
 
     Composite settings = getSettings();
     Integer validityDays = settings.getAsNumber(Const.FIRST_KEY).intValue();
@@ -94,19 +101,42 @@ public class DiDbStorage implements DiServerStorage {
       customerId = settings.getAsString(Const.THIRD_KEY);
     }
 
-    UUID guid = UUID.randomUUID();
-    Certificate[] issuerChain = resolver.getCertChain(
-        mstr.getAsNumber(Const.FIRST_KEY).intValue());
+    //setup cert hash and public key where applicable
+    Object publicKey = null;
+    Composite chainHash = null;
+    Composite chain = null;
 
+    UUID guid = UUID.randomUUID();
+
+    int keyType = mstr.getAsNumber(Const.FIRST_KEY).intValue();
     String serialNo = mstr.getAsString(Const.SECOND_KEY);
 
-    if (mstr.get(Const.FOURTH_KEY) != Optional.empty()) {
+    if (keyType == Const.PK_SECP256R1 || keyType == Const.PK_SECP384R1) {
+      Certificate[] issuerChain = resolver.getCertChain(keyType);
       chain = createChain(
           mstr.getAsBytes(Const.FOURTH_KEY),
           issuerChain,
           validityDays);
-      int hashType = getCryptoService().getCompatibleHashType(issuerChain[0].getPublicKey());
+      int hashType = cryptoService.getCompatibleHashType(issuerChain[0].getPublicKey());
       chainHash = cryptoService.hash(hashType, chain.toBytes());
+      publicKey = cryptoService.encode(issuerChain[0].getPublicKey(),
+              cryptoService.getCompatibleEncoding(issuerChain[0].getPublicKey()));
+    } else if (keyType == Const.PK_RSA2048RESTR) {
+      // EPID type device
+      Certificate[] issuerChain = resolver.getCertChain(keyType);
+      publicKey = cryptoService.encode(issuerChain[0].getPublicKey(), Const.PK_ENC_CRYPTO);
+      chain = null;
+      chain = Composite.newArray();
+      try {
+        chain.set(chain.size(), issuerChain[0].getEncoded());
+      } catch (CertificateEncodingException ex) {
+        throw new InvalidMessageException("Unsupported keytype in mstr: " + keyType);
+      }
+
+      chainHash = Composite.newArray();
+    } else {
+      // placeholder for future device types
+      throw new InvalidMessageException("Unsupported keytype in mstr: " + keyType);
     }
 
     String modelNo = mstr.getAsString(Const.THIRD_KEY);
@@ -116,9 +146,7 @@ public class DiDbStorage implements DiServerStorage {
     header.set(Const.OVH_GUID, guid);
     header.set(Const.OVH_RENDEZVOUS_INFO, rvInfo);
     header.set(Const.OVH_DEVICE_INFO, modelNo);
-    header.set(Const.OVH_PUB_KEY,
-        cryptoService.encode(issuerChain[0].getPublicKey(),
-            cryptoService.getCompatibleEncoding(issuerChain[0].getPublicKey())));
+    header.set(Const.OVH_PUB_KEY, publicKey);
     header.set(Const.OVH_CERT_CHAIN_HASH, chainHash);
 
     voucher.set(Const.OV_HEADER, header);
@@ -126,7 +154,7 @@ public class DiDbStorage implements DiServerStorage {
     voucher.set(Const.OV_DEV_CERT_CHAIN, chain);
     voucher.set(Const.OV_ENTRIES, Composite.newArray());
 
-    String sql = "INSERT INTO MT_DEVICES ("
+    String sql = "MERGE INTO MT_DEVICES ("
         + "GUID,"
         + "SERIAL_NO,"
         + "VOUCHER,"

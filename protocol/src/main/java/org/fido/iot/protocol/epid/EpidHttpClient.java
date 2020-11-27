@@ -29,7 +29,7 @@ public class EpidHttpClient {
 
   /**
    * Perform HTTP GET operation.
-   * 
+   *
    * @param url the Url to which request will be sent
    * @return the response from the Url
    * @throws IOException throws an IOException in case the response status code is not 200 (OK)
@@ -39,10 +39,10 @@ public class EpidHttpClient {
     try {
       httpClient = HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-          HttpRequest.newBuilder().header("Accept", "application/octet-stream");
+              HttpRequest.newBuilder().header("Accept", "application/octet-stream");
       final HttpRequest httpRequest = httpRequestBuilder.uri(URI.create(url)).GET().build();
       final Future<HttpResponse<byte[]>> future =
-          executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
+              executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
       final HttpResponse<byte[]> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
       if (httpResponse.statusCode() == 200) {
@@ -58,29 +58,26 @@ public class EpidHttpClient {
 
   /**
    * Perform HTTP POST operation.
-   * 
-   * @param url the Url to which request will be sent
+   *
+   * @param url     the Url to which request will be sent
    * @param payload the data to send in HTTP request body
-   * @return the response from the Url
+   * @return the status code response from the Url
    * @throws IOException throws an IOException in case the response status code is not 200 (OK)
    */
-  public static byte[] doPost(String url, byte[] payload) throws IOException {
+  public static int doPost(String url, String payload) throws IOException {
     HttpClient httpClient;
     try {
       httpClient = HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-          HttpRequest.newBuilder().header("Content-Type", "application/octet-stream");
+              HttpRequest.newBuilder().header("Content-Type", "application/json");
       final HttpRequest httpRequest =
-          httpRequestBuilder.uri(URI.create(url)).POST(BodyPublishers.ofByteArray(payload)).build();
-      final Future<HttpResponse<byte[]>> future =
-          executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
-      final HttpResponse<byte[]> httpResponse;
+          httpRequestBuilder.uri(URI.create(url)).POST(BodyPublishers.ofString(payload)).build();
+      final Future<HttpResponse<String>> future =
+          executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofString()));
+      final HttpResponse<String> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
-      if (httpResponse.statusCode() == 200) {
-        return null != httpResponse.body() ? httpResponse.body() : new byte[0];
-      } else {
-        throw new IOException("HTTP POST failed with: " + httpResponse.statusCode());
-      }
+      return httpResponse.statusCode();
+
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
       System.out.println(e.getMessage());
       throw new RuntimeException(e);
