@@ -176,8 +176,7 @@ public class RvsDbManager {
       InputStream inputStream = classLoader.getResourceAsStream(fileName);
       Properties properties = new Properties();
       properties.load(inputStream);
-      allowlist.add(properties.getProperty("mfg.allowlist.publickeyhash"));
-      allowlist.add(properties.getProperty("owner.allowlist.publickeyhash"));
+      allowlist = Arrays.asList(properties.getProperty("allowlist.publickeyhash").split(","));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -215,8 +214,7 @@ public class RvsDbManager {
       InputStream inputStream = classLoader.getResourceAsStream(fileName);
       Properties properties = new Properties();
       properties.load(inputStream);
-      denylist.add(properties.getProperty("mfg.denylist.publickeyhash"));
-      denylist.add(properties.getProperty("owner.denylist.publickeyhash"));
+      denylist = Arrays.asList(properties.getProperty("denylist.publickeyhash").split(","));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
