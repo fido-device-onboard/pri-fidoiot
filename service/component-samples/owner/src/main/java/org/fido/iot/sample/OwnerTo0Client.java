@@ -91,7 +91,7 @@ public class OwnerTo0Client {
 
       @Override
       protected void failed(Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     };
   }
@@ -120,7 +120,7 @@ public class OwnerTo0Client {
           break;
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
         throw e;
       }
     }
