@@ -51,9 +51,12 @@ public class ResellerServerApp {
         ResellerConfigLoader.loadConfig(ResellerAppConstants.DB_DRIVER));
 
     // hard-coded H2 config
-    ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-        + ResellerConfigLoader.loadConfig(ResellerAppConstants.DB_PORT));
-    ctx.addParameter("webAllowOthers", "true");
+    ctx.addParameter(
+        ResellerAppConstants.DB_TCP_SERVER,
+        ResellerConfigLoader.loadConfig(ResellerAppConstants.DB_TCP_SERVER));
+    ctx.addParameter(
+        ResellerAppConstants.H2_ALLOW_REMOTE_CONNECTION,
+        ResellerConfigLoader.loadConfig(ResellerAppConstants.H2_ALLOW_REMOTE_CONNECTION));
     ctx.addParameter("trace", "");
 
     ctx.addParameter(ResellerAppConstants.KEYSTORE_PWD,

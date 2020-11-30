@@ -69,10 +69,13 @@ public class ManufacturerApp {
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_USER));
     ctx.addParameter(ManufacturerAppSettings.DB_PWD,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_PWD));
-    ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-        + ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_PORT));
+    ctx.addParameter(
+        ManufacturerAppSettings.DB_TCP_SERVER,
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_TCP_SERVER));
 
-    ctx.addParameter("webAllowOthers", "true");
+    ctx.addParameter(
+        ManufacturerAppSettings.H2_ALLOW_REMOTE_CONNECTION,
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.H2_ALLOW_REMOTE_CONNECTION));
     ctx.addParameter("trace", "");
 
     ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,

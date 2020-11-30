@@ -13,7 +13,9 @@ public class RvAppSettings {
   public static final String DB_USER = "rv_database_username";
   public static final String DB_PWD = "rv_database_password";
   public static final String DB_PORT = "rv_database_port";
+  public static final String DB_TCP_SERVER = "db.tcpServer";
   public static final String H2_DRIVER = "org.h2.Driver";
+  public static final String H2_ALLOW_REMOTE_CONNECTION = "webAllowOthers";
 
   // tomcat's catalaina.home
   public static final String SERVER_PATH = "catalina_home";

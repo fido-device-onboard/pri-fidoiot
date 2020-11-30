@@ -39,11 +39,11 @@ public class RvServerApp {
     ctx.addParameter(RvAppSettings.DB_USER, RvConfigLoader.loadConfig(RvAppSettings.DB_USER));
     ctx.addParameter(RvAppSettings.DB_PWD, RvConfigLoader.loadConfig(RvAppSettings.DB_PWD));
     ctx.addParameter(
-        "db.tcpServer",
-        "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-            + RvConfigLoader.loadConfig(RvAppSettings.DB_PORT));
+        RvAppSettings.DB_TCP_SERVER, RvConfigLoader.loadConfig(RvAppSettings.DB_TCP_SERVER));
 
-    ctx.addParameter("webAllowOthers", "true");
+    ctx.addParameter(
+        RvAppSettings.H2_ALLOW_REMOTE_CONNECTION,
+        RvConfigLoader.loadConfig(RvAppSettings.H2_ALLOW_REMOTE_CONNECTION));
     ctx.addParameter("trace", "");
     if (null != RvConfigLoader.loadConfig(RvAppSettings.EPID_URL)) {
       ctx.addParameter(RvAppSettings.EPID_URL, RvConfigLoader.loadConfig(RvAppSettings.EPID_URL));

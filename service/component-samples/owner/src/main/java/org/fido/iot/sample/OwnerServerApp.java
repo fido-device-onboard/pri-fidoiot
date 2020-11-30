@@ -57,9 +57,12 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
 
     // hard-coded H2 config
-    ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-        + OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PORT));
-    ctx.addParameter("webAllowOthers", "true");
+    ctx.addParameter(
+        OwnerAppSettings.DB_TCP_SERVER,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_TCP_SERVER));
+    ctx.addParameter(
+        OwnerAppSettings.H2_ALLOW_REMOTE_CONNECTION,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.H2_ALLOW_REMOTE_CONNECTION));
     ctx.addParameter("trace", "");
 
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {

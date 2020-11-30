@@ -13,8 +13,10 @@ public class ResellerAppConstants {
   public static final String DB_PWD = "reseller_database_password";
   public static final String DB_PORT = "reseller_database_port";
   public static final String DB_DRIVER = "reseller_database_driver";
+  public static final String DB_TCP_SERVER = "db.tcpServer";
   public static final String API_USER = "reseller_api_user";
   public static final String API_PWD = "reseller_api_password";
+  public static final String H2_ALLOW_REMOTE_CONNECTION = "webAllowOthers";
 
   // tomcat's catalaina.home
   public static final String SERVER_PATH = "reseller_home";
