@@ -21,7 +21,7 @@ public class Ec256Test {
   @Test
   void Test() throws Exception {
 
-    SecureRandom random = new SecureRandom();
+    SecureRandom random = SecureRandom.getInstanceStrong();
     ECGenParameterSpec ecSpec = new ECGenParameterSpec(Const.SECP256R1_CURVE_NAME);
     KeyPairGenerator kg = KeyPairGenerator.getInstance(Const.EC_ALG_NAME);
     kg.initialize(ecSpec, random);
