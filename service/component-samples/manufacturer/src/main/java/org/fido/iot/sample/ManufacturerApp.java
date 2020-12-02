@@ -69,10 +69,18 @@ public class ManufacturerApp {
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_USER));
     ctx.addParameter(ManufacturerAppSettings.DB_PWD,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_PWD));
-    ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
+
+    // To enable remote connections to the DB set
+    // db.tcpServer=-tcp -tcpAllowOthers -ifNotExists -tcpPort
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
+    ctx.addParameter("db.tcpServer", "-tcp -ifNotExists -tcpPort "
         + ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_PORT));
 
-    ctx.addParameter("webAllowOthers", "true");
+    // To enable remote connections to the DB set webAllowOthers=true
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
+    ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
     ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,
