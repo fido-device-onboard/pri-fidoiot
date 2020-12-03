@@ -38,6 +38,12 @@ $ mvn clean install
 
 The build creates artifacts which will be used in the rest of this guide.
 
+To generate the code coverage report, execute the following command:
+```
+$ mvn clean verify
+```
+The code coverage report of individual components are stored in their respective build folder. ( Eg: `protocol/target/site/jacoco/`)
+
 ## Using Protocol Samples
 
 ### Starting FIDO IoT HTTP Servers
