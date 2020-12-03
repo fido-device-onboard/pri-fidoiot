@@ -87,10 +87,10 @@ public class DiClientApp {
             .set(Const.FOURTH_KEY, csr);
 
       } catch (IOException e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
         throw new RuntimeException(e);
       } catch (OperatorCreationException e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
         throw new RuntimeException(e);
       }
     }
@@ -160,7 +160,7 @@ public class DiClientApp {
 
       @Override
       protected void failed(Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     };
   }
@@ -175,7 +175,7 @@ public class DiClientApp {
       System.out.println("Device Credentials: " + deviceCredentials);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      System.out.println(e.getMessage());
     }
 
   }

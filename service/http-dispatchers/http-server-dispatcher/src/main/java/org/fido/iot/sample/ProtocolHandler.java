@@ -41,7 +41,7 @@ public class ProtocolHandler implements Runnable {
       OutputStream out = response.getOutputStream();
       try (PrintStream s = new PrintStream(out, true, StandardCharsets.US_ASCII.name())) {
         response.setContentType("text/plain; charset=us-ascii");
-        e.printStackTrace(s);
+        System.out.println("Failed to write data: " + e.getMessage());
       }
     } catch (UnsupportedEncodingException uee) {
       //nothing we can due since we are already processing an Exception
