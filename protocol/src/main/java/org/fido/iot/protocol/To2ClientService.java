@@ -232,7 +232,6 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite body = request.getAsComposite(Const.SM_BODY);
     Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
-
     byte[] receivedNonce7 = message.getAsBytes(Const.THIRD_KEY);
     getCryptoService().verifyBytes(receivedNonce7, nonce7);
 
@@ -290,12 +289,12 @@ public abstract class To2ClientService extends DeviceService {
     if (secret != null) {
       Composite headerCopy = Composite.newArray();
       headerCopy.set(Const.OVH_VERSION, voucherHdr.get(Const.OVH_VERSION));
-      headerCopy.set(Const.OVH_GUID, message.getAsUuid(Const.SECOND_KEY));
-      headerCopy.set(Const.OVH_RENDEZVOUS_INFO, message.getAsUuid(Const.FIRST_KEY));
+      headerCopy.set(Const.OVH_GUID, newCreds.getAsUuid(Const.DC_GUID));
+      headerCopy.set(Const.OVH_RENDEZVOUS_INFO, newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
       headerCopy.set(Const.OVH_DEVICE_INFO, voucherHdr.get(Const.OVH_DEVICE_INFO));
       headerCopy.set(Const.OVH_PUB_KEY, ownerKey2);
       headerCopy.set(Const.OVH_CERT_CHAIN_HASH, voucherHdr.get(Const.OVH_CERT_CHAIN_HASH));
-      hashType = getHeaderHash().getAsNumber(Const.HASH_TYPE).intValue();
+      hashType = getCryptoService().getCompatibleHmacType(getCryptoService().decode(ownerKey2));
       newHash = getCryptoService().hash(hashType, secret, headerCopy.toBytes());
     }
 

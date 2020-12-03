@@ -231,8 +231,8 @@ public abstract class To2ServerService extends MessagingService {
       // check if owner supports Resale
       // if supported, replacement hmac is set in the replacement voucher
       // if not supported, replacement hmac is discarded
-      if (getStorage().getOwnerResaleSupport()) {
-        voucher.set(Const.OV_HMAC, getStorage().getReplacementHmac());
+      if (getStorage().getOwnerResaleSupport() && getStorage().getReplacementHmac() != null) {
+        voucher.set(Const.OV_HMAC, Composite.fromObject(getStorage().getReplacementHmac()));
       } else {
         voucher.set(Const.OV_HMAC, PrimitivesUtil.getCborNullBytes());
         getStorage().discardReplacementOwnerKey();
