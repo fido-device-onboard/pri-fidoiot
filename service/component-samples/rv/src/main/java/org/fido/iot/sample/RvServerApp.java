@@ -38,12 +38,19 @@ public class RvServerApp {
     ctx.addParameter(RvAppSettings.DB_URL, RvConfigLoader.loadConfig(RvAppSettings.DB_URL));
     ctx.addParameter(RvAppSettings.DB_USER, RvConfigLoader.loadConfig(RvAppSettings.DB_USER));
     ctx.addParameter(RvAppSettings.DB_PWD, RvConfigLoader.loadConfig(RvAppSettings.DB_PWD));
+
+    // To enable remote connections to the DB set
+    // db.tcpServer=-tcp -tcpAllowOthers -ifNotExists -tcpPort
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
     ctx.addParameter(
         "db.tcpServer",
-        "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
-            + RvConfigLoader.loadConfig(RvAppSettings.DB_PORT));
+        "-tcp -ifNotExists -tcpPort " + RvConfigLoader.loadConfig(RvAppSettings.DB_PORT));
 
-    ctx.addParameter("webAllowOthers", "true");
+    // To enable remote connections to the DB set webAllowOthers=true
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
+    ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
     if (null != RvConfigLoader.loadConfig(RvAppSettings.EPID_URL)) {
       ctx.addParameter(RvAppSettings.EPID_URL, RvConfigLoader.loadConfig(RvAppSettings.EPID_URL));
