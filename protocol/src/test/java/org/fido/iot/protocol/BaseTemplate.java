@@ -144,7 +144,7 @@ public class BaseTemplate {
   protected void setup() throws Exception {
 
     //setup resources used for tests
-    SecureRandom random = new SecureRandom();
+    SecureRandom random = SecureRandom.getInstanceStrong();
 
     //setup crypto service
     cryptoService = new CryptoService();
