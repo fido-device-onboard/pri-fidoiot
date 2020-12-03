@@ -80,7 +80,7 @@ public class To2ClientApp {
         client.run();
 
       } catch (Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     }
 
@@ -209,7 +209,7 @@ public class To2ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     };
   }
