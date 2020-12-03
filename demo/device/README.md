@@ -1,6 +1,6 @@
 # Getting the executable
 
-Use following commands to build FIDO IoT HTTP Device Component sample source.
+Use the following commands to build FIDO IoT HTTP Device Component sample source.
 ```
 $ cd <fido-iot-src>/service/component-samples/http-device-sample/
 $ mvn clean install

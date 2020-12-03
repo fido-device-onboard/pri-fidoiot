@@ -134,8 +134,8 @@ The FIDO IoT Owner Sample currently supports the same `sdo_sys` module to send O
 
 # Enabling Service info transfer
 
-To enable service info transfer to a Device with a given GUID, following are the steps:
+To enable service info transfer to a Device with a given GUID by following are the steps below:
 
 1. (Optional) Insert required Service info values into the database table 'OWNER_SERVICEINFO' using the API `POST /api/v1/owner/svivalues/?id=<serviceinfo_id>&isCborEncoded=<boolean_value>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). If the required service info already exists in the table, go on to the next step.
 
-2. (Mandatory) Insert required association between the Device and Service info values to transfer using the API `POST /api/v1/owner/svi/?guid=<guid>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). As a referance, please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv, which says that Owner will transfer the column 'Content' of serviceinfoIds 'payload.bin' and 'package.sh', which the device will store in files named by the column 'Content' of serviceinfoids 'payload_name' and 'package_name'. Additionally, the Owner transfers the command as specified in column 'Content' of serviceinfoId 'binsh-linux', to be executed by the Device.
+2. (Mandatory) Insert required association between the Device and Service info values to transfer using the API `POST /api/v1/owner/svi/?guid=<guid>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). As a referance, please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv, which says that Owner will transfer the column 'Content' of serviceinfoIds, 'payload.bin', and 'package.sh', which the device will store in files named by the column 'Content' of serviceinfoids 'payload_name' and 'package_name'. Additionally, the Owner transfers the command as specified in column 'Content' of serviceinfoId 'binsh-linux', to be executed by the Device.

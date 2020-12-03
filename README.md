@@ -7,7 +7,7 @@
 For the instructions in this document, `<fido-iot-src>` refers to the path of the FIDO
 IoT source folder 'pri'.
 
-FIDO IoT source code is organized into following sub-folders.
+FIDO IoT source code is organized into the following sub-folders.
 
 - `cert-utils`: It contains utilities for loading certificates and keys from PEM formatted strings.
 
@@ -22,15 +22,15 @@ FIDO IoT source code is organized into following sub-folders.
 ## Building FIDO IoT source
 
 FIDO IoT source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
-[Apache Maven* software](http://maven.apache.org). The instructions which follow describe a simple
+[Apache Maven* software](http://maven.apache.org). The instructions which follow describes a simple
 build and assume familiarity with
 [the Maven build lifecycle](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html).
 
-Following ports are used for unit-tests and sample code - 8039, 8040, 8042, 8043, 8049, 8050 and 8051.
+Following ports are used for unit-tests and sample code - 8039, 8040, 8042, 8043, 8049, 8050, and 8051.
 Ensure that these ports are not used by other applications while building and executing the
 binaries.
 
-Use following commands to build FIDO IoT source.
+Use the following commands to build FIDO IoT source.
 ```
 $ cd <fido-iot-src>
 $ mvn clean install
@@ -68,7 +68,7 @@ $ mvn exec:java
 
 The server will listen for FIDO IoT HTTP messages on port 8039.
 The H2 database will listen on TCP port 8049.
-You can allow remote database console connections by setting webAllowOthers=true in the .h2.server.properties file located your user home directory (e.g '~' for Linux and C:\Users\[username] for Windows).
+You can allow remote database console connections by setting webAllowOthers=true in the .h2.server.properties file located your user home directory (for example, '~' for Linux and C:\Users\[username] for Windows).
 
 ### Running FIDO IoT HTTP Clients
 
@@ -116,7 +116,7 @@ The DI server will listen for messages at http://localhost:8039/fido/100/msg/<ms
 The server also includes an SQL database that runs on port 8049. The database console
 UI will be available at http://localhost:8039/console.
 
-Extended ownership vouchers can be obtained from the following uri:
+Extended ownership vouchers can be obtained from the following url:
 
 http://localhost:8039/api/v1/vouchers/<serial_no>
 ***NOTE***: Default serial number is '0'. To get the serial_no corresponding to the GUID, look up the `SERIAL_NO` field of MT_DEVICES table in the DI database.
