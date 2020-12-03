@@ -55,6 +55,10 @@ public class RvServerApp {
     if (null != RvConfigLoader.loadConfig(RvAppSettings.EPID_URL)) {
       ctx.addParameter(RvAppSettings.EPID_URL, RvConfigLoader.loadConfig(RvAppSettings.EPID_URL));
     }
+    if (null != RvConfigLoader.loadConfig(RvAppSettings.EPID_TEST_MODE)) {
+      ctx.addParameter(RvAppSettings.EPID_TEST_MODE,
+              RvConfigLoader.loadConfig(RvAppSettings.EPID_TEST_MODE));
+    }
 
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(RvContextListener.class.getName());
