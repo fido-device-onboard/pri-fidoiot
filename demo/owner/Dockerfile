@@ -4,7 +4,7 @@
 FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y openjdk-11-jdk wget
+RUN apt-get update && apt-get install -y openjdk-11-jdk wget haveged
 
 RUN useradd -ms /bin/bash owner
 USER owner
