@@ -4,14 +4,12 @@
 FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm softhsm-common opensc wget
+RUN apt-get update && apt-get install -y openjdk-11-jdk wget
 
-# Configuring softHSM and JVM provider.
-COPY java.security /etc/java-11-openjdk/security/
-COPY pkcs11.cfg /etc/softhsm/
-
-RUN mkdir -p /home/owner/lib /home/owner/serviceinfo
+RUN useradd -ms /bin/bash owner
+USER owner
 WORKDIR /home/owner/
+RUN mkdir -p /home/owner/lib /home/owner/serviceinfo
 
 # Setup owner dependencies
 COPY ./lib ./lib/
