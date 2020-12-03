@@ -241,7 +241,7 @@ public class To0ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     };
   }
@@ -272,7 +272,7 @@ public class To0ClientApp {
           break;
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     }
 

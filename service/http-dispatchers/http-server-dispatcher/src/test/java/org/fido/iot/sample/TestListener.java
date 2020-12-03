@@ -123,7 +123,7 @@ public class TestListener implements ServletContextListener {
       try {
         ((Closeable) obj).close();
       } catch (IOException e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     }
   }

@@ -43,7 +43,7 @@ public class OwnerKeyResolver implements KeyResolver {
           }
         }
       } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     }
     return null;
@@ -59,7 +59,7 @@ public class OwnerKeyResolver implements KeyResolver {
         ownerKeyStore.load(null, ownerKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      e.printStackTrace();
+      System.out.println(e.getMessage());
     }
   }
 }
