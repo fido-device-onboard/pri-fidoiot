@@ -21,9 +21,12 @@ import org.fido.iot.protocol.To0ClientService;
 import org.fido.iot.protocol.To0ClientStorage;
 import org.fido.iot.storage.OwnerDbTo0Storage;
 import org.fido.iot.storage.OwnerDbTo0Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerTo0Client {
 
+  private static Logger logger = LoggerFactory.getLogger(OwnerTo0Client.class);
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final KeyResolver keyResolver;
@@ -91,7 +94,7 @@ public class OwnerTo0Client {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -100,7 +103,7 @@ public class OwnerTo0Client {
    * Initiates TO0 for a device.
    */
   public void run() throws NoSuchAlgorithmException, IOException, InterruptedException {
-    System.out.println("TO0 Client started for GUID " + guid.toString());
+    logger.info("TO0 Client started for GUID " + guid.toString());
     MessageDispatcher dispatcher = createDispatcher();
 
     DispatchResult dr = clientService().getHelloMessage();
@@ -120,9 +123,10 @@ public class OwnerTo0Client {
           break;
         }
       } catch (Exception e) {
-        System.out.println("TO0 failed for " + guid.toString() + "." + e.getMessage());
+        logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
         throw e;
       }
     }
+    logger.info("TO0 Client finished for GUID " + guid.toString());
   }
 }

@@ -40,11 +40,15 @@ import org.fido.iot.protocol.DispatchException;
 import org.fido.iot.protocol.InvalidJwtException;
 import org.fido.iot.protocol.InvalidMessageException;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Device Initialization Database Storage.
  */
 public class DiDbStorage implements DiServerStorage {
+
+  private static Logger logger = LoggerFactory.getLogger(DiDbStorage.class);
 
   private final CryptoService cryptoService;
   private final DataSource dataSource;
@@ -210,7 +214,7 @@ public class DiDbStorage implements DiServerStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    System.out.println("Voucher stored with GUID: " + guid.toString());
+    logger.info("Voucher stored with GUID: " + guid.toString());
   }
 
   @Override

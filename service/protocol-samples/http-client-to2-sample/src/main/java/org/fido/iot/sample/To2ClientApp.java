@@ -20,8 +20,12 @@ import org.fido.iot.protocol.RendezvousBlobDecoder;
 import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class To2ClientApp {
+
+  private static Logger logger = LoggerFactory.getLogger(To2ClientApp.class);
 
   private static final int RV_PORT = 8040;
   private static final String HOST_NAME = "localhost";
@@ -80,7 +84,7 @@ public class To2ClientApp {
         client.run();
 
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -209,7 +213,7 @@ public class To2ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -222,7 +226,7 @@ public class To2ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To2ClientApp().run(args);
-    System.out.println("TO2 Client finished.");
+    logger.info("TO2 Client finished.");
     return;
   }
 }

@@ -30,7 +30,7 @@ public class ResellerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(ResellerAppConstants.DB_USER));
     ds.setPassword(sc.getInitParameter(ResellerAppConstants.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    sc.log(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

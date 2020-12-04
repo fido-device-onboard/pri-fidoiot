@@ -16,11 +16,15 @@ import org.fido.iot.api.DiApiServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Runs the Device Initialization Application service.
  */
 public class DiApp {
+
+  private static Logger logger = LoggerFactory.getLogger(DiApp.class);
 
   private static final int DI_PORT = 8039;
   private static final String DB_PORT = "8049";
@@ -46,14 +50,14 @@ public class DiApp {
   public static void main(String[] args) {
     Security.addProvider(new BouncyCastleProvider());
 
-    System.out.println(System.getProperty("java.home"));
+    logger.info(System.getProperty("java.home"));
     try {
       Provider[] providers = Security.getProviders();
       for (int i = 0; i < providers.length; i++) {
-        System.out.println(providers[i]);
+        logger.info(String.valueOf(providers[i]));
       }
     } catch (Exception e) {
-      System.out.println(e);
+      logger.error(String.valueOf(e));
     }
 
     Tomcat tomcat = new Tomcat();

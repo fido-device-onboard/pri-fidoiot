@@ -21,8 +21,12 @@ import org.fido.iot.protocol.DiClientService;
 import org.fido.iot.protocol.DiClientStorage;
 import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiClientApp {
+
+  private static Logger logger = LoggerFactory.getLogger(DiClientApp.class);
 
   private static final String DI_URI = "http://localhost:8039";
 
@@ -78,7 +82,7 @@ public class DiClientApp {
         String serialNo = Composite.toString(
             cryptoService.getRandomBytes(4));
 
-        System.out.println("SerialNo: " + serialNo);
+        logger.info("SerialNo: " + serialNo);
 
         return Composite.newArray()
             .set(Const.FIRST_KEY, Const.PK_SECP256R1)
@@ -87,10 +91,10 @@ public class DiClientApp {
             .set(Const.FOURTH_KEY, csr);
 
       } catch (IOException e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
         throw new RuntimeException(e);
       } catch (OperatorCreationException e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
         throw new RuntimeException(e);
       }
     }
@@ -160,7 +164,7 @@ public class DiClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -172,10 +176,10 @@ public class DiClientApp {
     try {
       WebClient client = new WebClient(DI_URI, clientService.getHelloMessage(), dispatcher);
       client.run();
-      System.out.println("Device Credentials: " + deviceCredentials);
+      logger.info("Device Credentials: " + deviceCredentials);
 
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
     }
 
   }
@@ -187,7 +191,7 @@ public class DiClientApp {
    */
   public static void main(String[] args) {
     new DiClientApp().run(args);
-    System.out.println("DI Client finished.");
+    logger.info("DI Client finished.");
     return;
   }
 }

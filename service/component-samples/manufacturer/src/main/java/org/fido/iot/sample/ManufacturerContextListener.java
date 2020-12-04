@@ -32,11 +32,15 @@ import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.storage.CertificateResolver;
 import org.fido.iot.storage.DiDbManager;
 import org.fido.iot.storage.DiDbStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Device Initialization servlet Context Listener.
  */
 public class ManufacturerContextListener implements ServletContextListener {
+
+  private static Logger logger = LoggerFactory.getLogger(ManufacturerContextListener.class);
 
   private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
@@ -70,7 +74,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(ManufacturerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(ManufacturerAppSettings.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -102,7 +106,7 @@ public class ManufacturerContextListener implements ServletContextListener {
             }
           } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
               | CertificateEncodingException e) {
-            System.out.println("Unable to retrieve Private Key. " + e.getMessage());
+            logger.error("Unable to retrieve Private Key. " + e.getMessage());
           }
         }
         throw new RuntimeException();
@@ -135,7 +139,7 @@ public class ManufacturerContextListener implements ServletContextListener {
               }
             }
           } catch (KeyStoreException e) {
-            System.out.println("Unable to retrieve Certificate chain. " + e.getMessage());
+            logger.error("Unable to retrieve Certificate chain. " + e.getMessage());
           }
         }
         throw new RuntimeException();
@@ -213,7 +217,7 @@ public class ManufacturerContextListener implements ServletContextListener {
         mfgKeyStore.load(null, mfgKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      System.out.println("Error in loading keystore. " + e.getMessage());
+      logger.error("Error in loading keystore. " + e.getMessage());
     }
   }
 }

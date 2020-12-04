@@ -37,8 +37,12 @@ import org.fido.iot.serviceinfo.ServiceInfo;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
 import org.fido.iot.serviceinfo.ServiceInfoSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerDbStorage implements To2ServerStorage {
+
+  private static Logger logger = LoggerFactory.getLogger(OwnerDbStorage.class);
 
   private final CryptoService cryptoService;
   private final DataSource dataSource;
@@ -354,7 +358,7 @@ public class OwnerDbStorage implements To2ServerStorage {
                 try {
                   encoder.writeObject(info.get(Const.SECOND_KEY));
                 } catch (IOException e) {
-                  System.out.println("Invalid serviceinfo value" + e.getMessage());
+                  logger.error("Invalid serviceinfo value" + e.getMessage());
                 }
                 return out.toByteArray();
               }

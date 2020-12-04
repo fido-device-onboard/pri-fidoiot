@@ -20,8 +20,12 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To0ServerService;
 import org.fido.iot.protocol.To0ServerStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestListener implements ServletContextListener {
+
+  private static Logger logger = LoggerFactory.getLogger(ServletContextListener.class);
 
   public static final String BEARER_TOKEN = "1234567890abcef";
 
@@ -128,7 +132,7 @@ public class TestListener implements ServletContextListener {
       try {
         ((Closeable) obj).close();
       } catch (IOException e) {
-        System.out.println(e.getMessage());
+        logger.info(e.getMessage());
       }
     }
   }

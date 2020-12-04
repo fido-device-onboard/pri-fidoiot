@@ -16,11 +16,15 @@ import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.DispatchResult;
 import org.fido.iot.protocol.MessageDispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for all message Handlers.
  */
 public class ProtocolHandler implements Runnable {
+
+  private static Logger logger = LoggerFactory.getLogger(ProtocolHandler.class);
 
   private MessageDispatcher dispatcher;
   private AsyncContext asyncCtx;
@@ -41,7 +45,7 @@ public class ProtocolHandler implements Runnable {
       OutputStream out = response.getOutputStream();
       try (PrintStream s = new PrintStream(out, true, StandardCharsets.US_ASCII.name())) {
         response.setContentType("text/plain; charset=us-ascii");
-        System.out.println("Failed to write data: " + e.getMessage());
+        logger.info("Failed to write data: " + e.getMessage());
       }
     } catch (UnsupportedEncodingException uee) {
       //nothing we can due since we are already processing an Exception

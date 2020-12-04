@@ -32,8 +32,12 @@ import org.fido.iot.protocol.DiServerStorage;
 import org.fido.iot.protocol.DispatchResult;
 import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiStorageTest {
+
+  private static Logger logger = LoggerFactory.getLogger(DiStorageTest.class);
 
   private static final String DB_HOST = "localhost";
   private static final String DB_PORT = "8043";
@@ -247,7 +251,7 @@ public class DiStorageTest {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println(request.toString());
+        logger.info(request.toString());
       }
 
       @Override

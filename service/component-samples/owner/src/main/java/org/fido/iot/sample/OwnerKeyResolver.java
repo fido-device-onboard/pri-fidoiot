@@ -19,8 +19,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.fido.iot.protocol.KeyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerKeyResolver implements KeyResolver {
+
+  private static Logger logger = LoggerFactory.getLogger(OwnerKeyResolver.class);
 
   private static KeyStore ownerKeyStore;
   private final String ownerKeystorePath;
@@ -51,7 +55,7 @@ public class OwnerKeyResolver implements KeyResolver {
           }
         }
       } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
     return null;
@@ -72,8 +76,8 @@ public class OwnerKeyResolver implements KeyResolver {
             ownerKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      System.out.println("Keystore not configured.");
-      System.out.println(e.getMessage());
+      logger.error("Keystore not configured.");
+      logger.error(e.getMessage());
     }
   }
 }

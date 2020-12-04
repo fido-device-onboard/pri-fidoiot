@@ -29,8 +29,12 @@ import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
 import org.fido.iot.protocol.To1ServerService;
 import org.fido.iot.protocol.To1ServerStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RvsStorageTest {
+
+  private static Logger logger = LoggerFactory.getLogger(RvsStorageTest.class);
 
   private static final String DB_HOST = "localhost";
   private static final String DB_PORT = "8043";
@@ -215,7 +219,7 @@ public class RvsStorageTest {
 
       @Override
       public void setResponseWait(long wait) {
-        System.out.println("To0 Wait: " + wait + " seconds");
+        logger.info("To0 Wait: " + wait + " seconds");
       }
 
       @Override

@@ -16,8 +16,12 @@ import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
 import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class To1ClientApp {
+
+  private static Logger logger = LoggerFactory.getLogger(To1ClientApp.class);
 
   private static final String devKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBdjCCAR0CCQCNo1W35xxR9TAKBggqhkjOPQQDAjANMQswCQYDVQQDDAJDQTAg\n"
@@ -70,7 +74,7 @@ public class To1ClientApp {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -140,7 +144,7 @@ public class To1ClientApp {
     @Override
     public void storeSignedBlob(Composite signedBlob) {
       signedTo1Blob = signedBlob;
-      System.out.println("signed RV Blob: " + signedBlob.toString());
+      logger.info("signed RV Blob: " + signedBlob.toString());
     }
   };
 
@@ -168,7 +172,7 @@ public class To1ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -181,7 +185,7 @@ public class To1ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To1ClientApp().run(args);
-    System.out.println("TO1 Client finished.");
+    logger.info("TO1 Client finished.");
     return;
   }
 }

@@ -9,8 +9,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.UUID;
 import org.fido.iot.certutils.PemLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseTemplate {
+
+  private static Logger logger = LoggerFactory.getLogger(BaseTemplate.class);
 
   protected static final UUID guid = UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb");
 
@@ -138,7 +142,7 @@ public class BaseTemplate {
 
   protected void printError(Composite msg) {
     Composite error = msg.getAsComposite(Const.SM_BODY);
-    System.out.println(error.getAsString(Const.EM_ERROR_STR));
+    logger.error(error.getAsString(Const.EM_ERROR_STR));
   }
 
   protected void setup() throws Exception {
@@ -170,7 +174,7 @@ public class BaseTemplate {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println("dispatching: " + request.toString());
+        logger.info("dispatching: " + request.toString());
         ;
       }
 
@@ -190,7 +194,7 @@ public class BaseTemplate {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println("dispatching: " + request.toString());
+        logger.info("dispatching: " + request.toString());
       }
 
       @Override
@@ -231,6 +235,6 @@ public class BaseTemplate {
       dr = clientDispatcher.dispatch(dr.getReply());
     }
 
-    System.out.println("Client protocol finished.");
+    logger.info("Client protocol finished.");
   }
 }

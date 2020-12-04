@@ -10,12 +10,15 @@ import org.apache.commons.configuration2.SystemConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class to load properties/configuration from system, environment and configuration file.
  */
 public class OwnerConfigLoader {
 
+  private static Logger logger = LoggerFactory.getLogger(OwnerConfigLoader.class);
   private static final String configurationFile = "application.properties";
   private static EnvironmentConfiguration environmentConfiguration;
   private static SystemConfiguration systemConfiguration;
@@ -35,7 +38,7 @@ public class OwnerConfigLoader {
         throw new ConfigurationException();
       }
     } catch (ConfigurationException e) {
-      System.out.println("The Owner application might not be using config file");
+      logger.error("The Owner application might not be using config file");
       // ignore the error since the application might not be using config file.
       // log when logging is enabled in the application.
     }
@@ -55,7 +58,7 @@ public class OwnerConfigLoader {
     } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
       return fileBasedConfiguration.getString(property);
     }
-    System.out.println("Could not load property: " + property);
+    logger.info("Could not load property: " + property);
     return null;
   }
 }

@@ -17,8 +17,12 @@ import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.KeyResolver;
 import org.fido.iot.protocol.To0ClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OwnerDbTo0Storage implements To0ClientStorage {
+
+  private static Logger logger = LoggerFactory.getLogger(OwnerDbTo0Storage.class);
 
   private DataSource dataSource;
   private KeyResolver keyResolver;
@@ -80,7 +84,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
     }
     // return default value
     return TO0_REQUEST_WS;
@@ -101,7 +105,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    System.out.println("To0 Response Wait for " + guid.toString() + " : " + Long.toString(wait));
+    logger.info("To0 Response Wait for " + guid.toString() + " : " + Long.toString(wait));
   }
 
   @Override

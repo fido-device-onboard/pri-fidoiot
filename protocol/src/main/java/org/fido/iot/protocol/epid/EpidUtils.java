@@ -6,8 +6,12 @@ package org.fido.iot.protocol.epid;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import org.fido.iot.protocol.Const;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EpidUtils {
+
+  private static Logger logger = LoggerFactory.getLogger(EpidUtils.class);
 
   private static String epidOnlineUrlString = "https://verify.epid-sbx.trustedservices.intel.com/";
   private static URI epidOnlineUrl = URI.create(epidOnlineUrlString);

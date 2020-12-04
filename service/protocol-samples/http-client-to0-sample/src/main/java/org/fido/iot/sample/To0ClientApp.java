@@ -20,8 +20,12 @@ import org.fido.iot.protocol.RendezvousBlobDecoder;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
 import org.fido.iot.protocol.To0ClientService;
 import org.fido.iot.protocol.To0ClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class To0ClientApp {
+
+  private static Logger logger = LoggerFactory.getLogger(To0ClientApp.class);
 
   private static final int REQUEST_WS = 3600;
   private static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
@@ -166,7 +170,7 @@ public class To0ClientApp {
     @Override
     public void setResponseWait(long wait) {
       responseWait = wait;
-      System.out.println("To0 Response Wait: " + Long.toString(wait));
+      logger.info("To0 Response Wait: " + Long.toString(wait));
     }
 
     @Override
@@ -241,7 +245,7 @@ public class To0ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -272,7 +276,7 @@ public class To0ClientApp {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -286,7 +290,7 @@ public class To0ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To0ClientApp().run(args);
-    System.out.println("TO0 Client finished.");
+    logger.info("TO0 Client finished.");
     return;
   }
 }

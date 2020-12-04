@@ -38,7 +38,7 @@ public class RvContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(RvAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(RvAppSettings.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    sc.log(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

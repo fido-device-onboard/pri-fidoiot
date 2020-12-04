@@ -14,8 +14,11 @@ import java.util.List;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.InvalidMessageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EpidMaterialService {
+  private static Logger logger = LoggerFactory.getLogger(EpidMaterialService.class);
 
   private byte[] getSigrl(Composite sigInfo, String epidVersion) throws IOException {
     byte[] sigrlResponse = getEpidVerificationServiceResource(sigInfo, Const.SIGRL, epidVersion);
@@ -55,7 +58,7 @@ public class EpidMaterialService {
               .toString();
       return EpidHttpClient.doGet(url);
     } catch (URISyntaxException | IOException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

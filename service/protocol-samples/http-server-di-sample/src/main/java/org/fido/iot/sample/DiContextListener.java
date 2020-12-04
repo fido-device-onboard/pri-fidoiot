@@ -138,7 +138,7 @@ public class DiContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter("db.user"));
     ds.setPassword(sc.getInitParameter("db.password"));
 
-    System.out.println(ds.getUrl());
+    sc.log(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

@@ -24,11 +24,15 @@ import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.MessageBodyException;
 import org.fido.iot.serviceinfo.SdoSys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Owner Database Manager.
  */
 public class OwnerDbManager {
+
+  private static Logger logger = LoggerFactory.getLogger(OwnerDbManager.class);
 
   private static final String SVI_ARRAY_DELIMETER = ",";
   private static final String SVI_ENTRY_DELIMETER = "=";
@@ -323,7 +327,7 @@ public class OwnerDbManager {
     try {
       assignSviToDevice(ds, guid, Files.readString(svi));
     } catch (IOException e) {
-      System.out.println("Unable to load sample service info");
+      logger.error("Unable to load sample service info");
       throw new RuntimeException(e);
     }
   }

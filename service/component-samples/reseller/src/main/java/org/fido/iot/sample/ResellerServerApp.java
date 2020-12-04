@@ -14,8 +14,13 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.KeyStoreServlet;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResellerServerApp {
+
+  private static Logger logger = LoggerFactory.getLogger(ResellerServerApp.class);
+
   private static final String CATALINA_HOME = "catalina.home";
   private static final String AUTH_ROLE = "api";
 
@@ -31,7 +36,7 @@ public class ResellerServerApp {
     tomcat.setPort(
         Integer.parseInt(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_PORT)));
 
-    System.out.println(System.getProperty("user.dir"));
+    logger.info(System.getProperty("user.dir"));
     // set the path of tomcat
     System.setProperty(CATALINA_HOME,
         Path.of(ResellerConfigLoader.loadConfig(ResellerAppConstants.SERVER_PATH)).toAbsolutePath()
