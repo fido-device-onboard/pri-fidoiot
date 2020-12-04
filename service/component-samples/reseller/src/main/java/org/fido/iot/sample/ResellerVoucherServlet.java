@@ -77,7 +77,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     }
 
     Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-    List<PublicKey> certs =
+    List<PublicKey> nextOwnerPublicKeys =
         PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
 
     //find the public key
@@ -93,9 +93,31 @@ public class ResellerVoucherServlet extends HttpServlet {
 
     CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
     PublicKey ownerPub = cs.decode(prevOwner);
+    PublicKey nextOwner = null;
+    int keyType = prevOwner.getAsNumber(Const.PK_TYPE).intValue();
+    for (PublicKey pub : nextOwnerPublicKeys) {
+      int ownerType = cs.getPublicKeyType(pub);
+      if (ownerType == keyType) {
+        nextOwner = pub;
+        break;
+      }
+    }
+    // we didn't find an owner entry in database as per the current owner's key-type.
+    if (null == nextOwner) {
+      System.out.println("Customer entry missing for " + serialNo);
+      resp.setStatus(500);
+      return;
+    }
+
     VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
     try (CloseableKey signer = new CloseableKey(resolver.getKey(ownerPub))) {
-      vse.add(signer.get(), cs.decode(prevOwner));
+      if (signer.get() != null) {
+        vse.add(signer.get(), nextOwner);
+      } else {
+        System.out.println("Reseller is not the current owner for " + serialNo);
+        resp.setStatus(500);
+        return;
+      }
     }
 
     resp.setContentType(Const.HTTP_APPLICATION_CBOR);

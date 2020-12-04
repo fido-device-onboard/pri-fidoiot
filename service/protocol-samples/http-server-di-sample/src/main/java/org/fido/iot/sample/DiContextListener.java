@@ -155,7 +155,10 @@ public class DiContextListener implements ServletContextListener {
         String alg = cert.getPublicKey().getAlgorithm();
         for (String pem : mfgPemKeys) {
           PrivateKey privateKey = PemLoader.loadPrivateKey(pem);
-          if (privateKey.getAlgorithm().contentEquals(alg)) {
+          // Doing a check with .startsWith(), since the algorithm name returned by BC library is
+          // "ECDSA" instead of "EC" for Elliptic curve based private keys.
+          // This works with the only other key type that we use, RSA.
+          if (privateKey.getAlgorithm().startsWith(alg)) {
             return new CloseableKey(privateKey);
           }
         }

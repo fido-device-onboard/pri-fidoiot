@@ -75,6 +75,12 @@ public class OwnerServerApp {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));
     }
+    if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_TEST_MODE)) {
+      ctx.addParameter(OwnerAppSettings.EPID_TEST_MODE,
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_TEST_MODE));
+    }
+    ctx.addParameter(OwnerAppSettings.OWNER_KEYSTORE,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_KEYSTORE));
     ctx.addParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_KEYSTORE_PWD));
     ctx.addParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED,
