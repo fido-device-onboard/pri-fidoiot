@@ -148,6 +148,8 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
 
   @Override
   public void completed(Composite request, Composite reply) {
+    // log first since TO0 is done. Update DB later.
+    System.out.println("TO0 Client finished for GUID " + guid.toString());
     String sql = "UPDATE TO2_DEVICES SET TO0_COMPLETED = ? WHERE GUID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -166,6 +168,6 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
 
   @Override
   public void failed(Composite request, Composite reply) {
-
+    System.out.println("TO0 Client failed for GUID " + guid.toString());
   }
 }

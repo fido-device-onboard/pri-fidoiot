@@ -57,8 +57,7 @@ public class VoucherExtensionService {
     } else {
       Composite prev = entries.getAsComposite(entries.size() - 1);
       Composite prevEntry = Composite.fromObject(prev.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
-      prevHash = prevEntry.getAsComposite(Const.OVE_HASH_PREV_ENTRY);
-      hdrHash = cryptoService.hash(hashType, prev.toBytes());
+      prevHash = cryptoService.hash(hashType, prev.toBytes());
       prevOwnerPubKey = cryptoService.decode(prevEntry.getAsComposite(Const.OVE_PUB_KEY));
     }
 
