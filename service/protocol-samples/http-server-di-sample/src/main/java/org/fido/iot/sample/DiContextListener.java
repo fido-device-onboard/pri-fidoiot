@@ -208,7 +208,7 @@ public class DiContextListener implements ServletContextListener {
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          e.printStackTrace(pw);
+          sc.log("Failed to write data: " + e.getMessage());
         }
         sc.log(writer.toString());
       }

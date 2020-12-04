@@ -43,19 +43,19 @@ public class ManufacturerContextListener implements ServletContextListener {
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END PUBLIC KEY-----\n"
       + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEkhES/RfsfzMFJP1N4xjlCoWTOtr/ay8b\n"
-      + "fFHlXftScQIzlK4/fR/eKYInMEoB5UsIkP6Yo+oJ1AEc4MzFN83N/1U7IYMkkzxy\n"
-      + "VeJJtKP1OA4NFliXFc6fC8ey6A+vthWJ\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
+      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
+      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
       + "-----END PUBLIC KEY-----\n"
       + "-----BEGIN PUBLIC KEY-----\n"
-      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu5Cyn1+lblNm9zXmKQPV\n"
-      + "Bhnl4K3lVYT7DJsedoqduk5tCZbinlG9/XYXvHGKFageh352xTck89LWXOTfCKUh\n"
-      + "xiSE6zugN1zKnEritPm/DiP38LNmiffttVApYBidwBw9Hgq3fdFdMYAF+aLMWCZe\n"
-      + "t0gLMoyrEBsg2k6Uaq5ES13G/Gvk8V8cDjFSIdidZe6P4xvHyVgkePqRfeHtJdEx\n"
-      + "hlyPOt2Jqf3+h3kGDJoz6WA7xycX2hbvZ1ZA6oTvKosw8PMbDb48CteXn6Cl0BKI\n"
-      + "5EC6Gjr5VtHdo0r8QCZvOw6kQPjkzqWZFDElm4aCIiixbjTH+NN8ncc9DaHCo27H\n"
-      + "4wIDAQAB\n"
-      + "-----END PUBLIC KEY-----\n";
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
 
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
@@ -162,7 +162,7 @@ public class ManufacturerContextListener implements ServletContextListener {
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          e.printStackTrace(pw);
+          sc.log(e.getMessage());
         }
         sc.log(writer.toString());
       }

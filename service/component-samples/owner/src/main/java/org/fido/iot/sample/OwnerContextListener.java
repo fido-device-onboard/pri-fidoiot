@@ -88,11 +88,24 @@ public class OwnerContextListener implements ServletContextListener {
     ds.setMaxOpenPreparedStatements(100);
     
     CryptoService cs = new CryptoService();
-    
+    String epidTestMode = sc.getInitParameter(OwnerAppSettings.EPID_TEST_MODE);
+    if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
+      cs.setEpidTestMode();
+      sc.log("EPID Test mode enabled.");
+    }
+    String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
+    if (null != epidUrl) {
+      EpidUtils.setEpidOnlineUrl(epidUrl);
+    } else {
+      sc.log("EPID URL not set. Default URL will be used: "
+          + EpidUtils.getEpidOnlineUrl().toString());
+    }
+
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
     
-    resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
+    resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
+        sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
     
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
@@ -114,16 +127,12 @@ public class OwnerContextListener implements ServletContextListener {
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          e.printStackTrace(pw);
+          sc.log("Failed to write data: " + e.getMessage());
         }
         sc.log(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
-    String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
-    if (null != epidUrl) {
-      EpidUtils.setEpidOnlineUrl(epidUrl);
-    }
     // create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
@@ -184,7 +193,8 @@ public class OwnerContextListener implements ServletContextListener {
   private void scheduleTo0(ServletContext sc, DataSource ds, UUID guid, OwnerDbTo0Util to0Util) {
     try {
       OwnerTo0Client to0Client = new OwnerTo0Client(new CryptoService(), ds,
-          new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD)),
+          new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
+              sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD)),
               guid, to0Util);
       to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();

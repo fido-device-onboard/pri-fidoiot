@@ -22,7 +22,7 @@ public class Ec384Test {
   @Test
   void Test() throws Exception {
 
-    SecureRandom random = new SecureRandom();
+    SecureRandom random = SecureRandom.getInstanceStrong();
 
     ECGenParameterSpec ecSpec = new ECGenParameterSpec(Const.SECP384R1_CURVE_NAME);
     KeyPairGenerator kg = KeyPairGenerator.getInstance(Const.EC_ALG_NAME);

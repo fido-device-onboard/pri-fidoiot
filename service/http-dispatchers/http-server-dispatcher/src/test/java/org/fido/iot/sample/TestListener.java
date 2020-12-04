@@ -5,6 +5,7 @@ package org.fido.iot.sample;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import javax.security.auth.message.AuthException;
@@ -27,7 +28,11 @@ public class TestListener implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
 
-    SecureRandom random = new SecureRandom();
+    try {
+      SecureRandom random = SecureRandom.getInstanceStrong();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
     Provider bc = new BouncyCastleProvider();
 
     CryptoService cryptoService = new CryptoService();
@@ -123,7 +128,7 @@ public class TestListener implements ServletContextListener {
       try {
         ((Closeable) obj).close();
       } catch (IOException e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
       }
     }
   }

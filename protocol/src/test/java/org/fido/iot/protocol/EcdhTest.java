@@ -19,7 +19,7 @@ public class EcdhTest {
     byte[] dd = Base64.getDecoder().decode(
         "ACDo4f7a63e1oTh5z0u32xgc42TWtnZvufIGRTJu/iT6KAAgjm5HIGvLbW/vqXajrewkC3dVGkwz8lFjSFtyKWq7tAQAEBrNkhftAX3Q4KmxtiP7HmA=");
 
-    SecureRandom random = new SecureRandom();
+    SecureRandom random = SecureRandom.getInstanceStrong();
     Provider bc = new BouncyCastleProvider();
     CryptoService cryptoService = new CryptoService();
 

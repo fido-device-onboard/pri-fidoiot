@@ -76,7 +76,7 @@ import org.fido.iot.protocol.epid.EpidSignatureVerifier;
 public class CryptoService {
 
   static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
-  private final SecureRandom secureRandom;
+  private SecureRandom secureRandom;
   private boolean epidTestMode = false;
 
   /**
@@ -99,7 +99,11 @@ public class CryptoService {
     }
     // no algorithm found in priority list
     if (rnd == null) {
-      rnd = new SecureRandom();
+      try {
+        rnd = SecureRandom.getInstanceStrong();
+      } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException(e);
+      }
     }
     secureRandom = rnd;
   }
@@ -108,7 +112,11 @@ public class CryptoService {
    * Constructs a CryptoService using default secure random number generator.
    */
   public CryptoService() {
-    secureRandom = new SecureRandom();
+    try {
+      secureRandom = SecureRandom.getInstanceStrong();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
