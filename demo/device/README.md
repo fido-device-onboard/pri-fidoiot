@@ -1,3 +1,10 @@
+# System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven**.
+* **Java 11**.
+* **Haveged**.
+
 # Getting the executable
 
 Use the following commands to build FIDO IoT HTTP Device Component sample source.
@@ -30,7 +37,7 @@ Some software settings are runtime-configurable via Java properties.  They inclu
   The location of the PEM file containing the device keys (private and public).
   If not set, a hardcoded key is used - see the Java source for details.
 
-  There is no default. Provide value `./device.pem` to use the existing default EC-256 key-pair.
+  There is no default configured. Provide value `./device.pem` to use the existing default EC-256 key-pair.
 
 # Starting the Device service
 

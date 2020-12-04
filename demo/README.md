@@ -114,9 +114,51 @@ Assuming that there is already an existing certificate named 'certificate.pem' a
 
 6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample again. The previously created 'credential.bin' from Step#2 will be used directly by the Device.
 
+**NOTE** Reuse is enabled by default.
+
+# Running Resale Demo
+
+There are 2 methods of performing resale:
+
+**Method 1**:
+
+1. Ensure that TO2 is complete using the instructions listed in [Running Demo](#running-demo) section.
+
+2. To disable reuse and enable resale, update the `REPLACEMENT_GUID` field in Owner `TO2_DEVICES` field.
+
+3. Get the new ownership voucher using the owner API `GET /api/v1/owner/newvoucher/?id=<device_guid>`.
+
+4. Start the FIDO IoT Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
+
+5. Add the new size 0 ownership voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`
+
+6. If the reseller key to be used for voucher extension is not present in `RT_CUSTOMER` table, add it using reseller API `POST /api/v1/resell/keys/?alias=<keystore_alias>`.
+
+7. Extend the voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>`.
+
+8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample.
+
+**Method 2**:
+
+1. Start the FIDO IoT Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
+
+2. Complete Device Initialization (DI) by starting the FIDO IoT HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
+
+3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. By default, existing customer with customer Id '1', is assigned to the device. To add a new customer and assign the inserted customer to the device, please refer to [FIDO IoT Manufacturer REST APIs](manufacturer/README.md/#fido-iot-manufacturer-rest-apis) for more information about the API.
+
+4. Start the FIDO IoT Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
+
+5. Add the extended ownership voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`.
+
+6. If the reseller key to be used for voucher extension is not present in `RT_CUSTOMER` table, add it using reseller API `POST /api/v1/resell/keys/?alias=<keystore_alias>`.
+
+7. Extend the voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>`.
+
+8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample again.
+
 # Service info setup between FIDO IoT HTTP Java Device Sample and FIDO IoT Owner Sample
 
-The FIDO IoT HTTP Java Device Sample curretly supports `sdo_sys` module for interpreting received owner service info and `devmod` module to share device service info with Owner.
+The FIDO IoT HTTP Java Device Sample currently supports `sdo_sys` module for interpreting received owner service info and `devmod` module to share device service info with Owner.
 
 - `sdo_sys` Owner service info module: This module supports the following 3 message names as listed below to interpret the service info as received from the Owner. The basic functionality of this module is to support payload/script transfers and basic command execution.  A sample format looks like 'sdo_sys:filedesc=filename, sdo_sys:write=filecontent,sdo_sys:exec=command-to-execute'.
 
@@ -134,7 +176,7 @@ The FIDO IoT Owner Sample currently supports the same `sdo_sys` module to send O
 
 # Enabling Service info transfer
 
-To enable service info transfer to a Device with a given GUID by following are the steps below:
+To enable service info transfer to a Device with a given GUID, follow the steps below:
 
 1. (Optional) Insert required Service info values into the database table 'OWNER_SERVICEINFO' using the API `POST /api/v1/owner/svivalues/?id=<serviceinfo_id>&isCborEncoded=<boolean_value>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). If the required service info already exists in the table, go on to the next step.
 

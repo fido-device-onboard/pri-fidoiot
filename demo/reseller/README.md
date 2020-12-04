@@ -1,3 +1,11 @@
+# System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven**.
+* **Java 11**.
+* **Haveged**.
+* **SoftHSM**.
+
 # Getting the executable
 
 Use the following commands to build FIDO IoT Reseller Component sample source.
@@ -22,7 +30,7 @@ Some required runtime arguments
 
    JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file
 
-  Default value: jdbc:h2:tcp://localhost:8071/<path-to-user-dir>
+  Default value: jdbc:h2:tcp://localhost:8071/./target/data/reseller
 
 - `reseller_database_username`
 
@@ -93,7 +101,7 @@ db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <reseller_db_port>
 webAllowOthers = true
 ```
 
-**IMPORTANT: NOT recommended to enable this setting especially on production systems.**
+**IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
 # Starting the Reseller service
 

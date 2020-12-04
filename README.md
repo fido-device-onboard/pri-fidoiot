@@ -2,6 +2,13 @@
 
 # FIDO IoT Quick Start
 
+## System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven**.
+* **Java 11**.
+* **Haveged**.
+
 ## Source Layout
 
 For the instructions in this document, `<fido-iot-src>` refers to the path of the FIDO
@@ -113,7 +120,7 @@ TO2 Client finished.
 ## Ownership voucher creation
 
 The DI server will listen for messages at http://localhost:8039/fido/100/msg/<msgid>.
-The server also includes an SQL database that runs on port 8049. The database console
+The server also includes a SQL database that runs on port 8049. The database console
 UI will be available at http://localhost:8039/console.
 
 Extended ownership vouchers can be obtained from the following url:
@@ -152,8 +159,14 @@ db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
 webAllowOthers = true
 ```
 
-**IMPORTANT: NOT recommended to use enable this setting especially on production systems.**
+**IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-## Using Component Samples
+# EPID Test Mode
+
+EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intended to support onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device. Test mode is enabled by default for protocol-sample in components.
+
+**NOTE** Not recommended for use in production systems.
+
+# Using Component Samples
 
 Refer to [Demo README](demo/README.md) for steps to run component sample demo.
