@@ -114,7 +114,7 @@ public class OwnerDbManager {
           + "DSI_KEY CHAR(100) NOT NULL, "
           + "DSI_VALUE BLOB NOT NULL, "
           + "PRIMARY KEY (GUID, DSI_KEY), "
-          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) "
+          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
           + ");";
 
       stmt.executeUpdate(sql);
