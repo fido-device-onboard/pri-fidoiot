@@ -11,6 +11,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
@@ -110,6 +111,9 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "voucherServlet",
         new OwnerVoucherServlet());
     wrapper.addMapping("/api/v1/owner/vouchers/*");
+    wrapper = tomcat.addServlet(ctx, "replacementVoucherServlet",
+        new OwnerReplacementVoucherServlet());
+    wrapper.addMapping("/api/v1/owner/newvoucher/*");
     wrapper = tomcat.addServlet(ctx, "serviceinfoServlet",
         new OwnerServiceInfoValuesServlet());
     wrapper.addMapping("/api/v1/owner/svivalues/*");

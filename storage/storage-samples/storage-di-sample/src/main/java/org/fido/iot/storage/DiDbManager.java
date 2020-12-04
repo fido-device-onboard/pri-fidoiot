@@ -154,4 +154,24 @@ public class DiDbManager {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Assign customer ID to voucher having the input GUID.
+   *
+   * @param ds The datasource to use.
+   * @param rvInfo The GUID of the device
+   */
+  public void addRvInfo(DataSource ds, String rvInfo) {
+
+    String sql = "" + "UPDATE MT_SETTINGS   " + "SET RENDEZVOUS_INFO=? " + "WHERE ID=1; ";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, rvInfo);
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
