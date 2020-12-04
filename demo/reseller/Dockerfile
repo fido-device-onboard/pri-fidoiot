@@ -4,7 +4,7 @@
 FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm softhsm-common opensc wget
+RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm softhsm-common opensc wget haveged
 
 # Configuring softHSM and JVM provider.
 COPY java.security /etc/java-11-openjdk/security/
