@@ -27,12 +27,14 @@ public class OwnerAppSettings {
   
   // EPID URL
   public static final String EPID_URL = "epid_online_url";
+  public static final String EPID_TEST_MODE = "epid_test_mode";
 
-  // the user pin for HSM keystore that contains the owner keys
+  // the path and user pin for keystore that contains the owner keys
+  public static final String OWNER_KEYSTORE = "owner_keystore";
   public static final String OWNER_KEYSTORE_PWD = "owner_keystore_password";
 
   // the owner keystore type
-  public static final String OWNER_KEYSTORE_TYPE = "PKCS11";
+  public static final String OWNER_KEYSTORE_TYPE = "PKCS12";
 
   public static final String TO0_RV_BLOB = "owner_to0_rv_blob";
 
