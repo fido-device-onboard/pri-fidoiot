@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.MessageBodyException;
+import org.fido.iot.protocol.RendezvousInfoDecoder;
 import org.fido.iot.serviceinfo.SdoSys;
 
 /**
@@ -114,7 +115,7 @@ public class OwnerDbManager {
           + "DSI_KEY CHAR(100) NOT NULL, "
           + "DSI_VALUE BLOB NOT NULL, "
           + "PRIMARY KEY (GUID, DSI_KEY), "
-          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) "
+          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
           + ");";
 
       stmt.executeUpdate(sql);
@@ -324,6 +325,53 @@ public class OwnerDbManager {
       assignSviToDevice(ds, guid, Files.readString(svi));
     } catch (IOException e) {
       System.out.println("Unable to load sample service info");
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Update the replacementRvInfo for given currentGuid.
+   *
+   * @param ds Datasource instance
+   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param replacementRvInfo The replacement/new RvInfo for the device.
+   */
+  public void updateDeviceReplacementRvinfo(DataSource ds, UUID currentGuid,
+      String replacementRvInfo) {
+
+    String sql = "UPDATE TO2_DEVICES"
+        + " SET REPLACEMENT_RVINFO = ?"
+        + " WHERE GUID = ?;";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setBytes(1, RendezvousInfoDecoder.decode(replacementRvInfo).toBytes());
+      pstmt.setString(2, currentGuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Update the replacementGuid for given currentGuid.
+   *
+   * @param ds Datasource instance
+   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param replacementGuid The replacement/new GUID for the device.
+   */
+  public void updateDeviceReplacementGuid(DataSource ds, UUID currentGuid, UUID replacementGuid) {
+
+    String sql = "UPDATE TO2_DEVICES"
+        + " SET REPLACEMENT_GUID = ?"
+        + " WHERE GUID = ?;";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, replacementGuid.toString());
+      pstmt.setString(2, currentGuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }

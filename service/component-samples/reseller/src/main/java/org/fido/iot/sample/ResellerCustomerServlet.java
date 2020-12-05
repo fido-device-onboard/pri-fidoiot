@@ -44,4 +44,13 @@ public class ResellerCustomerServlet extends HttpServlet {
     PemLoader.loadPublicKeys(keySet);
     new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
   }
+
+  @Override
+  protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    String uri = req.getRequestURI();
+    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+    new ResellerDbManager().deleteKeySet(ds, serialNo);
+  }
 }

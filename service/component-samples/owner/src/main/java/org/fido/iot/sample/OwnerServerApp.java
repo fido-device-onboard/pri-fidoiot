@@ -11,7 +11,9 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
+import org.fido.iot.api.OwnerSetupInfoServlet;
 import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
@@ -57,15 +59,29 @@ public class OwnerServerApp {
         OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PWD));
 
     // hard-coded H2 config
-    ctx.addParameter("db.tcpServer", "-tcp -tcpAllowOthers -ifNotExists -tcpPort "
+    // To enable remote connections to the DB set
+    // db.tcpServer=-tcp -tcpAllowOthers -ifNotExists -tcpPort
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
+    ctx.addParameter("db.tcpServer", "-tcp -ifNotExists -tcpPort "
         + OwnerConfigLoader.loadConfig(OwnerAppSettings.DB_PORT));
-    ctx.addParameter("webAllowOthers", "true");
+
+    // To enable remote connections to the DB set webAllowOthers=true
+    // This creates a security hole in the system.
+    // Not recommended to use especially on production system
+    ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));
     }
+    if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_TEST_MODE)) {
+      ctx.addParameter(OwnerAppSettings.EPID_TEST_MODE,
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_TEST_MODE));
+    }
+    ctx.addParameter(OwnerAppSettings.OWNER_KEYSTORE,
+        OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_KEYSTORE));
     ctx.addParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_KEYSTORE_PWD));
     ctx.addParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED,
@@ -96,12 +112,18 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "voucherServlet",
         new OwnerVoucherServlet());
     wrapper.addMapping("/api/v1/owner/vouchers/*");
+    wrapper = tomcat.addServlet(ctx, "replacementVoucherServlet",
+        new OwnerReplacementVoucherServlet());
+    wrapper.addMapping("/api/v1/owner/newvoucher/*");
     wrapper = tomcat.addServlet(ctx, "serviceinfoServlet",
         new OwnerServiceInfoValuesServlet());
     wrapper.addMapping("/api/v1/owner/svivalues/*");
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
+    wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
+        new OwnerSetupInfoServlet());
+    wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());

@@ -120,10 +120,9 @@ public class OwnerTo0Client {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        System.out.println("TO0 failed for " + guid.toString() + "." + e.getMessage());
         throw e;
       }
     }
-    System.out.println("TO0 Client finished for GUID " + guid.toString());
   }
 }

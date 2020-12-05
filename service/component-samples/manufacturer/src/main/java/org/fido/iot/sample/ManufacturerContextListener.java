@@ -43,19 +43,37 @@ public class ManufacturerContextListener implements ServletContextListener {
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END PUBLIC KEY-----\n"
       + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEkhES/RfsfzMFJP1N4xjlCoWTOtr/ay8b\n"
-      + "fFHlXftScQIzlK4/fR/eKYInMEoB5UsIkP6Yo+oJ1AEc4MzFN83N/1U7IYMkkzxy\n"
-      + "VeJJtKP1OA4NFliXFc6fC8ey6A+vthWJ\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
+      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
+      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
       + "-----END PUBLIC KEY-----\n"
       + "-----BEGIN PUBLIC KEY-----\n"
-      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu5Cyn1+lblNm9zXmKQPV\n"
-      + "Bhnl4K3lVYT7DJsedoqduk5tCZbinlG9/XYXvHGKFageh352xTck89LWXOTfCKUh\n"
-      + "xiSE6zugN1zKnEritPm/DiP38LNmiffttVApYBidwBw9Hgq3fdFdMYAF+aLMWCZe\n"
-      + "t0gLMoyrEBsg2k6Uaq5ES13G/Gvk8V8cDjFSIdidZe6P4xvHyVgkePqRfeHtJdEx\n"
-      + "hlyPOt2Jqf3+h3kGDJoz6WA7xycX2hbvZ1ZA6oTvKosw8PMbDb48CteXn6Cl0BKI\n"
-      + "5EC6Gjr5VtHdo0r8QCZvOw6kQPjkzqWZFDElm4aCIiixbjTH+NN8ncc9DaHCo27H\n"
-      + "4wIDAQAB\n"
-      + "-----END PUBLIC KEY-----\n";
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
+  private final String resellerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE305J06Z2xAqL4pwiKst8QXVEmJzO\n"
+      + "lxgM43F4JSwI4XSKohIZ6GH6o1R25zrBgwXWE6imL754v/av1cHmwP8MSw==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEKJGKqlmZZyeFw/9fltM3QotdCFhQoj3w\n"
+      + "plx5CFRmHdU3haPPKV8s0K+Fb2NO0gZXuF/bv5AUR5wL9/lDpQR9zgQgCNV2z6CZ\n"
+      + "Mhs4RzFN34ss4Hx1uhakIVBem3ubtP2o\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyr0lXjWv0vdvzxTklqKk\n"
+      + "sAD3Q0JEs8o12CQmybpn9QInC14SO4jRs592EVfun7CQGvxYk+1P4ll2ZctZa7QL\n"
+      + "Dw3cmJnkAFHd5bpgVqgqq3oMmAqVQsZzgSoz5vlvINorPFvP8Qnif0QND5QaBRPA\n"
+      + "OQEfZHJGCeAxPrU/6iVhZnZlTmoDJXBl8uUnM/suush8DQQkJSxQMG+A5goLdMgH\n"
+      + "CpcrrnVFWIYPQZMlwtX+JVCvh+OpmFYukgqbc9RP68C99TI6X1206wUsS/wEsqA9\n"
+      + "mKXCGo4hjbrFxaoFIEUFlOf3js7CIvotV0kNUaAIsF1Qz9dzKiEHXJCqaqksEd5z\n"
+      + "FwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
 
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
@@ -175,6 +193,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeysPem);
+    manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
     manager.setAutoEnroll(ds, 1);
 
   }
