@@ -161,7 +161,12 @@ public class To2ClientApp {
 
     @Override
     public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
-      return null;
+      if (isReuse) {
+        return null;
+      } else {
+        // Defaulting to 32-bytes key length for HMAC-SHA-256 that this device uses.
+        return cryptoService.getRandomBytes(256 / 8);
+      }
     }
 
     @Override
