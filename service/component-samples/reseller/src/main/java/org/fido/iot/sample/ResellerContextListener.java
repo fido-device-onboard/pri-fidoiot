@@ -20,6 +20,25 @@ import org.fido.iot.protocol.KeyStoreResolver;
 
 public class ResellerContextListener implements ServletContextListener {
 
+  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
+      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
+      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     BasicDataSource ds = new BasicDataSource();
@@ -64,7 +83,7 @@ public class ResellerContextListener implements ServletContextListener {
 
     ResellerDbManager dbManager = new ResellerDbManager();
     dbManager.createTables(ds);
-
+    dbManager.defineKeySet(ds, ownerKeysPem, "owner", 1);
   }
 
 }

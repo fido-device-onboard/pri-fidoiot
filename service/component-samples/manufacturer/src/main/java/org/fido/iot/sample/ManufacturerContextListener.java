@@ -56,6 +56,24 @@ public class ManufacturerContextListener implements ServletContextListener {
       + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
       + "AwIDAQAB\n"
       + "-----END PUBLIC KEY-----";
+  private final String resellerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE305J06Z2xAqL4pwiKst8QXVEmJzO\n"
+      + "lxgM43F4JSwI4XSKohIZ6GH6o1R25zrBgwXWE6imL754v/av1cHmwP8MSw==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEKJGKqlmZZyeFw/9fltM3QotdCFhQoj3w\n"
+      + "plx5CFRmHdU3haPPKV8s0K+Fb2NO0gZXuF/bv5AUR5wL9/lDpQR9zgQgCNV2z6CZ\n"
+      + "Mhs4RzFN34ss4Hx1uhakIVBem3ubtP2o\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyr0lXjWv0vdvzxTklqKk\n"
+      + "sAD3Q0JEs8o12CQmybpn9QInC14SO4jRs592EVfun7CQGvxYk+1P4ll2ZctZa7QL\n"
+      + "Dw3cmJnkAFHd5bpgVqgqq3oMmAqVQsZzgSoz5vlvINorPFvP8Qnif0QND5QaBRPA\n"
+      + "OQEfZHJGCeAxPrU/6iVhZnZlTmoDJXBl8uUnM/suush8DQQkJSxQMG+A5goLdMgH\n"
+      + "CpcrrnVFWIYPQZMlwtX+JVCvh+OpmFYukgqbc9RP68C99TI6X1206wUsS/wEsqA9\n"
+      + "mKXCGo4hjbrFxaoFIEUFlOf3js7CIvotV0kNUaAIsF1Qz9dzKiEHXJCqaqksEd5z\n"
+      + "FwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
 
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
@@ -175,6 +193,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeysPem);
+    manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
     manager.setAutoEnroll(ds, 1);
 
   }
