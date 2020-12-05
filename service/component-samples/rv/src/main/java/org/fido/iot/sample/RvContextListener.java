@@ -45,6 +45,18 @@ public class RvContextListener implements ServletContextListener {
     ds.setMaxOpenPreparedStatements(100);
 
     final CryptoService cs = new CryptoService();
+    String epidTestMode = sc.getInitParameter(RvAppSettings.EPID_TEST_MODE);
+    if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
+      cs.setEpidTestMode();
+      sc.log("EPID Test mode enabled.");
+    }
+    String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
+    if (null != epidUrl) {
+      EpidUtils.setEpidOnlineUrl(epidUrl);
+    } else {
+      sc.log("EPID URL not set. Default URL will be used: "
+              + EpidUtils.getEpidOnlineUrl().toString());
+    }
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
@@ -85,10 +97,7 @@ public class RvContextListener implements ServletContextListener {
           }
         };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
-    String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
-    if (null != epidUrl) {
-      EpidUtils.setEpidOnlineUrl(epidUrl);
-    }
+
     // create tables
     RvsDbManager manager = new RvsDbManager();
     manager.createTables(ds);

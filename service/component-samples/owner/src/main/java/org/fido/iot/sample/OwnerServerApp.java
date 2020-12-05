@@ -13,6 +13,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
+import org.fido.iot.api.OwnerSetupInfoServlet;
 import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
@@ -120,6 +121,9 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
+    wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
+        new OwnerSetupInfoServlet());
+    wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
