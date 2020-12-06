@@ -3,9 +3,12 @@
 
 package org.fido.iot.storage;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
@@ -54,6 +57,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private Composite sigInfoA;
   private long serviceInfoCount = 0;
   private long serviceInfoPosition = 0;
+  private ServiceInfoMarshaller serviceInfoMarshaller;
 
   private static final int SERVICEINFO_MTU = 1300;
 
@@ -273,7 +277,8 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7, SIGINFOA, "
-        + "SERVICEINFO_COUNT, SERVICEINFO_POSITION FROM TO2_SESSIONS WHERE SESSION_ID = ?";
+        + "SERVICEINFO_COUNT, SERVICEINFO_POSITION, SERVICEINFO_BLOB "
+        + "FROM TO2_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -290,7 +295,15 @@ public class OwnerDbStorage implements To2ServerStorage {
           sigInfoA = Composite.fromObject(rs.getBinaryStream(6));
           serviceInfoCount = rs.getLong(7);
           serviceInfoPosition = rs.getLong(8);
+          if (rs.getBlob(9) != null) {
+            ObjectInputStream inputStream = new ObjectInputStream(
+                rs.getBlob(9).getBinaryStream());
+            serviceInfoMarshaller = (ServiceInfoMarshaller) inputStream.readObject();
+            inputStream.close();
+          }
         }
+      } catch (IOException | ClassNotFoundException e) {
+        throw new RuntimeException();
       }
 
     } catch (SQLException e) {
@@ -307,27 +320,21 @@ public class OwnerDbStorage implements To2ServerStorage {
     if (serviceInfoCount == 0 || serviceInfoPosition == serviceInfoCount) {
       return ServiceInfoEncoder.encodeOwnerServiceInfo(Collections.EMPTY_LIST, false, true);
     } else {
-      ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
-          voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
-      marshaller.register(new OwnerServiceInfoModule(dataSource));
-      Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
+      serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
+      Iterable<Supplier<ServiceInfo>> serviceInfos = serviceInfoMarshaller.marshal();
       List<Composite> svi = new LinkedList<Composite>();
-      int currentPosition = 0;
-      for (final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator(); it.hasNext();) {
+      final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
+      if (it.hasNext()) {
         ServiceInfo serviceInfo = it.next().get();
-        if (currentPosition == serviceInfoPosition) {
-          // Convert to CBOR now
-          Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
-          while (marshalledEntries.hasNext()) {
-            ServiceInfoEntry marshalledEntry = marshalledEntries.next();
-            Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
+        Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
+        while (marshalledEntries.hasNext()) {
+          ServiceInfoEntry marshalledEntry = marshalledEntries.next();
+          Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
                 marshalledEntry.getValue().getContent());
-            svi.add(innerArray);
-          }
+          svi.add(innerArray);
         }
-        ++currentPosition;
+        ++serviceInfoPosition;
       }
-      ++serviceInfoPosition;
       return ServiceInfoEncoder.encodeOwnerServiceInfo(svi, true, false);
     }
   }
@@ -412,10 +419,10 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void prepareServiceInfo() {
-    ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
+    serviceInfoMarshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
         voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
-    marshaller.register(new OwnerServiceInfoModule(dataSource));
-    Iterable<Supplier<ServiceInfo>> serviceInfo = marshaller.marshal();
+    serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
+    Iterable<Supplier<ServiceInfo>> serviceInfo = serviceInfoMarshaller.marshal();
     int mtuPacketCount = 0;
     for (final Iterator<Supplier<ServiceInfo>> it = serviceInfo.iterator(); it.hasNext();) {
       it.next().get();
@@ -423,6 +430,8 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
     serviceInfoCount = mtuPacketCount;
     serviceInfoPosition = 0;
+    // Reset the positions because we need to start from the beginning to send service info.
+    serviceInfoMarshaller.reset();
   }
 
   @Override
@@ -528,6 +537,7 @@ public class OwnerDbStorage implements To2ServerStorage {
         + "SET OWNER_STATE = ? ,"
         + "SERVICEINFO_COUNT = ? ,"
         + "SERVICEINFO_POSITION = ? ,"
+        + "SERVICEINFO_BLOB = ? ,"
         + "UPDATED = ? "
         + "WHERE SESSION_ID = ?";
 
@@ -537,13 +547,23 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setBytes(1, ownerState.toBytes());
       pstmt.setLong(2, serviceInfoCount);
       pstmt.setLong(3, serviceInfoPosition);
+      if (serviceInfoMarshaller != null) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream outputStream = new ObjectOutputStream(
+            baos);
+        outputStream.writeObject(serviceInfoMarshaller);
+        pstmt.setBytes(4,  baos.toByteArray());
+        outputStream.close();
+      } else {
+        pstmt.setObject(4,  null);
+      }
       Timestamp updatedAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(4, updatedAt);
-      pstmt.setString(5, sessionId);
+      pstmt.setTimestamp(5, updatedAt);
+      pstmt.setString(6, sessionId);
 
       pstmt.executeUpdate();
 
-    } catch (SQLException e) {
+    } catch (SQLException | IOException e) {
       throw new RuntimeException(e);
     }
   }
