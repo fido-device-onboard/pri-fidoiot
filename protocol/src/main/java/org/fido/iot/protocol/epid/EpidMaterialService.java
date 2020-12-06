@@ -79,13 +79,12 @@ public class EpidMaterialService {
     switch (sgType) {
       case Const.SG_EPIDv10:
       case Const.SG_EPIDv11:
-        Composite certRequestSigInfo =
-            Composite.newArray().set(Const.FIRST_KEY, sgType).set(Const.SECOND_KEY, sigA.toBytes());
 
         byte[] certBytes = Const.EMPTY_BYTE;
         try {
           certBytes = getGroupCertSigma10(sigA);
         } catch (RuntimeException ex) {
+          System.out.println("Runtime Exception in getSigInfo");
           // intentional fall through
           // some EPID 1.1 groups have a cert 0 and others don't
         }
@@ -98,6 +97,7 @@ public class EpidMaterialService {
         try {
           certBytes = getGroupCertSigma11(sigA);
         } catch (RuntimeException ex) {
+          System.out.println("Runtime Exception in getSigInfo");
           // intentional fall through
         }
         sigInfoBytes.write(getLengthBytes(certBytes.length));
@@ -110,6 +110,7 @@ public class EpidMaterialService {
           sigRlBytes = getSigrl(sigA,
                   Const.EPID_PROTOCOL_VERSION_V2 + Const.URL_PATH_SEPARATOR +  Const.EPID_11);
         } catch (RuntimeException ex) {
+          System.out.println("Runtime Exception in getSigInfo");
           // intentional fall through
         }
         sigInfoBytes.write(getLengthBytes(sigRlBytes.length));

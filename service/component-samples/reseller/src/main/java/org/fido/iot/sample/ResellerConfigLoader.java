@@ -38,6 +38,7 @@ public class ResellerConfigLoader {
       try {
         fileBasedConfiguration = builder.getConfiguration();
       } catch (ConfigurationException e) {
+        System.out.println("Application might not be using config file");
         // ignore the error since the application might not be using config file.
         // log when logging is enabled in the application.
       }
