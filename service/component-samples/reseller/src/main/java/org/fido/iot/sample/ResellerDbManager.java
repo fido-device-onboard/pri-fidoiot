@@ -93,7 +93,6 @@ public class ResellerDbManager {
       Composite voucher,
       String serialNo,
       String customerId) {
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
 
     String sql = ""
         + "MERGE INTO RT_DEVICES  "
