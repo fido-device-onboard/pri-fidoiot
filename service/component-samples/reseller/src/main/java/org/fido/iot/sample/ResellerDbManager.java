@@ -94,7 +94,6 @@ public class ResellerDbManager {
       String serialNo,
       String customerId) {
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    UUID guid = ovh.getAsUuid(Const.OVH_GUID);
 
     String sql = ""
         + "MERGE INTO RT_DEVICES  "
