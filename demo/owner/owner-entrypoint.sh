@@ -6,4 +6,6 @@
 # Sample script that starts the Owner service.
 
 # Start the owner service
-exec java -jar owner.jar
+# Configure heap size based on your requirement.
+# Trying updating heap size to troubleshoot any unexpected errors.
+exec java -Xmx256m -jar owner.jar
