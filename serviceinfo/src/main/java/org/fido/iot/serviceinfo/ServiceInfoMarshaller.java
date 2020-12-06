@@ -3,18 +3,22 @@
 
 package org.fido.iot.serviceinfo;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class ServiceInfoMarshaller {
+public class ServiceInfoMarshaller implements Serializable {
 
-  private final long mtu;
-  private final UUID uuid;
-  private List<ServiceInfoModule> serviceInfoModules = new LinkedList<ServiceInfoModule>();
-  private List<ServiceInfoEntry> serviceInfoEntries = new LinkedList<ServiceInfoEntry>();
+  private long mtu;
+  private UUID uuid;
+  private int index = 0; // index for fetching entry from entries
+  private long subSequenceStart = 0; // index until which the value has been read completely
+
+  private transient List<ServiceInfoModule> serviceInfoModules;
+  private transient List<ServiceInfoEntry> serviceInfoEntries;
 
   // some constants that help to determine Integer CBOR type.
   private static final double POWER_8 = Math.pow(2, 8) - 1;
@@ -25,7 +29,26 @@ public class ServiceInfoMarshaller {
     this.uuid = uuid;
   }
 
+  private void init() {
+    serviceInfoModules = new LinkedList<ServiceInfoModule>();
+    serviceInfoEntries = new LinkedList<ServiceInfoEntry>();
+  }
+
+  /**
+   * Resets the positions.
+   */
+  public void reset() {
+    index = 0;
+    subSequenceStart = 0;
+  }
+
+  /**
+   * Register a service info module.
+   * 
+   * @param serviceInfoModule instance of {@link ServiceInfoModule}
+   */
   public void register(ServiceInfoModule serviceInfoModule) {
+    init();
     serviceInfoModules.add(serviceInfoModule);
     serviceInfoEntries.addAll(serviceInfoModule.getServiceInfo(this.uuid));
   }
@@ -65,14 +88,10 @@ public class ServiceInfoMarshaller {
 
   private class LazyIterator implements Iterator<Supplier<ServiceInfo>> {
 
-    private int index; // index for fetching entry from entries
     private final LazyIterable iterable;
-    private long subSequenceStart; // index until which the value has been read completely
 
     LazyIterator(final LazyIterable iterable) {
       this.iterable = iterable;
-      this.index = 0;
-      this.subSequenceStart = 0;
     }
 
     @Override
@@ -153,7 +172,7 @@ public class ServiceInfoMarshaller {
           long valueFitLen = 0;
 
           // calculate total length of the remaining value
-          long valueRemaining = valueLength - this.subSequenceStart;
+          long valueRemaining = valueLength - subSequenceStart;
           if (valueRemaining > 0) {
             long encodeLen = 0; // look-ahead counter
             for (;;) {

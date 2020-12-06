@@ -50,10 +50,10 @@ public class OwnerServiceInfoSequence extends ServiceInfoSequence {
       pstmt.setString(1, getServiceInfoId());
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          InputStream inputStream = rs.getBinaryStream(1);
-          inputStream.skip(getStart());
+          InputStream inputStream = rs.getBlob(1).getBinaryStream(getStart() + 1, lengthToRead);
           byte[] content = new byte[lengthToRead];
           inputStream.read(content, 0, lengthToRead);
+          inputStream.close();
           return content;
         }
       } catch (IOException e) {

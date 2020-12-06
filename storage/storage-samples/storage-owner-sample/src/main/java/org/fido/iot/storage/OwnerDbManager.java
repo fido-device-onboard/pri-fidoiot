@@ -76,6 +76,7 @@ public class OwnerDbManager {
           + "SIGINFOA BLOB, "
           + "SERVICEINFO_COUNT BIGINT, "
           + "SERVICEINFO_POSITION BIGINT, "
+          + "SERVICEINFO_BLOB BLOB, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"
           + "PRIMARY KEY (SESSION_ID), "
