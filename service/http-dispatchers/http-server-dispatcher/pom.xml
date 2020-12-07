@@ -7,7 +7,7 @@
   <parent>
     <artifactId>http-dispatchers</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
   </parent>
 
   <name>HTTP Server Dispatcher</name>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.3-SNAPSHOT</version>
+      <version>0.3</version>
     </dependency>
 
     <dependency>

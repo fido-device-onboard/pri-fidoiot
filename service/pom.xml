@@ -11,7 +11,7 @@
   <parent>
     <artifactId>fido-iot</artifactId>
     <groupId>org.fido</groupId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
   </parent>
 
   <name>Service Samples</name>
