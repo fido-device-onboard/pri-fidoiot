@@ -1,4 +1,4 @@
-**NOTE**: The "protocol-next" branch of the PRI repository contains a preliminary implementation of the [FIDO IoT Spec - Working Draft ](https://fidoalliance.org/specs/fidoiot/FIDO-IoT-spec-v1.0-wd-20200730.html) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
+**NOTE**: This is a preliminary implementation of the [FIDO IoT Spec - Working Draft ](https://fidoalliance.org/specs/fidoiot/FIDO-IoT-spec-v1.0-wd-20200730.html) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
 
 # FIDO IoT Quick Start
 
@@ -117,18 +117,18 @@ $ mvn exec:java
 
 TO2 Client finished.
 
-## Ownership voucher creation
+## Ownership Voucher creation
 
 The DI server will listen for messages at http://localhost:8039/fido/100/msg/<msgid>.
 The server also includes a SQL database that runs on port 8049. The database console
 UI will be available at http://localhost:8039/console.
 
-Extended ownership vouchers can be obtained from the following url:
+Extended Ownership Vouchers can be obtained from the following url:
 
 http://localhost:8039/api/v1/vouchers/<serial_no>
 ***NOTE***: Default serial number is '0'. To get the serial_no corresponding to the GUID, look up the `SERIAL_NO` field of MT_DEVICES table in the DI database.
 
-The hex value of the extended voucher can be obtained by running the API above. The value will be populated on DI server console.
+The hex value of the extended Ownership Voucher can be obtained by running the API above. The value will be populated on DI server console.
 
 To log in to the database and view records use the following information:
 ```
@@ -140,7 +140,7 @@ The path to the DB will be printed out in following format when the DI server is
 
 `jdbc:h2:tcp:...`
 
-SELECT * FROM MT_DEVICES will show the current vouchers created by DI messages.
+SELECT * FROM MT_DEVICES will show the current Ownership Vouchers created by DI messages.
 
 # Enabling Remote Access to DB
 

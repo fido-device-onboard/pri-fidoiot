@@ -114,9 +114,9 @@ In the following use-case, the FIDO IoT Manufacturer provisions the Device using
 
 5. Add the extended Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`.
 
-6. If the reseller key to be used for voucher extension is not present in `RT_CUSTOMER` table, add it using reseller API `POST /api/v1/resell/keys/?alias=<keystore_alias>`. By default, the next Owner keys are present in the table `RT_CUSTOMERS`, that are same as the keys present in Owner's keystore.
+6. If the reseller key to be used for Ownership Voucher extension is not present in `RT_CUSTOMER` table, add it using reseller API `POST /api/v1/resell/keys/?alias=<keystore_alias>`. By default, the next Owner keys are present in the table `RT_CUSTOMERS`, that are same as the keys present in Owner's keystore.
 
-7. Extend the voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>` to the next owner.
+7. Extend the Ownership Voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>` to the next owner.
 
 8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample.
 
@@ -132,7 +132,7 @@ In an another use-case, the FIDO IoT Manufacturer provisions the Device using DI
 
 5. Add a new set of Owner PEM-formatted public keys in `RT_CUSTOMER` table using reseller API `POST /api/v1/resell/keys/?alias=<keystore_alias>`. Refer to [Generating Key-Pair](#generating-key-pair) for generating PEM-formatted key-pairs.
 
-6. Extend the voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>`.
+6. Extend the Ownership Voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>`.
 
 7. Start the FIDO IoT Owner Sample as per the steps outlined in [Owner README](owner/README.md). Prior to the startup, if an instance of FIDO IoT Owner is already running on the same port, terminate the previous instance. Configure the FIDO IoT Owner to use the new Owner's key-pairs. This can be done by deleting any existing 'alias' from the \<fido-iot-src\>/demo/owner/owner_keystore.p12, and inserting the key-pairs created in Step-6. Refer to [Inserting Keys into Keystore](#inserting-keys-into-keystore) and [Removing an Existing Key-Pair from Keystore](#removing-an-existing-key-pair-from-keystore). Additionally,  update the properties 'owner_keystore' and 'owner_keystore_password' in \<fido-iot-src\>/demo/owner/owner.env, with the keystore file-system path and password, respectively.
 
