@@ -28,7 +28,7 @@ Some required runtime arguments
 
 - `reseller_database_connection_url`
 
-   JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file
+  JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file
 
   Default value: jdbc:h2:tcp://localhost:8071/./target/data/reseller
 

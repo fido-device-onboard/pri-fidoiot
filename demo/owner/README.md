@@ -45,7 +45,7 @@ Some required runtime arguments
 
 - `owner_database_port`
 
-  RV database port number.
+  Owner database port number.
 
   Default value: 8051
 
@@ -70,6 +70,12 @@ Some required runtime arguments
 
   Default value: ./target/tomcat
 
+- `owner_keystore`
+
+  Path to the Owner keystore file containing the owner's keys.
+
+  Default value: ./owner_keystore.p12
+
 - `owner_keystore_password`
 
   Keystore password for owner_keystore.p12 and the internal softHSM's PKCS11 keystore.
@@ -78,9 +84,9 @@ Some required runtime arguments
 
 - `owner_to0_scheduling_enabled`
 
-  Auto completes TO0 for GUIDs with DI complete state.
+  Schedule eligible devices for TO0, as present in `TO2_DEVICES` table. If true, automatic TO0 scheduling is enabled. If false, TO0 scheduling is disabled.
 
-  Default value: false
+  Default value: true
 
 - `owner_to0_scheduling_interval`
 
@@ -108,13 +114,13 @@ Some required runtime arguments
 
 - `owner_svi_values`
 
-  Path to the directory that contains default sample owner serviceinfo values. The filenames are used as identifiers in the database, while the actual file content is the requisite serviceinfo that is transferred to the device. Only used for demo purposes and should not be modified.
+  Path to the directory that contains default sample owner ServiceInfo values. The filenames are used as identifiers in the database, while the actual file content is the requisite ServiceInfo that is transferred to the device. Only used for demo purposes and should not be modified.
 
   Default value: ./serviceinfo/sample-values
 
 - `owner_svi_string`
 
-  Path to the file that contains default sample svi string that maps serviceinfo values to module names and messages. Only used for demo purposes and should not be modified.
+  Path to the file that contains default sample svi string that maps ServiceInfo values to module names and messages. Only used for demo purposes and should not be modified.
 
   Docker default: ./serviceinfo/sample-svi.csv
 
@@ -146,19 +152,23 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | POST /api/v1/owner/vouchers/ | Insert voucher against the specified GUID in `TO2_DEVICES` table. | | application/cbor | Content of Ownership voucher in binary format | |
 | DELETE /api/v1/owner/vouchers/?id=<device_guid> | Deletes voucher of the specified GUID from the `TO2_DEVICES` table. | Query - id: Device GUID | | | |
 | GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the new voucher for the specified GUID to enable resale. | Query - id: Device GUID | | | Ownership voucher |
-| POST /api/v1/owner/svivalues/?id=\<serviceinfo_id>&isCborEncoded=<boolean_value> | Adds serviceinfo entry to `OWNER_SERVICEINFO` table. The query parameter 'isCborEncoded' should be 'true' for CBOR encoded binary data that will never be split into smaller chunks while transferring to the device (small in length, to be used for CBOR primitives such as boolean, int, array and map), and it should be 'false' (preferably) for other binary data that could be split into smaller chunks and transferred across messages (for example binary values, string). | Query - id: Service info ID, isCborEncoded: Boolean | application/octet-stream or application/cbor | Content of Serviceinfo in binary format. | |
-| DELETE /api/v1/owner/svivalues/?id=<serviceinfo_id> | Deletes the serviceinfo values from `OWNER_SERVICEINFO` table. | Query - id: Service info ID | | | |
-| POST /api/v1/owner/svi/?guid=<device_guid> | Adds owner serviceinfo for the GUID in `GUID_OWNERSVI` table, that will be transferred to the device in the insertion order. The format is `Entry1,Entry2,Entry3` and so on, where each Entry contains `moduleName:messageName=serviceInfoId`. Here, the 'content' corresponding to the 'serviceInfoId' is transferred to the device. Please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv as an example for the above format, where moduleName is 'sdo_sys' and messageName is either one of 'filedesc', 'write' and 'exec'. The order of each 'Entry' is important as this order decides the sequence in which the Owner will transfer the Service info. | Query - guid: Device GUID | application/text | SVI string | |
-| DELETE /api/v1/owner/svi/?guid=<device_guid> | Deletes owner serviceinfo for the GUID from the `GUID_OWNERSVI` table. | Query - guid: Device GUID | | | |
+| POST /api/v1/owner/svivalues/?id=\<serviceinfo_id>&isCborEncoded=<boolean_value> | Adds ServiceInfo entry to `OWNER_SERVICEINFO` table. The query parameter 'isCborEncoded' should be 'true' for CBOR encoded binary data that will never be split into smaller chunks while transferring to the device (small in length, to be used for CBOR primitives such as boolean, int, array and map), and it should be 'false' (preferably) for other binary data that could be split into smaller chunks and transferred across messages (for example binary values, string). | Query - id: ServiceInfo ID, isCborEncoded: Boolean | application/octet-stream or application/cbor | Content of Serviceinfo in binary format. | |
+| DELETE /api/v1/owner/svivalues/?id=<serviceinfo_id> | Deletes the ServiceInfo values from `OWNER_SERVICEINFO` table. | Query - id: ServiceInfo ID | | | |
+| POST /api/v1/owner/svi/?guid=<device_guid> | Adds owner ServiceInfo for the GUID in `GUID_OWNERSVI` table, that will be transferred to the device in the insertion order. The format is `Entry1,Entry2,Entry3` and so on, where each Entry contains `moduleName:messageName=serviceInfoId`. Here, the 'content' corresponding to the 'serviceInfoId' is transferred to the device. Please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv as an example for the above format, where moduleName is 'sdo_sys' and messageName is either one of 'filedesc', 'write' and 'exec'. The order of each 'Entry' is important as this order decides the sequence in which the Owner will transfer the ServiceInfo. | Query - guid: Device GUID | application/text | SVI string | |
+| DELETE /api/v1/owner/svi/?guid=<device_guid> | Deletes owner ServiceInfo for the GUID from the `GUID_OWNERSVI` table. | Query - guid: Device GUID | | | |
 | POST /api/v1/owner/setupinfo/?id=current_guid | updates `Replacement GUID` or `Replacement RVInfo` or both in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or both. <br/> To update both GUID and RV Info: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\>| | |
+| GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the replacement voucher for the GUID if TO2 is completed and resale/non-resale was selected. | Query - id: Device GUID | | | Ownership voucher |
+| POST /api/v1/owner/setupinfo?id=<device_guid> | Updates the replacement RendezvousInfo and GUID for the device. The setupinfo sring format is 'guid:=<replacement_device_guid_string>,rvinfo:=<replacement_rv_info_string>'. Both 'guid' and 'rvinfo' are optional. An example setupinfo string looks like 'guid:=64612afb-4ad9-4c69-a7d1-1cb1378157ec,rvinfo:=http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040'. | Query - id: Device GUID | application/text | Setupinfo string | |
 
 ***NOTE*** These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
 
 # Inserting keys into Owner keystore
 
-The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains the default Owner keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fido-iot-src\>/demo/owner/owner_keystore.p12.
+The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fido-iot-src\>/demo/owner/owner_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
+
+***NOTE*** A 'PKCS12' keystore is used to store the keys, instead of 'PKCS11' keystore (softHSM). This is because of use of 'BouncyCastle' as a security provider for algorithm 'RSA/NONE/OAEPWithSHA256AndMGF1Padding' to support Asymmetric key exchange, since the security provider 'SUNPKCS11' configured with softHSM, does not support the same as per the available documentation.
 
 # Troubleshooting
 
