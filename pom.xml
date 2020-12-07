@@ -11,7 +11,7 @@
   <artifactId>fido-iot</artifactId>
   <groupId>org.fido</groupId>
   <version>0.3</version>
-  <name>Protocol Reference Implementaion</name>
+  <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
   <!--
