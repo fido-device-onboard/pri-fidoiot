@@ -78,7 +78,8 @@ public class To2ClientApp {
       try {
         WebClient client = new WebClient(path, dr, dispatcher);
         client.run();
-
+        // break here since no exception is thrown, so TO2 is successful.
+        break;
       } catch (Exception e) {
         System.out.println(e.getMessage());
       }
