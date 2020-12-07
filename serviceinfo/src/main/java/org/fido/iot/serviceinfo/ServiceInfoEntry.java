@@ -3,6 +3,7 @@
 
 package org.fido.iot.serviceinfo;
 
+import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 

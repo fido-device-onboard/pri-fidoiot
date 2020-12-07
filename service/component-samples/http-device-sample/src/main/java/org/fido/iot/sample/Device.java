@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fido.iot.sample;
 
 import java.io.ByteArrayOutputStream;
@@ -8,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +58,7 @@ public class Device {
   private static final String PROPERTY_DI_URL = "fido.iot.url.di";
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
   private static final int SERVICEINFO_MTU = 1300;
+  private static boolean isServiceinfoDone;
 
   private static final Logger logger = LogManager.getLogger();
 
@@ -319,22 +325,28 @@ public class Device {
 
       @Override
       public Composite getNextServiceInfo() {
+        if (isServiceinfoDone) {
+          return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.EMPTY_LIST, false);
+        } else {
+          ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(
+              SERVICEINFO_MTU,
+              wrappedCreds.get().getAsUuid(Const.DC_GUID));
+          marshaller.register(new DeviceServiceInfoModule());
+          Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
+          List<Composite> marshaledSvi = new LinkedList<>();
 
-        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(
-            SERVICEINFO_MTU,
-            wrappedCreds.get().getAsUuid(Const.DC_GUID));
-        marshaller.register(new DeviceServiceInfoModule());
-        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
-        List<Composite> marshaledSvi = new LinkedList<>();
-
-        for (Supplier<ServiceInfo> supplier : serviceInfos) {
-          ServiceInfo si = supplier.get();
-          for (ServiceInfoEntry sie : si) {
-            Composite c = ServiceInfoEncoder.encodeValue(sie.getKey(), sie.getValue().getContent());
-            marshaledSvi.add(c);
+          for (Supplier<ServiceInfo> supplier : serviceInfos) {
+            ServiceInfo si = supplier.get();
+            for (ServiceInfoEntry sie : si) {
+              Composite c = ServiceInfoEncoder.encodeValue(
+                  sie.getKey(), sie.getValue().getContent());
+              marshaledSvi.add(c);
+            }
           }
+          // As per the default MTU, only one message is sent to the Owner as Serviceinfo.
+          isServiceinfoDone = true;
+          return ServiceInfoEncoder.encodeDeviceServiceInfo(marshaledSvi, false);
         }
-        return ServiceInfoEncoder.encodeDeviceServiceInfo(marshaledSvi, false);
       }
 
       @Override
@@ -362,7 +374,6 @@ public class Device {
 
       @Override
       public void prepareServiceInfo() {
-
       }
 
       @Override
