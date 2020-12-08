@@ -10,8 +10,8 @@
 
   <artifactId>fido-iot</artifactId>
   <groupId>org.fido</groupId>
-  <version>0.3-SNAPSHOT</version>
-  <name>Protocol Reference Implementaion</name>
+  <version>0.3</version>
+  <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
   <!--

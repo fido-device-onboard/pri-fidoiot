@@ -13,7 +13,7 @@
   <parent>
     <artifactId>storage-samples</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
   </parent>
 
   <name>Storage Device Initialization Sample</name>
@@ -33,14 +33,14 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.3-SNAPSHOT</version>
+      <version>0.3</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.3-SNAPSHOT</version>
+      <version>0.3</version>
     </dependency>
 
     <dependency>
