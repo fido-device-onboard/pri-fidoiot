@@ -5,7 +5,7 @@
 ## System Requirements:
 
 * **Ubuntu 20.04**.
-* **Maven**.
+* **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
 
@@ -116,6 +116,15 @@ $ mvn exec:java
 ```
 
 TO2 Client finished.
+
+***NOTE***: During the execution of the Protcol Samples using the command 'mvn exec:java', following warning messages may be displayed on the console. These warning messages are a result of the version discrepency of Guice with maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
+```
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/usr/share/maven/lib/guice.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
+WARNING: Please consider reporting this to the maintainers of com.google.inject.internal.cglib.core.$ReflectUtils$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+```
 
 ## Ownership Voucher creation
 
