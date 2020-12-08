@@ -1,3 +1,11 @@
+# System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven**.
+* **Java 11**.
+* **Haveged**.
+* **SoftHSM**.
+
 # Getting the executable
 
 Use the following commands to build FIDO IoT Reseller Component sample source.
@@ -20,9 +28,9 @@ Some required runtime arguments
 
 - `reseller_database_connection_url`
 
-   JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file
+  JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file
 
-  Default value: jdbc:h2:tcp://localhost:8071/<path-to-user-dir>
+  Default value: jdbc:h2:tcp://localhost:8071/./target/data/reseller
 
 - `reseller_database_username`
 
@@ -93,7 +101,7 @@ db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <reseller_db_port>
 webAllowOthers = true
 ```
 
-**IMPORTANT: NOT recommended to enable this setting especially on production systems.**
+**IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
 # Starting the Reseller service
 
@@ -105,9 +113,9 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id> | Assigns the customer and returns the extended voucher for the given serial number from `RT_DEVICES` table. | Query - id: Customer Id, Path - Device Serial Number | | | Ownership voucher |
-| POST /api/v1/resell/vouchers/<serial_number> | Adds voucher to `RT_DEVICES` table against the serial number. | Path - Device Serial Number | application/cbor | Ownership voucher | |
-| DELETE /api/v1/resell/vouchers/<serial_number> | Deletes voucher from `RT_DEVICES` table with the specified serial number. | Path - Device Serial Number | | | |
+| GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id> | Assigns the customer and returns the extended Ownership Voucher for the given serial number from `RT_DEVICES` table. | Query - id: Customer Id, Path - Device Serial Number | | | Ownership Voucher |
+| POST /api/v1/resell/vouchers/<serial_number> | Adds Ownership Voucher to `RT_DEVICES` table against the serial number. | Path - Device Serial Number | application/cbor | Ownership Voucher | |
+| DELETE /api/v1/resell/vouchers/<serial_number> | Deletes Ownership Voucher from `RT_DEVICES` table with the specified serial number. | Path - Device Serial Number | | | |
 | POST /api/v1/resell/customers/?id=<customer_id>&name=<customer_name> | Adds customer keyset to `RT_CUSTOMERS` table. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
 | DELETE /api/v1/resell/customers/<customer_id> | Deletes customer keyset from `RT_CUSTOMERS` table. | Path - Customer Id | | | |
 | POST /api/v1/resell/keys/?alias=<keystore_alias> | Adds new Reseller keys to the keystore with the given alias | Query - alias: Alias to be added in keystore | | PEM formatted certificate and private key | |

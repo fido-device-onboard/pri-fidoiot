@@ -1,3 +1,10 @@
+# System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven**.
+* **Java 11**.
+* **Haveged**.
+
 # Getting the executable
 
 Use the following commands to build FIDO IoT RV Component sample source.
@@ -49,6 +56,14 @@ Some required runtime arguments
   Default value: https://verify.epid-sbx.trustedservices.intel.com/
   Other server options: https://verify.epid.trustedservices.intel.com/ (production EPID verification server), https://localhost:1180 (onprem verification service)
 
+- `epid_test_mode`
+
+   EPID devices can be tested using `Test` mode, it is intended for supporting onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device.
+
+   Default value: false
+
+   **NOTE** Not recommended for use in production systems.
+
 - `catalina_home`
 
   Tomcat configuration for catalina home.
@@ -66,7 +81,7 @@ db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
 webAllowOthers = true
 ```
 
-**IMPORTANT: NOT recommended to enable this setting especially on production systems.**
+**IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
 # Starting the rv service
 
@@ -74,9 +89,9 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Allowlist and Denylist Configuration
 
-- RV provides the option to allow and deny requests based on the owner, manufacturer and reseller public keys and based on the GUID used in the device ownership voucher
-header. 
-- To add entries to these allowlist and denylist, update the `config.properties` file in `<fido-iot-src>/storage/storage-rv-sample/src/main/resources` location.
+- RV provides the option to allow and deny requests based on the owner, manufacturer and reseller public keys and based on the GUID used in the Device Ownership Voucher
+header.
+- To add entries to these allowlist and denylist, update the `config.properties` file in `<fido-iot-src>/storage/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `demo/rv` and restart the docker.
 - Once updated, rebuild the code, rebuild RV docker image and then start the docker.
 - The hashes for the default public keys present of owner, manufacturer and reseller are already added in allowlist configuration of component sample. The table below lists them.
 
