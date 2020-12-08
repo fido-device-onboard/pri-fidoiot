@@ -21,7 +21,7 @@
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
     <commons-codec.version>1.14</commons-codec.version>
-    <tomcat.version>9.0.39</tomcat.version>
+    <tomcat.version>9.0.40</tomcat.version>
     <bcpkix.version>1.65</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
     <exec.mainClass>org.fido.iot.sample.To2ServerApp</exec.mainClass>

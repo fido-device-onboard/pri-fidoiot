@@ -1,6 +1,13 @@
-**NOTE**: The "protocol-next" branch of the PRI repository contains a preliminary implementation of the [FIDO IoT Spec - Working Draft ](https://fidoalliance.org/specs/fidoiot/FIDO-IoT-spec-v1.0-wd-20200730.html) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
+**NOTE**: This is a preliminary implementation of the [FIDO IoT Spec - Working Draft ](https://fidoalliance.org/specs/fidoiot/FIDO-IoT-spec-v1.0-wd-20200730.html) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
 
 # FIDO IoT Quick Start
+
+## System Requirements:
+
+* **Ubuntu 20.04**.
+* **Maven 3.6.3**.
+* **Java 11**.
+* **Haveged**.
 
 ## Source Layout
 
@@ -110,18 +117,27 @@ $ mvn exec:java
 
 TO2 Client finished.
 
-## Ownership voucher creation
+***NOTE***: During the execution of the Protcol Samples using the command 'mvn exec:java', following warning messages may be displayed on the console. These warning messages are a result of the version discrepency of Guice with maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
+```
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/usr/share/maven/lib/guice.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
+WARNING: Please consider reporting this to the maintainers of com.google.inject.internal.cglib.core.$ReflectUtils$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+```
+
+## Ownership Voucher creation
 
 The DI server will listen for messages at http://localhost:8039/fido/100/msg/<msgid>.
-The server also includes an SQL database that runs on port 8049. The database console
+The server also includes a SQL database that runs on port 8049. The database console
 UI will be available at http://localhost:8039/console.
 
-Extended ownership vouchers can be obtained from the following url:
+Extended Ownership Vouchers can be obtained from the following url:
 
 http://localhost:8039/api/v1/vouchers/<serial_no>
 ***NOTE***: Default serial number is '0'. To get the serial_no corresponding to the GUID, look up the `SERIAL_NO` field of MT_DEVICES table in the DI database.
 
-The hex value of the extended voucher can be obtained by running the API above. The value will be populated on DI server console.
+The hex value of the extended Ownership Voucher can be obtained by running the API above. The value will be populated on DI server console.
 
 To log in to the database and view records use the following information:
 ```
@@ -133,7 +149,7 @@ The path to the DB will be printed out in following format when the DI server is
 
 `jdbc:h2:tcp:...`
 
-SELECT * FROM MT_DEVICES will show the current vouchers created by DI messages.
+SELECT * FROM MT_DEVICES will show the current Ownership Vouchers created by DI messages.
 
 # Enabling Remote Access to DB
 
@@ -152,8 +168,14 @@ db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
 webAllowOthers = true
 ```
 
-**IMPORTANT: NOT recommended to use enable this setting especially on production systems.**
+**IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-## Using Component Samples
+# EPID Test Mode
+
+EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intended to support onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device. Test mode is enabled by default for protocol-sample in components.
+
+**NOTE** Not recommended for use in production systems.
+
+# Using Component Samples
 
 Refer to [Demo README](demo/README.md) for steps to run component sample demo.
