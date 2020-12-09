@@ -147,6 +147,7 @@ public class CryptoService {
     switch (algId) {
       case Const.PK_SECP256R1:
       case Const.PK_SECP384R1:
+      case Const.PK_ONDIE_ECDSA_384:
         return Const.EC_ALG_NAME;
       case Const.PK_RSA2048RESTR:
       case Const.PK_RSA:
@@ -231,6 +232,7 @@ public class CryptoService {
       case Const.COSE_ES256:
         return Const.ECDSA_256_ALG_NAME;
       case Const.COSE_ES384:
+      case Const.COSE_ES384_ONDIE:
         return Const.ECDSA_384_ALG_NAME;
       case Const.COSE_RS384:
         return Const.RSA_384_ALG_NAME;
@@ -500,7 +502,6 @@ public class CryptoService {
     final Composite pm = Composite.newArray();
     pm.set(Const.PK_ENC, encType);
     switch (encType) {
-
       case Const.PK_ENC_COSEEC: {
 
         final ECPublicKey ec = (ECPublicKey) publicKey;

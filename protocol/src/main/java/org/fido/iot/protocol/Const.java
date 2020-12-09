@@ -155,7 +155,10 @@ public final class Const {
   public static final int PK_RSA = 4; // RSA key (unrestricted)
   public static final int PK_SECP256R1 = 13; // ECDSA secp256r1 = NIST-P-256 = prime256v1
   public static final int PK_SECP384R1 = 14; // ECDSA secp384r1 = NIST-P-384
-
+  public static final int PK_EPIDv10 = 90; // Intel EPID, version 1.0
+  public static final int PK_EPIDv11 = 91; // Intel EPID, version 1.1
+  public static final int PK_EPIDv20 = 92; // Intel EPID, version 2.0
+  public static final int PK_ONDIE_ECDSA_384 = 93;
 
   //Java Algorithm names for Signatures
   public static final String RSA_256_ALG_NAME = "SHA256withRSA";
@@ -290,6 +293,7 @@ public final class Const {
   public static final int COSE_RS256 = -257;
   public static final int COSE_RS384 = -258;
   //todo:EPID types still need defined
+  public static final int COSE_ES384_ONDIE = -280;
 
   //Common COSE Headers Parameters
   public static final long COSE_ALG = 1;
@@ -423,4 +427,12 @@ public final class Const {
   public static final int DC_GUID = 4;
   public static final int DC_RENDEZVOUS_INFO = 5;
   public static final int DC_PUBLIC_KEY_HASH = 6;
+
+  // Device type values - included as part of the DI "mi" field
+  public static final int DT_ECDSA_256 = 1;
+  public static final int DT_ECDSA_384 = 2;
+  public static final int DT_ECDSA_512 = 3;
+  public static final int DT_EPID = 4;
+  public static final int DT_ONDIE_ECDSA_384 = 5;
+
 }

@@ -22,6 +22,8 @@ import org.fido.iot.protocol.DiServerService;
 import org.fido.iot.protocol.DiServerStorage;
 import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.CertificateResolver;
 import org.fido.iot.storage.DiDbManager;
 import org.fido.iot.storage.DiDbStorage;
@@ -149,6 +151,22 @@ public class DiContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+
+    OnDieCache odc = new OnDieCache(
+            sc.getInitParameter("ods.cacheDir"),
+            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+            sc.getInitParameter("ods.sourceUrlList"));
+
+    try {
+      odc.initializeCache();
+    } catch (Exception ex) {
+      // TODO - need to handle exception
+    }
+
+    final OnDieService ods = new OnDieService(
+            odc,
+            sc.getInitParameter("ods.checkRevocations").equals("true"));
+
     keyResolver = new CertificateResolver() {
       @Override
       public CloseableKey getPrivateKey(Certificate cert) {
@@ -191,7 +209,7 @@ public class DiContextListener implements ServletContextListener {
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createDiService(cs, ds);
+        return createDiService(cs, ds, ods);
       }
 
       @Override
@@ -222,7 +240,7 @@ public class DiContextListener implements ServletContextListener {
     }
 
     //create tables
-    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver);
+    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeys);
@@ -234,14 +252,14 @@ public class DiContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private DiServerService createDiService(CryptoService cs, DataSource ds) {
+  private DiServerService createDiService(CryptoService cs, DataSource ds, OnDieService ods) {
     return new DiServerService() {
       private DiServerStorage storage;
 
       @Override
       public DiServerStorage getStorage() {
         if (storage == null) {
-          storage = new DiDbStorage(cs, ds, keyResolver);
+          storage = new DiDbStorage(cs, ds, keyResolver, ods);
         }
         return storage;
       }
