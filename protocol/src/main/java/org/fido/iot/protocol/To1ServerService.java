@@ -4,7 +4,10 @@
 package org.fido.iot.protocol;
 
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -50,7 +53,13 @@ public abstract class To1ServerService extends MessagingService {
       deviceKey = getStorage().getVerificationKey();
     }
 
-    if (!cryptoService.verify(deviceKey, body, sigA)) {
+    // verify the data signed by the device key
+    if (!cryptoService.verify(
+            deviceKey,
+            body,
+            sigA,
+            getStorage().getOnDieService(),
+            null)) {
       throw new InvalidMessageException();
     }
     Composite payload = Composite.fromObject(

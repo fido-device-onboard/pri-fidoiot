@@ -39,6 +39,7 @@ public class TestListener implements ServletContextListener {
 
     To0ServerStorage serverStorage = new To0ServerStorage() {
       byte[] nonce3;
+      private byte[] onDieCertChain;
 
       @Override
       public byte[] getNonce3() {

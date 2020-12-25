@@ -4,6 +4,8 @@
 package org.fido.iot.protocol;
 
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.util.List;
 
 /**
  * To0 Server message processing service.
@@ -59,7 +61,9 @@ public abstract class To0ServerService extends MessagingService {
 
     Composite pubKeyEntry = getCryptoService().getOwnerPublicKey(voucher);
     PublicKey verificationKey = cryptoService.decode(pubKeyEntry);
-    if (!cryptoService.verify(verificationKey, to1d, null)) {
+
+    // Verify voucher signature
+    if (!cryptoService.verify(verificationKey, to1d, null, null, null)) {
       throw new InvalidOwnerSignBodyException();
     }
 

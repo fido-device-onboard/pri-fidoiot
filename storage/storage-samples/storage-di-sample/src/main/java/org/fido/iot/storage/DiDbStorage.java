@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -148,7 +150,7 @@ public class DiDbStorage implements DiServerStorage {
 
         // validate test signature against certpath
         if (!onDieService.validateSignature(
-                certPath,
+                (List<Certificate>) certPath.getCertificates(),
                 serialNo.getBytes(),
                 mstr.getAsBytes(Const.FIFTH_KEY),
                 false)) {
@@ -162,6 +164,7 @@ public class DiDbStorage implements DiServerStorage {
 
         int hashType = getCryptoService().getCompatibleHashType(
                 certPath.getCertificates().get(0).getPublicKey());
+
         chainHash = cryptoService.hash(hashType, chain.toBytes());
 
         publicKey = cryptoService.encode(certPath.getCertificates().get(0).getPublicKey(),
@@ -327,7 +330,7 @@ public class DiDbStorage implements DiServerStorage {
 
       X509CertificateHolder certHolder = null;
 
-      try (CloseableKey signingKey = resolver.getPrivateKey(issuerChain[0])) {
+      try (CloseableKey signingKey = resolver.getPrivateKey(issuerCert)) {
         ContentSigner signer = signer = jcaBuilder.build(signingKey.get());
 
         final X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(

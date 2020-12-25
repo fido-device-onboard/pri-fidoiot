@@ -27,6 +27,7 @@ public class To0DbStorage implements To0ServerStorage {
   private final CryptoService cryptoService;
   protected final DataSource dataSource;
   private byte[] nonce3;
+  private byte[] onDieCertChain;
 
   /**
    * Constructs a To0DbStorage instance.

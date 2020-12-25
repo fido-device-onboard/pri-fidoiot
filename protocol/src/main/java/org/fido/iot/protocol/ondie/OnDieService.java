@@ -71,19 +71,32 @@ public class OnDieService {
    * @param signature signature
    * @param checkRevocations checkRevocations
    * @return boolean indicating if signature is valid.
-   * @throws CertificateException when error.
    */
-  public boolean validateSignature(CertPath certChain,
+  public boolean validateSignature(List<Certificate> certChain,
                                    byte[] signedData,
                                    byte[] signature,
-                                   boolean checkRevocations) throws CertificateException {
-    List<Certificate> certificateList = (List<Certificate>) certChain.getCertificates();
+                                   boolean checkRevocations) {
 
     // Check revocations first.
-    if (checkRevocations && !checkRevocations(certificateList)) {
+    if ((certChain == null) || (checkRevocations && !checkRevocations(certChain))) {
       return false;
     }
 
+    return validateSignature(certChain.get(0).getPublicKey(), signedData, signature);
+  }
+
+  /**
+   * Performs a validation of the given signature with the public key
+   * extracted from the given cert chain.
+   *
+   * @param verificationKey verificationKey for signature
+   * @param signedData signedData
+   * @param signature signature
+   * @return boolean indicating if signature is valid.
+   */
+  public boolean validateSignature(PublicKey verificationKey,
+                                   byte[] signedData,
+                                   byte[] signature) {
     try {
       // check minimum length (taskinfo + R + S)
       if (signature.length < (taskInfoLength + rLength + sLength)) {
@@ -100,11 +113,9 @@ public class OnDieService {
       adjSignedData.write(signedData);
 
       byte[] adjSignature = convertSignature(signature, taskInfo);
-      PublicKey publicKey = certificateList.get(0).getPublicKey();
-
       Signature sig = Signature.getInstance("SHA384withECDSA");
 
-      sig.initVerify(publicKey);
+      sig.initVerify(verificationKey);
       sig.update(adjSignedData.toByteArray());
       return sig.verify(adjSignature);
     } catch (Exception ex) {
@@ -118,7 +129,6 @@ public class OnDieService {
       throw new IllegalArgumentException("taskinfo length is incorrect: " + taskInfo.length);
     }
 
-    final int taskInfoLength = 36;  // length of the taskinfo part of OnDie signature
     final int rLength = 48;  // length of the r field part of OnDie signature
     final int sLength = 48;  // length of the s field part of OnDie signature
 

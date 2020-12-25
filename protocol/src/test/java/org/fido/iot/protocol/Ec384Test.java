@@ -53,11 +53,11 @@ public class Ec384Test {
 
     Composite cos = service.sign(privateKey, payload, service.getCoseAlgorithm(privateKey));
 
-    assertTrue(service.verify(publicKey, cos, null));
+    assertTrue(service.verify(publicKey, cos, null, null, null));
 
     payload = service.getRandomBytes(15);
     cos.set(Const.COSE_SIGN1_PAYLOAD, payload);
-    assertFalse(service.verify(publicKey, cos, null));
+    assertFalse(service.verify(publicKey, cos, null, null, null));
 
   }
 }

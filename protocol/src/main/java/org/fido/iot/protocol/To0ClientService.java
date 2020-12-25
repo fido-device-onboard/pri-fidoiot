@@ -40,6 +40,8 @@ public abstract class To0ClientService extends ClientService {
     PublicKey mfgPublic = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
     int hashType = cryptoService.getCompatibleHashType(mfgPublic);
     Composite hash = cryptoService.hash(hashType, to0d.toBytes());
+    Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
+    final int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
 
     to01Payload.set(Const.TO1D_TO0D_HASH, hash);
 

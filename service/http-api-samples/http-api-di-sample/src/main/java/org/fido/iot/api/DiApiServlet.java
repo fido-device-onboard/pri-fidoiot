@@ -6,6 +6,8 @@ package org.fido.iot.api;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,7 +31,13 @@ import org.fido.iot.storage.CertificateResolver;
  */
 public class DiApiServlet extends HttpServlet {
 
-  protected Composite queryVoucher(DataSource dataSource, String serialNo) {
+  /**
+   * Returns the keyType of the voucher and it's assigned owner public key.
+   * @param dataSource database source
+   * @param serialNo serialNo to identify specific voucher
+   * @return Composite where first key is the voucher and second is the public keys
+   */
+  protected Composite queryVoucherAndPublicKeys(DataSource dataSource, String serialNo) {
 
     String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS "
         + "FROM MT_DEVICES "
@@ -54,6 +62,25 @@ public class DiApiServlet extends HttpServlet {
     return result;
   }
 
+  protected PublicKey getOwnerPublicKey(int keyType, List<PublicKey> publicKeys) {
+    CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
+    for (PublicKey key : publicKeys) {
+      if (key instanceof ECKey) {
+        int bitLength = ((ECKey) key).getParams().getCurve().getField().getFieldSize();
+        if (keyType == Const.PK_SECP256R1 && bitLength == Const.BIT_LEN_256) {
+          return key;
+        }
+        if (keyType == Const.PK_SECP384R1 && bitLength == Const.BIT_LEN_384) {
+          return key;
+        }
+      } else if ((keyType == Const.PK_RSA || keyType == Const.PK_RSA2048RESTR)
+              && key instanceof RSAKey) {
+        return key;
+      }
+    }
+    return null;
+  }
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
@@ -66,31 +93,24 @@ public class DiApiServlet extends HttpServlet {
     CertificateResolver resolver =
         (CertificateResolver) getServletContext().getAttribute("resolver");
 
-    Composite result = queryVoucher(ds, serialNo);
+    // get voucher and assigned public keys
+    Composite result = queryVoucherAndPublicKeys(ds, serialNo);
     if (result.size() == 0) {
       resp.setStatus(401);
       return;
     }
 
     Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-    List<PublicKey> certs =
+    List<PublicKey> publicKeys =
         PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
 
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
     Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
 
     int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
-    Certificate[] issuerChain =
-        resolver.getCertChain(keyType);
+    PublicKey ownerPub = getOwnerPublicKey(keyType, publicKeys);
 
-    PublicKey ownerPub = null;
-    for (PublicKey pub : certs) {
-      int ownerType = cs.getPublicKeyType(pub);
-      if (ownerType == keyType) {
-        ownerPub = pub;
-        break;
-      }
-    }
+    Certificate[] issuerChain = resolver.getCertChain(keyType);
 
     VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
     try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
@@ -102,6 +122,5 @@ public class DiApiServlet extends HttpServlet {
     getServletContext().log("Extended voucher: " + Composite.toString(voucherBytes));
     resp.setContentLength(voucherBytes.length);
     resp.getOutputStream().write(voucherBytes);
-
   }
 }

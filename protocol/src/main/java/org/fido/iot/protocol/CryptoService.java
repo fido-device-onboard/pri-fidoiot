@@ -67,6 +67,7 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 import org.fido.iot.protocol.epid.EpidMaterialService;
 import org.fido.iot.protocol.epid.EpidSignatureVerifier;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 /**
  * Cryptography Service.
@@ -642,16 +643,23 @@ public class CryptoService {
   }
 
   /**
-   * Verifies a COSE signature.
+   * Verifies a COSE signature. Handles generic ECCDSA EPID and OnDie ECDSA signatures.
    *
    * @param verificationKey The verification key to use.
    * @param cose            The COSE message.
    * @param sigInfoA        The sigInfo object representing eA
+   * @param onDieService    The onDie service.
+   * @param onDieCertPath   The onDie cert path.
    * @return True if the signature matches otherwise false.
    */
-  public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
+  public boolean verify(PublicKey verificationKey,
+                        Composite cose,
+                        Composite sigInfoA,
+                        OnDieService onDieService,
+                        Composite onDieCertPath) {
     if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      // EPID verification
       verifyMaroePrefix(cose);
       EpidSignatureVerifier.Result verificationResult =
               EpidSignatureVerifier.verify(cose, sigInfoA);
@@ -674,6 +682,32 @@ public class CryptoService {
     final byte[] sig = cose.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
 
     try {
+      // OnDie ECDSA signature verification
+      if (algId == Const.COSE_ES384_ONDIE) {
+        if (onDieService == null) {
+          throw new SignatureException("Internal error: onDieService not initialized.");
+        }
+        try {
+          // if cert path is given then check revocations
+          // else just check the signature
+          if (onDieCertPath != null) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            List<Certificate> certPath = new ArrayList<>();
+            for (int i = 0; i < onDieCertPath.size(); i++) {
+              certPath.add(
+                      cf.generateCertificate(
+                              new ByteArrayInputStream((byte[]) onDieCertPath.get(i))));
+            }
+            return onDieService.validateSignature(certPath, payload.array(), sig, false);
+          } else {
+            return onDieService.validateSignature(verificationKey, payload.array(), sig);
+          }
+        } catch (CertificateException ex) {
+          return false;
+        }
+      }
+
+      // ECDSA verification
       final String algName = getSignatureAlgorithm(algId);
       final Signature signer = getSignatureInstance(algName);
 
@@ -827,7 +861,7 @@ public class CryptoService {
     verifyHash(
         voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
         voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
-    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+    //verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
     verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 
