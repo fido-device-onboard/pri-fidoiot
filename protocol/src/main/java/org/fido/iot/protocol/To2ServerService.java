@@ -98,11 +98,13 @@ public abstract class To2ServerService extends MessagingService {
     Composite sigInfoA = getStorage().getSigInfoA();
     PublicKey deviceKey = getCryptoService().getDevicePublicKey(voucher);
 
-    // TODO
-    Composite certPath = voucher.getAsComposite(Const.OV_HEADER)
-                    .getAsComposite(Const.OV_DEV_CERT_CHAIN);
+    Composite certPath = voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN);
 
-    if (!getCryptoService().verify(deviceKey, body, sigInfoA, null, certPath)) {
+    if (!getCryptoService().verify(deviceKey,
+            body,
+            sigInfoA,
+            getStorage().getOnDieService(),
+            certPath)) {
       throw new InvalidMessageException();
     }
 

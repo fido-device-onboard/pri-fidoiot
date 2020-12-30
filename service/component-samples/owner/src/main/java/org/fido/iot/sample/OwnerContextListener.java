@@ -178,7 +178,7 @@ public class OwnerContextListener implements ServletContextListener {
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, resolver);
+          storage = new OwnerDbStorage(cs, ds, resolver, null);
         }
         return storage;
       }
