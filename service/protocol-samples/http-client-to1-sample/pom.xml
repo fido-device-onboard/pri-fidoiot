@@ -13,7 +13,7 @@
   <parent>
     <artifactId>protocol-samples</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>0.3</version>
+    <version>0.4-SNAPSHOT</version>
   </parent>
 
   <name>HTTP TO1 Client Sample</name>
@@ -32,25 +32,25 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>storage-rv-sample</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
