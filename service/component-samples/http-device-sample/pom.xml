@@ -14,7 +14,7 @@
   <parent>
     <artifactId>component-samples</artifactId>
     <groupId>org.fido.iot</groupId>
-    <version>0.3</version>
+    <version>0.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>device</artifactId>
@@ -95,14 +95,14 @@
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>serviceinfo</artifactId>
-      <version>0.3</version>
+      <version>0.4-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
