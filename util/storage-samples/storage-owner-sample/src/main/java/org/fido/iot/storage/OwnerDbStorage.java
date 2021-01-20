@@ -3,13 +3,11 @@
 
 package org.fido.iot.storage;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.security.PrivateKey;
@@ -24,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
@@ -58,8 +57,8 @@ public class OwnerDbStorage implements To2ServerStorage {
   private long serviceInfoCount = 0;
   private long serviceInfoPosition = 0;
   private ServiceInfoMarshaller serviceInfoMarshaller;
-
-  private static final int SERVICEINFO_MTU = 1300;
+  int ownerServiceInfoMtuSize = 0;
+  String deviceServiceInfoMtuSize = String.valueOf(0);
 
   /**
    * Constructs a OwnerDbStorage instance.
@@ -268,6 +267,77 @@ public class OwnerDbStorage implements To2ServerStorage {
     return true;
   }
 
+  // maximum size service info that owner can receive from device (i.e) DeviceServiceInfoMTU
+  @Override
+  public String getMaxDeviceServiceInfoMtuSz() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT DEVICE_SERVICE_INFO_MTU_SIZE FROM TO2_SETTINGS;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          deviceServiceInfoMtuSize =
+              (rs.getInt(1) > 0
+                  ? String.valueOf(rs.getInt(1))
+                  : String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    return deviceServiceInfoMtuSize;
+  }
+
+  @Override
+  public void setMaxOwnerServiceInfoMtuSz(int mtu) {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "UPDATE TO2_DEVICES "
+            + "SET OWNER_SERVICE_INFO_MTU_SIZE = ? "
+            + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setInt(1, mtu);
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // maximum size service info that owner can send to device (i.e) OwnerServiceInfoMTU
+  @Override
+  public int getMaxOwnerServiceInfoMtuSz() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT OWNER_SERVICE_INFO_MTU_SIZE FROM TO2_DEVICES WHERE GUID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          ownerServiceInfoMtuSize = rs.getInt(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return this.ownerServiceInfoMtuSize;
+  }
+
   @Override
   public void continuing(Composite request, Composite reply) {
     sessionId = getToken(request);
@@ -419,7 +489,7 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void prepareServiceInfo() {
-    serviceInfoMarshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
+    serviceInfoMarshaller = new ServiceInfoMarshaller(getMaxOwnerServiceInfoMtuSz(),
         voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
     serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
     Iterable<Supplier<ServiceInfo>> serviceInfo = serviceInfoMarshaller.marshal();

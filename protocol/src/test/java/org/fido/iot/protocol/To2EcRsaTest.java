@@ -213,6 +213,21 @@ public class To2EcRsaTest extends BaseTemplate {
       public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
         fromOwnerInfo = info;
       }
+
+      @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        prepareServiceInfo();
+      }
+
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
     };
 
     clientService = new To2ClientService() {
@@ -277,6 +292,21 @@ public class To2EcRsaTest extends BaseTemplate {
       @Override
       public boolean getOwnerResaleSupport() {
         return false;
+      }
+
+      @Override
+      public String getMaxDeviceServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
+      public void setMaxOwnerServiceInfoMtuSz(int mtu) {
+
+      }
+
+      @Override
+      public int getMaxOwnerServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       }
 
       @Override
