@@ -14,4 +14,57 @@ node('ubuntu18.04-OnDemand'){
     sh 'tar -czvf demo.tar.gz demo/'
     archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
+  try
+  {
+    //Run the smoke test
+    stage('Run Smoke test')
+    {
+
+      //Checking out the smoke test code
+      git(
+        url:"https://github.com/secure-device-onboard-ci/sdo-test",
+        credentialsID:"sdo-automationgithubtoken",
+        branch:"master"
+      )
+
+      //Creating the required directories ()
+      sh '''
+        mkdir -p sdo-test/binaries
+        mkdir -p sdo-test/binaries/pri-fidoiot
+      '''
+
+      //Extract and copy the demo.tar content to the location
+      sh '''
+        cp -r demo/* sdo-test/binaries/pri-fidoiot
+      '''
+
+      //Setting the TEST_DIR and executing smoke test
+      sh'''
+        cd sdo-test
+        export TEST_DIR='pwd'
+        mvn clean verify -Dgroups=fido_smoketest 2>&1 | tee smoke_test.log
+      '''
+    }
+  }
+  finally
+  {
+    //Remove the files
+    print "Removing the files"
+    sh'''
+      rm -f credential.bin
+      rm -f ext_voucher
+      rm -f guid
+      rm -f linux64.sh
+      rm -f payload.bin
+      rm -f result.txt
+    '''
+
+    print "Pruning docker containers"
+    sh'''
+      docker system prune -a -f
+    '''
+
+    print "Archiving the smoke test logs"
+    archiveArtifacts artifacts: 'smoke_test.log', fingerprint: true, allowEmptyArchive:false
+  }
 }
