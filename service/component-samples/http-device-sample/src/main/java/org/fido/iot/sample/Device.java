@@ -59,6 +59,7 @@ public class Device {
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
   private static final int SERVICEINFO_MTU = 1300;
   private static boolean isServiceinfoDone;
+  private static boolean rvBypass;
 
   private static final Logger logger = LogManager.getLogger();
 
@@ -213,79 +214,97 @@ public class Device {
     client.run();
   }
 
+  boolean isRvBypassSet(Composite rvInformation) {
+    Composite rvItems = rvInformation.getAsComposite(Const.FIRST_KEY);
+    for (int i = 0; i < rvItems.size(); i++) {
+      Composite variable = rvItems.getAsComposite(i);
+      if (variable.getAsNumber(Const.FIRST_KEY).intValue() == Const.RV_BYPASS) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void doTransferOwnership(Composite credentials) {
 
     Composite rvi = credentials.getAsComposite(Const.DC_RENDEZVOUS_INFO);
-    List<String> to1Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
 
     // the 'signed blob' contains the redirect to TO2
     AtomicReference<Composite> signedBlob = new AtomicReference<>();
     AtomicReference<Composite> wrappedCreds = new AtomicReference<>(credentials);
     AtomicBoolean isTo2Done = new AtomicBoolean(false);
 
-    To1ClientStorage to1Storage = new To1ClientStorage() {
+    rvBypass = isRvBypassSet(rvi);
+    if (!rvBypass) {
+      // if rvBypass flag is not set, continue with T01.
 
-      @Override
-      public void completed(Composite request, Composite reply) {
-        List<String> redirects = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
-        logger.info("TO1 complete, owner is at " + redirects);
+      List<String> to1Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
+      To1ClientStorage to1Storage = new To1ClientStorage() {
+
+        @Override
+        public void completed(Composite request, Composite reply) {
+          List<String> redirects = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
+          logger.info("TO1 complete, owner is at " + redirects);
+        }
+
+        @Override
+        public Composite getDeviceCredentials() {
+          return wrappedCreds.get();
+        }
+
+        @Override
+        public byte[] getMaroePrefix() {
+          return new byte[0];
+        }
+
+        @Override
+        public Composite getSigInfoA() {
+          return buildSigInfoA();
+        }
+
+        @Override
+        public PrivateKey getSigningKey() {
+          return myKeys.getPrivate();
+        }
+
+        @Override
+        public void storeSignedBlob(Composite b) {
+          signedBlob.set(b.clone());
+        }
+      };
+
+      To1ClientService to1Service = new To1ClientService() {
+        @Override
+        public CryptoService getCryptoService() {
+          return myCryptoService;
+        }
+
+        @Override
+        protected To1ClientStorage getStorage() {
+          return to1Storage;
+        }
+      };
+
+      MessageDispatcher to1Dispatcher = new MessageDispatcher() {
+        @Override
+        protected MessagingService getMessagingService(Composite request) {
+          return to1Service;
+        }
+      };
+
+      for (String url : to1Urls) {
+        if (null != signedBlob.get()) {
+          break;
+        }
+
+        logger.info("TO1 URL is " + url);
+
+        DispatchResult dr = to1Service.getHelloMessage();
+        WebClient client = new WebClient(url, dr, to1Dispatcher);
+        client.run();
       }
-
-      @Override
-      public Composite getDeviceCredentials() {
-        return wrappedCreds.get();
-      }
-
-      @Override
-      public byte[] getMaroePrefix() {
-        return new byte[0];
-      }
-
-      @Override
-      public Composite getSigInfoA() {
-        return buildSigInfoA();
-      }
-
-      @Override
-      public PrivateKey getSigningKey() {
-        return myKeys.getPrivate();
-      }
-
-      @Override
-      public void storeSignedBlob(Composite b) {
-        signedBlob.set(b.clone());
-      }
-    };
-
-    To1ClientService to1Service = new To1ClientService() {
-      @Override
-      public CryptoService getCryptoService() {
-        return myCryptoService;
-      }
-
-      @Override
-      protected To1ClientStorage getStorage() {
-        return to1Storage;
-      }
-    };
-
-    MessageDispatcher to1Dispatcher = new MessageDispatcher() {
-      @Override
-      protected MessagingService getMessagingService(Composite request) {
-        return to1Service;
-      }
-    };
-
-    for (String url : to1Urls) {
-      if (null != signedBlob.get()) {
-        break;
-      }
-
-      logger.info("TO1 URL is " + url);
-
-      DispatchResult dr = to1Service.getHelloMessage();
-      WebClient client = new WebClient(url, dr, to1Dispatcher);
-      client.run();
+    } else {
+      logger.info("RVBypass flag is set, Skipping T01.");
     }
 
     To2ClientStorage to2Storage = new To2ClientStorage() {
@@ -414,14 +433,20 @@ public class Device {
       }
     };
 
+    List<String> to2Urls = null;
+    if (rvBypass) {
+      to2Service.setRvBypass(true); // to skip rendezvous blob verification
+      to2Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
+    } else {
+      to2Urls = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
+    }
+
     MessageDispatcher to2Dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
         return to2Service;
       }
     };
-
-    List<String> to2Urls = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
 
     for (String url : to2Urls) {
       if (isTo2Done.get()) {
