@@ -236,7 +236,7 @@ public class Device {
 
     rvBypass = isRvBypassSet(rvi);
     if (!rvBypass) {
-      // if rvBypass flag is not set, continue with T01.
+      logger.info("RVBypass flag not set, Starting TO1.");
 
       List<String> to1Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
       To1ClientStorage to1Storage = new To1ClientStorage() {
