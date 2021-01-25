@@ -36,8 +36,9 @@ node('ubuntu18.04-OnDemand'){
         cp -r demo/* sdo-test/binaries/pri-fidoiot
       '''
 
-      // Setting the TEST_DIR and executing smoke test
+      // Setting the TEST_DIR and executing smoke test (Added chmod just for one verification)
       sh'''
+        chmod 777 sdo-test
         cd sdo-test
         export TEST_DIR=`pwd`
         mvn clean verify -Dgroups=fido_smoketest | tee smoke_test.log
