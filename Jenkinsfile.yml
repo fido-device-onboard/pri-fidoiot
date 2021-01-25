@@ -25,7 +25,7 @@ node('ubuntu18.04-OnDemand'){
       // Checking out the smoke test code
       checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'sdo-test']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test']]])
 
-      // Creating the required directories ()
+      // Creating the required directories
       sh '''
         mkdir -p sdo-test/binaries
         mkdir -p sdo-test/binaries/pri-fidoiot
@@ -40,7 +40,7 @@ node('ubuntu18.04-OnDemand'){
       sh'''
         cd sdo-test
         export TEST_DIR=`pwd`
-        mvn clean verify -Dgroups=fido_smoketest
+        mvn clean verify -Dgroups=fido_smoketest | tee smoke_test.log
       '''
     }
   }
@@ -56,13 +56,13 @@ node('ubuntu18.04-OnDemand'){
       rm -f payload.bin
       rm -f result.txt
     '''
-    
+
     print "Pruning docker containers"
     sh'''
       docker system prune -a -f
     '''
-    
+
     print "Archiving the smoke test logs"
-    archiveArtifacts artifacts: 'smoke_test.log', fingerprint: true, allowEmptyArchive:false
+    archiveArtifacts artifacts: 'sdo-test/smoke_test.log', fingerprint: true, allowEmptyArchive:false
   }
 }
