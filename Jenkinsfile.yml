@@ -15,14 +15,14 @@ node('ubuntu18.04-OnDemand'){
     archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
 
-  try{
+  try
+  {
     
     // Run the smoke test
     stage('Run Smoke test')
     {
 
       // Checking out the smoke test code
-      //git credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test.git'
       checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'sdo-test']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test']]])
 
       // Creating the required directories ()
@@ -39,7 +39,7 @@ node('ubuntu18.04-OnDemand'){
       // Setting the TEST_DIR and executing smoke test
       sh'''
         cd sdo-test
-        export TEST_DIR='pwd'
+        export TEST_DIR=`pwd`
         mvn clean verify -Dgroups=fido_smoketest 2>&1 | tee smoke_test.log
       '''
     }
