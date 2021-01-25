@@ -22,7 +22,8 @@ node('ubuntu18.04-OnDemand'){
     {
 
       // Checking out the smoke test code
-      git credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test.git'
+      //git credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test.git'
+      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'sdo-test']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test']]])
 
       // Creating the required directories ()
       sh '''
