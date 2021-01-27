@@ -36,12 +36,11 @@ node('ubuntu18.04-OnDemand'){
         cp -r demo/* sdo-test/binaries/pri-fidoiot
       '''
 
-      // Setting the TEST_DIR and executing smoke test (Added chmod just for one verification)
+      // Setting the TEST_DIR and executing smoke test
       sh'''
-        chmod 777 sdo-test
         cd sdo-test
         export TEST_DIR=`pwd`
-        mvn clean verify -Dgroups=fido_smoketest | tee smoke_test.log
+        mvn clean verify -Dgroups=fido_smoketest wget -O smoke_test.log ${BUILD_URL}consoleText
       '''
     }
   }
@@ -65,5 +64,7 @@ node('ubuntu18.04-OnDemand'){
 
     print "Archiving the smoke test logs"
     archiveArtifacts artifacts: 'sdo-test/smoke_test.log', fingerprint: true, allowEmptyArchive:false
+
+    wget -O smoke_test.log ${BUILD_URL}consoleText
   }
 }
