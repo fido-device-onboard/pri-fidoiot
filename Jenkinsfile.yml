@@ -40,7 +40,7 @@ node('ubuntu18.04-OnDemand'){
       sh'''
         cd sdo-test
         export TEST_DIR=`pwd`
-        mvn clean verify -Dgroups=fido_smoketest | tee smoke_test.log
+        mvn clean verify -Dgroups=fido_smoketest
       '''
     }
   }
@@ -65,8 +65,8 @@ node('ubuntu18.04-OnDemand'){
     print "Archiving the smoke test logs"
     archiveArtifacts artifacts: 'sdo-test/smoke_test.log', fingerprint: true, allowEmptyArchive:false
 
-    sh'''
-    wget -O smoke_test.log ${BUILD_URL}consoleText
-    '''
+    //sh'''
+    //wget -O smoke_test.log ${BUILD_URL}consoleText
+    //'''
   }
 }
