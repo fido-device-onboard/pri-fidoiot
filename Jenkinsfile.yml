@@ -61,12 +61,5 @@ node('ubuntu18.04-OnDemand'){
     sh'''
       docker system prune -a -f
     '''
-
-    print "Archiving the smoke test logs"
-    archiveArtifacts artifacts: 'sdo-test/smoke_test.log', fingerprint: true, allowEmptyArchive:false
-
-    //sh'''
-    //wget -O smoke_test.log ${BUILD_URL}consoleText
-    //'''
   }
 }
