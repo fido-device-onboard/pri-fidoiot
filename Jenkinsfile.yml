@@ -40,7 +40,7 @@ node('ubuntu18.04-OnDemand'){
       sh'''
         cd sdo-test
         export TEST_DIR=`pwd`
-        mvn clean verify -Dgroups=fido_smoketest wget -O smoke_test.log ${BUILD_URL}consoleText
+        mvn clean verify -Dgroups=fido_smoketest | tee smoke_test.log
       '''
     }
   }
