@@ -134,11 +134,12 @@ public class To2StorageTest {
       + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
       + "fi\r\n";
 
+  String activateMod = "true";
   String packageName = "linux64.sh";
-  String boolName = "bool";
-  String boolValue = "true";
+  String filename = "sample_file";
+  String url = "http://host/file.tmp";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-  ",sdo_sys:filedesc=BooleanId,sdo_sys:write=BooleanValue";
+  ",sdo_wget:filename=filename,sdo_sys:url=url";
 
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
@@ -171,10 +172,11 @@ public class To2StorageTest {
 
   private void insertSampleServiceInfo(UUID uuid, DataSource ds, OwnerDbManager ownerDbManager) {
 
+    ownerDbManager.addServiceInfo(ds, "activate_mod", activateMod.getBytes());
     ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
     ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
-    ownerDbManager.addServiceInfo(ds, "BooleanValue", boolValue.getBytes());
-    ownerDbManager.addServiceInfo(ds, "BooleanId", boolName.getBytes());
+    ownerDbManager.addServiceInfo(ds, "filename", filename.getBytes());
+    ownerDbManager.addServiceInfo(ds, "url", url.getBytes());
 
     ownerDbManager.removeSviFromDevice(ds, uuid);
     ownerDbManager.assignSviToDevice(ds, uuid, sviString);
@@ -403,7 +405,6 @@ public class To2StorageTest {
       try {
         // cleanup serviceinfo files that were created during test execution
         Files.deleteIfExists(Paths.get(System.getProperty("user.dir"), packageName));
-        Files.deleteIfExists(Paths.get(System.getProperty("user.dir"), boolName));
       } catch (IOException e) {
         // ignore
       }

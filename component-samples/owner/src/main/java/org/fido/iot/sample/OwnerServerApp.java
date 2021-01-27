@@ -14,11 +14,10 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
-import org.fido.iot.api.OwnerSviMtuServlet;
 import org.fido.iot.api.OwnerSviServlet;
+import org.fido.iot.api.OwnerSviSettingsServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
-import org.fido.iot.sample.ProtocolServlet;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
 
@@ -122,13 +121,13 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
-    wrapper = tomcat.addServlet(ctx, "sviMtuServlet",
-            new OwnerSviMtuServlet());
-    wrapper.addMapping("/api/v1/owner/svi/mtu/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
+    wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
+            new OwnerSviSettingsServlet());
+    wrapper.addMapping("/api/v1/owner/svi/settings/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
