@@ -43,6 +43,7 @@
     <module>service</module>
     <module>serviceinfo</module>
     <module>storage</module>
+    <module>component-samples</module>
   </modules>
 
   <dependencyManagement>

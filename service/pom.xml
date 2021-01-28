@@ -23,6 +23,5 @@
     <module>http-dispatchers</module>
     <module>http-api-samples</module>
     <module>protocol-samples</module>
-    <module>component-samples</module>
   </modules>
 </project>
