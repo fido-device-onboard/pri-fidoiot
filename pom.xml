@@ -44,6 +44,7 @@
     <module>serviceinfo</module>
     <module>storage</module>
     <module>component-samples</module>
+    <module>protocol-samples</module>
   </modules>
 
   <dependencyManagement>
