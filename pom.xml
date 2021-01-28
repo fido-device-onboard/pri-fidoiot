@@ -45,6 +45,7 @@
     <module>storage</module>
     <module>component-samples</module>
     <module>protocol-samples</module>
+    <module>http-api-samples</module>
   </modules>
 
   <dependencyManagement>
