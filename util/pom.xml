@@ -22,5 +22,6 @@
   <modules>
     <module>cert-utils</module>
     <module>http-dispatchers</module>
+    <module>serviceinfo</module>
   </modules>
 </project>
