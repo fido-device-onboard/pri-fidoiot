@@ -20,6 +20,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>cert-utils</module>
     <module>http-dispatchers</module>
   </modules>
 </project>
