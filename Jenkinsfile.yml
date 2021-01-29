@@ -48,12 +48,12 @@ node('ubuntu18.04-OnDemand'){
     // Remove the files
     print "Removing the files"
     sh'''
-      rm -f credential.bin
-      rm -f ext_voucher
-      rm -f guid
-      rm -f linux64.sh
-      rm -f payload.bin
-      rm -f result.txt
+      rm -f sdo-test/credential.bin
+      rm -f sdo-test/ext_voucher
+      rm -f sdo-test/guid
+      rm -f sdo-test/linux64.sh
+      rm -f sdo-test/payload.bin
+      rm -f sdo-test/result.txt
     '''
 
     print "Pruning docker containers"
