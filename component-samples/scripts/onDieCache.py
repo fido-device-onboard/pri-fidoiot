@@ -1,4 +1,14 @@
-#This script copies OnDie ECDSA artifacts to a specified local directory.
+#This script copies OnDie ECDSA artifacts from the cloud to a specified local directory.
+#Typically, the FDO components (Mfg, RV, Owner) will be configured to load OnDie certs from this
+#local directory. 
+#
+#When files are updated in the local directory, they will have a file type of ".new". In addition,
+#a touch file is created after copying to indicate to the component than an update has been made.
+#The component will trigger an update when this touch file is detected and will rename the .new 
+#files to the original names as the cache files are read. 
+#
+#The use of the .new mechanism is employed to prevent any conflict between reading a file and 
+#copying a new version from the script.
 
 import sys, getopt
 import urllib.request
