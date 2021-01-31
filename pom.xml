@@ -38,11 +38,11 @@
   </properties>
 
   <modules>
-    <module>cert-utils</module>
     <module>protocol</module>
-    <module>service</module>
-    <module>serviceinfo</module>
-    <module>storage</module>
+    <module>component-samples</module>
+    <module>protocol-samples</module>
+    <module>http-api-samples</module>
+    <module>util</module>
   </modules>
 
   <dependencyManagement>

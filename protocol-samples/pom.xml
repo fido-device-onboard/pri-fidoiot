@@ -11,18 +11,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>service</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <artifactId>fido-iot</artifactId>
+    <groupId>org.fido</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP Dispatchers</name>
-  <artifactId>http-dispatchers</artifactId>
+  <name>Protocol Service Samples</name>
+  <groupId>org.fido.iot</groupId>
+  <artifactId>protocol-samples</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>http-server-dispatcher</module>
-    <module>http-client-dispatcher</module>
+    <module>http-client-di-sample</module>
+    <module>http-client-to0-sample</module>
+    <module>http-client-to1-sample</module>
+    <module>http-client-to2-sample</module>
+    <module>http-server-di-sample</module>
+    <module>http-server-to0-to1-sample</module>
+    <module>http-server-to2-sample</module>
   </modules>
 
 </project>

@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
-     Copyright 2020 Intel Corporation
-     SPDX-License-Identifier: Apache 2.0
+    Copyright 2020 Intel Corporation
+    SPDX-License-Identifier: Apache 2.0
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>storage</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <artifactId>fido-iot</artifactId>
+    <groupId>org.fido</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <name>Storage samples</name>
-  <artifactId>storage-samples</artifactId>
+  <name>Http Api Samples</name>
+  <artifactId>http-api-samples</artifactId>
   <groupId>org.fido.iot</groupId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>storage-di-sample</module>
-    <module>storage-owner-sample</module>
-    <module>storage-rv-sample</module>
+    <module>http-api-di-sample</module>
+    <module>http-api-owner-sample</module>
+    <module>http-api-rv-sample</module>
+    <module>http-api-keystore-sample</module>
   </modules>
 </project>
