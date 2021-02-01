@@ -81,7 +81,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project-demo-directory}/rv</outputDirectory>
+              <outputDirectory>../${project-demo-directory}/rv</outputDirectory>
               <resources>
                 <resource>
                   <directory>${project.basedir}/src/main/resources</directory>
@@ -100,7 +100,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>${project-demo-directory}/rv</directory>
+              <directory>../${project-demo-directory}/rv</directory>
               <includes>
                 <include>config.properties</include>
               </includes>
