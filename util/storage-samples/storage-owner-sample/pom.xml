@@ -11,30 +11,60 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>fido-iot</artifactId>
-    <groupId>org.fido</groupId>
+    <artifactId>storage-samples</artifactId>
+    <groupId>org.fido.iot</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <name>Protocol Core</name>
-  <artifactId>protocol</artifactId>
-  <groupId>org.fido.iot</groupId>
+  <name>Storage Owner Sample</name>
+  <artifactId>storage-owner-sample</artifactId>
   <packaging>jar</packaging>
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
-    <jackson-datatype-jdk8.version>2.11.0</jackson-datatype-jdk8.version>
     <commons-codec.version>1.14</commons-codec.version>
     <tomcat.version>9.0.40</tomcat.version>
-    <bcprov.version>1.66</bcprov.version>
+    <bcprov.version>1.65.01</bcprov.version>
     <bcpkix.version>1.65</bcpkix.version>
+    <dbcp2.version>2.7.0</dbcp2.version>
   </properties>
 
   <dependencies>
     <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>protocol</artifactId>
+      <version>0.5-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>serviceinfo</artifactId>
+      <version>0.5-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>${dbcp2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.200</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bcpkix.version}</version>
     </dependency>
 
     <dependency>
@@ -43,24 +73,10 @@
       <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${commons-codec.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-      <version>${bcprov.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>${bcpkix.version}</version>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>device</artifactId>
+      <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

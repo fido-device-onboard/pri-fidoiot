@@ -10,7 +10,7 @@
 
   <artifactId>fido-iot</artifactId>
   <groupId>org.fido</groupId>
-  <version>0.3</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
@@ -34,15 +34,15 @@
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <maven-surefire-report-plugin.version>3.0.0-M4</maven-surefire-report-plugin.version>
     <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
-    <project-demo-directory>../../../demo</project-demo-directory>
+    <project-demo-directory>../../demo</project-demo-directory>
   </properties>
 
   <modules>
-    <module>cert-utils</module>
     <module>protocol</module>
-    <module>service</module>
-    <module>serviceinfo</module>
-    <module>storage</module>
+    <module>component-samples</module>
+    <module>protocol-samples</module>
+    <module>http-api-samples</module>
+    <module>util</module>
   </modules>
 
   <dependencyManagement>

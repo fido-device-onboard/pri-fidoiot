@@ -42,6 +42,8 @@ public class RendezvousInfoDecoder {
         return new Object[]{Const.RV_DEV_ONLY};
       case "owneronly":
         return new Object[]{Const.RV_OWNER_ONLY};
+      case "rvbypass":
+        return new Object[]{Const.RV_BYPASS};
       case "ipaddress":
         return new Object[]{Const.RV_IP_ADDRESS, getIpAddress(param[1])};
       case "ownerport":
