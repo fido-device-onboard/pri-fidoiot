@@ -115,6 +115,7 @@ public class Decoder implements Iterator<Object> {
       // of the data item.
       InitialByte ib = InitialByte.of(b);
       final long val;
+      boolean aiIndefiniteFlag = false;
 
       switch (ib.getAi()) {
         case AdditionalInfo.LENGTH_ONE:
@@ -135,6 +136,7 @@ public class Decoder implements Iterator<Object> {
           throw new IllegalArgumentException("CBOR ai code is illegal: " + ib);
         case AdditionalInfo.LENGTH_INDEFINITE:
         default:
+          aiIndefiniteFlag = true;
           val = ib.getAi();
       }
 
@@ -146,7 +148,7 @@ public class Decoder implements Iterator<Object> {
           return Long.valueOf(-1L - val);
 
         case MajorType.BYTE_STRING:
-          if (AdditionalInfo.LENGTH_INDEFINITE == val) {
+          if (aiIndefiniteFlag && AdditionalInfo.LENGTH_INDEFINITE == val) {
             throw new UnsupportedOperationException();
           } else {
             ByteBuffer bytes = ByteBuffer.allocate((int) val);
@@ -167,7 +169,7 @@ public class Decoder implements Iterator<Object> {
           }
 
         case MajorType.TEXT_STRING:
-          if (AdditionalInfo.LENGTH_INDEFINITE == val) {
+          if (aiIndefiniteFlag && AdditionalInfo.LENGTH_INDEFINITE == val) {
             throw new UnsupportedOperationException();
           } else {
             ByteBuffer text = ByteBuffer.allocate((int) val);
@@ -178,7 +180,7 @@ public class Decoder implements Iterator<Object> {
           }
 
         case MajorType.ARRAY:
-          if (AdditionalInfo.LENGTH_INDEFINITE == val) {
+          if (aiIndefiniteFlag && AdditionalInfo.LENGTH_INDEFINITE == val) {
             throw new UnsupportedOperationException();
           } else {
             return LongStream.range(0, val)
@@ -187,7 +189,7 @@ public class Decoder implements Iterator<Object> {
           }
 
         case MajorType.MAP:
-          if (AdditionalInfo.LENGTH_INDEFINITE == val) {
+          if (aiIndefiniteFlag && AdditionalInfo.LENGTH_INDEFINITE == val) {
             throw new UnsupportedOperationException();
           } else {
             return LongStream.range(0, val)
