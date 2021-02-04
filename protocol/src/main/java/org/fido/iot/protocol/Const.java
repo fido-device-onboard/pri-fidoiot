@@ -404,10 +404,10 @@ public final class Const {
   public static final String KEY_EXCHANGE_A = "A";
   public static final String KEY_EXCHANGE_B = "B";
 
-  public static final byte[] KDF_STRING = "MarshalPointKDF".getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_CIPHER = "AutomaticProvisioning-cipher"
+  public static final byte[] KDF_STRING = "FIDO-KDF".getBytes(StandardCharsets.US_ASCII);
+  public static final byte[] PROV_CIPHER = "AutomaticOnboard-cipher"
       .getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_HMAC = "AutomaticProvisioning-hmac"
+  public static final byte[] PROV_HMAC = "AutomaticOnboard-hmac"
       .getBytes(StandardCharsets.US_ASCII);
 
   public static final byte[] HMAC_ZERO = new byte[]{0};
