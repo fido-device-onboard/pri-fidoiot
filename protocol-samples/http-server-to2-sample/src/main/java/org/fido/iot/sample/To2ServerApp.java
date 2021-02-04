@@ -78,7 +78,7 @@ public class To2ServerApp {
     wrapper.addMapping(getMessagePath(Const.TO2_HELLO_DEVICE));
     wrapper.addMapping(getMessagePath(Const.TO2_GET_OVNEXT_ENTRY));
     wrapper.addMapping(getMessagePath(Const.TO2_PROVE_DEVICE));
-    wrapper.addMapping(getMessagePath(Const.TO2_AUTH_DONE));
+    wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO_READY));
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO));
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
 

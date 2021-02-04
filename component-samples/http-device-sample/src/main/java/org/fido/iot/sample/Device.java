@@ -3,10 +3,7 @@
 
 package org.fido.iot.sample;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -57,9 +54,8 @@ public class Device {
   private static final String PROPERTY_DEV_PEM = "fido.iot.pem.dev";
   private static final String PROPERTY_DI_URL = "fido.iot.url.di";
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
-  private static final int SERVICEINFO_MTU = 1300;
-  private static boolean isServiceinfoDone;
   private static boolean rvBypass;
+  private static final String PROPERTY_SERVICE_INFO_MTU = "fido.iot.device.service.info.mtu";
 
   private static final Logger logger = LogManager.getLogger();
 
@@ -67,6 +63,9 @@ public class Device {
   final KeyPair myKeys;
   final CredentialStorage myCredStore;
   final DeviceServiceInfoModule deviceServiceInfoModule;
+  private long serviceInfoCount = 0;
+  private long serviceInfoPosition = 0;
+  private ServiceInfoMarshaller marshaller;
 
   Device() throws IOException {
     Properties p = System.getProperties();
@@ -309,6 +308,13 @@ public class Device {
 
     To2ClientStorage to2Storage = new To2ClientStorage() {
 
+      int deviceServiceInfoMtuSize = 0;
+      String ownerServiceInfoMtuSize = String.valueOf(0);
+
+      @Override
+      public void starting(Composite request, Composite reply) {
+      }
+
       @Override
       public void completed(Composite request, Composite reply) {
         logger.info("TO2 complete, GUID is " + wrappedCreds.get().getAsUuid(Const.DC_GUID));
@@ -342,29 +348,47 @@ public class Device {
         return new byte[0];
       }
 
+      // maximum size service info that device can receive from owner (i.e) OwnerServiceInfoMTU
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        ownerServiceInfoMtuSize = System.getProperties().getProperty(PROPERTY_SERVICE_INFO_MTU);
+        return ownerServiceInfoMtuSize;
+      }
+
+      // maximum size service info that device can send to owner (i.e) DeviceServiceInfoMTU
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return deviceServiceInfoMtuSize;
+      }
+
+      @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        deviceServiceInfoMtuSize = mtu;
+        prepareServiceInfo();
+      }
+
       @Override
       public Composite getNextServiceInfo() {
-        if (isServiceinfoDone) {
+        if (serviceInfoCount == 0 || serviceInfoPosition == serviceInfoCount) {
           return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.EMPTY_LIST, false);
         } else {
-          ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(
-              SERVICEINFO_MTU,
-              wrappedCreds.get().getAsUuid(Const.DC_GUID));
           marshaller.register(new DeviceServiceInfoModule());
           Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
-          List<Composite> marshaledSvi = new LinkedList<>();
-
-          for (Supplier<ServiceInfo> supplier : serviceInfos) {
-            ServiceInfo si = supplier.get();
-            for (ServiceInfoEntry sie : si) {
-              Composite c = ServiceInfoEncoder.encodeValue(
-                  sie.getKey(), sie.getValue().getContent());
-              marshaledSvi.add(c);
+          List<Composite> svi = new LinkedList<Composite>();
+          final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
+          if (it.hasNext()) {
+            ServiceInfo serviceInfo = it.next().get();
+            Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
+            while (marshalledEntries.hasNext()) {
+              ServiceInfoEntry marshalledEntry = marshalledEntries.next();
+              Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
+                      marshalledEntry.getValue().getContent());
+              svi.add(innerArray);
             }
+            ++serviceInfoPosition;
           }
-          // As per the default MTU, only one message is sent to the Owner as Serviceinfo.
-          isServiceinfoDone = true;
-          return ServiceInfoEncoder.encodeDeviceServiceInfo(marshaledSvi, false);
+
+          return ServiceInfoEncoder.encodeDeviceServiceInfo(svi, true);
         }
       }
 
@@ -393,6 +417,20 @@ public class Device {
 
       @Override
       public void prepareServiceInfo() {
+        marshaller = new ServiceInfoMarshaller(
+                getMaxDeviceServiceInfoMtuSz(),
+                wrappedCreds.get().getAsUuid(Const.DC_GUID));
+        marshaller.register(new DeviceServiceInfoModule());
+        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
+        int mtuPacketCount = 0;
+        for (final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator(); it.hasNext();) {
+          it.next().get();
+          ++mtuPacketCount;
+        }
+        serviceInfoCount = mtuPacketCount;
+        serviceInfoPosition = 0;
+        // Reset the positions because we need to start from the beginning to send service info.
+        marshaller.reset();
       }
 
       @Override
