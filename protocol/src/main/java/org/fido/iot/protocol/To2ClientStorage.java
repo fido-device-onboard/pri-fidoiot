@@ -28,4 +28,10 @@ public interface To2ClientStorage extends StorageEvents, DeviceCredentials {
 
   void setServiceInfo(Composite info, boolean isMore, boolean isDone);
 
+  void setMaxDeviceServiceInfoMtuSz(int mtu);
+
+  int getMaxDeviceServiceInfoMtuSz();
+
+  String getMaxOwnerServiceInfoMtuSz();
+
 }

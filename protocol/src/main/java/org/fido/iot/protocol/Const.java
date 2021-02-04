@@ -38,8 +38,8 @@ public final class Const {
   public static final int TO2_OVNEXT_ENTRY = 63;
   public static final int TO2_PROVE_DEVICE = 64;
   public static final int TO2_SETUP_DEVICE = 65;
-  public static final int TO2_AUTH_DONE = 66;
-  public static final int TO2_AUTH_DONE2 = 67;
+  public static final int TO2_DEVICE_SERVICE_INFO_READY = 66;
+  public static final int TO2_OWNER_SERVICE_INFO_READY = 67;
   public static final int TO2_DEVICE_SERVICE_INFO = 68;
   public static final int TO2_OWNER_SERVICE_INFO = 69;
   public static final int TO2_DONE = 70;
@@ -424,4 +424,7 @@ public final class Const {
   public static final int DC_GUID = 4;
   public static final int DC_RENDEZVOUS_INFO = 5;
   public static final int DC_PUBLIC_KEY_HASH = 6;
+
+  // Default ServiceInfo MTU size
+  public static final int DEFAULT_SERVICE_INFO_MTU_SIZE = 1300;
 }

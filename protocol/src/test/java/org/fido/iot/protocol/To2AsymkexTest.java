@@ -161,6 +161,21 @@ public class To2AsymkexTest extends BaseTemplate {
       }
 
       @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        prepareServiceInfo();
+      }
+
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
       public Composite getDeviceCredentials() {
         return deviceCreds;
       }
@@ -371,6 +386,21 @@ public class To2AsymkexTest extends BaseTemplate {
       @Override
       public boolean getOwnerResaleSupport() {
         return false;
+      }
+
+      @Override
+      public String getMaxDeviceServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
+      public void setMaxOwnerServiceInfoMtuSz(int mtu) {
+
+      }
+
+      @Override
+      public int getMaxOwnerServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       }
     };
 

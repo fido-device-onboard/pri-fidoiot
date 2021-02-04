@@ -39,6 +39,11 @@ Some software settings are runtime-configurable via Java properties.  They inclu
 
   There is no default configured. Provide value `./device.pem` to use the existing default EC-256 key-pair.
 
+- `fido.iot.device.service.info.mtu`
+
+  Maximum MTU Size for ServiceInfo that owner can send to the device.
+  If not set, default MTU size of 1300 bytes will be used for ServiceInfo transfers to device.
+
 # Starting the Device service
 
 ```
