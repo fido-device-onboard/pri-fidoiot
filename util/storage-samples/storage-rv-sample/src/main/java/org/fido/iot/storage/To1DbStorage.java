@@ -182,7 +182,7 @@ public class To1DbStorage implements To1ServerStorage {
 
   @Override
   public void failed(Composite request, Composite reply) {
-
+    completed(request, reply);
   }
 
   private CryptoService getCryptoService() {
