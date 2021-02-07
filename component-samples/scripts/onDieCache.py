@@ -9,6 +9,8 @@
 #
 #The use of the .new mechanism is employed to prevent any conflict between reading a file and 
 #copying a new version from the script.
+#
+#Use Python version 3.X with this script. This script is not compatible with earlier versions.
 
 import sys, getopt
 import urllib.request
