@@ -75,7 +75,6 @@ for file in glob.glob(sourcedir):
 # delete the zip file
 # delete the unzipped files
 shutil.rmtree(os.path.join(args.cachedir, "content"), ignore_errors=False, onerror=None)
-#os.remove(os.path.join(args.cachedir, "csme.zip"))
 
 
 # create the touch file to indicate that the cache has been updated
