@@ -68,8 +68,6 @@ public class OwnerDbManager {
           + "NONCE6 BINARY(16), "
           + "NONCE7 BINARY(16), "
           + "SIGINFOA BLOB, "
-          + "SERVICEINFO_COUNT BIGINT, "
-          + "SERVICEINFO_POSITION BIGINT, "
           + "SERVICEINFO_BLOB BLOB, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"

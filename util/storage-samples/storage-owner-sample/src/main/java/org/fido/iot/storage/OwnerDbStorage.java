@@ -59,6 +59,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private ServiceInfoMarshaller serviceInfoMarshaller;
   int ownerServiceInfoMtuSize = 0;
   String deviceServiceInfoMtuSize = String.valueOf(0);
+  static Iterator<Supplier<ServiceInfo>> iterator;
 
   /**
    * Constructs a OwnerDbStorage instance.
@@ -347,7 +348,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7, SIGINFOA, "
-        + "SERVICEINFO_COUNT, SERVICEINFO_POSITION, SERVICEINFO_BLOB "
+        + " SERVICEINFO_BLOB "
         + "FROM TO2_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -363,11 +364,9 @@ public class OwnerDbStorage implements To2ServerStorage {
           nonce6 = rs.getBytes(4);
           nonce7 = rs.getBytes(5);
           sigInfoA = Composite.fromObject(rs.getBinaryStream(6));
-          serviceInfoCount = rs.getLong(7);
-          serviceInfoPosition = rs.getLong(8);
-          if (rs.getBlob(9) != null) {
+          if (rs.getBlob(7) != null) {
             ObjectInputStream inputStream = new ObjectInputStream(
-                rs.getBlob(9).getBinaryStream());
+                rs.getBlob(7).getBinaryStream());
             serviceInfoMarshaller = (ServiceInfoMarshaller) inputStream.readObject();
             inputStream.close();
           }
@@ -387,26 +386,22 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public Composite getNextServiceInfo() {
-    if (serviceInfoCount == 0 || serviceInfoPosition == serviceInfoCount) {
-      return ServiceInfoEncoder.encodeOwnerServiceInfo(Collections.EMPTY_LIST, false, true);
-    } else {
-      serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
-      Iterable<Supplier<ServiceInfo>> serviceInfos = serviceInfoMarshaller.marshal();
-      List<Composite> svi = new LinkedList<Composite>();
-      final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
-      if (it.hasNext()) {
-        ServiceInfo serviceInfo = it.next().get();
-        Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
-        while (marshalledEntries.hasNext()) {
-          ServiceInfoEntry marshalledEntry = marshalledEntries.next();
-          Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
-                marshalledEntry.getValue().getContent());
-          svi.add(innerArray);
-        }
-        ++serviceInfoPosition;
+    serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
+    Iterable<Supplier<ServiceInfo>> serviceInfos = serviceInfoMarshaller.marshal();
+    List<Composite> svi = new LinkedList<Composite>();
+    final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
+    if (it.hasNext()) {
+      ServiceInfo serviceInfo = it.next().get();
+      Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
+      while (marshalledEntries.hasNext()) {
+        ServiceInfoEntry marshalledEntry = marshalledEntries.next();
+        Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
+            marshalledEntry.getValue().getContent());
+        svi.add(innerArray);
       }
       return ServiceInfoEncoder.encodeOwnerServiceInfo(svi, true, false);
     }
+    return ServiceInfoEncoder.encodeOwnerServiceInfo(Collections.EMPTY_LIST, false, true);
   }
 
   @Override
@@ -488,16 +483,6 @@ public class OwnerDbStorage implements To2ServerStorage {
     serviceInfoMarshaller = new ServiceInfoMarshaller(getMaxOwnerServiceInfoMtuSz(),
         voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
     serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
-    Iterable<Supplier<ServiceInfo>> serviceInfo = serviceInfoMarshaller.marshal();
-    int mtuPacketCount = 0;
-    for (final Iterator<Supplier<ServiceInfo>> it = serviceInfo.iterator(); it.hasNext();) {
-      it.next().get();
-      ++mtuPacketCount;
-    }
-    serviceInfoCount = mtuPacketCount;
-    serviceInfoPosition = 0;
-    // Reset the positions because we need to start from the beginning to send service info.
-    serviceInfoMarshaller.reset();
   }
 
   @Override
@@ -601,8 +586,6 @@ public class OwnerDbStorage implements To2ServerStorage {
   public void continued(Composite request, Composite reply) {
     String sql = "UPDATE TO2_SESSIONS "
         + "SET OWNER_STATE = ? ,"
-        + "SERVICEINFO_COUNT = ? ,"
-        + "SERVICEINFO_POSITION = ? ,"
         + "SERVICEINFO_BLOB = ? ,"
         + "UPDATED = ? "
         + "WHERE SESSION_ID = ?";
@@ -611,21 +594,19 @@ public class OwnerDbStorage implements To2ServerStorage {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setBytes(1, ownerState.toBytes());
-      pstmt.setLong(2, serviceInfoCount);
-      pstmt.setLong(3, serviceInfoPosition);
       if (serviceInfoMarshaller != null) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream outputStream = new ObjectOutputStream(
             baos);
         outputStream.writeObject(serviceInfoMarshaller);
-        pstmt.setBytes(4,  baos.toByteArray());
+        pstmt.setBytes(2,  baos.toByteArray());
         outputStream.close();
       } else {
-        pstmt.setObject(4,  null);
+        pstmt.setObject(2,  null);
       }
       Timestamp updatedAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(5, updatedAt);
-      pstmt.setString(6, sessionId);
+      pstmt.setTimestamp(3, updatedAt);
+      pstmt.setString(4, sessionId);
 
       pstmt.executeUpdate();
 
