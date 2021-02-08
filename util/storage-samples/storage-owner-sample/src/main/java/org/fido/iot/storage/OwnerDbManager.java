@@ -94,7 +94,6 @@ public class OwnerDbManager {
           + "SVI_ID CHAR(36) PRIMARY KEY, "
           + "CONTENT BLOB, "
           + "CONTENT_LENGTH BIGINT, "
-          + "CONTENT_TYPE CHAR(10), "
           + "PRIMARY KEY (SVI_ID) "
           + ");";
 
@@ -206,14 +205,12 @@ public class OwnerDbManager {
    * @param ds Datasource
    * @param serviceInfoId Serviceinfo Identifier
    * @param serviceInfo Serviceinfo as byte array
-   * @param isCborData 'true', if data is cbor-encoded, 'false' otherwise
    */
-  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo,
-      boolean isCborData) {
+  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo) {
     String sql = ""
         + "MERGE INTO OWNER_SERVICEINFO  "
         + "KEY (SVI_ID) "
-        + "VALUES (?,?,?,?); ";
+        + "VALUES (?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -221,11 +218,6 @@ public class OwnerDbManager {
       pstmt.setString(1, serviceInfoId);
       pstmt.setBytes(2, serviceInfo);
       pstmt.setInt(3, serviceInfo.length);
-      if (isCborData) {
-        pstmt.setString(4, OwnerServiceInfoSequence.CBOR_TYPE);
-      } else {
-        pstmt.setString(4, OwnerServiceInfoSequence.PLAIN_TYPE);
-      }
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -319,7 +311,7 @@ public class OwnerDbManager {
       files.map(Path::toAbsolutePath).filter(Files::isRegularFile).forEach((path) -> {
         try {
           byte[] value = Files.readAllBytes(path);
-          addServiceInfo(ds, path.getFileName().toString(), value, false);
+          addServiceInfo(ds, path.getFileName().toString(), value);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

@@ -441,11 +441,6 @@ public class Device {
                 new ServiceInfoSequence(info.getAsString(Const.FIRST_KEY)) {
 
                   @Override
-                  public boolean canSplit() {
-                    return false;
-                  }
-
-                  @Override
                   public Object getContent() {
                     return info.get(Const.SECOND_KEY);
                   }

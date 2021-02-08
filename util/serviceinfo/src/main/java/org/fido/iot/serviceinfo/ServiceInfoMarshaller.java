@@ -137,29 +137,13 @@ public class ServiceInfoMarshaller implements Serializable {
         ServiceInfoEntry entry = entries.get(index);
         int keyLength = entry.getKey().length();
         long valueLength = entry.getValue().length();
-        boolean toSplit = entry.getValue().canSplit();
 
-        // check if the value allows itself to be split.
-        if (!toSplit) {
-          if (keyLength + additionalCborLength(keyLength) + valueLength
-              + additionalCborLength(valueLength) > mtu) {
-            // size of entry is more than the MTU, skip entry
-            index++;
-            break;
-          } else if (packed + keyLength + additionalCborLength(keyLength) + valueLength
-              + additionalCborLength(valueLength) > mtu) {
-            // size of entry + the total packed length yet, is more than MTU
-            // pack in the next iteration
-            break;
-          } else if (packed + keyLength + additionalCborLength(keyLength) + valueLength
+        if (packed + keyLength + additionalCborLength(keyLength) + valueLength
               + additionalCborLength(valueLength) < mtu) {
-            packed += 1; // 1 byte for creating a new array (innermost block of [[[]]])
-            subList.add(new ServiceInfoEntry(entry.getKey(), entry.getValue()));
-            index++;
-            continue;
-          } else {
-            throw new RuntimeException();
-          }
+          packed += 1; // 1 byte for creating a new array (innermost block of [[[]]])
+          subList.add(new ServiceInfoEntry(entry.getKey(), entry.getValue()));
+          index++;
+          continue;
         }
 
         // Account for the key only if the key can be placed fully inside the array, with
