@@ -11,7 +11,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
-import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -51,8 +50,7 @@ public class OnDieService {
    * @param onDieCache onDieCache
    * @param checkRevocations checkRevocations
    */
-  public OnDieService(OnDieCache onDieCache,
-                      final boolean checkRevocations) {
+  public OnDieService(OnDieCache onDieCache, boolean checkRevocations) {
     this.onDieCache = onDieCache;
     this.checkRevocations = checkRevocations;
   }
@@ -69,13 +67,11 @@ public class OnDieService {
    * @param certChain certChain
    * @param signedData signedData
    * @param signature signature
-   * @param checkRevocations checkRevocations
    * @return boolean indicating if signature is valid.
    */
   public boolean validateSignature(List<Certificate> certChain,
                                    byte[] signedData,
-                                   byte[] signature,
-                                   boolean checkRevocations) {
+                                   byte[] signature) {
 
     // Check revocations first.
     if ((certChain == null) || (checkRevocations && !checkRevocations(certChain))) {
@@ -193,12 +189,12 @@ public class OnDieService {
             GeneralName[] generalNames =
                     GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
             for (GeneralName generalName : generalNames) {
-              byte[] crlBytes = onDieCache.getCertOrCrl(generalName.toString());
+              String name = generalName.toString();
+              byte[] crlBytes = onDieCache.getCertOrCrl(name.substring(name.indexOf("http")));
               if (crlBytes == null) {
-                /* TODO LoggerFactory.getLogger(getClass()).error(
-                    "CRL ({}) not found in cache for cert: {}",
-                    generalName.getName().toString(),
-                    x509cert.getIssuerX500Principal().getName());*/
+                System.out.println("CRL: " + generalName.getName().toString()
+                        + " not found in cache for cert: "
+                        + x509cert.getIssuerX500Principal().getName());
                 return false;
               } else {
                 CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));

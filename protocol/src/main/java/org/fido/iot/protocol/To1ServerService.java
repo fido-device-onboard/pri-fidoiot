@@ -4,10 +4,7 @@
 package org.fido.iot.protocol;
 
 import java.security.PublicKey;
-import java.security.cert.Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 /**

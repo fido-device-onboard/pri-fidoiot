@@ -29,10 +29,15 @@ public abstract class To2ClientService extends DeviceService {
   protected byte[] nonce7;
   protected byte[] kexA;
   protected Composite ownState;
+  private boolean rvBypass;
 
   protected Enumeration<Composite> dviEnumerator;
 
   protected abstract To2ClientStorage getStorage();
+
+  public void setRvBypass(boolean rvBypass) {
+    this.rvBypass = rvBypass;
+  }
 
   protected Composite getVoucherHeader() {
     return voucherHdr;
@@ -179,7 +184,10 @@ public abstract class To2ClientService extends DeviceService {
     PublicKey verifyKey = getCryptoService().decode(pub);
     getCryptoService().verify(verifyKey, cose, null, null, null);
 
-    //TODO: verify to1d
+    // Skipping to1d verification, if the RVBypass flag is set.
+    if (!rvBypass) {
+      //TODO: verify to1d
+    }
 
     //calculate and set hdrHash
     byte[] guid = ovh.getAsBytes(Const.OVH_GUID);

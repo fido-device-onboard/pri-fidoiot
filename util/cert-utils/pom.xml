@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>util</artifactId>
+    <groupId>org.fido.iot</groupId>
+    <version>0.5-SNAPSHOT</version>
+  </parent>
+
+  <name>Cert Utilities</name>
+  <artifactId>cert-utils</artifactId>
+  <groupId>org.fido.iot</groupId>
+  <packaging>jar</packaging>
+
+  <properties>
+     <bcpkix.version>1.65</bcpkix.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bcpkix.version}</version>
+    </dependency>
+  </dependencies>
+</project>

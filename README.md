@@ -170,6 +170,23 @@ webAllowOthers = true
 
 **IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
+# Enabling Rendezvous Bypass
+
+FIDO Device Onboard includes a Rendezvous Bypass mechanism that is useful for IOT deployments that are not
+dependent on a particular network structure or ownership.
+
+In such cases, a FDO device may elect to bypass the FDO Rendezvous Server mechanism and use
+the local mechanism instead. Since the TO2 provides full authentication and authorization of the
+Device to the Owner, there is no change in the security posture of FDO.
+
+To enable Rendezvous Bypass
+
+- Update the RVInfo blob with `rvbypass` flag  and owner address using the API `POST /api/v1/rvinfo` with
+  `http://<owner-ip:port>?rvbypass=&ipaddress=<owner-ip>&ownerport=<port>` as body.
+
+- Setting the `rvbypass` flag in RVblob, causes the TO1 protocol to be skipped, and a TO2 connection
+ to be attempted to `<owner-ip>` address mentioned in the above POST body.
+
 # EPID Test Mode
 
 EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intended to support onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device. Test mode is enabled by default for protocol-sample in components.

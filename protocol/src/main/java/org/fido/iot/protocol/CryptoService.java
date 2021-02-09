@@ -503,6 +503,7 @@ public class CryptoService {
     final Composite pm = Composite.newArray();
     pm.set(Const.PK_ENC, encType);
     switch (encType) {
+
       case Const.PK_ENC_COSEEC: {
 
         final ECPublicKey ec = (ECPublicKey) publicKey;
@@ -698,7 +699,7 @@ public class CryptoService {
                       cf.generateCertificate(
                               new ByteArrayInputStream((byte[]) onDieCertPath.get(i))));
             }
-            return onDieService.validateSignature(certPath, payload.array(), sig, false);
+            return onDieService.validateSignature(certPath, payload.array(), sig);
           } else {
             return onDieService.validateSignature(verificationKey, payload.array(), sig);
           }
@@ -730,7 +731,8 @@ public class CryptoService {
     final Set<TrustAnchor> anchors = new HashSet<>();
 
     try {
-      final CertPath cp = getCertPath(chain);
+      //final
+      CertPath cp = getCertPath(chain);
 
       for (int i = 1; i < chain.size(); i++) {
         X509Certificate anchorCert = (X509Certificate) cp.getCertificates().get(i);
@@ -738,7 +740,7 @@ public class CryptoService {
       }
 
       final CertPathValidator validator =
-          CertPathValidator.getInstance(getValidatorAlgorithm());
+            CertPathValidator.getInstance(getValidatorAlgorithm());
 
       final CertPathParameters params = getCertPathParameters(anchors);
 
@@ -820,6 +822,7 @@ public class CryptoService {
   private void verifyLeafCertPrivileges(X509Certificate cert)
       throws InvalidOwnershipVoucherException {
     if (cert.getKeyUsage() != null) {
+      boolean[] test = cert.getKeyUsage();
       if (!(cert.getKeyUsage()[0])) {
         throw new InvalidOwnershipVoucherException(
             "Digital signature is not allowed for the device certificate");
@@ -831,8 +834,9 @@ public class CryptoService {
    * Verifies certificate chain.
    *
    * @param certChain ownership voucher device certificate chain
+   * @param onDieChain true if OnDie, false otherwise
    */
-  public void verifyCertChain(Composite certChain) {
+  public void verifyCertChain(Composite certChain, boolean onDieChain) {
     LinkedList<X509Certificate> x509certs = new LinkedList<>();
 
     try {
@@ -848,20 +852,35 @@ public class CryptoService {
 
     X509Certificate leafCertificate = x509certs.getFirst();
     verifyLeafPubKeyData(leafCertificate);
-    verifyLeafCertPrivileges(leafCertificate);
+    if (!onDieChain) {
+      verifyLeafCertPrivileges(leafCertificate);
+    }
   }
 
   /**
    * Verifies ownership voucher.
    *
    * @param voucher ownership voucher
+   * @param onDieService service for OnDie operations
    */
-  public void verifyVoucher(Composite voucher) {
+  public void verifyVoucher(Composite voucher, OnDieService onDieService) {
+
+    boolean isOnDieChain = false;
+    try {
+      final CertPath cp = getCertPath(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+      X509Certificate x509Certificate =
+              (X509Certificate) cp.getCertificates().get(cp.getCertificates().size() - 1);
+      if (onDieService != null) {
+        isOnDieChain = onDieService.getOnDieCache().isRootCa(x509Certificate.getEncoded());
+      }
+    } catch (Exception ex) {
+      // if cannot verify OnDie then fall back to default
+    }
 
     verifyHash(
-        voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
-        voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
-    //verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+            voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
+            voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
+    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN), isOnDieChain);
     verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 
@@ -1011,6 +1030,7 @@ public class CryptoService {
       throws InvalidAlgorithmParameterException {
     final PKIXParameters params = new PKIXParameters(anchors);
     params.setRevocationEnabled(false);
+    params.setTrustAnchors(anchors);
     return params;
   }
 

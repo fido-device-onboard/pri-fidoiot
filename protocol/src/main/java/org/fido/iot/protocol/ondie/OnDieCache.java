@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,6 +31,8 @@ public class OnDieCache {
   private String sourceUrls = "";
   private boolean initialized = false;
 
+  List<String> rootCaList = new ArrayList<>();
+
   private final List<URL> sourceUrlList = new ArrayList<URL>();
 
   private HashMap<String, byte[]> cacheMap = new HashMap<String, byte[]>();
@@ -45,10 +48,18 @@ public class OnDieCache {
    */
   public OnDieCache(final String cacheDir,
                     final boolean autoUpdate,
-                    final String sourceUrls) {
+                    final String sourceUrls,
+                    final List<String> rootCaCerts) {
     this.cacheDir = cacheDir;
     this.autoUpdate = autoUpdate;
     this.sourceUrls = sourceUrls;
+
+    if (rootCaCerts == null) {
+      rootCaList.add("OnDie_CA_RootCA_Certificate.cer");
+      rootCaList.add("OnDie_CA_DEBUG_RootCA_Certificate.cer");
+    } else {
+      rootCaList = rootCaCerts;
+    }
   }
 
   /**
@@ -205,6 +216,22 @@ public class OnDieCache {
       throw new IllegalArgumentException("OnDieCache: illegal crl reference: " + pathName);
     }
     return cacheMap.get(fileName.toString());
+  }
+
+  /**
+   * Identifies whether the given cert matches the OnDie root CA certs.
+   *
+   * @param caBytes certificate to compare with
+   * @return true if matches any one of OnDie root CA certs
+   */
+  public boolean isRootCa(byte[] caBytes) {
+    for (String rootCa : rootCaList) {
+      byte[] rootBytes = cacheMap.get(rootCa);
+      if (Arrays.equals(rootBytes, caBytes)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

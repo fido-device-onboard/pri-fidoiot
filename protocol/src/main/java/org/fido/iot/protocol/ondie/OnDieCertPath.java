@@ -8,21 +8,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fido.iot.protocol.Const;
+import org.fido.iot.protocol.CryptoServiceException;
 
 
 public class OnDieCertPath {
@@ -48,13 +57,13 @@ public class OnDieCertPath {
       byte[] deviceCertChain, OnDieCache onDieCache)
       throws CertificateException, IOException, IllegalArgumentException {
 
-    List<Certificate> deviceCertChainList = new ArrayList<Certificate>();
+    List<Certificate> romToLeafCertList = new ArrayList<Certificate>();
 
     // parse the device input chain into a list of x509 certificates
     List<byte[]> certList = deserializeCertificateChain(deviceCertChain);
     for (byte[] array : certList) {
       InputStream is = new ByteArrayInputStream(array);
-      deviceCertChainList.add(certFactory.generateCertificate(is));
+      romToLeafCertList.add(certFactory.generateCertificate(is));
     }
 
     // Based on the ROM certificate of the device, look up the issuing certificate
@@ -63,7 +72,9 @@ public class OnDieCertPath {
     // leaf -> DAL -> Kernel -> ROM -> platform -> intermediate -> OnDie CA
 
     // Start with the ROM cert, loop until we get to the CA
-    String certId  = getIssuingCertificate(deviceCertChainList.get(0));
+    String certId  = getIssuingCertificate(
+            romToLeafCertList.get(0));
+    List<Certificate> platformToCaList = new ArrayList<Certificate>();
     while (true) {
       byte[] cert = onDieCache.getCertOrCrl(certId);
       if (cert == null) {
@@ -72,7 +83,7 @@ public class OnDieCertPath {
       }
       ByteArrayInputStream is = new ByteArrayInputStream(cert);
       X509Certificate x509Cert = (X509Certificate) certFactory.generateCertificate(is);
-      deviceCertChainList.add(x509Cert);
+      platformToCaList.add(x509Cert);
       is.close();
 
       // if we are at the root CA then we have the complete chain
@@ -87,11 +98,44 @@ public class OnDieCertPath {
       }
     }
 
-    return certFactory.generateCertPath(deviceCertChainList);
+    final Set<TrustAnchor> anchors = new HashSet<>();
+
+    // put the list in order from CA -> ... ROM -> ... leaf
+    List<Certificate> deviceCertChainList = new ArrayList<Certificate>();
+    for (int i = romToLeafCertList.size() - 1; i >= 0; i--) {
+      deviceCertChainList.add(romToLeafCertList.get(i));
+      if (i != 0) {
+        anchors.add(new TrustAnchor((X509Certificate) romToLeafCertList.get(i), null));
+      }
+    }
+    for (int i = 0; i < platformToCaList.size(); i++) {
+      deviceCertChainList.add(platformToCaList.get(i));
+      anchors.add(new TrustAnchor((X509Certificate) platformToCaList.get(i), null));
+    }
+
+    CertPath cp = certFactory.generateCertPath(deviceCertChainList);
+
+    // validate certpath before returning
+    try {
+      final CertPathValidator validator =
+              CertPathValidator.getInstance(Const.VALIDATOR_ALG_NAME);
+
+      final PKIXParameters params = new PKIXParameters(anchors);
+      // revocations handled differently for OnDie so do elsewhere
+      params.setRevocationEnabled(false);
+      params.setTrustAnchors(anchors);
+
+      validator.validate(cp, params);
+    } catch (NoSuchAlgorithmException
+            | InvalidAlgorithmParameterException
+            | CertPathValidatorException e) {
+      throw new CryptoServiceException(e);
+    }
+    return cp;
   }
 
   private String getIssuingCertificate(Certificate cert)
-      throws IllegalArgumentException, CertificateEncodingException, IOException {
+      throws IllegalArgumentException, IOException, CertificateEncodingException {
     X509CertificateHolder certholder = new X509CertificateHolder(cert.getEncoded());
     AuthorityInformationAccess aia =
         AuthorityInformationAccess.fromExtensions(certholder.getExtensions());
