@@ -274,17 +274,17 @@ public class OwnerDbStorage implements To2ServerStorage {
     if (guid == null) {
       guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
     }
-    String sql = "SELECT DEVICE_SERVICE_INFO_MTU_SIZE FROM TO2_SETTINGS;";
+    String sql = "SELECT DEVICE_SERVICE_INFO_MTU_SIZE FROM TO2_SETTINGS WHERE ID = 1;";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          deviceServiceInfoMtuSize =
-              (rs.getInt(1) > 0
-                  ? String.valueOf(rs.getInt(1))
-                  : String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
+        if (rs.next()) {
+          if (rs.getInt(1) < 0) {
+            System.out.println("Negative value received. MTU size will default to 1300 bytes");
+          }
+          deviceServiceInfoMtuSize = (rs.getInt(1) > 0 ? String.valueOf(rs.getInt(1)) : null);
         }
       }
     } catch (SQLException e) {
@@ -299,6 +299,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     if (guid == null) {
       guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
     }
+
     String sql = "UPDATE TO2_DEVICES "
             + "SET OWNER_SERVICE_INFO_MTU_SIZE = ? "
             + "WHERE GUID = ?";
@@ -322,21 +323,42 @@ public class OwnerDbStorage implements To2ServerStorage {
     if (guid == null) {
       guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
     }
-    String sql = "SELECT OWNER_SERVICE_INFO_MTU_SIZE FROM TO2_DEVICES WHERE GUID = ?;";
+
+    int ownerMtuThreshold = 0;
+    String sql = "SELECT OWNER_MTU_THRESHOLD FROM TO2_SETTINGS WHERE ID = 1;";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql); ) {
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          ownerMtuThreshold = rs.getInt(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    sql = "SELECT OWNER_SERVICE_INFO_MTU_SIZE FROM TO2_DEVICES WHERE GUID = ?;";
 
     try (Connection conn = dataSource.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setString(1, guid.toString());
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
+        if (rs.next()) {
           ownerServiceInfoMtuSize = rs.getInt(1);
         }
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    return this.ownerServiceInfoMtuSize;
+
+    if (ownerMtuThreshold < ownerServiceInfoMtuSize) {
+      System.out.println(
+          "Device Maximum MTU request exceeds, owner threshold MTU size. "
+              + "MTU size set to owner threshold MTU size");
+    }
+
+    return Math.min(ownerServiceInfoMtuSize, ownerMtuThreshold);
   }
 
   @Override

@@ -180,6 +180,10 @@ public class To2StorageTest {
     ownerDbManager.assignSviToDevice(ds, uuid, sviString);
   }
 
+  private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
+    ownerDbManager.loadTo2Settings(ds);
+  }
+
   @Test
   void Test() throws Exception {
 
@@ -376,6 +380,7 @@ public class To2StorageTest {
       insertSampleServiceInfo(Composite.fromObject(VOUCHER)
           .getAsComposite(Const.OV_HEADER)
           .getAsUuid(Const.OVH_GUID), ds, dbsManager);
+      insertSampleSettings(ds, dbsManager);
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 
