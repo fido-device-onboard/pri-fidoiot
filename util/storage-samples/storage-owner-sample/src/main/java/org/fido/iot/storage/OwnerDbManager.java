@@ -68,8 +68,6 @@ public class OwnerDbManager {
           + "NONCE6 BINARY(16), "
           + "NONCE7 BINARY(16), "
           + "SIGINFOA BLOB, "
-          + "SERVICEINFO_COUNT BIGINT, "
-          + "SERVICEINFO_POSITION BIGINT, "
           + "SERVICEINFO_BLOB BLOB, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"
@@ -82,7 +80,8 @@ public class OwnerDbManager {
       sql = "CREATE TABLE IF NOT EXISTS "
               + "TO2_SETTINGS("
               + "ID INT NOT NULL, "
-              + "DEVICE_SERVICE_INFO_MTU_SIZE INT, "
+              + "DEVICE_SERVICE_INFO_MTU_SIZE INT NOT NULL, "
+              + "OWNER_MTU_THRESHOLD INT NOT NULL, "
               + "PRIMARY KEY (ID), "
               + "UNIQUE (ID)"
               + ");";
@@ -94,7 +93,6 @@ public class OwnerDbManager {
           + "SVI_ID CHAR(36) PRIMARY KEY, "
           + "CONTENT BLOB, "
           + "CONTENT_LENGTH BIGINT, "
-          + "CONTENT_TYPE CHAR(10), "
           + "PRIMARY KEY (SVI_ID) "
           + ");";
 
@@ -202,18 +200,16 @@ public class OwnerDbManager {
 
   /**
    * Add service info to the database.
-   * 
+   *
    * @param ds Datasource
    * @param serviceInfoId Serviceinfo Identifier
    * @param serviceInfo Serviceinfo as byte array
-   * @param isCborData 'true', if data is cbor-encoded, 'false' otherwise
    */
-  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo,
-      boolean isCborData) {
+  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo) {
     String sql = ""
         + "MERGE INTO OWNER_SERVICEINFO  "
         + "KEY (SVI_ID) "
-        + "VALUES (?,?,?,?); ";
+        + "VALUES (?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -221,11 +217,6 @@ public class OwnerDbManager {
       pstmt.setString(1, serviceInfoId);
       pstmt.setBytes(2, serviceInfo);
       pstmt.setInt(3, serviceInfo.length);
-      if (isCborData) {
-        pstmt.setString(4, OwnerServiceInfoSequence.CBOR_TYPE);
-      } else {
-        pstmt.setString(4, OwnerServiceInfoSequence.PLAIN_TYPE);
-      }
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -234,7 +225,7 @@ public class OwnerDbManager {
 
   /**
    * Remove Service info value as identified by serviceinfoId from the database.
-   * 
+   *
    * @param ds Datasource
    * @param serviceInfoId Serviceinfo Identifier
    */
@@ -253,7 +244,7 @@ public class OwnerDbManager {
   /**
    * Assign svi as given in 'sviString', to the given device. The sviString is off the form
    * 'modName:msgName=serviceinfoId1,modName:msgName=serviceinfoId1....'.
-   * 
+   *
    * @param ds Datasource
    * @param guid Device GUID
    * @param sviString svi list
@@ -287,7 +278,7 @@ public class OwnerDbManager {
 
   /**
    * Remove svi for a given device.
-   * 
+   *
    * @param ds Datasource
    * @param guid Device GUID
    */
@@ -305,7 +296,7 @@ public class OwnerDbManager {
 
   /**
    * Load Sample Owner service info from the file-system.
-   * 
+   *
    * @param ds Datasource instance
    * @param guid Device GUID
    * @param sviValues Path to 'sample-values' directory containing serviceinfo
@@ -319,7 +310,7 @@ public class OwnerDbManager {
       files.map(Path::toAbsolutePath).filter(Files::isRegularFile).forEach((path) -> {
         try {
           byte[] value = Files.readAllBytes(path);
-          addServiceInfo(ds, path.getFileName().toString(), value, false);
+          addServiceInfo(ds, path.getFileName().toString(), value);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -387,12 +378,13 @@ public class OwnerDbManager {
    *
    * @param ds Datasource instance
    */
-  public void loadDefaultDeviceMtu(DataSource ds) {
+  public void loadTo2Settings(DataSource ds) {
 
     String sql = "MERGE INTO TO2_SETTINGS ("
-            + "ID,"
-            + "DEVICE_SERVICE_INFO_MTU_SIZE) "
-            + "VALUES (1,'1300');";
+        + "ID,"
+        + "DEVICE_SERVICE_INFO_MTU_SIZE, "
+        + "OWNER_MTU_THRESHOLD) "
+        + "VALUES (1,1300,8192);";
 
     try (Connection conn = ds.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -403,21 +395,26 @@ public class OwnerDbManager {
   }
 
   /**
-   * Update the maximum MTU size owner can accept for serviceinfo transfer.
+   * Update the given field with the required MTU size in TO2_SETTINGS table.
    *
    * @param ds Datasource instance
+   * @param field Database column name
    * @param mtu maximum MTU size
    */
-  public void updateDeviceMtu(DataSource ds, int id, int mtu) {
+  public void updateMtu(DataSource ds, String field, int mtu) {
 
-    String sql = "UPDATE TO2_SETTINGS"
-            + " SET DEVICE_SERVICE_INFO_MTU_SIZE = ?"
-            + " WHERE ID = ?;";
+    String sql = "UPDATE TO2_SETTINGS" + " SET " + field + " = ?" + " WHERE ID = 1;";
+
+    if (mtu > 0 && mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+      System.out.println(
+          "Received value less than default minimum of 256 bytes. "
+              + "Updating MTU size to default minimum");
+      mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+    }
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, String.valueOf(mtu));
-      pstmt.setString(2, String.valueOf(id));
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);

@@ -65,27 +65,4 @@ public class OwnerServiceInfoSequence extends ServiceInfoSequence {
     throw new RuntimeException();
   }
 
-  @Override
-  public boolean canSplit() {
-    String sql = "SELECT CONTENT_TYPE FROM OWNER_SERVICEINFO WHERE SVI_ID = ?;";
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, getServiceInfoId());
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          String value = rs.getString(1);
-          if (value.equalsIgnoreCase(PLAIN_TYPE)) {
-            return true;
-          } else if (value.equalsIgnoreCase(CBOR_TYPE)) {
-            return false;
-          } else {
-            return false;
-          }
-        }
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-    return false;
-  }
 }

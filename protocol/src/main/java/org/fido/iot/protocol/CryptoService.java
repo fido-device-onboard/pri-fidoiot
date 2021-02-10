@@ -1307,7 +1307,7 @@ public class CryptoService {
   }
 
   protected Composite getSmallerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-cipher"||ShSe]
+    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
     ByteBuffer buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
     buffer.put((byte) 1);
@@ -1321,7 +1321,7 @@ public class CryptoService {
     byte[] sek = new byte[(Const.BIT_LEN_256 / Byte.SIZE) / 2];//16 bytes
     buffer.get(sek);
 
-    //HMAC-SHA-256[0,(byte)2||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
 
@@ -1343,7 +1343,7 @@ public class CryptoService {
   }
 
   protected Composite getLargerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-cipher"||ShSe]
+    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
     ByteBuffer buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
     buffer.put((byte) 1);
@@ -1357,7 +1357,7 @@ public class CryptoService {
     byte[] sek = new byte[Const.BIT_LEN_256 / Byte.SIZE]; // 32 bytes
     buffer.get(sek);
 
-    //HMAC-SHA-256[0,(byte)2||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
 
@@ -1372,7 +1372,7 @@ public class CryptoService {
     byte[] svk1 = new byte[Const.BIT_LEN_384 / Byte.SIZE]; //48 bytes
     buffer.get(svk1);
 
-    //HMAC-SHA-256[0,(byte)3||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)3||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
     buffer.put((byte) 3);
