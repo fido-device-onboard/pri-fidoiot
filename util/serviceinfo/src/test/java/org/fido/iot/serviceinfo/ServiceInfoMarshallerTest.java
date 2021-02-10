@@ -44,11 +44,6 @@ public class ServiceInfoMarshallerTest {
                     .position((int) start).get(result, 0, (int) (end - start));
                 return result;
               }
-
-              @Override
-              public boolean canSplit() {
-                return true;
-              }
             });
         entries.add(entry1);
 
@@ -62,11 +57,6 @@ public class ServiceInfoMarshallerTest {
               @Override
               public Object getContent() {
                 return "F5";
-              }
-
-              @Override
-              public boolean canSplit() {
-                return false;
               }
             });
         entries.add(entry2);

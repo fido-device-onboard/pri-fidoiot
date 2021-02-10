@@ -136,8 +136,9 @@ public class To2StorageTest {
 
   String packageName = "linux64.sh";
   String boolName = "bool";
+  String boolValue = "true";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-  ",sdo_sys:filedesc=cborBooleanId,sdo_sys:write=cborBooleanValue";
+  ",sdo_sys:filedesc=BooleanId,sdo_sys:write=BooleanValue";
 
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
@@ -170,13 +171,17 @@ public class To2StorageTest {
 
   private void insertSampleServiceInfo(UUID uuid, DataSource ds, OwnerDbManager ownerDbManager) {
 
-    ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes(), false);
-    ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes(), false);
-    ownerDbManager.addServiceInfo(ds, "cborBooleanValue", Composite.decodeHex("F5"), true);
-    ownerDbManager.addServiceInfo(ds, "cborBooleanId", boolName.getBytes(), true);
+    ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
+    ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
+    ownerDbManager.addServiceInfo(ds, "BooleanValue", boolValue.getBytes());
+    ownerDbManager.addServiceInfo(ds, "BooleanId", boolName.getBytes());
 
     ownerDbManager.removeSviFromDevice(ds, uuid);
     ownerDbManager.assignSviToDevice(ds, uuid, sviString);
+  }
+
+  private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
+    ownerDbManager.loadTo2Settings(ds);
   }
 
   @Test
@@ -375,6 +380,7 @@ public class To2StorageTest {
       insertSampleServiceInfo(Composite.fromObject(VOUCHER)
           .getAsComposite(Const.OV_HEADER)
           .getAsUuid(Const.OVH_GUID), ds, dbsManager);
+      insertSampleSettings(ds, dbsManager);
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 

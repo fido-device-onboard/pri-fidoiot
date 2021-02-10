@@ -33,8 +33,4 @@ public class DeviceServiceInfoSequence extends ServiceInfoSequence {
     return serviceInfoValue;
   }
 
-  @Override
-  public boolean canSplit() {
-    return false;
-  }
 }
