@@ -27,9 +27,8 @@ public class OwnerServiceInfoValuesServlet extends HttpServlet {
     try {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       String serviceInfoId = req.getParameter("id");
-      boolean isCborData = Boolean.valueOf(req.getParameter("isCborEncoded"));
       byte[] serviceInfo = req.getInputStream().readAllBytes();
-      new OwnerDbManager().addServiceInfo(ds, serviceInfoId, serviceInfo, isCborData);
+      new OwnerDbManager().addServiceInfo(ds, serviceInfoId, serviceInfo);
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
