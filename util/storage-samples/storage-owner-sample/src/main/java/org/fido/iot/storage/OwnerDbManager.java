@@ -3,9 +3,6 @@
 
 package org.fido.iot.storage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,16 +12,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
-import org.fido.iot.protocol.MessageBodyException;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
-import org.fido.iot.serviceinfo.SdoSys;
 
 /**
  * Owner Database Manager.
