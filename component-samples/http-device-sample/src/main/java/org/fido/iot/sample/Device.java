@@ -369,27 +369,22 @@ public class Device {
 
       @Override
       public Composite getNextServiceInfo() {
-        if (serviceInfoCount == 0 || serviceInfoPosition == serviceInfoCount) {
-          return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.EMPTY_LIST, false);
-        } else {
-          marshaller.register(new DeviceServiceInfoModule());
-          Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
-          List<Composite> svi = new LinkedList<Composite>();
-          final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
-          if (it.hasNext()) {
-            ServiceInfo serviceInfo = it.next().get();
-            Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
-            while (marshalledEntries.hasNext()) {
-              ServiceInfoEntry marshalledEntry = marshalledEntries.next();
-              Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
+        marshaller.register(new DeviceServiceInfoModule());
+        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
+        List<Composite> svi = new LinkedList<Composite>();
+        final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
+        if (it.hasNext()) {
+          ServiceInfo serviceInfo = it.next().get();
+          Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
+          while (marshalledEntries.hasNext()) {
+            ServiceInfoEntry marshalledEntry = marshalledEntries.next();
+            Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
                       marshalledEntry.getValue().getContent());
-              svi.add(innerArray);
+            svi.add(innerArray);
             }
-            ++serviceInfoPosition;
-          }
-
           return ServiceInfoEncoder.encodeDeviceServiceInfo(svi, true);
         }
+        return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.EMPTY_LIST, false);
       }
 
       @Override
@@ -421,16 +416,6 @@ public class Device {
                 getMaxDeviceServiceInfoMtuSz(),
                 wrappedCreds.get().getAsUuid(Const.DC_GUID));
         marshaller.register(new DeviceServiceInfoModule());
-        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
-        int mtuPacketCount = 0;
-        for (final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator(); it.hasNext();) {
-          it.next().get();
-          ++mtuPacketCount;
-        }
-        serviceInfoCount = mtuPacketCount;
-        serviceInfoPosition = 0;
-        // Reset the positions because we need to start from the beginning to send service info.
-        marshaller.reset();
       }
 
       @Override
@@ -439,11 +424,6 @@ public class Device {
             wrappedCreds.get().getAsUuid(Const.DC_GUID),
             new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
                 new ServiceInfoSequence(info.getAsString(Const.FIRST_KEY)) {
-
-                  @Override
-                  public boolean canSplit() {
-                    return false;
-                  }
 
                   @Override
                   public Object getContent() {
