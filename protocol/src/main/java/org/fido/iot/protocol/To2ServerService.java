@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public abstract class To2ServerService extends MessagingService {
 
-  protected abstract To2ServerStorage getStorage();
+  public abstract To2ServerStorage getStorage();
 
   protected void doHello(Composite request, Composite reply) {
     getStorage().starting(request, reply);
@@ -159,7 +159,7 @@ public abstract class To2ServerService extends MessagingService {
     getStorage().continued(request, reply);
   }
 
-  protected void doAuthDone(Composite request, Composite reply) {
+  protected void doDeviceServiceInfoReady(Composite request, Composite reply) {
     getStorage().continuing(request, reply);
     Composite body = request.getAsComposite(Const.SM_BODY);
     Composite message = Composite.fromObject(getCryptoService().decrypt(body,
@@ -180,10 +180,35 @@ public abstract class To2ServerService extends MessagingService {
       }
     }
 
-    Composite payload = Const.EMPTY_MESSAGE;
+    int ownerMtu = 0;
+    Object maxOwnerServiceInfoSz = message.get(Const.SECOND_KEY);
+    if (!maxOwnerServiceInfoSz.equals(Optional.empty())) {
+      try {
+        ownerMtu = message.getAsNumber(Const.SECOND_KEY).intValue();
+      } catch (Exception e) {
+        try {
+          if (PrimitivesUtil.isCborNull(maxOwnerServiceInfoSz)) {
+            ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+          }
+        } catch (Exception exception) {
+          throw new RuntimeException(new MessageBodyException(exception));
+        }
+      }
+    }
+    getStorage().setMaxOwnerServiceInfoMtuSz(ownerMtu);
+
+    Composite payload = Composite.newArray();
+    payload.set(
+        Const.FIRST_KEY,
+        (getStorage()
+                .getMaxDeviceServiceInfoMtuSz()
+                .equals(String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE))
+            ? PrimitivesUtil.getCborNullBytes()
+            : Integer.parseInt(getStorage().getMaxDeviceServiceInfoMtuSz())));
+
     body = getCryptoService().encrypt(payload.toBytes(),
         getStorage().getOwnerState());
-    reply.set(Const.SM_MSG_ID, Const.TO2_AUTH_DONE2);
+    reply.set(Const.SM_MSG_ID, Const.TO2_OWNER_SERVICE_INFO_READY);
     reply.set(Const.SM_BODY, body);
 
     getStorage().prepareServiceInfo();
@@ -289,8 +314,8 @@ public abstract class To2ServerService extends MessagingService {
       case Const.TO2_PROVE_DEVICE:
         doProveDevice(request, reply);
         return false;
-      case Const.TO2_AUTH_DONE:
-        doAuthDone(request, reply);
+      case Const.TO2_DEVICE_SERVICE_INFO_READY:
+        doDeviceServiceInfoReady(request, reply);
         return false;
       case Const.TO2_DEVICE_SERVICE_INFO:
         doDeviceInfo(request, reply);

@@ -62,5 +62,11 @@ public interface To2ServerStorage extends StorageEvents {
 
   boolean getOwnerResaleSupport();
 
+  String getMaxDeviceServiceInfoMtuSz();
+
+  void setMaxOwnerServiceInfoMtuSz(int mtu);
+
+  int getMaxOwnerServiceInfoMtuSz();
+
   OnDieService getOnDieService();
 }

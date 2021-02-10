@@ -59,6 +59,7 @@ public class OwnerDbManager {
           + "REPLACEMENT_RVINFO BLOB, "
           + "REPLACEMENT_HMAC BLOB, "
           + "REPLACEMENT_VOUCHER BLOB, "
+          + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
           + "PRIMARY KEY (GUID), "
           + "UNIQUE (GUID)"
           + ");";
@@ -82,6 +83,16 @@ public class OwnerDbManager {
           + "PRIMARY KEY (SESSION_ID), "
           + "UNIQUE (SESSION_ID)"
           + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
+              + "TO2_SETTINGS("
+              + "ID INT NOT NULL, "
+              + "DEVICE_SERVICE_INFO_MTU_SIZE INT, "
+              + "PRIMARY KEY (ID), "
+              + "UNIQUE (ID)"
+              + ");";
 
       stmt.executeUpdate(sql);
 
@@ -139,7 +150,7 @@ public class OwnerDbManager {
     String sql = ""
         + "MERGE INTO TO2_DEVICES  "
         + "KEY (GUID) "
-        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?); ";
+        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -159,6 +170,7 @@ public class OwnerDbManager {
           .getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes());
       pstmt.setBytes(12, null);
       pstmt.setBytes(13, null);
+      pstmt.setInt(14, 0);
 
       pstmt.executeUpdate();
 
@@ -371,6 +383,48 @@ public class OwnerDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, replacementGuid.toString());
       pstmt.setString(2, currentGuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Load default value of maximum serviceinfo that owner can receive.
+   *
+   * @param ds Datasource instance
+   */
+  public void loadDefaultDeviceMtu(DataSource ds) {
+
+    String sql = "MERGE INTO TO2_SETTINGS ("
+            + "ID,"
+            + "DEVICE_SERVICE_INFO_MTU_SIZE) "
+            + "VALUES (1,'1300');";
+
+    try (Connection conn = ds.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Update the maximum MTU size owner can accept for serviceinfo transfer.
+   *
+   * @param ds Datasource instance
+   * @param mtu maximum MTU size
+   */
+  public void updateDeviceMtu(DataSource ds, int id, int mtu) {
+
+    String sql = "UPDATE TO2_SETTINGS"
+            + " SET DEVICE_SERVICE_INFO_MTU_SIZE = ?"
+            + " WHERE ID = ?;";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, String.valueOf(mtu));
+      pstmt.setString(2, String.valueOf(id));
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);

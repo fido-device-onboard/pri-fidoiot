@@ -38,8 +38,8 @@ public final class Const {
   public static final int TO2_OVNEXT_ENTRY = 63;
   public static final int TO2_PROVE_DEVICE = 64;
   public static final int TO2_SETUP_DEVICE = 65;
-  public static final int TO2_AUTH_DONE = 66;
-  public static final int TO2_AUTH_DONE2 = 67;
+  public static final int TO2_DEVICE_SERVICE_INFO_READY = 66;
+  public static final int TO2_OWNER_SERVICE_INFO_READY = 67;
   public static final int TO2_DEVICE_SERVICE_INFO = 68;
   public static final int TO2_OWNER_SERVICE_INFO = 69;
   public static final int TO2_DONE = 70;
@@ -408,10 +408,10 @@ public final class Const {
   public static final String KEY_EXCHANGE_A = "A";
   public static final String KEY_EXCHANGE_B = "B";
 
-  public static final byte[] KDF_STRING = "MarshalPointKDF".getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_CIPHER = "AutomaticProvisioning-cipher"
+  public static final byte[] KDF_STRING = "FIDO-KDF".getBytes(StandardCharsets.US_ASCII);
+  public static final byte[] PROV_CIPHER = "AutomaticOnboard-cipher"
       .getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_HMAC = "AutomaticProvisioning-hmac"
+  public static final byte[] PROV_HMAC = "AutomaticOnboard-hmac"
       .getBytes(StandardCharsets.US_ASCII);
 
   public static final byte[] HMAC_ZERO = new byte[]{0};
@@ -428,6 +428,9 @@ public final class Const {
   public static final int DC_GUID = 4;
   public static final int DC_RENDEZVOUS_INFO = 5;
   public static final int DC_PUBLIC_KEY_HASH = 6;
+
+  // Default ServiceInfo MTU size
+  public static final int DEFAULT_SERVICE_INFO_MTU_SIZE = 1300;
 
   // Device type values - included as part of the DI "mi" field
   public static final int DT_ECDSA_256 = 1;

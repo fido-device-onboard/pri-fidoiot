@@ -14,6 +14,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
+import org.fido.iot.api.OwnerSviMtuServlet;
 import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
@@ -103,7 +104,7 @@ public class OwnerServerApp {
     wrapper.addMapping(getMessagePath(Const.TO2_HELLO_DEVICE));
     wrapper.addMapping(getMessagePath(Const.TO2_GET_OVNEXT_ENTRY));
     wrapper.addMapping(getMessagePath(Const.TO2_PROVE_DEVICE));
-    wrapper.addMapping(getMessagePath(Const.TO2_AUTH_DONE));
+    wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO_READY));
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO));
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
 
@@ -121,6 +122,9 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
+    wrapper = tomcat.addServlet(ctx, "sviMtuServlet",
+            new OwnerSviMtuServlet());
+    wrapper.addMapping("/api/v1/owner/svi/mtu/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");

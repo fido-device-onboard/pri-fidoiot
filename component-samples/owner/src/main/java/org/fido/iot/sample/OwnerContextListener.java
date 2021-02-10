@@ -74,19 +74,19 @@ public class OwnerContextListener implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     BasicDataSource ds = new BasicDataSource();
-    
+
     ServletContext sc = sce.getServletContext();
     ds.setUrl(sc.getInitParameter(OwnerAppSettings.DB_URL));
     ds.setDriverClassName(OwnerAppSettings.H2_DRIVER);
     ds.setUsername(sc.getInitParameter(OwnerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(OwnerAppSettings.DB_PWD));
-    
+
     sc.log(ds.getUrl());
-    
+
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
     ds.setMaxOpenPreparedStatements(100);
-    
+
     CryptoService cs = new CryptoService();
     String epidTestMode = sc.getInitParameter(OwnerAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
@@ -103,26 +103,26 @@ public class OwnerContextListener implements ServletContextListener {
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
-    
+
     resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
         sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
-    
+
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
         return createTo2Service(cs, ds);
       }
-      
+
       @Override
       protected void replied(Composite reply) {
         sc.log("replied with: " + reply.toString());
       }
-      
+
       @Override
       protected void dispatching(Composite request) {
         sc.log("dispatching: " + request.toString());
       }
-      
+
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
@@ -144,6 +144,7 @@ public class OwnerContextListener implements ServletContextListener {
         Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
+    manager.loadDefaultDeviceMtu(ds);
 
     // schedule devices for TO0 only if the flag is set
     if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {

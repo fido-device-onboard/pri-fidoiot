@@ -45,7 +45,6 @@ public class To2StorageTest {
   private static final String DB_PORT = "8043";
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
-  private static final int SERVICEINFO_MTU = 1300;
 
   private static final String VOUCHER = ""
       + "8486186450f0956089c0df4c349c61f460457e87eb8185820567302e302e302e3082024400000000820419cb9"
@@ -273,7 +272,7 @@ public class To2StorageTest {
       @Override
       public void prepareServiceInfo() {
         List<Composite> list = new ArrayList<>();
-        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
+        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(getMaxDeviceServiceInfoMtuSz(),
                 Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER)
                         .getAsUuid(Const.OVH_GUID));
         marshaller.register(new DeviceServiceInfoModule());
@@ -309,6 +308,21 @@ public class To2StorageTest {
                 new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
                         new DeviceServiceInfoSequence(info.getAsString(Const.FIRST_KEY),
                                 info.getAsBytes(Const.SECOND_KEY), 0)));
+      }
+
+      @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        prepareServiceInfo();
+      }
+
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
       }
     };
 

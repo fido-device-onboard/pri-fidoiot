@@ -731,8 +731,7 @@ public class CryptoService {
     final Set<TrustAnchor> anchors = new HashSet<>();
 
     try {
-      //final
-      CertPath cp = getCertPath(chain);
+      final CertPath cp = getCertPath(chain);
 
       for (int i = 1; i < chain.size(); i++) {
         X509Certificate anchorCert = (X509Certificate) cp.getCertificates().get(i);
@@ -822,7 +821,6 @@ public class CryptoService {
   private void verifyLeafCertPrivileges(X509Certificate cert)
       throws InvalidOwnershipVoucherException {
     if (cert.getKeyUsage() != null) {
-      boolean[] test = cert.getKeyUsage();
       if (!(cert.getKeyUsage()[0])) {
         throw new InvalidOwnershipVoucherException(
             "Digital signature is not allowed for the device certificate");
@@ -1030,7 +1028,6 @@ public class CryptoService {
       throws InvalidAlgorithmParameterException {
     final PKIXParameters params = new PKIXParameters(anchors);
     params.setRevocationEnabled(false);
-    params.setTrustAnchors(anchors);
     return params;
   }
 
@@ -1362,7 +1359,7 @@ public class CryptoService {
   }
 
   protected Composite getSmallerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-cipher"||ShSe]
+    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
     ByteBuffer buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
     buffer.put((byte) 1);
@@ -1376,7 +1373,7 @@ public class CryptoService {
     byte[] sek = new byte[(Const.BIT_LEN_256 / Byte.SIZE) / 2];//16 bytes
     buffer.get(sek);
 
-    //HMAC-SHA-256[0,(byte)2||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
 
@@ -1398,7 +1395,7 @@ public class CryptoService {
   }
 
   protected Composite getLargerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-cipher"||ShSe]
+    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
     ByteBuffer buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
     buffer.put((byte) 1);
@@ -1412,7 +1409,7 @@ public class CryptoService {
     byte[] sek = new byte[Const.BIT_LEN_256 / Byte.SIZE]; // 32 bytes
     buffer.get(sek);
 
-    //HMAC-SHA-256[0,(byte)2||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
 
@@ -1427,7 +1424,7 @@ public class CryptoService {
     byte[] svk1 = new byte[Const.BIT_LEN_384 / Byte.SIZE]; //48 bytes
     buffer.get(svk1);
 
-    //HMAC-SHA-256[0,(byte)3||"MarshalPointKDF"||(byte)0||"AutomaticProvisioning-hmac"||ShSe]
+    //HMAC-SHA-256[0,(byte)3||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
     buffer = ByteBuffer
         .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
     buffer.put((byte) 3);
