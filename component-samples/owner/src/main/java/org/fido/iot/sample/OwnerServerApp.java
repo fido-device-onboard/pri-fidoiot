@@ -73,6 +73,15 @@ public class OwnerServerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
+    ctx.addParameter(OwnerAppSettings.ONDIE_CACHEDIR,
+            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
+    ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
+            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
+    ctx.addParameter(OwnerAppSettings.ONDIE_SOURCE_URLS,
+            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_SOURCE_URLS));
+    ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
+            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
+
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));

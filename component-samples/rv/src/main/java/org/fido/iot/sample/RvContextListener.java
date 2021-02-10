@@ -64,19 +64,20 @@ public class RvContextListener implements ServletContextListener {
     sc.setAttribute("cryptoservice", cs);
 
     OnDieCache odc = new OnDieCache(
-            sc.getInitParameter("ods.cacheDir"),
-            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.sourceUrlList"),
+            sc.getInitParameter(RvAppSettings.ONDIE_CACHEDIR),
+            sc.getInitParameter(RvAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
+            sc.getInitParameter(RvAppSettings.ONDIE_SOURCE_URLS),
             null);
 
     try {
       odc.initializeCache();
     } catch (Exception ex) {
-      // TODO - need to handle exception
+      throw new RuntimeException("OnDie initialization error");
     }
 
-    final OnDieService ods = new OnDieService(odc, false);
-
+    final OnDieService ods = new OnDieService(odc,
+            sc.getInitParameter(RvAppSettings.ONDIE_CHECK_REVOCATIONS)
+                    .toLowerCase().equals("true"));
 
     MessageDispatcher dispatcher =
         new MessageDispatcher() {

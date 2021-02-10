@@ -31,6 +31,8 @@ import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
 import org.fido.iot.protocol.epid.EpidUtils;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.OwnerDbManager;
 import org.fido.iot.storage.OwnerDbStorage;
 import org.fido.iot.storage.OwnerDbTo0Util;
@@ -104,13 +106,30 @@ public class OwnerContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    OnDieCache odc = new OnDieCache(
+            sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR),
+            sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
+            sc.getInitParameter(OwnerAppSettings.ONDIE_SOURCE_URLS),
+            null);
+
+    try {
+      odc.initializeCache();
+    } catch (Exception ex) {
+      throw new RuntimeException("OnDie initialization error");
+    }
+
+    final OnDieService ods = new OnDieService(odc,
+            sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                    .toLowerCase().equals("true"));
+
+
     resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
         sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
 
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createTo2Service(cs, ds);
+        return createTo2Service(cs, ds, ods);
       }
 
       @Override
@@ -172,14 +191,16 @@ public class OwnerContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private To2ServerService createTo2Service(CryptoService cs, DataSource ds) {
+  private To2ServerService createTo2Service(CryptoService cs,
+                                            DataSource ds,
+                                            OnDieService ods) {
     return new To2ServerService() {
       private To2ServerStorage storage;
 
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, resolver, null);
+          storage = new OwnerDbStorage(cs, ds, resolver, ods);
         }
         return storage;
       }

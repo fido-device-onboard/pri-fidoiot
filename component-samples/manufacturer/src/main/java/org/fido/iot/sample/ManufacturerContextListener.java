@@ -102,19 +102,22 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute("cryptoservice", cs);
 
     OnDieCache odc = new OnDieCache(
-            sc.getInitParameter("ods.cacheDir"),
-            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.sourceUrlList"),
+            sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR),
+            sc.getInitParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE)
+                    .toLowerCase().equals("true"),
+            sc.getInitParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS),
             null);
 
     try {
       odc.initializeCache();
     } catch (Exception ex) {
-      // TODO - need to handle exception
+      throw new RuntimeException("OnDie initialization error");
     }
 
     final OnDieService ods = new OnDieService(odc,
-            sc.getInitParameter("ods.checkRevocations").equals("true"));
+            sc.getInitParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                    .toLowerCase().equals("true"));
+
     initManufacturerKeystore(sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     keyResolver = new CertificateResolver() {
       @Override

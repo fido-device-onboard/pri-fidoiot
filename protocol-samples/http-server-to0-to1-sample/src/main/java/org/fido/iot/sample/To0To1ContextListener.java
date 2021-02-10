@@ -64,7 +64,7 @@ public class To0To1ContextListener implements ServletContextListener {
     try {
       odc.initializeCache();
     } catch (Exception ex) {
-      // TODO - need to handle exception
+      throw new RuntimeException("OnDie initialization error");
     }
 
     final OnDieService ods = new OnDieService(odc, false);
