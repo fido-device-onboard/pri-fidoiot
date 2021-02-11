@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Class that contains information on the cursor start and end positions that a single ServiceInfo
  * entry will be read from. The implementation for the abstract methods must provide a mechanism to
  * fetch the service info length and serviceinfo content based on the cursor start and end
- * positions. The length() and canSplit() are supposed to be called upon exclusively by
+ * positions. The length() is supposed to be called upon exclusively by
  * {@link ServiceInfoMarshaller}, while the rest are to be called on per-use basis.
  */
 public abstract class ServiceInfoSequence implements Serializable {
@@ -76,11 +76,4 @@ public abstract class ServiceInfoSequence implements Serializable {
    */
   public abstract Object getContent();
 
-  /**
-   * Return boolean true if the content as received from method 'getContent()' can be split
-   * partially to allow transfer of the sequence across messages.
-   * 
-   * @return value
-   */
-  public abstract boolean canSplit();
 }

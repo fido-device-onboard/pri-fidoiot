@@ -427,4 +427,6 @@ public final class Const {
 
   // Default ServiceInfo MTU size
   public static final int DEFAULT_SERVICE_INFO_MTU_SIZE = 1300;
+  public static final int SERVICE_INFO_MTU_MIN_SIZE = 256;
+  public static final int OWNER_THRESHOLD_DEFAULT_MTU_SIZE = 8192;
 }
