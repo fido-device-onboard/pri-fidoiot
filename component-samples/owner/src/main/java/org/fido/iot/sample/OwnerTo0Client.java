@@ -4,6 +4,7 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
@@ -119,6 +120,8 @@ public class OwnerTo0Client {
         if (responseWait > 0) {
           break;
         }
+      } catch (RuntimeException e) {
+        System.out.println("Unable to connect with RV at " + path + ". " + e.getMessage());
       } catch (Exception e) {
         System.out.println("TO0 failed for " + guid.toString() + "." + e.getMessage());
         throw e;

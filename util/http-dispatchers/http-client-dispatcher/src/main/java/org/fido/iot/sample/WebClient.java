@@ -4,6 +4,7 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -152,6 +153,8 @@ public class WebClient implements Runnable {
         dr = sendMessage(dr.getReply());
         dr = dispatcher.dispatch(dr.getReply());
       }
+    } catch (ConnectException e) {
+      throw new RuntimeException(e);
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
