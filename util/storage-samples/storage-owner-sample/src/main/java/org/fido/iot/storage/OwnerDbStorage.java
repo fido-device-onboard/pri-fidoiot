@@ -570,18 +570,10 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public void completed(Composite request, Composite reply) {
 
-    String sql = "DELETE FROM TO2_SESSIONS WHERE SESSION_ID = ?;";
+    deleteTo2Session();
 
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, sessionId);
-      pstmt.executeUpdate();
-
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-
-    sql = "UPDATE TO2_DEVICES "
+    String sql =
+        "UPDATE TO2_DEVICES "
         + "SET TO2_COMPLETED = ? "
         + "WHERE GUID = ?";
 
@@ -601,7 +593,7 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void failed(Composite request, Composite reply) {
-
+    deleteTo2Session();
   }
 
   @Override
@@ -633,6 +625,19 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.executeUpdate();
 
     } catch (SQLException | IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void deleteTo2Session() {
+    String sql = "DELETE FROM TO2_SESSIONS WHERE SESSION_ID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, sessionId);
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
