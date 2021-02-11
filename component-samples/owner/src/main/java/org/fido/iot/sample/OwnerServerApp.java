@@ -11,10 +11,11 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerDeviceSviStringServlet;
+import org.fido.iot.api.OwnerDeviceTypeCriteriaServlet;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
-import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerSviSettingsServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
@@ -131,9 +132,6 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "serviceinfoServlet",
         new OwnerServiceInfoValuesServlet());
     wrapper.addMapping("/api/v1/owner/svivalues/*");
-    wrapper = tomcat.addServlet(ctx, "sviServlet",
-        new OwnerSviServlet());
-    wrapper.addMapping("/api/v1/owner/svi/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");
@@ -141,6 +139,12 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
             new OwnerSviSettingsServlet());
     wrapper.addMapping("/api/v1/owner/svi/settings/*");
+    wrapper = tomcat.addServlet(ctx, "deviceSviStringServlet",
+        new OwnerDeviceSviStringServlet());
+    wrapper.addMapping("/api/v1/owner/svi/string/*");
+    wrapper = tomcat.addServlet(ctx, "deviceTypeCriteriaServlet",
+        new OwnerDeviceTypeCriteriaServlet());
+    wrapper.addMapping("/api/v1/owner/devicetype/criteria/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");

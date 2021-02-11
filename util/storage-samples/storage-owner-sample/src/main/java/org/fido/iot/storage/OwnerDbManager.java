@@ -4,7 +4,6 @@
 package org.fido.iot.storage;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -16,15 +15,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
-import org.fido.iot.protocol.CryptoService;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
-import org.fido.iot.serviceinfo.SdoWget;
 
 /**
  * Owner Database Manager.
@@ -107,16 +103,23 @@ public class OwnerDbManager {
       stmt.executeUpdate(sql);
 
       sql = "CREATE TABLE IF NOT EXISTS "
-          + "GUID_OWNERSVI("
-          + "ID INT NOT NULL AUTO_INCREMENT,"
-          + "GUID CHAR(36), "
-          + "SVI_ID CHAR(36), "
-          + "MODULE_NAME CHAR(36), "
-          + "MESSAGE_NAME CHAR(36),"
-          + "CREATED_AT TIMESTAMP, "
-          + "PRIMARY KEY (ID, GUID, SVI_ID),"
-          + "FOREIGN KEY (GUID) references TO2_DEVICES(GUID) ON DELETE CASCADE, "
-          + "FOREIGN KEY (SVI_ID) REFERENCES OWNER_SERVICEINFO(SVI_ID) ON DELETE CASCADE"
+          + "DEVICE_TYPE_OWNERSVI_STRING("
+          + "DEVICE_TYPE CHAR(255), "
+          + "OWNERSVI_STRING CHAR(2147483647), "
+          + "PRIMARY KEY (DEVICE_TYPE),"
+          + "UNIQUE (DEVICE_TYPE)"
+          + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "DEVICE_TYPE_OWNERSVI_CRITERIA("
+          + "DEVICE_TYPE CHAR(255), "
+          + "CRITERIA CHAR(2147483647), "
+          + "EXPECTED_VALUE CHAR(2147483647), "
+          + "PRIMARY KEY (DEVICE_TYPE, CRITERIA),"
+          + "FOREIGN KEY (DEVICE_TYPE) REFERENCES "
+          + "DEVICE_TYPE_OWNERSVI_STRING(DEVICE_TYPE) ON DELETE CASCADE"
           + ");";
 
       stmt.executeUpdate(sql);
@@ -251,234 +254,14 @@ public class OwnerDbManager {
   }
 
   /**
-   * Assign svi as given in 'sviString', to the given device. The sviString is off the form
-   * 'modName:msgName=serviceinfoId1,modName:msgName=serviceinfoId1....'.
-   *
-   * @param ds Datasource
-   * @param guid Device GUID
-   * @param sviString svi list
-   */
-  public void assignSviToDevice(DataSource ds, UUID guid, String sviString) {
 
-    sviString = insertModActivateSviEntry(sviString);
-
-    if (checkWgetInSviString(sviString) && isWgetVerificationEnabled(ds)) {
-      sviString = insertWgetContentHash(ds, sviString);
-    }
-
-    String sql = "INSERT INTO GUID_OWNERSVI "
-            + "(GUID, SVI_ID, MODULE_NAME, MESSAGE_NAME, CREATED_AT) "
-            + "VALUES (?,?,?,?,?); ";
-
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      sviString = sviString.replace("\n", "").replace("\r", "");
-      for (String sviEntry : sviString.split(SVI_ARRAY_DELIMETER)) {
-        String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-        String[] modMsgDelimeted = sviEntryArray[0].split(SVI_MODMSG_DELIMETER);
-
-        pstmt.setString(1, guid.toString());
-        pstmt.setString(2, sviEntryArray[1]);
-        pstmt.setString(3, modMsgDelimeted[0]);
-        pstmt.setString(4, modMsgDelimeted[1]);
-        // +1 so that the created time is necessarily different for all serviceinfo,
-        // this maintains insertion (ascending) order
-        Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis() + 1);
-        pstmt.setTimestamp(5, created);
-        pstmt.addBatch();
-      }
-      pstmt.executeBatch();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * For every module change in sviString, inserts mod:active SVI entry.
-   *
-   * @param sviString svi mapping string to be updated
-   * @return updated sviString with activate module entries
-   */
-  public String insertModActivateSviEntry(String sviString) {
-    StringBuilder sb = new StringBuilder();
-    List<String> sviEntries = Arrays.asList(sviString.split(","));
-    List<String> modSequence = new ArrayList<>();
-
-    for (String sviEntry : sviEntries) {
-      String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-      String[] modMsgDelimeted = sviEntryArray[0].split(SVI_MODMSG_DELIMETER);
-      modSequence.add(modMsgDelimeted[0]);
-    }
-
-    sb.append(modSequence.get(0));
-    sb.append(":active=activate_mod,");
-    sb.append(sviEntries.get(0) + ",");
-    for (int i = 1; i < modSequence.size(); i++) {
-      if (!(modSequence.get(i - 1).equals(modSequence.get(i)))) {
-        sb.append(modSequence.get(i));
-        sb.append(":active=activate_mod,");
-      }
-      sb.append(sviEntries.get(i) + ",");
-    }
-
-    sb.deleteCharAt(sb.length() - 1);
-    return sb.toString();
-  }
-
-  /**
-   * Determines if wget module is included in svi.
-   *
-   * @param sviString svi mapping string
-   * @return checks if wget module entries are present in the service info string
-   */
-  public boolean checkWgetInSviString(String sviString) {
-
-    List<String> sviEntries = Arrays.asList(sviString.split(","));
-
-    for (String sviEntry : sviEntries) {
-      String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-      String[] modMsgDelimeted = sviEntryArray[0].split(SVI_MODMSG_DELIMETER);
-      if (modMsgDelimeted[0].equals(SdoWget.NAME)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Checks if content verification is enabled for wget file content.
-   *
-   * @param ds Datasource
-   * @return checks wget verification enable status
-   */
-  public boolean isWgetVerificationEnabled(DataSource ds) {
-    boolean isWgetContentVerificationEnabled = false;
-
-    String sql = "SELECT WGET_SVI_MOD_VERIFICATION FROM TO2_SETTINGS WHERE ID = 1";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      try (ResultSet rs = pstmt.executeQuery()) {
-        if (rs.next()) {
-          isWgetContentVerificationEnabled = rs.getBoolean(1);
-        }
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-
-    return isWgetContentVerificationEnabled;
-  }
-
-  /**
-   * Calculated sha384 hash of file content to be transferred using wget:url. Adds the hash entry to
-   * OWNER_SERVICEINFO table Includes appropriate mapping in the sviString for corresponding hash
-   * file.
-   *
-   * @param ds datasource
-   * @param sviString svi mapping string to be updated
-   * @return updated sviString with activate module entries
-   */
-  public String insertWgetContentHash(DataSource ds, String sviString) {
-    StringBuilder sb = new StringBuilder();
-    List<String> sviEntries = Arrays.asList(sviString.split(","));
-    List<String> newSviEntries = new ArrayList<>();
-
-    for (String sviEntry : sviEntries) {
-      String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-
-      // Get the filename whose hash needs to be calculated.
-      if (sviEntryArray[0]
-          .trim()
-          .equals(SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_FILENAME)) {
-        String filename = null;
-        String sviId = null;
-        byte[] sviContent = null;
-
-        String sql = "SELECT CONTENT FROM OWNER_SERVICEINFO WHERE SVI_ID = ?";
-        try (Connection conn = ds.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-          pstmt.setString(1, sviEntryArray[1]);
-          try (ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) {
-              filename = new String(rs.getBytes(1), StandardCharsets.UTF_8);
-              // concatenate the filename and the hash to generate a unique SVI_ID.
-              sviId = new StringBuilder(filename + "_hash").toString();
-            }
-          }
-        } catch (SQLException e) {
-          throw new RuntimeException(e);
-        }
-
-        // Read the file content whose hash needs to be calculated.
-        sql = "SELECT CONTENT FROM OWNER_SERVICEINFO WHERE SVI_ID = ?";
-        try (Connection conn = ds.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-          pstmt.setString(1, filename);
-          try (ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) {
-              sviContent = rs.getBytes(1);
-            }
-          }
-        } catch (SQLException e) {
-          throw new RuntimeException(e);
-        }
-
-        // calculate SHA384 hash of the file content.
-        byte[] wgetFileContentHash =
-            (new CryptoService().hash(Const.SHA_384, sviContent)).getAsBytes(Const.HASH);
-
-        // Adds the hash entry to OWNER_SERVICEINFO table.
-        addServiceInfo(ds, sviId, wgetFileContentHash);
-
-        // add the mapping to GUID_OWNERSVI
-        newSviEntries.add(
-            (SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_SHA + SVI_ENTRY_DELIMETER + sviId));
-      }
-    }
-
-    int i = 0;
-    for (String sviEntry : sviEntries) {
-      sb.append(sviEntry + ",");
-      String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-      if (sviEntryArray[0].trim().equals(SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_URL)) {
-        sb.append(newSviEntries.get(i) + ",");
-        i++;
-      }
-    }
-
-    sb.deleteCharAt(sb.length() - 1);
-    return sb.toString();
-  }
-
-  /**
-   * Remove svi for a given device.
-   *
-   * @param ds Datasource
-   * @param guid Device GUID
-   */
-  public void removeSviFromDevice(DataSource ds, UUID guid) {
-    String sql = "DELETE FROM GUID_OWNERSVI WHERE GUID = ?;";
-
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, guid.toString());
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
    * Load Sample Owner service info from the file-system.
    *
    * @param ds Datasource instance
-   * @param guid Device GUID
    * @param sviValues Path to 'sample-values' directory containing serviceinfo
-   * @param svi Path to 'sample-svi.csv' file that contains svi String
    */
-  public void loadSampleServiceInfo(DataSource ds, UUID guid, Path sviValues, Path svi) {
-    if (sviValues == null || !sviValues.toFile().isDirectory() || svi == null) {
+  public void loadSampleServiceInfo(DataSource ds, Path sviValues) {
+    if (sviValues == null || !sviValues.toFile().isDirectory()) {
       return;
     }
     try (Stream<Path> files = Files.walk(sviValues, 1)) {
@@ -493,10 +276,24 @@ public class OwnerDbManager {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Loads sample device type to owner string mapping from file-system.
+   *
+   * @param ds Datasource instance
+   * @param svi Path to 'sample-svi.csv' file that contains device type to svi
+   *     string mapping
+   */
+  public void loadSampleDeviceTypeSviStringMapping(DataSource ds, Path svi) {
+
+    if (svi == null) {
+      return;
+    }
     try {
-      assignSviToDevice(ds, guid, Files.readString(svi));
+      String sviString = Files.readString(svi);
+      addDeviceTypeOwnerSviString(ds, "default", sviString);
     } catch (IOException e) {
-      System.out.println("Unable to load sample service info");
       throw new RuntimeException(e);
     }
   }
@@ -598,6 +395,69 @@ public class OwnerDbManager {
   }
 
   /**
+   * Add device type to owner serviceinfo mapping.
+   *
+   * @param ds Datasource
+   * @param deviceType device type
+   * @param ownerSviString owner serviceinfo string
+   */
+  public void addDeviceTypeOwnerSviString(DataSource ds, String deviceType, String ownerSviString) {
+
+    if (checkSviIdReferentialIntegrity(ds, ownerSviString)) {
+      String sql = "MERGE INTO DEVICE_TYPE_OWNERSVI_STRING VALUES (?,?);";
+      try (Connection conn = ds.getConnection();
+          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, deviceType);
+        pstmt.setString(2, ownerSviString);
+        pstmt.executeUpdate();
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      System.out.println("Invalid serviceinfo string provided");
+    }
+  }
+
+  /**
+   * Ensures the referential integrity between OWNER_SERVICEINFO and DEVICE_TYPE_OWNERSVI_STRING
+   * tables.
+   *
+   * <p>SVI_ID specified in OwnerServiceInfo string must exist in OWNER_SERVICEINFO table.
+   *
+   * @param ds Datasource
+   * @param ownerSviString owner serviceinfo string
+   */
+  private boolean checkSviIdReferentialIntegrity(DataSource ds, String ownerSviString) {
+    ArrayList<String> expectedSviIds = new ArrayList<>();
+    ArrayList<String> actualSviIds = new ArrayList<>();
+
+    String[] sviMappings = ownerSviString.split(SVI_ARRAY_DELIMETER);
+    for (String sviMapping : sviMappings) {
+      if (sviMapping.split(SVI_MODMSG_DELIMETER).length != 2) {
+        return false;
+      }
+      expectedSviIds.add(sviMapping.split(SVI_ENTRY_DELIMETER)[1]);
+    }
+
+    String sql = "SELECT SVI_ID FROM OWNER_SERVICEINFO;";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      try (ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+          actualSviIds.add(rs.getString(1));
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    if (actualSviIds.containsAll(expectedSviIds)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Updates content verification preference for wget module.
    *
    * @param ds Datasource instance
@@ -611,6 +471,65 @@ public class OwnerDbManager {
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, String.valueOf(contentVerificationPreference));
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Remove Service info value as identified by serviceinfoId from the database.
+   *
+   * @param ds Datasource
+   * @param deviceType Serviceinfo Identifier
+   */
+  public void removeDeviceSviString(DataSource ds, String deviceType) {
+    String sql = "DELETE FROM DEVICE_TYPE_OWNERSVI_STRING WHERE DEVICE_TYPE = ?;";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, deviceType);
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Add device type criteria.
+   *
+   * @param ds Datasource
+   * @param criteria DSI key(s) for identifying device type
+   * @param expectedValue expected value for DSI keys included in criteria
+   */
+  public void addDeviceTypeCriteria(
+      DataSource ds, String deviceType, String criteria, String expectedValue) {
+
+    removeDeviceTypeCriteria(ds, deviceType);
+    String sql = "MERGE INTO DEVICE_TYPE_OWNERSVI_CRITERIA VALUES (?,?,?);";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, deviceType);
+      pstmt.setString(2, criteria);
+      pstmt.setString(3, expectedValue);
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Remove device type identifier criteria for a particular device type.
+   *
+   * @param ds Datasource
+   * @param deviceType device type
+   */
+  public void removeDeviceTypeCriteria(DataSource ds, String deviceType) {
+    String sql = "DELETE FROM DEVICE_TYPE_OWNERSVI_CRITERIA WHERE DEVICE_TYPE = ?;";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, deviceType);
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
