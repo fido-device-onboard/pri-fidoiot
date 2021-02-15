@@ -15,6 +15,11 @@ import org.fido.iot.storage.OwnerDbManager;
 
 public class OwnerSviMtuServlet extends HttpServlet {
 
+  private static final String SETTINGS_DEVICE_MTU = "devicemtu";
+  private static final String SETTINGS_OWNER_THRESHOLD = "ownerthreshold";
+  private static final String SETUPINFO_ARRAY_DELIMETER = ",";
+  private static final String SETUPINFO_VALUE_DELIMETER = ":=";
+
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
@@ -24,23 +29,55 @@ public class OwnerSviMtuServlet extends HttpServlet {
       return;
     }
 
-    String id = req.getParameter("id");
-    if (id == null) {
-      getServletContext().log("No current ID has been provided to update.");
-      resp.setStatus(400);
-      return;
-    }
-
     try {
       String requestBody = req.getReader().lines().collect(Collectors.joining());
 
-      int mtu = Integer.parseInt(requestBody);
+      // Request format: devicemtu:=<mtusettingze>,ownerthreshold:=<thresholdmtu>
+      if (requestBody != null) {
+        DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+        OwnerDbManager ownerDbManager = new OwnerDbManager();
 
-      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      OwnerDbManager ownerDbManager = new OwnerDbManager();
-      // update the maximum MTU owner can accept
-      ownerDbManager.updateDeviceMtu(ds, Integer.parseInt(id), mtu);
+        String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
+        if (to2Settings.length > 2) {
+          getServletContext().log("Invalid to2Settings request has been provided.");
+          resp.setStatus(400);
+          return;
+        }
+        int deviceMtu = 0;
+        int ownerThresholdMtu = 0;
+        for (String setupInfo : to2Settings) {
+          String[] setting = setupInfo.split(SETUPINFO_VALUE_DELIMETER);
+          if (setting.length == 2) {
+            switch (setting[0]) {
+              case SETTINGS_DEVICE_MTU:
+                deviceMtu = Integer.parseInt(setting[1]);
+                getServletContext().log("Updating Device MTU for TO2 Settings");
+                ownerDbManager.updateMtu(ds, "DEVICE_SERVICE_INFO_MTU_SIZE", deviceMtu);
+                break;
+              case SETTINGS_OWNER_THRESHOLD:
+                ownerThresholdMtu = Integer.parseInt(setting[1]);
+                if (ownerThresholdMtu < 0) {
+                  getServletContext()
+                      .log(
+                          "Negative value received. "
+                              + "Updating Owner Threshold to default MTU size of 8192 bytes");
+                  ownerThresholdMtu = Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE;
+                }
+                getServletContext().log("Updating Owner Threshold MTU for TO2 Settings");
+                ownerDbManager.updateMtu(ds, "OWNER_MTU_THRESHOLD", ownerThresholdMtu);
+                break;
+              default:
+                break;
+            }
+          } else {
+            getServletContext().log("Invalid settings request has been provided.");
+            resp.setStatus(400);
+            return;
+          }
+        }
+      }
     } catch (Exception exp) {
+      getServletContext().log("Error occurred while updating TO2 settings " + exp.getMessage());
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
   }

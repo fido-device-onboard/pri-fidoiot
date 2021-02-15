@@ -307,13 +307,36 @@ public abstract class To2ClientService extends DeviceService {
       newHash = getCryptoService().hash(hashType, secret, headerCopy.toBytes());
     }
 
+    int ownerMtu = 0;
+    if (getStorage().getMaxOwnerServiceInfoMtuSz() != null) {
+      try {
+        ownerMtu = Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz());
+        if (ownerMtu <= 0) {
+          System.out.println(
+              "Negative value received. Proceeding with default MTU size of 1300 bytes");
+          ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+        } else if (ownerMtu > 0 && ownerMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+          System.out.println(
+              "Received value less than default minimum of 256 bytes. "
+                  + "Updating MTU size to default minimum");
+          ownerMtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+        }
+      } catch (Exception e) {
+        System.out.println(
+            "Out of Bound value received."
+                + e.getMessage()
+                + " Proceeding with default MTU size of 1300 bytes");
+        ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+    }
+
     Composite payload =
         Composite.newArray()
             .set(Const.FIRST_KEY, newHash != null ? newHash : PrimitivesUtil.getCborNullBytes())
             .set(
                 Const.SECOND_KEY,
                 getStorage().getMaxOwnerServiceInfoMtuSz() != null
-                    ? Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz())
+                    ? ownerMtu
                     : PrimitivesUtil.getCborNullBytes());
 
     body = getCryptoService().encrypt(payload.toBytes(), this.ownState);

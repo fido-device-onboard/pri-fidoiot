@@ -163,7 +163,7 @@ public class OwnerContextListener implements ServletContextListener {
         Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
-    manager.loadDefaultDeviceMtu(ds);
+    manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set
     if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
