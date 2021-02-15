@@ -3,11 +3,11 @@
 
 package org.fido.iot.protocol.ondie;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -17,23 +17,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class OnDieCache {
 
   private boolean autoUpdate = false;
   private String cacheDir = "";
-  private String sourceUrls = "";
   private boolean initialized = false;
 
-  List<String> rootCaList = new ArrayList<>();
+  List<String> rootCaList = new ArrayList<String>(Arrays.asList(
+          "OnDie_CA_RootCA_Certificate.cer",
+          "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
 
-  private final List<URL> sourceUrlList = new ArrayList<URL>();
+  // set to default and override in constructor if user wishes
+  private String artifactZipUrl = "https://tsci.intel.com/content/csme.zip";
 
   private HashMap<String, byte[]> cacheMap = new HashMap<String, byte[]>();
 
@@ -44,20 +43,21 @@ public class OnDieCache {
    *
    * @param cacheDir cacheDir
    * @param autoUpdate autoUpdate
-   * @param sourceUrls sourceUrls
+   * @param artifactZipUrl URL of zip file containing certs and crls
+   *                            (only used if autoUpdate is set to true)
    */
   public OnDieCache(final String cacheDir,
                     final boolean autoUpdate,
-                    final String sourceUrls,
+                    final String artifactZipUrl,
                     final List<String> rootCaCerts) {
     this.cacheDir = cacheDir;
     this.autoUpdate = autoUpdate;
-    this.sourceUrls = sourceUrls;
 
-    if (rootCaCerts == null) {
-      rootCaList.add("OnDie_CA_RootCA_Certificate.cer");
-      rootCaList.add("OnDie_CA_DEBUG_RootCA_Certificate.cer");
-    } else {
+    if (artifactZipUrl != null && !artifactZipUrl.isEmpty()) {
+      this.artifactZipUrl = artifactZipUrl;
+    }
+
+    if (rootCaCerts != null && !rootCaCerts.isEmpty()) {
       rootCaList = rootCaCerts;
     }
   }
@@ -70,16 +70,6 @@ public class OnDieCache {
 
     if (initialized) {
       return;
-    }
-    if (sourceUrls != null && !sourceUrls.isEmpty()) {
-      String[] urls = sourceUrls.split(",");
-      for (String url : urls) {
-        this.sourceUrlList.add(new URL(url.trim()));
-      }
-    } else {
-      // defaults: the public facing sites containing OnDie artifacts
-      this.sourceUrlList.add(new URL("https://tsci.intel.com/content/OnDieCA/certs/"));
-      this.sourceUrlList.add(new URL("https://tsci.intel.com/content/OnDieCA/crls/"));
     }
 
     if (cacheDir != null) {
@@ -104,7 +94,7 @@ public class OnDieCache {
 
 
   /**
-   * Copy the certs and CRLs from the URL sources to the cache directory.
+   * Copy the certs and CRLs from the URL source to the cache directory.
    *
    */
   private void copyFromUrlSources() throws IOException {
@@ -114,31 +104,26 @@ public class OnDieCache {
       cache.mkdir();
     }
 
-    for (URL url : this.sourceUrlList) {
-      URLConnection urlConn = url.openConnection();
-      try (BufferedReader in = new BufferedReader(new InputStreamReader(
-          urlConn.getInputStream()))) {
-
-        // loop through all the href entries and for each .crl and .cer
-        // links, download the file and store locally
-        Document doc = Jsoup.connect(url.toString()).get();
-        Elements elements = doc.select("a[href]");
-        if (elements != null) {
-          for (Element e : elements) {
-            if (e != null) {
-              for (Attribute attr : e.attributes()) {
-                if (attr.getKey().equals("href")) {
-                  String hrefValue = attr.getValue();
-                  if (hrefValue.contains(".cer") || hrefValue.contains(".crl")) {
-                    URL fileUrl = new URL(url, hrefValue);
-                    byte[] fileBytes = fileUrl.openConnection().getInputStream().readAllBytes();
-                    Files.write(Paths.get(cacheDir, hrefValue), fileBytes);
-                  }
-                }
-              }
-            }
+    URL url = new URL(artifactZipUrl);
+    URLConnection urlConn = url.openConnection();
+    try (InputStream zipFileInput = urlConn.getInputStream()) {
+      ZipInputStream zipInput = new ZipInputStream(zipFileInput);
+      ZipEntry zipEntry = zipInput.getNextEntry();
+      while (zipEntry != null) {
+        System.out.println(zipEntry.getName());
+        if (zipEntry.getName().startsWith("content/OnDieCA")
+            && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
+          Path p = Paths.get(zipEntry.getName());
+          File newFile = new File(cacheDir, p.getFileName().toString());
+          FileOutputStream fos = new FileOutputStream(newFile);
+          byte[] buffer = new byte[1024];
+          int len;
+          while ((len = zipInput.read(buffer)) > 0) {
+            fos.write(buffer, 0, len);
           }
+          fos.close();
         }
+        zipEntry = zipInput.getNextEntry();
       }
     }
   }

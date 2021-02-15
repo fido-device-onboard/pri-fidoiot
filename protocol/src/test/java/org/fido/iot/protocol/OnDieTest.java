@@ -19,6 +19,8 @@ import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -68,7 +70,7 @@ class OnDieTest {
   }
 
   // The following test is left disabled since it can fail depending on
-  // the test environment. The test requires access to the source URLs for
+  // the test environment. The test requires access to the source URL for
   // OnDie certs and CRLs. If this test is run on a network with access then
   // it will fail. We cannot guarantee that this will be true for all environments.
   // Comment out the @Disabled if you want to run the test.
@@ -78,14 +80,13 @@ class OnDieTest {
   void testOnDieCacheDownload(@TempDir Path tempDir) throws Exception {
 
     try {
-      String sourceList = "https://tsci.intel.com/content/OnDieCA/certs/"
-        + "https://tsci.intel.com/content/OnDieCA/crls/";
-
       OnDieCache onDieCache = new OnDieCache(
               tempDir.toString(),
               true,
-              sourceList,
+              "",
               null);
+
+      onDieCache.initializeCache();
 
       assertNotNull(onDieCache.getCertOrCrl(
         "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
@@ -108,6 +109,50 @@ class OnDieTest {
       "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
     assertThrows(MalformedURLException.class,
       () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+  }
+
+  @Test
+  @DisplayName("OnDie cache load test - specify root CA")
+  void testOnDieCacheLoadRootCa() throws Exception {
+    if (onDieCache == null) {
+      List<String> rootCaList = new ArrayList<String>(Arrays.asList(
+              "OnDie_CA_RootCA_Certificate.cer",
+              "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
+
+      onDieCache = new OnDieCache(
+              getClass().getClassLoader().getResource("cachedir").getFile(),
+              false,
+              null,
+              rootCaList);
+    }
+
+    onDieCache.initializeCache();
+    OnDieCache onDieCache = getTestOnDieCache();
+
+    assertNotNull(onDieCache.getCertOrCrl(
+            "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+    assertThrows(MalformedURLException.class,
+            () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+  }
+
+  @Test
+  @DisplayName("OnDie cache load test - specify zip pathanme")
+  void testOnDieCacheLoadZip() throws Exception {
+    if (onDieCache == null) {
+      onDieCache = new OnDieCache(
+              getClass().getClassLoader().getResource("cachedir").getFile(),
+              false,
+              "https://tsci.intel.com/content/csme.zip",
+              null);
+    }
+
+    onDieCache.initializeCache();
+    OnDieCache onDieCache = getTestOnDieCache();
+
+    assertNotNull(onDieCache.getCertOrCrl(
+            "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+    assertThrows(MalformedURLException.class,
+            () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
   }
 
   @Test

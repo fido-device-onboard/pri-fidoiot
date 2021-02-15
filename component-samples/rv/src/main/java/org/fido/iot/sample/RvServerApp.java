@@ -51,8 +51,8 @@ public class RvServerApp {
             RvConfigLoader.loadConfig(RvAppSettings.ONDIE_CACHEDIR));
     ctx.addParameter(RvAppSettings.ONDIE_AUTOUPDATE,
             RvConfigLoader.loadConfig(RvAppSettings.ONDIE_AUTOUPDATE));
-    ctx.addParameter(RvAppSettings.ONDIE_SOURCE_URLS,
-            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_SOURCE_URLS));
+    ctx.addParameter(RvAppSettings.ONDIE_ZIP_ARTIFACT,
+            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_ZIP_ARTIFACT));
     ctx.addParameter(RvAppSettings.ONDIE_CHECK_REVOCATIONS,
             RvConfigLoader.loadConfig(RvAppSettings.ONDIE_CHECK_REVOCATIONS));
 

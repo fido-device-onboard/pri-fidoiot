@@ -185,21 +185,31 @@ public class DiContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    // To maintain backwards compatibility with installation without
+    // any OnDie settings or installations that do not wish to use
+    // OnDie we will check if the one required setting is present.
+    // If not then the ods object is set to null and operation should
+    // proceed without error. If an OnDie operation is attempted then
+    // an error will occur at that time and the user will need to
+    // correct their configuration.
+    OnDieService initialOds = null;
+    if (sc.getInitParameter("ods.cacheDir") != null
+            && !sc.getInitParameter("ods.cacheDir").isEmpty()) {
+      OnDieCache odc = new OnDieCache(
+              sc.getInitParameter("ods.cacheDir"),
+              sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+              sc.getInitParameter("ods.zipArtifactUrl"),
+              null);
+      try {
+        odc.initializeCache();
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error");
+      }
 
-    OnDieCache odc = new OnDieCache(
-            sc.getInitParameter("ods.cacheDir"),
-            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.sourceUrlList"),
-            null);
-
-    try {
-      odc.initializeCache();
-    } catch (Exception ex) {
-      // TODO - need to handle exception
+      initialOds = new OnDieService(odc,
+              sc.getInitParameter("ods.checkRevocations").equals("true"));
     }
-
-    final OnDieService ods = new OnDieService(odc,
-            sc.getInitParameter("ods.checkRevocations").equals("true"));
+    final OnDieService ods = initialOds;
 
     keyResolver = new CertificateResolver() {
       @Override

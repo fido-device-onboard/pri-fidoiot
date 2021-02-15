@@ -34,6 +34,6 @@ public class ManufacturerAppSettings {
   // ondie settings
   public static final String ONDIE_CACHEDIR = "ondie_cache";
   public static final String ONDIE_AUTOUPDATE = "ondie_autoupdate";
-  public static final String ONDIE_SOURCE_URLS = "ondie_source_urls";
+  public static final String ONDIE_SOURCE_URLS = "ondie_zip_artifact";
   public static final String ONDIE_CHECK_REVOCATIONS = "ondie_check_revocations";
 }

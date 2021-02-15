@@ -181,7 +181,7 @@ public class To2ContextListener implements ServletContextListener {
     OnDieCache odc = new OnDieCache(
             sc.getInitParameter("ods.cacheDir"),
             sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.sourceUrlList"),
+            sc.getInitParameter("ods.zipArtifactUrl"),
             null);
 
     try {

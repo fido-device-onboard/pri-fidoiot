@@ -77,7 +77,7 @@ public class To2ServerApp {
     System.out.println("Working Directory = " + odcPath.toString());
     ctx.addParameter("ods.cacheDir",  odcPath.toString());
     ctx.addParameter("ods.autoUpdate", "false");
-    ctx.addParameter("ods.sourceUrlList", "");
+    ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations", "true");
 
     ctx.addApplicationListener(DbStarter.class.getName());

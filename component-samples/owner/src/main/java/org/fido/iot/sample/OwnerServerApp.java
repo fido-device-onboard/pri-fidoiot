@@ -77,8 +77,8 @@ public class OwnerServerApp {
             OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
     ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
             OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
-    ctx.addParameter(OwnerAppSettings.ONDIE_SOURCE_URLS,
-            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_SOURCE_URLS));
+    ctx.addParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT,
+            OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
     ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
             OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
 
