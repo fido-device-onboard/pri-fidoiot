@@ -228,6 +228,11 @@ public class To2EcRsaTest extends BaseTemplate {
       public String getMaxOwnerServiceInfoMtuSz() {
         return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
       }
+
+      @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
+      }
     };
 
     clientService = new To2ClientService() {

@@ -176,6 +176,11 @@ public class To2AsymkexTest extends BaseTemplate {
       }
 
       @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
+      }
+
+      @Override
       public Composite getDeviceCredentials() {
         return deviceCreds;
       }
