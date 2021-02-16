@@ -47,15 +47,6 @@ public class RvServerApp {
         "db.tcpServer",
         "-tcp -ifNotExists -tcpPort " + RvConfigLoader.loadConfig(RvAppSettings.DB_PORT));
 
-    ctx.addParameter(RvAppSettings.ONDIE_CACHEDIR,
-            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_CACHEDIR));
-    ctx.addParameter(RvAppSettings.ONDIE_AUTOUPDATE,
-            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_AUTOUPDATE));
-    ctx.addParameter(RvAppSettings.ONDIE_ZIP_ARTIFACT,
-            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_ZIP_ARTIFACT));
-    ctx.addParameter(RvAppSettings.ONDIE_CHECK_REVOCATIONS,
-            RvConfigLoader.loadConfig(RvAppSettings.ONDIE_CHECK_REVOCATIONS));
-
     // To enable remote connections to the DB set webAllowOthers=true
     // This creates a security hole in the system.
     // Not recommended to use especially on production system
