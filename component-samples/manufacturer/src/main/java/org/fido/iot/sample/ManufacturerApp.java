@@ -85,14 +85,18 @@ public class ManufacturerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
-    ctx.addParameter(ManufacturerAppSettings.ONDIE_CACHEDIR,
-            ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_CACHEDIR));
-    ctx.addParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE,
-            ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_AUTOUPDATE));
-    ctx.addParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS,
-            ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_SOURCE_URLS));
-    ctx.addParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS,
-            ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS));
+    try {
+      ctx.addParameter(ManufacturerAppSettings.ONDIE_CACHEDIR,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_CACHEDIR));
+      ctx.addParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_AUTOUPDATE));
+      ctx.addParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_SOURCE_URLS));
+      ctx.addParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS));
+    } catch (Exception ex) {
+      // ondie is optional so if config cannot be loaded just default to no config
+    }
 
     ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
