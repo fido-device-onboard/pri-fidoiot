@@ -61,14 +61,6 @@ public class To0To1ServerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
-    Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
-    System.out.println("Working Directory = " + odcPath.toString());
-
-    ctx.addParameter("ods.cacheDir",  odcPath.toString());
-    ctx.addParameter("ods.autoUpdate", "false");
-    ctx.addParameter("ods.zipArtifactUrl", "");
-    ctx.addParameter("ods.checkRevocations", "true");
-
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(To0To1ContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());

@@ -46,6 +46,9 @@ class OnDieTest {
         + "iidupV+ipN8bCVAYe3eZV7c3i9rhTpHipVdII1/ppdswzl2IXQ0CMHNeOFuvHe64S9m2JRbBXUSdJ7"
         + "iNQwp/4+OdQUmWYs2mB7KqZpmDPGQkq5mDuygBaA==";
 
+  String zipFileUrl = "https://tsci.intel.com/content/csme.zip";
+  String sampleCrl = "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl";
+  String sampleCrl2 = "TGL_00001846_OnDie_CA.crl";
 
   OnDieCache getTestOnDieCache() throws Exception {
     if (onDieCache == null) {
@@ -63,7 +66,7 @@ class OnDieTest {
     // get public key from cert path
     byte [] certBytes = Base64.getDecoder().decode(b64DeviceCert);
     CertificateFactory certificateFactory =
-            CertificateFactory.getInstance("X.509"); //TODO, BouncyCastleLoader.load());
+            CertificateFactory.getInstance("X.509");
     Certificate cert = certificateFactory.generateCertificate(
             new ByteArrayInputStream(certBytes));
     return cert.getPublicKey();
@@ -88,12 +91,11 @@ class OnDieTest {
 
       onDieCache.initializeCache();
 
-      assertNotNull(onDieCache.getCertOrCrl(
-        "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+      assertNotNull(onDieCache.getCertOrCrl(sampleCrl));
       assertNull(onDieCache.getCertOrCrl(
         "https://pre1-tsci.intel.com/content/OD/certs/NOT_IN_THE_CACHE.crl"));
       assertThrows(MalformedURLException.class,
-        () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+        () -> onDieCache.getCertOrCrl(sampleCrl2));
     } catch (Exception ex) {
       throw ex;
     } finally {
@@ -105,10 +107,9 @@ class OnDieTest {
   void testOnDieCacheLoad() throws Exception {
     OnDieCache onDieCache = getTestOnDieCache();
 
-    assertNotNull(onDieCache.getCertOrCrl(
-      "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+    assertNotNull(onDieCache.getCertOrCrl(sampleCrl));
     assertThrows(MalformedURLException.class,
-      () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+      () -> onDieCache.getCertOrCrl(sampleCrl2));
   }
 
   @Test
@@ -129,10 +130,9 @@ class OnDieTest {
     onDieCache.initializeCache();
     OnDieCache onDieCache = getTestOnDieCache();
 
-    assertNotNull(onDieCache.getCertOrCrl(
-            "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+    assertNotNull(onDieCache.getCertOrCrl(sampleCrl));
     assertThrows(MalformedURLException.class,
-            () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+            () -> onDieCache.getCertOrCrl(sampleCrl2));
   }
 
   @Test
@@ -142,17 +142,16 @@ class OnDieTest {
       onDieCache = new OnDieCache(
               getClass().getClassLoader().getResource("cachedir").getFile(),
               false,
-              "https://tsci.intel.com/content/csme.zip",
+              zipFileUrl,
               null);
     }
 
     onDieCache.initializeCache();
     OnDieCache onDieCache = getTestOnDieCache();
 
-    assertNotNull(onDieCache.getCertOrCrl(
-            "https://pre1-tsci.intel.com/content/OD/certs/TGL_00001846_OnDie_CA.crl"));
+    assertNotNull(onDieCache.getCertOrCrl(sampleCrl));
     assertThrows(MalformedURLException.class,
-            () -> onDieCache.getCertOrCrl("TGL_00001846_OnDie_CA.crl"));
+            () -> onDieCache.getCertOrCrl(sampleCrl2));
   }
 
   @Test

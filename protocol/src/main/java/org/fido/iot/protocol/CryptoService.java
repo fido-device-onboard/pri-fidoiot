@@ -869,7 +869,7 @@ public class CryptoService {
       X509Certificate x509Certificate =
               (X509Certificate) cp.getCertificates().get(cp.getCertificates().size() - 1);
       if (onDieService != null) {
-        isOnDieChain = onDieService.getOnDieCache().isRootCa(x509Certificate.getEncoded());
+        isOnDieChain = onDieService.isRootCa(x509Certificate.getEncoded());
       }
     } catch (Exception ex) {
       // if cannot verify OnDie then fall back to default

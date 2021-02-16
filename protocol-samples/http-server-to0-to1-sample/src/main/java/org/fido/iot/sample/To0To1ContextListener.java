@@ -55,19 +55,9 @@ public class To0To1ContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
-    OnDieCache odc = new OnDieCache(
-            sc.getInitParameter("ods.cacheDir"),
-            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.zipArtifactUrl"),
-            null);
-
-    try {
-      odc.initializeCache();
-    } catch (Exception ex) {
-      throw new RuntimeException("OnDie initialization error");
-    }
-
-    final OnDieService ods = new OnDieService(odc, false);
+    // OnDieService is only used to validate signatures and not revocations
+    // so initialization does not require onDieCache.
+    final OnDieService ods = new OnDieService(null, false);
 
 
     MessageDispatcher dispatcher = new MessageDispatcher() {

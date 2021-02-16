@@ -63,34 +63,9 @@ public class RvContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
-    // To maintain backwards compatibility with installation without
-    // any OnDie settings or installations that do not wish to use
-    // OnDie we will check if the one required setting is present.
-    // If not then the ods object is set to null and operation should
-    // proceed without error. If an OnDie operation is attempted then
-    // an error will occur at that time and the user will need to
-    // correct their configuration.
-    OnDieService initialOds = null;
-    if (sc.getInitParameter(RvAppSettings.ONDIE_CACHEDIR) != null
-            && !sc.getInitParameter(RvAppSettings.ONDIE_CACHEDIR).isEmpty()) {
-      OnDieCache odc = new OnDieCache(
-              sc.getInitParameter(RvAppSettings.ONDIE_CACHEDIR),
-              sc.getInitParameter(RvAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
-              sc.getInitParameter(RvAppSettings.ONDIE_ZIP_ARTIFACT),
-              null);
-
-      try {
-        odc.initializeCache();
-      } catch (Exception ex) {
-        throw new RuntimeException("OnDie initialization error");
-      }
-
-      initialOds = new OnDieService(odc,
-              sc.getInitParameter(RvAppSettings.ONDIE_CHECK_REVOCATIONS)
-                      .toLowerCase().equals("true"));
-    }
-    final OnDieService ods = initialOds;
-
+    // OnDieService is only used to validate signatures and not revocations
+    // so initialization does not require onDieCache.
+    final OnDieService ods = new OnDieService(null, false);
 
     MessageDispatcher dispatcher =
         new MessageDispatcher() {

@@ -203,21 +203,5 @@ public class OnDieCache {
     return cacheMap.get(fileName.toString());
   }
 
-  /**
-   * Identifies whether the given cert matches the OnDie root CA certs.
-   *
-   * @param caBytes certificate to compare with
-   * @return true if matches any one of OnDie root CA certs
-   */
-  public boolean isRootCa(byte[] caBytes) {
-    for (String rootCa : rootCaList) {
-      byte[] rootBytes = cacheMap.get(rootCa);
-      if (Arrays.equals(rootBytes, caBytes)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
 }
 

@@ -25,6 +25,7 @@ import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.encoders.Base64;
 import org.fido.iot.protocol.Const;
 
 
@@ -32,29 +33,57 @@ public class OnDieService {
 
   private boolean checkRevocations = true;
 
-  private final List<URL> sourceUrlList = new ArrayList<URL>();
-
-  private HashMap<String, byte[]> cacheMap = new HashMap<String, byte[]>();
-
-  private final String cacheUpdatedTouchFile = "cache_updated";
-
   private OnDieCache onDieCache;
 
   static final int taskInfoLength = 36;  // length of the taskinfo part of OnDie signature
   static final int rLength = 48;  // length of the r field part of OnDie signature
   static final int sLength = 48;  // length of the s field part of OnDie signature
 
+  private static final String b64RootCa =
+        "MIICujCCAj6gAwIBAgIUPLLiHTrwySRtWxR4lxKLlu7MJ7wwDAYIKoZIzj0EAwMFADCBiTELMAkGA1UEBgwCVVMxCz"
+      + "AJBgNVBAgMAkNBMRQwEgYDVQQHDAtTYW50YSBDbGFyYTEaMBgGA1UECgwRSW50ZWwgQ29ycG9yYXRpb24xIzAhBgNV"
+      + "BAsMGk9uRGllIENBIFJvb3QgQ2VydCBTaWduaW5nMRYwFAYDVQQDDA13d3cuaW50ZWwuY29tMB4XDTE5MDQwMzAwMD"
+      + "AwMFoXDTQ5MTIzMTIzNTk1OVowgYkxCzAJBgNVBAYMAlVTMQswCQYDVQQIDAJDQTEUMBIGA1UEBwwLU2FudGEgQ2xh"
+      + "cmExGjAYBgNVBAoMEUludGVsIENvcnBvcmF0aW9uMSMwIQYDVQQLDBpPbkRpZSBDQSBSb290IENlcnQgU2lnbmluZz"
+      + "EWMBQGA1UEAwwNd3d3LmludGVsLmNvbTB2MBAGByqGSM49AgEGBSuBBAAiA2IABK8SfB2UflvXZqb5Kc3+lokrABHW"
+      + "azvNER2axPURP64HILkXChPB0OEX5hLB7Okw7Dy6oFqB5tQVDupgfvUX/SgYBEaDdG5rCVFrGAis6HX5TA2ewQmj14"
+      + "r2ncHBgnppB6NjMGEwHwYDVR0jBBgwFoAUtFjJ9uQIQKPyWMg5eG6ujgqNnDgwDwYDVR0TAQH/BAUwAwEB/zAOBgNV"
+      + "HQ8BAf8EBAMCAQYwHQYDVR0OBBYEFLRYyfbkCECj8ljIOXhuro4KjZw4MAwGCCqGSM49BAMDBQADaAAwZQIxAP9B4l"
+      + "FF86uvpHmkcp61cWaU565ayE3p7ezu9haLE/lPLh5hFQfmTi1nm/sG3JEXMQIwNpKfHoDmUTrUyezhhfv3GG+1CqBX"
+      + "stmCYH40buj9jKW3pHWc71s9arEmPWli7I8U";
+
+  private static final String b64DebugRootCa =
+      "MIICxDCCAkqgAwIBAgIQQAAAAAAAAAAAAAAAAAAAADAKBggqhkjOPQQDAzCBkjELMAkGA1UEBgwCVVMxCzAJBgNVBA"
+      + "gMAkNBMRQwEgYDVQQHDAtTYW50YSBDbGFyYTEaMBgGA1UECgwRSW50ZWwgQ29ycG9yYXRpb24xLDAqBgNVBAsMI09u"
+      + "RGllIENBIERFQlVHIFJvb3QgQ2VydCBTaWduaW5nIENBMRYwFAYDVQQDDA13d3cuaW50ZWwuY29tMB4XDTE5MDEwMT"
+      + "AwMDAwMFoXDTQ5MTIzMTIzNTk1OVowgZIxCzAJBgNVBAYMAlVTMQswCQYDVQQIDAJDQTEUMBIGA1UEBwwLU2FudGEg"
+      + "Q2xhcmExGjAYBgNVBAoMEUludGVsIENvcnBvcmF0aW9uMSwwKgYDVQQLDCNPbkRpZSBDQSBERUJVRyBSb290IENlcn"
+      + "QgU2lnbmluZyBDQTEWMBQGA1UEAwwNd3d3LmludGVsLmNvbTB2MBAGByqGSM49AgEGBSuBBAAiA2IABL8ArWuvvgyn"
+      + "yq4Es77WtPZ9i0k8WN1sX23eqaddu0fD66fVqg+Otu7SVG2AV1w9P+j2zr1ZESDlDcKPbOvbok54jJjiUA8+8JeNXr"
+      + "6Hbi/0BKs+o+jg4zl6BTqPifahsKNjMGEwHQYDVR0OBBYEFO/Pp+KngltMzerUdFI/9rmaZYhKMB8GA1UdIwQYMBaA"
+      + "FO/Pp+KngltMzerUdFI/9rmaZYhKMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2"
+      + "gAMGUCMQDGBQnGuNCqgRi5z+bYS3CefF4zPZH6/g8rRYEbT0KFFOCsCfoH3Y/ZZI7aRoX6RlECMCkmB7LOssgXkI55"
+      + "3HSfxKUoVpWWo91Q/sDelgx4vI7ezeNG9tVePSoFZmZggF+Cmg==";
+
+  private static byte[] rootCaBytes;
+  private static byte[] rootDebugCaBytes;
+
   /**
    * Constructor.
    *
-   * @param onDieCache onDieCache
+   * @param onDieCache onDieCache, required for revocation checking, optional otherwise
    * @param checkRevocations checkRevocations
    */
   public OnDieService(OnDieCache onDieCache, boolean checkRevocations) {
     this.onDieCache = onDieCache;
     this.checkRevocations = checkRevocations;
-  }
+    if (checkRevocations && onDieCache == null) {
+      throw new RuntimeException("OnDie error: OnDieCache is required for revocation checking");
+    }
 
+    rootCaBytes = Base64.decode(b64RootCa);
+    rootDebugCaBytes = Base64.decode(b64DebugRootCa);
+  }
 
   public OnDieCache getOnDieCache() {
     return this.onDieCache;
@@ -212,6 +241,18 @@ public class OnDieService {
     return true;
   }
 
+  /**
+   * Identifies whether the given cert matches the OnDie root CA certs.
+   *
+   * @param caBytes certificate to compare with
+   * @return true if matches any one of OnDie root CA certs
+   */
+  public boolean isRootCa(byte[] caBytes) {
+    if (Arrays.equals(caBytes, rootCaBytes) || Arrays.equals(caBytes, rootDebugCaBytes)) {
+      return true;
+    }
+    return false;
+  }
 
 }
 
