@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.UUID;
+
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
 
@@ -19,6 +21,8 @@ public class To1Test extends BaseTemplate {
   private String serverToken;
   private String clientToken;
   private String sererToken = guid.toString();
+  private Composite onDieCertChain;
+  private OnDieService onDieService;
 
   private final String signedBlobData = ""
       + "84a1012640583a828184447f000001696c6f63616c686f7374191f6803820858205dd275b97a8d3669a714"
@@ -133,6 +137,10 @@ public class To1Test extends BaseTemplate {
       @Override
       public void setNonce4(byte[] nonce4) {
         storedNonce4 = nonce4;
+      }
+
+      public OnDieService getOnDieService() {
+        return onDieService;
       }
 
       @Override

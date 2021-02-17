@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 import java.util.List;
 import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.Composite;
@@ -53,7 +55,7 @@ public class To0ClientApp {
       + "b61991a068aeb77320f5e603458473045022022acd405ca7c95e8104093becea5d5ddfb25adb55012a1cc7169"
       + "ccd114977ff50221009e9cdd0815358d35d543bae8362f02ddced995ab1ff96115d423c76313ccea2c";
 
-  private static String sampleOwnerKeyPemEC = "-----BEGIN CERTIFICATE-----\n"
+  private static String sampleOwnerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIB9DCCAZmgAwIBAgIJANpFH5JBylZhMAoGCCqGSM49BAMCMGoxJjAkBgNVBAMM\n"
       + "HVNkbyBEZW1vIE93bmVyIFJvb3QgQXV0aG9yaXR5MQ8wDQYDVQQIDAZPcmVnb24x\n"
       + "EjAQBgNVBAcMCUhpbGxzYm9ybzELMAkGA1UEBhMCVVMxDjAMBgNVBAoMBUludGVs\n"
@@ -72,7 +74,19 @@ public class To0ClientApp {
       + "1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END EC PRIVATE KEY-----";
 
-  private static String sampleOwnerKeyPem = "-----BEGIN CERTIFICATE-----\n"
+  private static String sampleOwnerKeyPemEC384 = "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
+      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
+      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PRIVATE KEY-----\n"
+      + "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDA1SeyFqosrLr1hCgzs\n"
+      + "B0G3Hi5y1YhWKo/Rz3dVeRnKPwysEMIGIcdt2meTkr5dJs2hZANiAAQw0wcHe3Y+\n"
+      + "jvrcLxC14rv9JMlF/oXVJ+TKLZNiYZZ2eVeAj7mzt86SsnN5sca+DrW9+lJnepys\n"
+      + "ompToSRZC/L5+ocfrT1TTRaE3AtgqOIaq1WUGsGzRD288FlUE+I3cmI=\n"
+      + "-----END PRIVATE KEY-----\n";
+
+  private static String sampleOwnerKeyPemRSA = "-----BEGIN CERTIFICATE-----\n"
       + "MIIDazCCAlOgAwIBAgIUIK/VIIEW6iqeu34vJ2pi0gGVGiEwDQYJKoZIhvcNAQEL\n"
       + "BQAwRTELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n"
       + "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMDExMTEyMzUwMDBaFw0yMTEx\n"
@@ -130,7 +144,8 @@ public class To0ClientApp {
       + "AwIDAQAB\n"
       + "-----END PUBLIC KEY-----\n";
 
-  protected static String[] sampleOwnerPemKeys = {sampleOwnerKeyPemEC, sampleOwnerKeyPem};
+  protected static String[] sampleOwnerPemKeys =
+      {sampleOwnerKeyPemEC256, sampleOwnerKeyPemEC384, sampleOwnerKeyPemRSA};
 
   private CryptoService cryptoService;
   private Long responseWait = null;
@@ -171,14 +186,18 @@ public class To0ClientApp {
 
     @Override
     public PrivateKey getOwnerSigningKey(PublicKey ownerPublicKey) {
-      String alg = ownerPublicKey.getAlgorithm();
-      for (String pem : sampleOwnerPemKeys) {
-        PrivateKey privateKey = PemLoader.loadPrivateKey(pem);
-        if (privateKey.getAlgorithm().contentEquals(alg)) {
-          return privateKey;
+      String pemValue = sampleOwnerKeyPemEC256;
+      if (ownerPublicKey instanceof ECKey) {
+        int bitLength = ((ECKey) ownerPublicKey).getParams().getCurve().getField().getFieldSize();
+        if (bitLength == Const.BIT_LEN_256) {
+          pemValue = sampleOwnerKeyPemEC256;
+        } else if (bitLength == Const.BIT_LEN_384) {
+          pemValue = sampleOwnerKeyPemEC384;
         }
+      } else if (ownerPublicKey instanceof RSAKey) {
+        pemValue = sampleOwnerKeyPemRSA;
       }
-      return null;
+      return PemLoader.loadPrivateKey(pemValue);
     }
 
     @Override

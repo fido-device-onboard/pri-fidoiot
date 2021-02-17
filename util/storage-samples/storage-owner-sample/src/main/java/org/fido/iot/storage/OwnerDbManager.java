@@ -3,9 +3,6 @@
 
 package org.fido.iot.storage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,16 +12,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
-import org.fido.iot.protocol.MessageBodyException;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
-import org.fido.iot.serviceinfo.SdoSys;
 
 /**
  * Owner Database Manager.
@@ -59,6 +52,7 @@ public class OwnerDbManager {
           + "REPLACEMENT_RVINFO BLOB, "
           + "REPLACEMENT_HMAC BLOB, "
           + "REPLACEMENT_VOUCHER BLOB, "
+          + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
           + "PRIMARY KEY (GUID), "
           + "UNIQUE (GUID)"
           + ");";
@@ -74,8 +68,6 @@ public class OwnerDbManager {
           + "NONCE6 BINARY(16), "
           + "NONCE7 BINARY(16), "
           + "SIGINFOA BLOB, "
-          + "SERVICEINFO_COUNT BIGINT, "
-          + "SERVICEINFO_POSITION BIGINT, "
           + "SERVICEINFO_BLOB BLOB, "
           + "CREATED TIMESTAMP,"
           + "UPDATED TIMESTAMP,"
@@ -86,11 +78,21 @@ public class OwnerDbManager {
       stmt.executeUpdate(sql);
 
       sql = "CREATE TABLE IF NOT EXISTS "
+              + "TO2_SETTINGS("
+              + "ID INT NOT NULL, "
+              + "DEVICE_SERVICE_INFO_MTU_SIZE INT NOT NULL, "
+              + "OWNER_MTU_THRESHOLD INT NOT NULL, "
+              + "PRIMARY KEY (ID), "
+              + "UNIQUE (ID)"
+              + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
           + "OWNER_SERVICEINFO("
           + "SVI_ID CHAR(36) PRIMARY KEY, "
           + "CONTENT BLOB, "
           + "CONTENT_LENGTH BIGINT, "
-          + "CONTENT_TYPE CHAR(10), "
           + "PRIMARY KEY (SVI_ID) "
           + ");";
 
@@ -139,7 +141,7 @@ public class OwnerDbManager {
     String sql = ""
         + "MERGE INTO TO2_DEVICES  "
         + "KEY (GUID) "
-        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?); ";
+        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -159,6 +161,7 @@ public class OwnerDbManager {
           .getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes());
       pstmt.setBytes(12, null);
       pstmt.setBytes(13, null);
+      pstmt.setInt(14, 0);
 
       pstmt.executeUpdate();
 
@@ -197,18 +200,16 @@ public class OwnerDbManager {
 
   /**
    * Add service info to the database.
-   * 
+   *
    * @param ds Datasource
    * @param serviceInfoId Serviceinfo Identifier
    * @param serviceInfo Serviceinfo as byte array
-   * @param isCborData 'true', if data is cbor-encoded, 'false' otherwise
    */
-  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo,
-      boolean isCborData) {
+  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo) {
     String sql = ""
         + "MERGE INTO OWNER_SERVICEINFO  "
         + "KEY (SVI_ID) "
-        + "VALUES (?,?,?,?); ";
+        + "VALUES (?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -216,11 +217,6 @@ public class OwnerDbManager {
       pstmt.setString(1, serviceInfoId);
       pstmt.setBytes(2, serviceInfo);
       pstmt.setInt(3, serviceInfo.length);
-      if (isCborData) {
-        pstmt.setString(4, OwnerServiceInfoSequence.CBOR_TYPE);
-      } else {
-        pstmt.setString(4, OwnerServiceInfoSequence.PLAIN_TYPE);
-      }
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -229,7 +225,7 @@ public class OwnerDbManager {
 
   /**
    * Remove Service info value as identified by serviceinfoId from the database.
-   * 
+   *
    * @param ds Datasource
    * @param serviceInfoId Serviceinfo Identifier
    */
@@ -248,7 +244,7 @@ public class OwnerDbManager {
   /**
    * Assign svi as given in 'sviString', to the given device. The sviString is off the form
    * 'modName:msgName=serviceinfoId1,modName:msgName=serviceinfoId1....'.
-   * 
+   *
    * @param ds Datasource
    * @param guid Device GUID
    * @param sviString svi list
@@ -282,7 +278,7 @@ public class OwnerDbManager {
 
   /**
    * Remove svi for a given device.
-   * 
+   *
    * @param ds Datasource
    * @param guid Device GUID
    */
@@ -300,7 +296,7 @@ public class OwnerDbManager {
 
   /**
    * Load Sample Owner service info from the file-system.
-   * 
+   *
    * @param ds Datasource instance
    * @param guid Device GUID
    * @param sviValues Path to 'sample-values' directory containing serviceinfo
@@ -314,7 +310,7 @@ public class OwnerDbManager {
       files.map(Path::toAbsolutePath).filter(Files::isRegularFile).forEach((path) -> {
         try {
           byte[] value = Files.readAllBytes(path);
-          addServiceInfo(ds, path.getFileName().toString(), value, false);
+          addServiceInfo(ds, path.getFileName().toString(), value);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -371,6 +367,54 @@ public class OwnerDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, replacementGuid.toString());
       pstmt.setString(2, currentGuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Load default value of maximum serviceinfo that owner can receive.
+   *
+   * @param ds Datasource instance
+   */
+  public void loadTo2Settings(DataSource ds) {
+
+    String sql = "MERGE INTO TO2_SETTINGS ("
+        + "ID,"
+        + "DEVICE_SERVICE_INFO_MTU_SIZE, "
+        + "OWNER_MTU_THRESHOLD) "
+        + "VALUES (1,1300,8192);";
+
+    try (Connection conn = ds.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Update the given field with the required MTU size in TO2_SETTINGS table.
+   *
+   * @param ds Datasource instance
+   * @param field Database column name
+   * @param mtu maximum MTU size
+   */
+  public void updateMtu(DataSource ds, String field, int mtu) {
+
+    String sql = "UPDATE TO2_SETTINGS" + " SET " + field + " = ?" + " WHERE ID = 1;";
+
+    if (mtu > 0 && mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+      System.out.println(
+          "Received value less than default minimum of 256 bytes. "
+              + "Updating MTU size to default minimum");
+      mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+    }
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, String.valueOf(mtu));
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);

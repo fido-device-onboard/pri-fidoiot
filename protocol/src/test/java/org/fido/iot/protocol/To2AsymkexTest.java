@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.fido.iot.certutils.PemLoader;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -161,6 +162,21 @@ public class To2AsymkexTest extends BaseTemplate {
       }
 
       @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        prepareServiceInfo();
+      }
+
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
       public Composite getDeviceCredentials() {
         return deviceCreds;
       }
@@ -238,6 +254,9 @@ public class To2AsymkexTest extends BaseTemplate {
       public void setNonce7(byte[] nonce) {
         storedNonce7 = nonce;
       }
+
+      @Override
+      public OnDieService getOnDieService() { return null; }
 
       @Override
       public void setOwnerState(Composite ownerState) {
@@ -371,6 +390,21 @@ public class To2AsymkexTest extends BaseTemplate {
       @Override
       public boolean getOwnerResaleSupport() {
         return false;
+      }
+
+      @Override
+      public String getMaxDeviceServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
+      public void setMaxOwnerServiceInfoMtuSz(int mtu) {
+
+      }
+
+      @Override
+      public int getMaxOwnerServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       }
     };
 

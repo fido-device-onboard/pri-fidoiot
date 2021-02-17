@@ -38,8 +38,8 @@ public final class Const {
   public static final int TO2_OVNEXT_ENTRY = 63;
   public static final int TO2_PROVE_DEVICE = 64;
   public static final int TO2_SETUP_DEVICE = 65;
-  public static final int TO2_AUTH_DONE = 66;
-  public static final int TO2_AUTH_DONE2 = 67;
+  public static final int TO2_DEVICE_SERVICE_INFO_READY = 66;
+  public static final int TO2_OWNER_SERVICE_INFO_READY = 67;
   public static final int TO2_DEVICE_SERVICE_INFO = 68;
   public static final int TO2_OWNER_SERVICE_INFO = 69;
   public static final int TO2_DONE = 70;
@@ -155,7 +155,10 @@ public final class Const {
   public static final int PK_RSA = 4; // RSA key (unrestricted)
   public static final int PK_SECP256R1 = 13; // ECDSA secp256r1 = NIST-P-256 = prime256v1
   public static final int PK_SECP384R1 = 14; // ECDSA secp384r1 = NIST-P-384
-
+  public static final int PK_EPIDv10 = 90; // Intel EPID, version 1.0
+  public static final int PK_EPIDv11 = 91; // Intel EPID, version 1.1
+  public static final int PK_EPIDv20 = 92; // Intel EPID, version 2.0
+  public static final int PK_ONDIE_ECDSA_384 = 93;
 
   //Java Algorithm names for Signatures
   public static final String RSA_256_ALG_NAME = "SHA256withRSA";
@@ -291,6 +294,7 @@ public final class Const {
   public static final int COSE_RS256 = -257;
   public static final int COSE_RS384 = -258;
   //todo:EPID types still need defined
+  public static final int COSE_ES384_ONDIE = -280;
 
   //Common COSE Headers Parameters
   public static final long COSE_ALG = 1;
@@ -404,10 +408,10 @@ public final class Const {
   public static final String KEY_EXCHANGE_A = "A";
   public static final String KEY_EXCHANGE_B = "B";
 
-  public static final byte[] KDF_STRING = "MarshalPointKDF".getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_CIPHER = "AutomaticProvisioning-cipher"
+  public static final byte[] KDF_STRING = "FIDO-KDF".getBytes(StandardCharsets.US_ASCII);
+  public static final byte[] PROV_CIPHER = "AutomaticOnboard-cipher"
       .getBytes(StandardCharsets.US_ASCII);
-  public static final byte[] PROV_HMAC = "AutomaticProvisioning-hmac"
+  public static final byte[] PROV_HMAC = "AutomaticOnboard-hmac"
       .getBytes(StandardCharsets.US_ASCII);
 
   public static final byte[] HMAC_ZERO = new byte[]{0};
@@ -424,4 +428,17 @@ public final class Const {
   public static final int DC_GUID = 4;
   public static final int DC_RENDEZVOUS_INFO = 5;
   public static final int DC_PUBLIC_KEY_HASH = 6;
+
+  // Default ServiceInfo MTU size
+  public static final int DEFAULT_SERVICE_INFO_MTU_SIZE = 1300;
+
+  // Device type values - included as part of the DI "mi" field
+  public static final int DT_ECDSA_256 = 1;
+  public static final int DT_ECDSA_384 = 2;
+  public static final int DT_ECDSA_512 = 3;
+  public static final int DT_EPID = 4;
+  public static final int DT_ONDIE_ECDSA_384 = 5;
+
+  public static final int SERVICE_INFO_MTU_MIN_SIZE = 256;
+  public static final int OWNER_THRESHOLD_DEFAULT_MTU_SIZE = 8192;
 }

@@ -45,7 +45,6 @@ public class To2StorageTest {
   private static final String DB_PORT = "8043";
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
-  private static final int SERVICEINFO_MTU = 1300;
 
   private static final String VOUCHER = ""
       + "8486186450f0956089c0df4c349c61f460457e87eb8185820567302e302e302e3082024400000000820419cb9"
@@ -137,8 +136,9 @@ public class To2StorageTest {
 
   String packageName = "linux64.sh";
   String boolName = "bool";
+  String boolValue = "true";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-  ",sdo_sys:filedesc=cborBooleanId,sdo_sys:write=cborBooleanValue";
+  ",sdo_sys:filedesc=BooleanId,sdo_sys:write=BooleanValue";
 
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
@@ -157,7 +157,7 @@ public class To2StorageTest {
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, keyResolver);
+          storage = new OwnerDbStorage(cs, ds, keyResolver, null);
         }
         return storage;
       }
@@ -171,13 +171,17 @@ public class To2StorageTest {
 
   private void insertSampleServiceInfo(UUID uuid, DataSource ds, OwnerDbManager ownerDbManager) {
 
-    ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes(), false);
-    ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes(), false);
-    ownerDbManager.addServiceInfo(ds, "cborBooleanValue", Composite.decodeHex("F5"), true);
-    ownerDbManager.addServiceInfo(ds, "cborBooleanId", boolName.getBytes(), true);
+    ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
+    ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
+    ownerDbManager.addServiceInfo(ds, "BooleanValue", boolValue.getBytes());
+    ownerDbManager.addServiceInfo(ds, "BooleanId", boolName.getBytes());
 
     ownerDbManager.removeSviFromDevice(ds, uuid);
     ownerDbManager.assignSviToDevice(ds, uuid, sviString);
+  }
+
+  private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
+    ownerDbManager.loadTo2Settings(ds);
   }
 
   @Test
@@ -273,7 +277,7 @@ public class To2StorageTest {
       @Override
       public void prepareServiceInfo() {
         List<Composite> list = new ArrayList<>();
-        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
+        ServiceInfoMarshaller marshaller = new ServiceInfoMarshaller(getMaxDeviceServiceInfoMtuSz(),
                 Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER)
                         .getAsUuid(Const.OVH_GUID));
         marshaller.register(new DeviceServiceInfoModule());
@@ -309,6 +313,21 @@ public class To2StorageTest {
                 new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
                         new DeviceServiceInfoSequence(info.getAsString(Const.FIRST_KEY),
                                 info.getAsBytes(Const.SECOND_KEY), 0)));
+      }
+
+      @Override
+      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+        prepareServiceInfo();
+      }
+
+      @Override
+      public int getMaxDeviceServiceInfoMtuSz() {
+        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      }
+
+      @Override
+      public String getMaxOwnerServiceInfoMtuSz() {
+        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
       }
     };
 
@@ -361,6 +380,7 @@ public class To2StorageTest {
       insertSampleServiceInfo(Composite.fromObject(VOUCHER)
           .getAsComposite(Const.OV_HEADER)
           .getAsUuid(Const.OVH_GUID), ds, dbsManager);
+      insertSampleSettings(ds, dbsManager);
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 

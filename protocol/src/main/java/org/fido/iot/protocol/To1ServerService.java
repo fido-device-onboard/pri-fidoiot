@@ -17,59 +17,80 @@ public abstract class To1ServerService extends MessagingService {
   protected void doHello(Composite request, Composite reply) {
 
     getStorage().starting(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
 
-    UUID guid = body.getAsUuid(Const.FIRST_KEY);
-    body.verifyMaxKey(Const.SECOND_KEY);
+    try {
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      final UUID guid = body.getAsUuid(Const.FIRST_KEY);
+      body.verifyMaxKey(Const.SECOND_KEY);
 
-    getStorage().setGuid(guid);
+      getStorage().setGuid(guid);
 
-    byte[] nonce4 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
-    getStorage().setNonce4(nonce4);
-    Composite sigA = body.getAsComposite(Const.SECOND_KEY);
-    getStorage().setSigInfoA(sigA);
+      byte[] nonce4 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
+      getStorage().setNonce4(nonce4);
+      Composite sigA = body.getAsComposite(Const.SECOND_KEY);
+      getStorage().setSigInfoA(sigA);
 
-    body = Composite.newArray()
-        .set(Const.FIRST_KEY, nonce4)
-        .set(Const.SECOND_KEY,
-            getCryptoService().getSigInfoB(sigA));
+      body = Composite.newArray()
+          .set(Const.FIRST_KEY, nonce4)
+          .set(Const.SECOND_KEY,
+              getCryptoService().getSigInfoB(sigA));
 
-    reply.set(Const.SM_MSG_ID, Const.TO1_HELLO_RV_ACK);
-    reply.set(Const.SM_BODY, body);
-    getStorage().started(request, reply);
+      reply.set(Const.SM_MSG_ID, Const.TO1_HELLO_RV_ACK);
+      reply.set(Const.SM_BODY, body);
+      getStorage().started(request, reply);
+
+    } catch (Exception e) {
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doProveOwner(Composite request, Composite reply) {
+
     getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    CryptoService cryptoService = getCryptoService();
-    Composite sigA = getStorage().getSigInfoA();
-    PublicKey deviceKey = null;
-    if (null == sigA || !Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
-            .contains(sigA.getAsNumber(Const.FIRST_KEY).intValue())) {
-      deviceKey = getStorage().getVerificationKey();
+
+    try {
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      CryptoService cryptoService = getCryptoService();
+      Composite sigA = getStorage().getSigInfoA();
+      PublicKey deviceKey = null;
+      if (null == sigA || !Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
+          .contains(sigA.getAsNumber(Const.FIRST_KEY).intValue())) {
+        deviceKey = getStorage().getVerificationKey();
+      }
+
+      // verify the data signed by the device key
+      if (!cryptoService.verify(
+              deviceKey,
+              body,
+              sigA,
+              getStorage().getOnDieService(),
+              null)) {
+        throw new InvalidMessageException();
+      }
+
+      Composite payload = Composite.fromObject(
+          body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+
+      byte[] nonce4 = payload.getAsBytes(Const.EAT_NONCE);
+      UUID ueGuid = getCryptoService().getGuidFromUeid(
+          payload.getAsBytes(Const.EAT_UEID));
+      UUID deviceId = getStorage().getGuid();
+
+      if (deviceId.compareTo(ueGuid) != 0) {
+        throw new InvalidMessageException(ueGuid.toString());
+      }
+
+      cryptoService.verifyBytes(nonce4, getStorage().getNonce4());
+
+      reply.set(Const.SM_MSG_ID, Const.TO1_RV_REDIRECT);
+      reply.set(Const.SM_BODY, getStorage().getRedirectBlob());
+      getStorage().completed(request, reply);
+
+    } catch (Exception e) {
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    if (!cryptoService.verify(deviceKey, body, sigA)) {
-      throw new InvalidMessageException();
-    }
-    Composite payload = Composite.fromObject(
-        body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
-
-    byte[] nonce4 = payload.getAsBytes(Const.EAT_NONCE);
-    UUID ueGuid = getCryptoService().getGuidFromUeid(
-        payload.getAsBytes(Const.EAT_UEID));
-    UUID deviceId = getStorage().getGuid();
-
-    if (deviceId.compareTo(ueGuid) != 0) {
-      throw new InvalidMessageException(ueGuid.toString());
-    }
-
-    cryptoService.verifyBytes(nonce4, getStorage().getNonce4());
-
-    reply.set(Const.SM_MSG_ID, Const.TO1_RV_REDIRECT);
-    reply.set(Const.SM_BODY, getStorage().getRedirectBlob());
-    getStorage().completed(request, reply);
   }
 
   protected void doError(Composite request, Composite reply) {

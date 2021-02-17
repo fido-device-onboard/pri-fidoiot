@@ -4,6 +4,8 @@
 package org.fido.iot.sample;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;

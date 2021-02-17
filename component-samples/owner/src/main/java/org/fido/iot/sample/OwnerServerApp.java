@@ -14,6 +14,7 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
+import org.fido.iot.api.OwnerSviMtuServlet;
 import org.fido.iot.api.OwnerSviServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
@@ -72,6 +73,19 @@ public class OwnerServerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
+    try {
+      ctx.addParameter(OwnerAppSettings.ONDIE_CACHEDIR,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
+      ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
+      ctx.addParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
+      ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
+    } catch (Exception ex) {
+      // ondie is optional so if config cannot be loaded just default to no config
+    }
+
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));
@@ -103,7 +117,7 @@ public class OwnerServerApp {
     wrapper.addMapping(getMessagePath(Const.TO2_HELLO_DEVICE));
     wrapper.addMapping(getMessagePath(Const.TO2_GET_OVNEXT_ENTRY));
     wrapper.addMapping(getMessagePath(Const.TO2_PROVE_DEVICE));
-    wrapper.addMapping(getMessagePath(Const.TO2_AUTH_DONE));
+    wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO_READY));
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO));
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
 
@@ -121,6 +135,9 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
+    wrapper = tomcat.addServlet(ctx, "sviMtuServlet",
+            new OwnerSviMtuServlet());
+    wrapper.addMapping("/api/v1/owner/svi/mtu/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");

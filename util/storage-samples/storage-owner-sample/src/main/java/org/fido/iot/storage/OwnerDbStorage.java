@@ -3,13 +3,11 @@
 
 package org.fido.iot.storage;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.security.PrivateKey;
@@ -24,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
@@ -36,6 +35,7 @@ import org.fido.iot.protocol.ResourceNotFoundException;
 import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To2ServerStorage;
 import org.fido.iot.protocol.cbor.Encoder;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.serviceinfo.ServiceInfo;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
@@ -46,6 +46,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final KeyResolver keyResolver;
+  private OnDieService onDieService;
   private Composite ownerState;
   private UUID guid;
   private String cipherName;
@@ -58,8 +59,9 @@ public class OwnerDbStorage implements To2ServerStorage {
   private long serviceInfoCount = 0;
   private long serviceInfoPosition = 0;
   private ServiceInfoMarshaller serviceInfoMarshaller;
-
-  private static final int SERVICEINFO_MTU = 1300;
+  int ownerServiceInfoMtuSize = 0;
+  String deviceServiceInfoMtuSize = String.valueOf(0);
+  static Iterator<Supplier<ServiceInfo>> iterator;
 
   /**
    * Constructs a OwnerDbStorage instance.
@@ -68,10 +70,14 @@ public class OwnerDbStorage implements To2ServerStorage {
    * @param ds          A SQL datasource.
    * @param keyResolver A key resolver.
    */
-  public OwnerDbStorage(CryptoService cs, DataSource ds, KeyResolver keyResolver) {
+  public OwnerDbStorage(CryptoService cs,
+                        DataSource ds,
+                        KeyResolver keyResolver,
+                        OnDieService ods) {
     cryptoService = cs;
     dataSource = ds;
     this.keyResolver = keyResolver;
+    onDieService = ods;
   }
 
   @Override
@@ -201,6 +207,11 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
+  public OnDieService getOnDieService() {
+    return onDieService;
+  }
+
+  @Override
   public Composite getReplacementRvInfo() {
     if (guid == null) {
       guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
@@ -268,6 +279,99 @@ public class OwnerDbStorage implements To2ServerStorage {
     return true;
   }
 
+  // maximum size service info that owner can receive from device (i.e) DeviceServiceInfoMTU
+  @Override
+  public String getMaxDeviceServiceInfoMtuSz() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+    String sql = "SELECT DEVICE_SERVICE_INFO_MTU_SIZE FROM TO2_SETTINGS WHERE ID = 1;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          if (rs.getInt(1) < 0) {
+            System.out.println("Negative value received. MTU size will default to 1300 bytes");
+          }
+          deviceServiceInfoMtuSize = (rs.getInt(1) > 0 ? String.valueOf(rs.getInt(1)) : null);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    return deviceServiceInfoMtuSize;
+  }
+
+  @Override
+  public void setMaxOwnerServiceInfoMtuSz(int mtu) {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+
+    String sql = "UPDATE TO2_DEVICES "
+            + "SET OWNER_SERVICE_INFO_MTU_SIZE = ? "
+            + "WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setInt(1, mtu);
+      pstmt.setString(2, guid.toString());
+
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // maximum size service info that owner can send to device (i.e) OwnerServiceInfoMTU
+  @Override
+  public int getMaxOwnerServiceInfoMtuSz() {
+    if (guid == null) {
+      guid = voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
+    }
+
+    int ownerMtuThreshold = 0;
+    String sql = "SELECT OWNER_MTU_THRESHOLD FROM TO2_SETTINGS WHERE ID = 1;";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql); ) {
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          ownerMtuThreshold = rs.getInt(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    sql = "SELECT OWNER_SERVICE_INFO_MTU_SIZE FROM TO2_DEVICES WHERE GUID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          ownerServiceInfoMtuSize = rs.getInt(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    if (ownerMtuThreshold < ownerServiceInfoMtuSize) {
+      System.out.println(
+          "Device Maximum MTU request exceeds, owner threshold MTU size. "
+              + "MTU size set to owner threshold MTU size");
+    }
+
+    return Math.min(ownerServiceInfoMtuSize, ownerMtuThreshold);
+  }
+
   @Override
   public void continuing(Composite request, Composite reply) {
     sessionId = getToken(request);
@@ -277,7 +381,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7, SIGINFOA, "
-        + "SERVICEINFO_COUNT, SERVICEINFO_POSITION, SERVICEINFO_BLOB "
+        + " SERVICEINFO_BLOB "
         + "FROM TO2_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -293,11 +397,9 @@ public class OwnerDbStorage implements To2ServerStorage {
           nonce6 = rs.getBytes(4);
           nonce7 = rs.getBytes(5);
           sigInfoA = Composite.fromObject(rs.getBinaryStream(6));
-          serviceInfoCount = rs.getLong(7);
-          serviceInfoPosition = rs.getLong(8);
-          if (rs.getBlob(9) != null) {
+          if (rs.getBlob(7) != null) {
             ObjectInputStream inputStream = new ObjectInputStream(
-                rs.getBlob(9).getBinaryStream());
+                rs.getBlob(7).getBinaryStream());
             serviceInfoMarshaller = (ServiceInfoMarshaller) inputStream.readObject();
             inputStream.close();
           }
@@ -317,26 +419,22 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public Composite getNextServiceInfo() {
-    if (serviceInfoCount == 0 || serviceInfoPosition == serviceInfoCount) {
-      return ServiceInfoEncoder.encodeOwnerServiceInfo(Collections.EMPTY_LIST, false, true);
-    } else {
-      serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
-      Iterable<Supplier<ServiceInfo>> serviceInfos = serviceInfoMarshaller.marshal();
-      List<Composite> svi = new LinkedList<Composite>();
-      final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
-      if (it.hasNext()) {
-        ServiceInfo serviceInfo = it.next().get();
-        Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
-        while (marshalledEntries.hasNext()) {
-          ServiceInfoEntry marshalledEntry = marshalledEntries.next();
-          Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
-                marshalledEntry.getValue().getContent());
-          svi.add(innerArray);
-        }
-        ++serviceInfoPosition;
+    serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
+    Iterable<Supplier<ServiceInfo>> serviceInfos = serviceInfoMarshaller.marshal();
+    List<Composite> svi = new LinkedList<Composite>();
+    final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
+    if (it.hasNext()) {
+      ServiceInfo serviceInfo = it.next().get();
+      Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
+      while (marshalledEntries.hasNext()) {
+        ServiceInfoEntry marshalledEntry = marshalledEntries.next();
+        Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
+            marshalledEntry.getValue().getContent());
+        svi.add(innerArray);
       }
       return ServiceInfoEncoder.encodeOwnerServiceInfo(svi, true, false);
     }
+    return ServiceInfoEncoder.encodeOwnerServiceInfo(Collections.EMPTY_LIST, false, true);
   }
 
   @Override
@@ -366,10 +464,6 @@ public class OwnerDbStorage implements To2ServerStorage {
                 return out.toByteArray();
               }
 
-              @Override
-              public boolean canSplit() {
-                return false;
-              }
             }));
   }
 
@@ -419,19 +513,9 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void prepareServiceInfo() {
-    serviceInfoMarshaller = new ServiceInfoMarshaller(SERVICEINFO_MTU,
+    serviceInfoMarshaller = new ServiceInfoMarshaller(getMaxOwnerServiceInfoMtuSz(),
         voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
     serviceInfoMarshaller.register(new OwnerServiceInfoModule(dataSource));
-    Iterable<Supplier<ServiceInfo>> serviceInfo = serviceInfoMarshaller.marshal();
-    int mtuPacketCount = 0;
-    for (final Iterator<Supplier<ServiceInfo>> it = serviceInfo.iterator(); it.hasNext();) {
-      it.next().get();
-      ++mtuPacketCount;
-    }
-    serviceInfoCount = mtuPacketCount;
-    serviceInfoPosition = 0;
-    // Reset the positions because we need to start from the beginning to send service info.
-    serviceInfoMarshaller.reset();
   }
 
   @Override
@@ -497,18 +581,10 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public void completed(Composite request, Composite reply) {
 
-    String sql = "DELETE FROM TO2_SESSIONS WHERE SESSION_ID = ?;";
+    deleteTo2Session();
 
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, sessionId);
-      pstmt.executeUpdate();
-
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-
-    sql = "UPDATE TO2_DEVICES "
+    String sql =
+        "UPDATE TO2_DEVICES "
         + "SET TO2_COMPLETED = ? "
         + "WHERE GUID = ?";
 
@@ -528,15 +604,13 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public void failed(Composite request, Composite reply) {
-
+    deleteTo2Session();
   }
 
   @Override
   public void continued(Composite request, Composite reply) {
     String sql = "UPDATE TO2_SESSIONS "
         + "SET OWNER_STATE = ? ,"
-        + "SERVICEINFO_COUNT = ? ,"
-        + "SERVICEINFO_POSITION = ? ,"
         + "SERVICEINFO_BLOB = ? ,"
         + "UPDATED = ? "
         + "WHERE SESSION_ID = ?";
@@ -545,25 +619,36 @@ public class OwnerDbStorage implements To2ServerStorage {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setBytes(1, ownerState.toBytes());
-      pstmt.setLong(2, serviceInfoCount);
-      pstmt.setLong(3, serviceInfoPosition);
       if (serviceInfoMarshaller != null) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream outputStream = new ObjectOutputStream(
             baos);
         outputStream.writeObject(serviceInfoMarshaller);
-        pstmt.setBytes(4,  baos.toByteArray());
+        pstmt.setBytes(2,  baos.toByteArray());
         outputStream.close();
       } else {
-        pstmt.setObject(4,  null);
+        pstmt.setObject(2,  null);
       }
       Timestamp updatedAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(5, updatedAt);
-      pstmt.setString(6, sessionId);
+      pstmt.setTimestamp(3, updatedAt);
+      pstmt.setString(4, sessionId);
 
       pstmt.executeUpdate();
 
     } catch (SQLException | IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void deleteTo2Session() {
+    String sql = "DELETE FROM TO2_SESSIONS WHERE SESSION_ID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, sessionId);
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }

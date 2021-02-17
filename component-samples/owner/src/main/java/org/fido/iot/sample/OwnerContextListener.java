@@ -31,6 +31,8 @@ import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
 import org.fido.iot.protocol.epid.EpidUtils;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.OwnerDbManager;
 import org.fido.iot.storage.OwnerDbStorage;
 import org.fido.iot.storage.OwnerDbTo0Util;
@@ -74,19 +76,19 @@ public class OwnerContextListener implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     BasicDataSource ds = new BasicDataSource();
-    
+
     ServletContext sc = sce.getServletContext();
     ds.setUrl(sc.getInitParameter(OwnerAppSettings.DB_URL));
     ds.setDriverClassName(OwnerAppSettings.H2_DRIVER);
     ds.setUsername(sc.getInitParameter(OwnerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(OwnerAppSettings.DB_PWD));
-    
+
     sc.log(ds.getUrl());
-    
+
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
     ds.setMaxOpenPreparedStatements(100);
-    
+
     CryptoService cs = new CryptoService();
     String epidTestMode = sc.getInitParameter(OwnerAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
@@ -103,26 +105,55 @@ public class OwnerContextListener implements ServletContextListener {
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
-    
+
+    // To maintain backwards compatibility with installation without
+    // any OnDie settings or installations that do not wish to use
+    // OnDie we will check if the one required setting is present.
+    // If not then the ods object is set to null and operation should
+    // proceed without error. If an OnDie operation is attempted then
+    // an error will occur at that time and the user will need to
+    // correct their configuration.
+    OnDieService initialOds = null;
+    if (sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR) != null
+            && !sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
+      OnDieCache odc = new OnDieCache(
+              sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR),
+              sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
+              sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
+              null);
+
+      try {
+        odc.initializeCache();
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error");
+      }
+
+      initialOds = new OnDieService(odc,
+              sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                      .toLowerCase().equals("true"));
+    }
+    final OnDieService ods = initialOds;
+
+
     resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
         sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
-    
+
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createTo2Service(cs, ds);
+        return createTo2Service(cs, ds, ods);
       }
-      
+
       @Override
       protected void replied(Composite reply) {
         sc.log("replied with: " + reply.toString());
       }
-      
+
       @Override
       protected void dispatching(Composite request) {
         sc.log("dispatching: " + request.toString());
       }
-      
+
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
@@ -144,6 +175,7 @@ public class OwnerContextListener implements ServletContextListener {
         Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)),
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
+    manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set
     if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
@@ -171,14 +203,16 @@ public class OwnerContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private To2ServerService createTo2Service(CryptoService cs, DataSource ds) {
+  private To2ServerService createTo2Service(CryptoService cs,
+                                            DataSource ds,
+                                            OnDieService ods) {
     return new To2ServerService() {
       private To2ServerStorage storage;
 
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, resolver);
+          storage = new OwnerDbStorage(cs, ds, resolver, ods);
         }
         return storage;
       }

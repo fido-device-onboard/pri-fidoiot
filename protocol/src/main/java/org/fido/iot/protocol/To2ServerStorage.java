@@ -7,6 +7,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.UUID;
 
+import org.fido.iot.protocol.ondie.OnDieService;
+
 /**
  * To2 Server Storage Interface.
  */
@@ -59,4 +61,12 @@ public interface To2ServerStorage extends StorageEvents {
   void setServiceInfo(Composite info, boolean isMore);
 
   boolean getOwnerResaleSupport();
+
+  String getMaxDeviceServiceInfoMtuSz();
+
+  void setMaxOwnerServiceInfoMtuSz(int mtu);
+
+  int getMaxOwnerServiceInfoMtuSz();
+
+  OnDieService getOnDieService();
 }
