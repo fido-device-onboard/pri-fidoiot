@@ -59,9 +59,16 @@ public abstract class To1ServerService extends MessagingService {
         deviceKey = getStorage().getVerificationKey();
       }
 
-      if (!cryptoService.verify(deviceKey, body, sigA)) {
+      // verify the data signed by the device key
+      if (!cryptoService.verify(
+              deviceKey,
+              body,
+              sigA,
+              getStorage().getOnDieService(),
+              null)) {
         throw new InvalidMessageException();
       }
+
       Composite payload = Composite.fromObject(
           body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 

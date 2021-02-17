@@ -35,6 +35,7 @@ import org.fido.iot.protocol.ResourceNotFoundException;
 import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To2ServerStorage;
 import org.fido.iot.protocol.cbor.Encoder;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.serviceinfo.ServiceInfo;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
@@ -45,6 +46,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final KeyResolver keyResolver;
+  private OnDieService onDieService;
   private Composite ownerState;
   private UUID guid;
   private String cipherName;
@@ -68,10 +70,14 @@ public class OwnerDbStorage implements To2ServerStorage {
    * @param ds          A SQL datasource.
    * @param keyResolver A key resolver.
    */
-  public OwnerDbStorage(CryptoService cs, DataSource ds, KeyResolver keyResolver) {
+  public OwnerDbStorage(CryptoService cs,
+                        DataSource ds,
+                        KeyResolver keyResolver,
+                        OnDieService ods) {
     cryptoService = cs;
     dataSource = ds;
     this.keyResolver = keyResolver;
+    onDieService = ods;
   }
 
   @Override
@@ -198,6 +204,11 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public byte[] getNonce7() {
     return nonce7;
+  }
+
+  @Override
+  public OnDieService getOnDieService() {
+    return onDieService;
   }
 
   @Override

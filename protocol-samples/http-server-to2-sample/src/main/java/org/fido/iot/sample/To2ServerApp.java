@@ -4,6 +4,8 @@
 package org.fido.iot.sample;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
@@ -68,6 +70,15 @@ public class To2ServerApp {
     // Not recommended to use especially on production system
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
+
+    // OnDie cert cache is included with the protocol samples.
+    Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
+
+    System.out.println("Working Directory = " + odcPath.toString());
+    ctx.addParameter("ods.cacheDir",  odcPath.toString());
+    ctx.addParameter("ods.autoUpdate", "false");
+    ctx.addParameter("ods.zipArtifactUrl", "");
+    ctx.addParameter("ods.checkRevocations", "true");
 
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(To2ContextListener.class.getName());

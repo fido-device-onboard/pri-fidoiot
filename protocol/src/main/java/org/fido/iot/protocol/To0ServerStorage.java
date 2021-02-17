@@ -3,6 +3,8 @@
 
 package org.fido.iot.protocol;
 
+import org.fido.iot.protocol.ondie.OnDieService;
+
 /**
  * To0 Server Storage Interface.
  */
@@ -31,4 +33,7 @@ public interface To0ServerStorage extends StorageEvents {
    * @return The response wait time in seconds.
    */
   long storeRedirectBlob(Composite voucher, long requestedWait, byte[] signedBlob);
+
+  OnDieService getOnDieService();
+
 }

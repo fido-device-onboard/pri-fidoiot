@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public abstract class To2ServerService extends MessagingService {
 
-  protected abstract To2ServerStorage getStorage();
+  public abstract To2ServerStorage getStorage();
 
   protected void doHello(Composite request, Composite reply) {
     getStorage().starting(request, reply);
@@ -108,11 +108,17 @@ public abstract class To2ServerService extends MessagingService {
 
     try {
       Composite body = request.getAsComposite(Const.SM_BODY);
-
       Composite voucher = getStorage().getVoucher();
       Composite sigInfoA = getStorage().getSigInfoA();
       PublicKey deviceKey = getCryptoService().getDevicePublicKey(voucher);
-      if (!getCryptoService().verify(deviceKey, body, sigInfoA)) {
+
+      Composite certPath = voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN);
+
+      if (!getCryptoService().verify(deviceKey,
+            body,
+            sigInfoA,
+            getStorage().getOnDieService(),
+            certPath)) {
         throw new InvalidMessageException();
       }
 

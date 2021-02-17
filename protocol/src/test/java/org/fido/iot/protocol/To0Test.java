@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
 
@@ -114,6 +116,10 @@ public class To0Test extends BaseTemplate {
       public void setNonce3(byte[] nonce3) {
 
         storedNonce3 = nonce3;
+      }
+
+      public OnDieService getOnDieService() {
+        return null;
       }
 
       @Override
