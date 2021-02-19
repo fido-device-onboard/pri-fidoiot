@@ -31,4 +31,9 @@ public class ManufacturerAppSettings {
   public static final String API_USER = "manufacturer_api_user";
   public static final String API_PWD = "manufacturer_api_password";
 
+  // ondie settings
+  public static final String ONDIE_CACHEDIR = "ondie_cache";
+  public static final String ONDIE_AUTOUPDATE = "ondie_autoupdate";
+  public static final String ONDIE_SOURCE_URLS = "ondie_zip_artifact";
+  public static final String ONDIE_CHECK_REVOCATIONS = "ondie_check_revocations";
 }

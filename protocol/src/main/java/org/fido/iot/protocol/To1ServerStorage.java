@@ -6,6 +6,8 @@ package org.fido.iot.protocol;
 import java.security.PublicKey;
 import java.util.UUID;
 
+import org.fido.iot.protocol.ondie.OnDieService;
+
 /**
  * To1 Server Storage Interface.
  */
@@ -26,4 +28,6 @@ public interface To1ServerStorage extends StorageEvents {
   PublicKey getVerificationKey();
 
   Composite getRedirectBlob();
+
+  OnDieService getOnDieService();
 }

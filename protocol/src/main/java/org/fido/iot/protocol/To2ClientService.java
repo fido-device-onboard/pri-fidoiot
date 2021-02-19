@@ -54,7 +54,7 @@ public abstract class To2ClientService extends DeviceService {
       throw new InvalidMessageException();
     }
     PublicKey verifyKey = getCryptoService().decode(this.prevEntryKey);
-    if (!getCryptoService().verify(verifyKey, entry, null)) {
+    if (!getCryptoService().verify(verifyKey, entry, null, null, null)) {
       throw new InvalidMessageException();
     }
 
@@ -183,7 +183,7 @@ public abstract class To2ClientService extends DeviceService {
         .getAsComposite(Const.CUPH_PUBKEY);
 
     PublicKey verifyKey = getCryptoService().decode(pub);
-    getCryptoService().verify(verifyKey, cose, null);
+    getCryptoService().verify(verifyKey, cose, null, null, null);
 
     // Skipping to1d verification, if the RVBypass flag is set.
     if (!rvBypass) {

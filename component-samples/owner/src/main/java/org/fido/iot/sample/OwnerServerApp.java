@@ -73,6 +73,19 @@ public class OwnerServerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
+    try {
+      ctx.addParameter(OwnerAppSettings.ONDIE_CACHEDIR,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
+      ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
+      ctx.addParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
+      ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
+    } catch (Exception ex) {
+      // ondie is optional so if config cannot be loaded just default to no config
+    }
+
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));

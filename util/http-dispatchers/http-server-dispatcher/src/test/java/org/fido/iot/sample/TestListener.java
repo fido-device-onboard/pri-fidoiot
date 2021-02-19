@@ -20,6 +20,7 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To0ServerService;
 import org.fido.iot.protocol.To0ServerStorage;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 public class TestListener implements ServletContextListener {
 
@@ -86,11 +87,16 @@ public class TestListener implements ServletContextListener {
       public void failed(Composite request, Composite reply) {
 
       }
+
+      @Override
+      public OnDieService getOnDieService() {
+        return null;
+      }
     };
 
     To0ServerService to0Service = new To0ServerService() {
       @Override
-      protected To0ServerStorage getStorage() {
+      public To0ServerStorage getStorage() {
         return serverStorage;
       }
 

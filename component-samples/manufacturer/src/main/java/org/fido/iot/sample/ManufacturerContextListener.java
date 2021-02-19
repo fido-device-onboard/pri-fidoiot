@@ -29,6 +29,8 @@ import org.fido.iot.protocol.DiServerService;
 import org.fido.iot.protocol.DiServerStorage;
 import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.CertificateResolver;
 import org.fido.iot.storage.DiDbManager;
 import org.fido.iot.storage.DiDbStorage;
@@ -99,6 +101,36 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    // To maintain backwards compatibility with installation without
+    // any OnDie settings or installations that do not wish to use
+    // OnDie we will check if the one required setting is present.
+    // If not then the ods object is set to null and operation should
+    // proceed without error. If an OnDie operation is attempted then
+    // an error will occur at that time and the user will need to
+    // correct their configuration.
+    OnDieService initialOds = null;
+    if (sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR) != null
+            && !sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
+      OnDieCache odc = new OnDieCache(
+              sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR),
+              sc.getInitParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE)
+                      .toLowerCase().equals("true"),
+              sc.getInitParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS),
+              null);
+
+      try {
+        odc.initializeCache();
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error");
+      }
+
+      initialOds = new OnDieService(odc,
+              sc.getInitParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                      .toLowerCase().equals("true"));
+
+    }
+    final OnDieService ods = initialOds;
+
     initManufacturerKeystore(sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     keyResolver = new CertificateResolver() {
       @Override
@@ -163,7 +195,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createDiService(cs, ds);
+        return createDiService(cs, ds, ods);
       }
 
       @Override
@@ -189,7 +221,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute("resolver", keyResolver);
 
     //create tables
-    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver);
+    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeysPem);
@@ -202,14 +234,14 @@ public class ManufacturerContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private DiServerService createDiService(CryptoService cs, DataSource ds) {
+  private DiServerService createDiService(CryptoService cs, DataSource ds, OnDieService ods) {
     return new DiServerService() {
       private DiServerStorage storage;
 
       @Override
       public DiServerStorage getStorage() {
         if (storage == null) {
-          storage = new DiDbStorage(cs, ds, keyResolver);
+          storage = new DiDbStorage(cs, ds, keyResolver, ods);
         }
         return storage;
       }

@@ -5,8 +5,10 @@ package org.fido.iot.sample;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -22,6 +24,8 @@ import org.fido.iot.protocol.DiServerService;
 import org.fido.iot.protocol.DiServerStorage;
 import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.CertificateResolver;
 import org.fido.iot.storage.DiDbManager;
 import org.fido.iot.storage.DiDbStorage;
@@ -31,7 +35,7 @@ import org.fido.iot.storage.DiDbStorage;
  */
 public class DiContextListener implements ServletContextListener {
 
-  private static final String mfgKeyPemEC = "-----BEGIN CERTIFICATE-----\n"
+  private static final String mfgKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
       + "Q0EwIBcNMTkwNDI0MTQ0NjQ3WhgPMjA1NDA0MTUxNDQ2NDdaMA0xCzAJBgNVBAMM\n"
       + "AkNBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELAJwkDKz/BaWq1Wx7PjkR5W5\n"
@@ -48,6 +52,32 @@ public class DiContextListener implements ServletContextListener {
       + "AwEHoUQDQgAELAJwkDKz/BaWq1Wx7PjkR5W5LLIbamgSZeVNUlyFM/t0sMAxAWbv\n"
       + "EbDzKu924TX4as3WVjMmfekysx30PlDGJQ==\n"
       + "-----END EC PRIVATE KEY-----\n";
+
+  private static final String mfgKeyPemEC384 = "-----BEGIN CERTIFICATE-----\n"
+      + "MIICHDCCAaKgAwIBAgIUWFemvHRHaQMjL7pUa6O0m6nLCJswCgYIKoZIzj0EAwIw\n"
+      + "RTELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGElu\n"
+      + "dGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMDExMDYxODU5MDJaFw0yMTExMDYx\n"
+      + "ODU5MDJaMEUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYD\n"
+      + "VQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwdjAQBgcqhkjOPQIBBgUrgQQA\n"
+      + "IgNiAATwVq+vfPRpGg6GaTrWtT3gDk+f+b/861IvZ6DZtF2xuVXbzVCmSt4zXPwc\n"
+      + "CfLOa5U/RKePzOzOH4nwnVRvnlcie4QqQcwIFRdPtvZpwdaR0whaTv1mTG+piAhQ\n"
+      + "cBRtEdqjUzBRMB0GA1UdDgQWBBTbsRA6kh4ji3vDUleohZtNxfBbJDAfBgNVHSME\n"
+      + "GDAWgBTbsRA6kh4ji3vDUleohZtNxfBbJDAPBgNVHRMBAf8EBTADAQH/MAoGCCqG\n"
+      + "SM49BAMCA2gAMGUCMQC/1cS9hVM15cdvNii2tdIKEgxDd/syDdfq8/MRF6HPU+9R\n"
+      + "Nv4sYaXKsITgy2X3IdwCMDiYE5ZMwPZjZXX9psCmEaPYGlPfZqAKQ2eYJtaCT0Ij\n"
+      + "1mbcId5bouuxIxnxhQQYUA==\n"
+      + "-----END CERTIFICATE-----\n"
+      + "-----BEGIN PRIVATE KEY-----\n"
+      + "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDCJYJLPaStXFLy2G/+w\n"
+      + "LgIqSkBXxGKBwDi7GZcbFBtpv0XNALlPm2Vb7OYbifOKBpehZANiAATwVq+vfPRp\n"
+      + "Gg6GaTrWtT3gDk+f+b/861IvZ6DZtF2xuVXbzVCmSt4zXPwcCfLOa5U/RKePzOzO\n"
+      + "H4nwnVRvnlcie4QqQcwIFRdPtvZpwdaR0whaTv1mTG+piAhQcBRtEdo=\n"
+      + "-----END PRIVATE KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8Favr3z0aRoOhmk61rU94A5Pn/m//OtS\n"
+      + "L2eg2bRdsblV281QpkreM1z8HAnyzmuVP0Snj8zszh+J8J1Ub55XInuEKkHMCBUX\n"
+      + "T7b2acHWkdMIWk79ZkxvqYgIUHAUbRHa\n"
+      + "-----END PUBLIC KEY-----\n";
 
   private static final String mfgKeyPemRSA = "-----BEGIN CERTIFICATE-----\n"
       + "MIIDazCCAlOgAwIBAgIUcg9kASwqV7YrZjAxNwQG80dK9pIwDQYJKoZIhvcNAQEL\n"
@@ -107,11 +137,17 @@ public class DiContextListener implements ServletContextListener {
       + "XQIDAQAB\n"
       + "-----END PUBLIC KEY-----\n";
 
-  private final String[] mfgPemKeys = {mfgKeyPemRSA, mfgKeyPemEC};
+  private final String[] mfgPemKeys = {mfgKeyPemRSA, mfgKeyPemEC256, mfgKeyPemEC384};
 
-  private final String ownerKeysPemEC = "-----BEGIN PUBLIC KEY-----\n"
+  private final String ownerKeyPemEC256 = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
       + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n";
+
+  private final String ownerKeyPemEC384 = "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
+      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
+      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
       + "-----END PUBLIC KEY-----\n";
 
   private final String ownerKeysPemRsa = "-----BEGIN PUBLIC KEY-----\n"
@@ -124,7 +160,7 @@ public class DiContextListener implements ServletContextListener {
       + "AwIDAQAB\n"
       + "-----END PUBLIC KEY-----\n";
 
-  private final String[] ownerPemKeys = {ownerKeysPemRsa, ownerKeysPemEC};
+  private final String[] ownerPemKeys = {ownerKeysPemRsa, ownerKeyPemEC256, ownerKeyPemEC384};
 
   CertificateResolver keyResolver;
 
@@ -149,49 +185,76 @@ public class DiContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    // To maintain backwards compatibility with installation without
+    // any OnDie settings or installations that do not wish to use
+    // OnDie we will check if the one required setting is present.
+    // If not then the ods object is set to null and operation should
+    // proceed without error. If an OnDie operation is attempted then
+    // an error will occur at that time and the user will need to
+    // correct their configuration.
+    OnDieService initialOds = null;
+    if (sc.getInitParameter("ods.cacheDir") != null
+            && !sc.getInitParameter("ods.cacheDir").isEmpty()) {
+      OnDieCache odc = new OnDieCache(
+              sc.getInitParameter("ods.cacheDir"),
+              sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+              sc.getInitParameter("ods.zipArtifactUrl"),
+              null);
+      try {
+        odc.initializeCache();
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error");
+      }
+
+      initialOds = new OnDieService(odc,
+              sc.getInitParameter("ods.checkRevocations").equals("true"));
+    }
+    final OnDieService ods = initialOds;
+
     keyResolver = new CertificateResolver() {
       @Override
       public CloseableKey getPrivateKey(Certificate cert) {
-        String alg = cert.getPublicKey().getAlgorithm();
-        for (String pem : mfgPemKeys) {
-          PrivateKey privateKey = PemLoader.loadPrivateKey(pem);
-          // Doing a check with .startsWith(), since the algorithm name returned by BC library is
-          // "ECDSA" instead of "EC" for Elliptic curve based private keys.
-          // This works with the only other key type that we use, RSA.
-          if (privateKey.getAlgorithm().startsWith(alg)) {
-            return new CloseableKey(privateKey);
+        String pemValue;
+        try {
+          for (String pem : mfgPemKeys) {
+            List<Certificate> keyList = PemLoader.loadCerts(pem);
+            for (Certificate certificate : keyList) {
+              if (Arrays.equals(certificate.getEncoded(), cert.getEncoded())) {
+                return new CloseableKey(PemLoader.loadPrivateKey(pem));
+              }
+            }
           }
+        } catch (CertificateEncodingException ex) {
+          System.out.println("Unable to retrieve Private Key. " + ex.getMessage());
+          return null;
         }
         return null;
       }
 
       @Override
       public Certificate[] getCertChain(int publicKeyType) {
-        String alg;
+        String pemValue;
         if (publicKeyType == Const.PK_RSA2048RESTR || publicKeyType == Const.PK_RSA) {
-          alg = "RSA";
-        } else if (publicKeyType == Const.PK_SECP256R1 || publicKeyType == Const.PK_SECP384R1) {
-          alg = "EC";
+          pemValue = mfgKeyPemRSA;
+        } else if (publicKeyType == Const.PK_SECP256R1) {
+          pemValue = mfgKeyPemEC256;
+        } else if (publicKeyType == Const.PK_SECP384R1) {
+          pemValue = mfgKeyPemEC384;
         } else {
           return new Certificate[0];
         }
 
-        for (String pem : mfgPemKeys) {
-          List<Certificate> list = PemLoader.loadCerts(pem);
-          if (list.get(0).getPublicKey().getAlgorithm().contentEquals(alg)) {
-            Certificate[] certs = new Certificate[list.size()];
-            list.toArray(certs);
-            return certs;
-          }
-        }
-        return new Certificate[0];
+        List<Certificate> list = PemLoader.loadCerts(pemValue);
+        Certificate[] certs = new Certificate[list.size()];
+        list.toArray(certs);
+        return certs;
       }
     };
 
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createDiService(cs, ds);
+        return createDiService(cs, ds, ods);
       }
 
       @Override
@@ -222,7 +285,7 @@ public class DiContextListener implements ServletContextListener {
     }
 
     //create tables
-    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver);
+    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeys);
@@ -234,14 +297,14 @@ public class DiContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private DiServerService createDiService(CryptoService cs, DataSource ds) {
+  private DiServerService createDiService(CryptoService cs, DataSource ds, OnDieService ods) {
     return new DiServerService() {
       private DiServerStorage storage;
 
       @Override
       public DiServerStorage getStorage() {
         if (storage == null) {
-          storage = new DiDbStorage(cs, ds, keyResolver);
+          storage = new DiDbStorage(cs, ds, keyResolver, ods);
         }
         return storage;
       }
