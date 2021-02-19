@@ -6,6 +6,7 @@ package org.fido.iot.sample;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -112,7 +113,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     if (sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR) != null
             && !sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
       OnDieCache odc = new OnDieCache(
-              sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR),
+              URI.create(sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR)),
               sc.getInitParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE)
                       .toLowerCase().equals("true"),
               sc.getInitParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS),

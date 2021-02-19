@@ -5,6 +5,7 @@ package org.fido.iot.protocol;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.UUID;
@@ -153,7 +154,7 @@ public class BaseTemplate {
     cryptoService = new CryptoService();
 
     OnDieCache onDieCache = new OnDieCache(
-            "", false, "", null);
+            URI.create(""), false, "", null);
     onDieService = new OnDieService(onDieCache, false);
 
     voucher = createTestVoucher();

@@ -6,6 +6,7 @@ package org.fido.iot.sample;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
@@ -179,7 +180,7 @@ public class To2ContextListener implements ServletContextListener {
     sc.setAttribute("cryptoservice", cs);
 
     OnDieCache odc = new OnDieCache(
-            sc.getInitParameter("ods.cacheDir"),
+            URI.create(sc.getInitParameter("ods.cacheDir")),
             sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
             sc.getInitParameter("ods.zipArtifactUrl"),
             null);

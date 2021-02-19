@@ -5,6 +5,7 @@ package org.fido.iot.sample;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -196,7 +197,7 @@ public class DiContextListener implements ServletContextListener {
     if (sc.getInitParameter("ods.cacheDir") != null
             && !sc.getInitParameter("ods.cacheDir").isEmpty()) {
       OnDieCache odc = new OnDieCache(
-              sc.getInitParameter("ods.cacheDir"),
+              URI.create(sc.getInitParameter("ods.cacheDir")),
               sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
               sc.getInitParameter("ods.zipArtifactUrl"),
               null);
