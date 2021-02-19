@@ -292,6 +292,12 @@ public abstract class To2ClientService extends DeviceService {
       }
     }
 
+    if (!getStorage().isDeviceCredReuseSupported() && isReuse) {
+      System.out.println("Credential reuse rejected by device. Device onboarding failed.");
+      throw new RuntimeException(
+          new CredReuseRejectedException(new UnsupportedOperationException()));
+    }
+
     byte[] secret = getStorage().getReplacementHmacSecret(newCreds, isReuse);
     Composite newHash = null;
 
