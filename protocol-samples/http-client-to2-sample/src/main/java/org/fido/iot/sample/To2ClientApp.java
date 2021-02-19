@@ -205,6 +205,11 @@ public class To2ClientApp {
     public String getMaxOwnerServiceInfoMtuSz() {
       return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
     }
+
+    @Override
+    public boolean isDeviceCredReuseSupported() {
+      return true;
+    }
   };
 
   To2ClientService clientService = new To2ClientService() {

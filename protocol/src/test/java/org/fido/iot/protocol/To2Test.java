@@ -121,6 +121,11 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
+      }
+
+      @Override
       public Composite getDeviceCredentials() {
         return deviceCreds;
       }
