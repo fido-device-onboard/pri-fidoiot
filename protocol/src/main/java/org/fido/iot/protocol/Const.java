@@ -67,6 +67,7 @@ public final class Const {
   public static final int RESOURCE_NOT_FOUND = 6;
   public static final int MESSAGE_BODY_ERROR = 100;
   public static final int INVALID_MESSAGE_ERROR = 101;
+  public static final int CRED_REUSE_ERROR = 102;
   public static final int INTERNAL_SERVER_ERROR = 500;
 
   public static final String ERROR_CAUSE = " caused by ";

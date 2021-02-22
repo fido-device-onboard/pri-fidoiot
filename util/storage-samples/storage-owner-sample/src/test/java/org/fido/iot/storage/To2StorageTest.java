@@ -329,6 +329,11 @@ public class To2StorageTest {
       public String getMaxOwnerServiceInfoMtuSz() {
         return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
       }
+
+      @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
+      }
     };
 
     To2ClientService to2ClientService = new To2ClientService() {
