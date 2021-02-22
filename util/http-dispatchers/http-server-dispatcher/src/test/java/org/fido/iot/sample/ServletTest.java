@@ -25,7 +25,7 @@ public class ServletTest {
   private static final int RV_PORT = 8040;
   private static final String HOST_NAME = "localhost";
   private static final String PROTOCOL_NAME = "http://";
-  private static final String WEB_PATH = "/fido/100/msg";
+  private static final String WEB_PATH = "/fdo/100/msg";
 
   private static final String BASE_PATH = "target";
 

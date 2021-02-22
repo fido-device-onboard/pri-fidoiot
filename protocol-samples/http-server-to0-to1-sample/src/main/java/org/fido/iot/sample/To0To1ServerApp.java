@@ -21,7 +21,7 @@ public class To0To1ServerApp {
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
 
-  private static final String WEB_PATH = "/fido/100/msg";
+  private static final String WEB_PATH = "/fdo/100/msg";
   private static final String DB_PATH = Path.of(System.getProperty("user.dir"),
       "target", "data", "rvs").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),

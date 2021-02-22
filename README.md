@@ -128,7 +128,7 @@ WARNING: All illegal access operations will be denied in a future release
 
 ## Ownership Voucher creation
 
-The DI server will listen for messages at http://localhost:8039/fido/100/msg/<msgid>.
+The DI server will listen for messages at http://localhost:8039/fdo/100/msg/<msgid>.
 The server also includes a SQL database that runs on port 8049. The database console
 UI will be available at http://localhost:8039/console.
 
