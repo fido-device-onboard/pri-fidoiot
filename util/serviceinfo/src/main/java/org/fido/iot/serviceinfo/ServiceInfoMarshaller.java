@@ -138,14 +138,6 @@ public class ServiceInfoMarshaller implements Serializable {
         int keyLength = entry.getKey().length();
         long valueLength = entry.getValue().length();
 
-        if (packed + keyLength + additionalCborLength(keyLength) + valueLength
-              + additionalCborLength(valueLength) < mtu) {
-          packed += 1; // 1 byte for creating a new array (innermost block of [[[]]])
-          subList.add(new ServiceInfoEntry(entry.getKey(), entry.getValue()));
-          index++;
-          continue;
-        }
-
         // Account for the key only if the key can be placed fully inside the array, with
         // atleast 2 bytes left for value, to avoid sending both partial/full key with no value
         if (packed + keyLength + additionalCborLength(keyLength) < mtu - 2) {
@@ -173,7 +165,7 @@ public class ServiceInfoMarshaller implements Serializable {
             packed += valueFitLen + additionalCborLength(valueFitLen);
           }
 
-          if (valueFitLen <= 0) {
+          if (valueFitLen <= 0 && valueLength != 0) {
             break; // nothing fits so break for next mtu
           }
 
