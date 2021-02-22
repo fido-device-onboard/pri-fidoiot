@@ -5,6 +5,7 @@ package org.fido.iot.storage;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -142,7 +143,7 @@ public class DiStorageTest {
     ds.setMaxIdle(10);
     ds.setMaxOpenPreparedStatements(100);
 
-    OnDieCache odc = new OnDieCache("", true, "", null);
+    OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);
     try {
       odc.initializeCache();
     } catch (Exception ex) {
