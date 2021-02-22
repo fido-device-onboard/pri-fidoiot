@@ -1,1 +1,1 @@
-sdo_sys:filedesc=payload_name,sdo_sys:write=payload.bin,sdo_sys:filedesc=package_name,sdo_sys:write=package.sh,sdo_sys:exec=binsh-linux64
+sdo_sys:filedesc=payload_name,sdo_sys:write=payload.bin,sdo_sys:filedesc=package_name,sdo_sys:write=package.sh,sdo_sys:exec=binsh-linux64,sdo_wget:filename=sample_file,sdo_wget:url=url
