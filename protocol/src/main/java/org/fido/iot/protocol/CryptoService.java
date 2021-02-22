@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.crypto.BadPaddingException;
@@ -677,7 +678,17 @@ public class CryptoService {
       }
       return false;
     }
-    final Composite header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
+
+    final Composite header1;
+    final Object rawHeader = cose.get(Const.COSE_SIGN1_PROTECTED);
+    if (rawHeader instanceof byte[]) {
+      final byte[] protectedHeader = cose.getAsBytes(Const.COSE_SIGN1_PROTECTED);
+      header1 = Composite.fromObject(protectedHeader);
+    } else if (rawHeader instanceof Map) {
+      header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
+    } else {
+      throw new UnsupportedOperationException();
+    }
     final int algId = header1.getAsNumber(Const.COSE_ALG).intValue();
     final ByteBuffer payload = cose.getAsByteBuffer(Const.COSE_SIGN1_PAYLOAD);
     final byte[] sig = cose.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
@@ -892,9 +903,13 @@ public class CryptoService {
    */
   public Composite sign(PrivateKey signingKey, byte[] payload, int coseSignatureAlg) {
 
+    final byte[] protectedHeader = Composite.newMap()
+        .set(Const.COSE_ALG, coseSignatureAlg)
+        .toBytes();
+
     final Composite cos = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap().set(Const.COSE_ALG, coseSignatureAlg))
-        .set(Const.COSE_SIGN1_UNPROTECTED, Const.EMPTY_BYTE)
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
+        .set(Const.COSE_SIGN1_UNPROTECTED, Composite.newMap())
         .set(Const.COSE_SIGN1_PAYLOAD, payload);
 
     try {
@@ -1327,10 +1342,11 @@ public class CryptoService {
       throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
 
+    byte[] protectedHeader = Composite.newMap()
+        .set(Const.ETM_AES_PLAIN_TYPE, aesType)
+        .toBytes();
     Composite cose0 = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED,
-            Composite.newMap()
-                .set(Const.ETM_AES_PLAIN_TYPE, aesType))
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
         .set(Const.COSE_SIGN1_UNPROTECTED,
             Composite.newMap()
                 .set(Const.ETM_AES_IV, iv))
@@ -1348,10 +1364,13 @@ public class CryptoService {
     }
     byte[] payload = cose0.toBytes();
     Composite mac = hash(hmacType, secret, payload);
+
+    protectedHeader = Composite.newMap()
+        .set(Const.ETM_MAC_TYPE, hmacType)
+        .toBytes();
     Composite mac0 = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap()
-            .set(Const.ETM_MAC_TYPE, hmacType))
-        .set(Const.COSE_SIGN1_UNPROTECTED, Const.EMPTY_BYTE)
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
+        .set(Const.COSE_SIGN1_UNPROTECTED, Composite.newMap())
         .set(Const.COSE_SIGN1_PAYLOAD, payload)
         .set(Const.COSE_SIGN1_SIGNATURE, mac.getAsBytes(Const.HASH));
 
@@ -1517,7 +1536,8 @@ public class CryptoService {
       cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(iv));
       final byte[] ciphered = cose0.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
       final byte[] mac1 = message.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
-      final Composite prh = message.getAsComposite(Const.COSE_SIGN1_PROTECTED);
+      final byte[] protectedHeader = message.getAsBytes(Const.COSE_SIGN1_PROTECTED);
+      final Composite prh = Composite.fromObject(protectedHeader);
       int macType = prh.getAsNumber(Const.ETM_MAC_TYPE).intValue();
 
       Composite mac2 = hash(macType, svk, cose0.toBytes());
