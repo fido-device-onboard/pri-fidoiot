@@ -126,7 +126,7 @@ Some required runtime arguments
 
 ## Support for OnDie devices
 
-Refer to [Demo README](demo/README.md) for steps to configure owner to support OnDie devices.
+Refer to [Demo README](../README.md) for steps to configure owner to support OnDie devices.
 
 # Enabling Remote Access to DB
 
