@@ -30,6 +30,7 @@ import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.serviceinfo.SdoDev;
 import org.fido.iot.serviceinfo.SdoSys;
+import org.fido.iot.serviceinfo.SdoWget;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoModule;
 import org.fido.iot.serviceinfo.ServiceInfoSequence;
@@ -172,6 +173,9 @@ public class DeviceServiceInfoModule implements ServiceInfoModule {
     String key = entry.getKey();
 
     switch (key) {
+      case (SdoSys.NAME + ":" + SdoSys.KEY_ACTIVE):
+        System.out.println(SdoSys.NAME + ": module activated");
+        break;
       case (SdoSys.NAME + ":" + SdoSys.KEY_FILEDESC):
         acceptFileDesc((byte[]) entry.getValue().getContent());
         break;
@@ -190,6 +194,18 @@ public class DeviceServiceInfoModule implements ServiceInfoModule {
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
+        break;
+      case (SdoWget.NAME + ":" + SdoWget.KEY_ACTIVE):
+        System.out.println(SdoWget.NAME + ": module activated");
+        break;
+      case (SdoWget.NAME + ":" + SdoWget.KEY_FILENAME):
+        System.out.println(SdoWget.NAME + ": filename received");
+        break;
+      case (SdoWget.NAME + ":" + SdoWget.KEY_URL):
+        System.out.println(SdoWget.NAME + ": url received");
+        break;
+      case (SdoWget.NAME + ":" + SdoWget.KEY_SHA):
+        System.out.println(SdoWget.NAME + ": hash received");
         break;
       default:
         // not one of our keys, just ignore it
@@ -259,7 +275,7 @@ public class DeviceServiceInfoModule implements ServiceInfoModule {
     ByteBuffer execBytes = ByteBuffer.wrap(encodedValue);
     while (execBytes.hasRemaining()) {
 
-      byte[] execByte = new byte[] { execBytes.get() };
+      byte[] execByte = new byte[] {execBytes.get()};
       char c = SdoSys.CHARSET.decode(ByteBuffer.wrap(execByte)).get();
       execBuilder.append(c);
 

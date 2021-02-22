@@ -42,7 +42,6 @@ import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
 import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
-import org.fido.iot.protocol.cbor.Encoder;
 import org.fido.iot.serviceinfo.ServiceInfo;
 import org.fido.iot.serviceinfo.ServiceInfoEntry;
 import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
@@ -54,8 +53,9 @@ public class Device {
   private static final String PROPERTY_DEV_PEM = "fido.iot.pem.dev";
   private static final String PROPERTY_DI_URL = "fido.iot.url.di";
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
-  private static boolean rvBypass;
   private static final String PROPERTY_SERVICE_INFO_MTU = "fido.iot.device.service.info.mtu";
+  private static final String PROPERTY_CRED_REUSE_SUPPORT = "fido.iot.device.cred.reuse";
+  private static boolean rvBypass;
 
   private static final Logger logger = LogManager.getLogger();
 
@@ -353,6 +353,16 @@ public class Device {
       public String getMaxOwnerServiceInfoMtuSz() {
         ownerServiceInfoMtuSize = System.getProperties().getProperty(PROPERTY_SERVICE_INFO_MTU);
         return ownerServiceInfoMtuSize;
+      }
+
+      @Override
+      public boolean isDeviceCredReuseSupported() {
+        String credReuseProperty =
+            System.getProperties().getProperty(PROPERTY_CRED_REUSE_SUPPORT);
+        if (credReuseProperty == null || credReuseProperty.equalsIgnoreCase("true")) {
+          return true;
+        }
+        return false;
       }
 
       // maximum size service info that device can send to owner (i.e) DeviceServiceInfoMTU
