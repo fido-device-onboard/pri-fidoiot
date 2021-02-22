@@ -124,6 +124,10 @@ Some required runtime arguments
 
   Docker default: ./serviceinfo/sample-svi.csv
 
+## Support for OnDie devices
+
+Refer to [Demo README](../README.md) for steps to configure owner to support OnDie devices.
+
 # Enabling Remote Access to DB
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
