@@ -158,7 +158,7 @@ public class To2StorageTest {
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, keyResolver);
+          storage = new OwnerDbStorage(cs, ds, keyResolver, null);
         }
         return storage;
       }
@@ -330,6 +330,11 @@ public class To2StorageTest {
       @Override
       public String getMaxOwnerServiceInfoMtuSz() {
         return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+      }
+
+      @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
       }
     };
 

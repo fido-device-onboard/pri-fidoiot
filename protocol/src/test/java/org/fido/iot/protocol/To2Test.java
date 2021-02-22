@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
 
@@ -119,6 +121,11 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
+      public boolean isDeviceCredReuseSupported() {
+        return true;
+      }
+
+      @Override
       public Composite getDeviceCredentials() {
         return deviceCreds;
       }
@@ -196,6 +203,9 @@ public class To2Test extends BaseTemplate {
       public void setNonce7(byte[] nonce) {
         storedNonce7 = nonce;
       }
+
+      @Override
+      public OnDieService getOnDieService() { return null; }
 
       @Override
       public void setOwnerState(Composite ownerState) {

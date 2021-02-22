@@ -54,7 +54,7 @@ public abstract class To2ClientService extends DeviceService {
       throw new InvalidMessageException();
     }
     PublicKey verifyKey = getCryptoService().decode(this.prevEntryKey);
-    if (!getCryptoService().verify(verifyKey, entry, null)) {
+    if (!getCryptoService().verify(verifyKey, entry, null, null, null)) {
       throw new InvalidMessageException();
     }
 
@@ -183,7 +183,7 @@ public abstract class To2ClientService extends DeviceService {
         .getAsComposite(Const.CUPH_PUBKEY);
 
     PublicKey verifyKey = getCryptoService().decode(pub);
-    getCryptoService().verify(verifyKey, cose, null);
+    getCryptoService().verify(verifyKey, cose, null, null, null);
 
     // Skipping to1d verification, if the RVBypass flag is set.
     if (!rvBypass) {
@@ -290,6 +290,12 @@ public abstract class To2ClientService extends DeviceService {
       if (Arrays.compare(info1, info2) != 0) {
         isReuse = false;
       }
+    }
+
+    if (!getStorage().isDeviceCredReuseSupported() && isReuse) {
+      System.out.println("Credential reuse rejected by device. Device onboarding failed.");
+      throw new RuntimeException(
+          new CredReuseRejectedException(new UnsupportedOperationException()));
     }
 
     byte[] secret = getStorage().getReplacementHmacSecret(newCreds, isReuse);

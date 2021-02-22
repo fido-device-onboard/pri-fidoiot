@@ -21,6 +21,8 @@ import org.fido.iot.protocol.To0ServerStorage;
 import org.fido.iot.protocol.To1ServerService;
 import org.fido.iot.protocol.To1ServerStorage;
 import org.fido.iot.protocol.epid.EpidUtils;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.RvsDbManager;
 import org.fido.iot.storage.To0AllowListDenyListDbStorage;
 import org.fido.iot.storage.To1DbStorage;
@@ -61,6 +63,10 @@ public class RvContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    // OnDieService is only used to validate signatures and not revocations
+    // so initialization does not require onDieCache.
+    final OnDieService ods = new OnDieService(null, false);
+
     MessageDispatcher dispatcher =
         new MessageDispatcher() {
           @Override
@@ -68,10 +74,10 @@ public class RvContextListener implements ServletContextListener {
             switch (request.getAsNumber(Const.SM_MSG_ID).intValue()) {
               case Const.TO0_HELLO:
               case Const.TO0_OWNER_SIGN:
-                return createTo0Service(cs, ds);
+                return createTo0Service(cs, ds, ods);
               case Const.TO1_HELLO_RV:
               case Const.TO1_PROVE_TO_RV:
-                return createTo1Service(cs, ds);
+                return createTo1Service(cs, ds, ods);
               default:
                 throw new InvalidMessageException();
             }
@@ -110,14 +116,16 @@ public class RvContextListener implements ServletContextListener {
   @Override
   public void contextDestroyed(ServletContextEvent sce) {}
 
-  private To0ServerService createTo0Service(CryptoService cs, DataSource ds) {
+  private To0ServerService createTo0Service(CryptoService cs,
+                                            DataSource ds,
+                                            OnDieService ods) {
     return new To0ServerService() {
       private To0ServerStorage storage;
 
       @Override
       public To0ServerStorage getStorage() {
         if (storage == null) {
-          storage = new To0AllowListDenyListDbStorage(cs, ds);
+          storage = new To0AllowListDenyListDbStorage(cs, ds, ods);
         }
         return storage;
       }
@@ -129,14 +137,17 @@ public class RvContextListener implements ServletContextListener {
     };
   }
 
-  private To1ServerService createTo1Service(CryptoService cs, DataSource ds) {
+  private To1ServerService createTo1Service(
+          CryptoService cs,
+          DataSource ds,
+          OnDieService ods) {
     return new To1ServerService() {
       private To1ServerStorage storage;
 
       @Override
       public To1ServerStorage getStorage() {
         if (storage == null) {
-          storage = new To1DbStorage(cs, ds);
+          storage = new To1DbStorage(cs, ds, ods);
         }
         return storage;
       }

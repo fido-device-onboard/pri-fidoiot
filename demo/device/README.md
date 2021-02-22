@@ -43,6 +43,12 @@ Some software settings are runtime-configurable via Java properties.  They inclu
 
   Maximum MTU Size for ServiceInfo that owner can send to the device.
   If not set, default MTU size of 1300 bytes will be used for ServiceInfo transfers to device.
+  
+- `fido.iot.device.cred.reuse`
+
+  Property to enable or disable support for device credential reuse.
+  
+  Default is true.
 
 # Starting the Device service
 

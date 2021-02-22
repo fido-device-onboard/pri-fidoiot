@@ -18,6 +18,7 @@ import org.fido.iot.protocol.CryptoService;
 import org.fido.iot.protocol.InvalidJwtException;
 import org.fido.iot.protocol.ResourceNotFoundException;
 import org.fido.iot.protocol.To1ServerStorage;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 /**
  * To1 Database Storage implementation.
@@ -26,13 +27,22 @@ public class To1DbStorage implements To1ServerStorage {
 
   private final CryptoService cryptoService;
   private final DataSource dataSource;
+  private final OnDieService onDieService;
   private byte[] nonce4;
   private UUID guid;
   private Composite sigInfoA;
 
-  public To1DbStorage(CryptoService cryptoService, DataSource dataSource) {
+  /**
+   * Constructor.
+   *
+   * @param cryptoService cryptoService used for crypto operations
+   * @param dataSource database source connection
+   * @param ods service object used for OnDie operations
+   */
+  public To1DbStorage(CryptoService cryptoService, DataSource dataSource, OnDieService ods) {
     this.cryptoService = cryptoService;
     this.dataSource = dataSource;
+    this.onDieService = ods;
   }
 
   @Override
@@ -187,6 +197,10 @@ public class To1DbStorage implements To1ServerStorage {
 
   private CryptoService getCryptoService() {
     return cryptoService;
+  }
+
+  public OnDieService getOnDieService() {
+    return onDieService;
   }
 
   protected static String getToken(Composite request) {

@@ -67,6 +67,7 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 import org.fido.iot.protocol.epid.EpidMaterialService;
 import org.fido.iot.protocol.epid.EpidSignatureVerifier;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 /**
  * Cryptography Service.
@@ -147,6 +148,7 @@ public class CryptoService {
     switch (algId) {
       case Const.PK_SECP256R1:
       case Const.PK_SECP384R1:
+      case Const.PK_ONDIE_ECDSA_384:
         return Const.EC_ALG_NAME;
       case Const.PK_RSA2048RESTR:
       case Const.PK_RSA:
@@ -231,6 +233,7 @@ public class CryptoService {
       case Const.COSE_ES256:
         return Const.ECDSA_256_ALG_NAME;
       case Const.COSE_ES384:
+      case Const.COSE_ES384_ONDIE:
         return Const.ECDSA_384_ALG_NAME;
       case Const.COSE_RS384:
         return Const.RSA_384_ALG_NAME;
@@ -641,16 +644,23 @@ public class CryptoService {
   }
 
   /**
-   * Verifies a COSE signature.
+   * Verifies a COSE signature. Handles generic ECCDSA EPID and OnDie ECDSA signatures.
    *
    * @param verificationKey The verification key to use.
    * @param cose            The COSE message.
    * @param sigInfoA        The sigInfo object representing eA
+   * @param onDieService    The onDie service.
+   * @param onDieCertPath   The onDie cert path.
    * @return True if the signature matches otherwise false.
    */
-  public boolean verify(PublicKey verificationKey, Composite cose, Composite sigInfoA) {
+  public boolean verify(PublicKey verificationKey,
+                        Composite cose,
+                        Composite sigInfoA,
+                        OnDieService onDieService,
+                        Composite onDieCertPath) {
     if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
         .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      // EPID verification
       verifyMaroePrefix(cose);
       EpidSignatureVerifier.Result verificationResult =
               EpidSignatureVerifier.verify(cose, sigInfoA);
@@ -673,6 +683,32 @@ public class CryptoService {
     final byte[] sig = cose.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
 
     try {
+      // OnDie ECDSA signature verification
+      if (algId == Const.COSE_ES384_ONDIE) {
+        if (onDieService == null) {
+          throw new SignatureException("Internal error: onDieService not initialized.");
+        }
+        try {
+          // if cert path is given then check revocations
+          // else just check the signature
+          if (onDieCertPath != null) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            List<Certificate> certPath = new ArrayList<>();
+            for (int i = 0; i < onDieCertPath.size(); i++) {
+              certPath.add(
+                      cf.generateCertificate(
+                              new ByteArrayInputStream((byte[]) onDieCertPath.get(i))));
+            }
+            return onDieService.validateSignature(certPath, payload.array(), sig);
+          } else {
+            return onDieService.validateSignature(verificationKey, payload.array(), sig);
+          }
+        } catch (CertificateException ex) {
+          return false;
+        }
+      }
+
+      // ECDSA verification
       final String algName = getSignatureAlgorithm(algId);
       final Signature signer = getSignatureInstance(algName);
 
@@ -703,7 +739,7 @@ public class CryptoService {
       }
 
       final CertPathValidator validator =
-          CertPathValidator.getInstance(getValidatorAlgorithm());
+            CertPathValidator.getInstance(getValidatorAlgorithm());
 
       final CertPathParameters params = getCertPathParameters(anchors);
 
@@ -796,8 +832,9 @@ public class CryptoService {
    * Verifies certificate chain.
    *
    * @param certChain ownership voucher device certificate chain
+   * @param onDieChain true if OnDie, false otherwise
    */
-  public void verifyCertChain(Composite certChain) {
+  public void verifyCertChain(Composite certChain, boolean onDieChain) {
     LinkedList<X509Certificate> x509certs = new LinkedList<>();
 
     try {
@@ -813,20 +850,35 @@ public class CryptoService {
 
     X509Certificate leafCertificate = x509certs.getFirst();
     verifyLeafPubKeyData(leafCertificate);
-    verifyLeafCertPrivileges(leafCertificate);
+    if (!onDieChain) {
+      verifyLeafCertPrivileges(leafCertificate);
+    }
   }
 
   /**
    * Verifies ownership voucher.
    *
    * @param voucher ownership voucher
+   * @param onDieService service for OnDie operations
    */
-  public void verifyVoucher(Composite voucher) {
+  public void verifyVoucher(Composite voucher, OnDieService onDieService) {
+
+    boolean isOnDieChain = false;
+    try {
+      final CertPath cp = getCertPath(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+      X509Certificate x509Certificate =
+              (X509Certificate) cp.getCertificates().get(cp.getCertificates().size() - 1);
+      if (onDieService != null) {
+        isOnDieChain = onDieService.isRootCa(x509Certificate.getEncoded());
+      }
+    } catch (Exception ex) {
+      // if cannot verify OnDie then fall back to default
+    }
 
     verifyHash(
-        voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
-        voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
-    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
+            voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
+            voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
+    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN), isOnDieChain);
     verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 

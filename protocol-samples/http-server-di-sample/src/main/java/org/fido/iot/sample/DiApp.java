@@ -3,7 +3,9 @@
 
 package org.fido.iot.sample;
 
+import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Provider;
 import java.security.Security;
 import org.apache.catalina.Context;
@@ -81,6 +83,15 @@ public class DiApp {
     // Not recommended to use especially on production system
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
+
+    // OnDie cert cache is included with the protocol samples.
+    Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
+
+    ctx.addParameter("ods.cacheDir", odcPath.toString());
+    ctx.addParameter("ods.autoUpdate", "false");
+    ctx.addParameter("ods.zipArtifactUrl", "");
+    ctx.addParameter("ods.checkRevocations",
+            System.getProperty("ods.checkrevocations", "true"));
 
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(DiContextListener.class.getName());
