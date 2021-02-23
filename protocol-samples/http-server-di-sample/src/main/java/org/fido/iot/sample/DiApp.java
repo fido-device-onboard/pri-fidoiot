@@ -15,6 +15,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fido.iot.api.AssignCustomerServlet;
 import org.fido.iot.api.DiApiServlet;
+import org.fido.iot.api.RvInfoServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -109,6 +110,9 @@ public class DiApp {
 
     wrapper = tomcat.addServlet(ctx, "AssignCustomerApi", new AssignCustomerServlet());
     wrapper.addMapping("/api/v1/assign/*");
+
+    wrapper = tomcat.addServlet(ctx, "UpdateRvInfoApi", new RvInfoServlet());
+    wrapper.addMapping("/api/v1/rvinfo/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
