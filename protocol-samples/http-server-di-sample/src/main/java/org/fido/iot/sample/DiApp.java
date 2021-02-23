@@ -88,7 +88,7 @@ public class DiApp {
     // OnDie cert cache is included with the protocol samples.
     Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
 
-    ctx.addParameter("ods.cacheDir", odcPath.toString());
+    ctx.addParameter("ods.cacheDir", odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations",
