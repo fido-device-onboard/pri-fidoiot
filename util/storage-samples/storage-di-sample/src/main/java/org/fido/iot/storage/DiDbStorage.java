@@ -138,6 +138,9 @@ public class DiDbStorage implements DiServerStorage {
       Certificate[] issuerChain = resolver.getCertChain(keyType);
       publicKey = cryptoService.encode(issuerChain[0].getPublicKey(),
              Const.PK_ENC_CRYPTO);
+      chain = Composite.newArray();
+      int hashType = getCryptoService().getCompatibleHashType(issuerChain[0].getPublicKey());
+      chainHash = cryptoService.hash(hashType, chain.toBytes());
     } else if (keyType == Const.PK_ONDIE_ECDSA_384) {
       // Ondie ECDSA type device
       // build the cert chain and hash for the OnDie ECDSA device
