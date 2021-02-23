@@ -34,4 +34,6 @@ public interface To2ClientStorage extends StorageEvents, DeviceCredentials {
 
   String getMaxOwnerServiceInfoMtuSz();
 
+  boolean isDeviceCredReuseSupported();
+
 }

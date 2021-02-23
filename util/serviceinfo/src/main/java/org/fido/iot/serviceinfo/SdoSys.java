@@ -17,5 +17,5 @@ public final class SdoSys {
   public static final String KEY_EXEC = "exec";
   public static final String KEY_FILEDESC = "filedesc";
   public static final String KEY_WRITE = "write";
-
 }
+

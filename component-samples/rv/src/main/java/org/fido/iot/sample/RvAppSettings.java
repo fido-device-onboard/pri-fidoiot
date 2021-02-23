@@ -24,4 +24,5 @@ public class RvAppSettings {
   // EPID URL
   public static final String EPID_URL = "epid_online_url";
   public static final String EPID_TEST_MODE = "epid_test_mode";
+
 }

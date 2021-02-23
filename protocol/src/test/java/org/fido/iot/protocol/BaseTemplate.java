@@ -5,10 +5,13 @@ package org.fido.iot.protocol;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.UUID;
 import org.fido.iot.certutils.PemLoader;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 public class BaseTemplate {
 
@@ -81,6 +84,7 @@ public class BaseTemplate {
   protected static final char[] STORE_CRED = "".toCharArray();
 
   protected CryptoService cryptoService;
+  protected OnDieService onDieService;
 
   protected MessageDispatcher serverDispatcher;
   protected MessagingService serverService;
@@ -148,6 +152,10 @@ public class BaseTemplate {
 
     //setup crypto service
     cryptoService = new CryptoService();
+
+    OnDieCache onDieCache = new OnDieCache(
+            URI.create(""), false, "", null);
+    onDieService = new OnDieService(onDieCache, false);
 
     voucher = createTestVoucher();
 

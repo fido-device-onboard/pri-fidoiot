@@ -6,8 +6,11 @@ package org.fido.iot.sample;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -24,6 +27,8 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.fido.iot.storage.OwnerDbManager;
 import org.fido.iot.storage.OwnerDbStorage;
 
@@ -32,7 +37,7 @@ import org.fido.iot.storage.OwnerDbStorage;
  */
 public class To2ContextListener implements ServletContextListener {
 
-  protected static String sampleOwnerKeyPemEC = "-----BEGIN CERTIFICATE-----\n"
+  private static String ownerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIB9DCCAZmgAwIBAgIJANpFH5JBylZhMAoGCCqGSM49BAMCMGoxJjAkBgNVBAMM\n"
       + "HVNkbyBEZW1vIE93bmVyIFJvb3QgQXV0aG9yaXR5MQ8wDQYDVQQIDAZPcmVnb24x\n"
       + "EjAQBgNVBAcMCUhpbGxzYm9ybzELMAkGA1UEBhMCVVMxDjAMBgNVBAoMBUludGVs\n"
@@ -51,7 +56,19 @@ public class To2ContextListener implements ServletContextListener {
       + "1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END EC PRIVATE KEY-----";
 
-  private static String sampleOwnerKeyPem = "-----BEGIN CERTIFICATE-----\n"
+  private static String ownerKeyPemEC384 = "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
+      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
+      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PRIVATE KEY-----\n"
+      + "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDA1SeyFqosrLr1hCgzs\n"
+      + "B0G3Hi5y1YhWKo/Rz3dVeRnKPwysEMIGIcdt2meTkr5dJs2hZANiAAQw0wcHe3Y+\n"
+      + "jvrcLxC14rv9JMlF/oXVJ+TKLZNiYZZ2eVeAj7mzt86SsnN5sca+DrW9+lJnepys\n"
+      + "ompToSRZC/L5+ocfrT1TTRaE3AtgqOIaq1WUGsGzRD288FlUE+I3cmI=\n"
+      + "-----END PRIVATE KEY-----\n";
+
+  private static String ownerKeyPemRsa = "-----BEGIN CERTIFICATE-----\n"
       + "MIIDazCCAlOgAwIBAgIUIK/VIIEW6iqeu34vJ2pi0gGVGiEwDQYJKoZIhvcNAQEL\n"
       + "BQAwRTELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n"
       + "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMDExMTEyMzUwMDBaFw0yMTEx\n"
@@ -109,8 +126,6 @@ public class To2ContextListener implements ServletContextListener {
       + "AwIDAQAB\n"
       + "-----END PUBLIC KEY-----\n";
 
-  protected static String[] sampleOwnerPemKeys = {sampleOwnerKeyPemEC, sampleOwnerKeyPem};
-
   private static final String sampleVoucher = ""
       + "8486186450f0956089c0df4c349c61f460457e87eb81858205696c6f63616c686f73748203191f68820c01820"
       + "2447f0000018204191f686a44656d6f446576696365830d0258402c02709032b3fc1696ab55b1ecf8e44795b9"
@@ -164,24 +179,44 @@ public class To2ContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
+    OnDieCache odc = new OnDieCache(
+            URI.create(sc.getInitParameter("ods.cacheDir")),
+            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+            sc.getInitParameter("ods.zipArtifactUrl"),
+            null);
+
+    try {
+      odc.initializeCache();
+    } catch (Exception ex) {
+      // TODO - need to handle exception
+    }
+
+    final OnDieService ods = new OnDieService(odc,
+            sc.getInitParameter("ods.checkRevocations").equals("true"));
+    sc.setAttribute("onDieService", ods);
+
     resolver = new KeyResolver() {
       @Override
-      public PrivateKey getKey(PublicKey key) {
-        String alg = key.getAlgorithm();
-        for (String pem : sampleOwnerPemKeys) {
-          PrivateKey privateKey = PemLoader.loadPrivateKey(pem);
-          if (privateKey.getAlgorithm().contentEquals(alg)) {
-            return privateKey;
+        public PrivateKey getKey(PublicKey key) {
+        String pemValue = ownerKeyPemEC256;
+        if (key instanceof ECKey) {
+          int bitLength = ((ECKey) key).getParams().getCurve().getField().getFieldSize();
+          if (bitLength == Const.BIT_LEN_256) {
+            pemValue = ownerKeyPemEC256;
+          } else if (bitLength == Const.BIT_LEN_384) {
+            pemValue = ownerKeyPemEC384;
           }
+        } else if (key instanceof RSAKey) {
+          pemValue = ownerKeyPemRsa;
         }
-        return null;
+        return PemLoader.loadPrivateKey(pemValue);
       }
     };
 
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createTo2Service(cs, ds);
+        return createTo2Service(cs, ds, ods);
       }
 
       @Override
@@ -223,14 +258,16 @@ public class To2ContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {
   }
 
-  private To2ServerService createTo2Service(CryptoService cs, DataSource ds) {
+  private To2ServerService createTo2Service(CryptoService cs,
+                                            DataSource ds,
+                                            OnDieService ods) {
     return new To2ServerService() {
       private To2ServerStorage storage;
 
       @Override
       public To2ServerStorage getStorage() {
         if (storage == null) {
-          storage = new OwnerDbStorage(cs, ds, resolver);
+          storage = new OwnerDbStorage(cs, ds, resolver, ods);
         }
         return storage;
       }

@@ -4,13 +4,15 @@
 package org.fido.iot.protocol;
 
 import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.X509Certificate;
 
 /**
  * To0 Server message processing service.
  */
 public abstract class To0ServerService extends MessagingService {
 
-  protected abstract To0ServerStorage getStorage();
+  public abstract To0ServerStorage getStorage();
 
   protected void doHello(Composite request, Composite reply) {
     getStorage().starting(request, reply);
@@ -51,7 +53,8 @@ public abstract class To0ServerService extends MessagingService {
     PublicKey publicKey = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
     if ((cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP256R1)
         || (cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP384R1)) {
-      cryptoService.verifyVoucher(voucher);
+
+      cryptoService.verifyVoucher(voucher, getStorage().getOnDieService());
     }
 
     byte[] nonce3 = getStorage().getNonce3();
@@ -59,7 +62,9 @@ public abstract class To0ServerService extends MessagingService {
 
     Composite pubKeyEntry = getCryptoService().getOwnerPublicKey(voucher);
     PublicKey verificationKey = cryptoService.decode(pubKeyEntry);
-    if (!cryptoService.verify(verificationKey, to1d, null)) {
+
+    // Verify voucher signature
+    if (!cryptoService.verify(verificationKey, to1d, null, null, null)) {
       throw new InvalidOwnerSignBodyException();
     }
 

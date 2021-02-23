@@ -5,11 +5,14 @@ package org.fido.iot.storage;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
@@ -114,14 +117,14 @@ public class RvsStorageTest {
       "target", "data",
       "rvs").toString();
 
-  private To1ServerService createTo1Service(CryptoService cs, DataSource ds) {
+  private To1ServerService createTo1Service(CryptoService cs, DataSource ds, OnDieService ods) {
     return new To1ServerService() {
       private To1ServerStorage storage;
 
       @Override
       public To1ServerStorage getStorage() {
         if (storage == null) {
-          storage = new To1DbStorage(cs, ds);
+          storage = new To1DbStorage(cs, ds, ods);
         }
         return storage;
       }
@@ -133,14 +136,16 @@ public class RvsStorageTest {
     };
   }
 
-  private To0ServerService createTo0Service(CryptoService cs, DataSource ds) {
+  private To0ServerService createTo0Service(CryptoService cs,
+                                            DataSource ds,
+                                            OnDieService ods) {
     return new To0ServerService() {
       private To0ServerStorage storage;
 
       @Override
       public To0ServerStorage getStorage() {
         if (storage == null) {
-          storage = new To0DbStorage(cs, ds);
+          storage = new To0DbStorage(cs, ds, ods);
         }
         return storage;
       }
@@ -156,6 +161,8 @@ public class RvsStorageTest {
   void Test() throws Exception {
 
     BasicDataSource ds = new BasicDataSource();
+    OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);
+    OnDieService ods = new OnDieService(odc, false);
 
     ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);
     ds.setDriverClassName("org.h2.Driver");
@@ -335,10 +342,10 @@ public class RvsStorageTest {
         switch (request.getAsNumber(Const.SM_MSG_ID).intValue()) {
           case Const.TO0_HELLO:
           case Const.TO0_OWNER_SIGN:
-            return createTo0Service(cs, ds);
+            return createTo0Service(cs, ds, ods);
           case Const.TO1_HELLO_RV:
           case Const.TO1_PROVE_TO_RV:
-            return createTo1Service(cs, ds);
+            return createTo1Service(cs, ds, ods);
           default:
             throw new DispatchException(new IllegalArgumentException());
         }

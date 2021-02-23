@@ -14,11 +14,10 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
-import org.fido.iot.api.OwnerSviMtuServlet;
 import org.fido.iot.api.OwnerSviServlet;
+import org.fido.iot.api.OwnerSviSettingsServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
-import org.fido.iot.sample.ProtocolServlet;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
 
@@ -73,6 +72,19 @@ public class OwnerServerApp {
     ctx.addParameter("webAllowOthers", "false");
     ctx.addParameter("trace", "");
 
+    try {
+      ctx.addParameter(OwnerAppSettings.ONDIE_CACHEDIR,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
+      ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
+      ctx.addParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
+      ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
+    } catch (Exception ex) {
+      // ondie is optional so if config cannot be loaded just default to no config
+    }
+
     if (null != OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL)) {
       ctx.addParameter(OwnerAppSettings.EPID_URL,
           OwnerConfigLoader.loadConfig(OwnerAppSettings.EPID_URL));
@@ -122,13 +134,13 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "sviServlet",
         new OwnerSviServlet());
     wrapper.addMapping("/api/v1/owner/svi/*");
-    wrapper = tomcat.addServlet(ctx, "sviMtuServlet",
-            new OwnerSviMtuServlet());
-    wrapper.addMapping("/api/v1/owner/svi/mtu/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
+    wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
+            new OwnerSviSettingsServlet());
+    wrapper.addMapping("/api/v1/owner/svi/settings/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");

@@ -5,6 +5,7 @@ package org.fido.iot.storage;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.security.Security;
 import java.security.cert.Certificate;
@@ -18,6 +19,8 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.fido.iot.protocol.ondie.OnDieCache;
+import org.fido.iot.protocol.ondie.OnDieService;
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
@@ -106,14 +109,14 @@ public class DiStorageTest {
     }
   };
 
-  private DiServerService createDiService(CryptoService cs, DataSource ds) {
+  private DiServerService createDiService(CryptoService cs, DataSource ds, OnDieService odc) {
     return new DiServerService() {
       private DiServerStorage storage;
 
       @Override
       public DiServerStorage getStorage() {
         if (storage == null) {
-          storage = new DiDbStorage(cs, ds, resolver);
+          storage = new DiDbStorage(cs, ds, resolver, odc);
         }
         return storage;
       }
@@ -139,6 +142,14 @@ public class DiStorageTest {
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
     ds.setMaxOpenPreparedStatements(100);
+
+    OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);
+    try {
+      odc.initializeCache();
+    } catch (Exception ex) {
+      // TODO - need to handle exception
+    }
+    OnDieService ods = new OnDieService(odc, false);
 
     CryptoService cs = new CryptoService();
 
@@ -242,7 +253,7 @@ public class DiStorageTest {
     MessageDispatcher serverDispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
-        return createDiService(cs, ds);
+        return createDiService(cs, ds, ods);
       }
 
       @Override

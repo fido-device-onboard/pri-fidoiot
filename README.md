@@ -196,3 +196,11 @@ EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intend
 # Using Component Samples
 
 Refer to [Demo README](demo/README.md) for steps to run component sample demo.
+
+# Support for OnDie devices
+
+Refer to [Demo README](demo/README.md) for steps to configure component-samples to support OnDie devices.
+
+Support for OnDie devices is built into the protocol-samples and no configuration is required. The OnDie certs and CRLs are preloaded into the
+protocol-samples/onDieCache directory. Should these need to be refreshed (in case of devices released after the PRI release) then the script in
+component-samples/onDieScript.py can be used to update the artifacts in this directory.

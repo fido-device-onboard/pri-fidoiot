@@ -22,6 +22,7 @@ import org.fido.iot.protocol.InvalidGuidException;
 import org.fido.iot.protocol.InvalidMessageException;
 import org.fido.iot.protocol.MessageBodyException;
 import org.fido.iot.protocol.ResourceNotFoundException;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 public class To0AllowListDenyListDbStorage extends To0DbStorage {
 
@@ -31,8 +32,10 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
    * @param cryptoService A crypto Service.
    * @param dataSource A SQL datasource.
    */
-  public To0AllowListDenyListDbStorage(CryptoService cryptoService, DataSource dataSource) {
-    super(cryptoService, dataSource);
+  public To0AllowListDenyListDbStorage(CryptoService cryptoService,
+                                       DataSource dataSource,
+                                       OnDieService ods) {
+    super(cryptoService, dataSource, ods);
   }
 
   /**

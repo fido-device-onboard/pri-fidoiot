@@ -13,10 +13,12 @@ import javax.sql.DataSource;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.storage.OwnerDbManager;
 
-public class OwnerSviMtuServlet extends HttpServlet {
+public class OwnerSviSettingsServlet extends HttpServlet {
 
   private static final String SETTINGS_DEVICE_MTU = "devicemtu";
   private static final String SETTINGS_OWNER_THRESHOLD = "ownerthreshold";
+  private static final String SETTINGS_WGET_MODE_CONTENT_VERIFICATION =
+      "wgetModContentVerification";
   private static final String SETUPINFO_ARRAY_DELIMETER = ",";
   private static final String SETUPINFO_VALUE_DELIMETER = ":=";
 
@@ -32,19 +34,24 @@ public class OwnerSviMtuServlet extends HttpServlet {
     try {
       String requestBody = req.getReader().lines().collect(Collectors.joining());
 
-      // Request format: devicemtu:=<mtusettingze>,ownerthreshold:=<thresholdmtu>
+      /* Request format:
+      devicemtu:=<mtusettingze>,
+      ownerthreshold:=<thresholdmtu>,
+      wgetModContentVerification:=<boolean>
+       */
       if (requestBody != null) {
         DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
         OwnerDbManager ownerDbManager = new OwnerDbManager();
 
         String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
-        if (to2Settings.length > 2) {
+        if (to2Settings.length > 3) {
           getServletContext().log("Invalid to2Settings request has been provided.");
           resp.setStatus(400);
           return;
         }
         int deviceMtu = 0;
         int ownerThresholdMtu = 0;
+        boolean wgetContentVerification = false;
         for (String setupInfo : to2Settings) {
           String[] setting = setupInfo.split(SETUPINFO_VALUE_DELIMETER);
           if (setting.length == 2) {
@@ -65,6 +72,12 @@ public class OwnerSviMtuServlet extends HttpServlet {
                 }
                 getServletContext().log("Updating Owner Threshold MTU for TO2 Settings");
                 ownerDbManager.updateMtu(ds, "OWNER_MTU_THRESHOLD", ownerThresholdMtu);
+                break;
+              case SETTINGS_WGET_MODE_CONTENT_VERIFICATION:
+                wgetContentVerification = Boolean.parseBoolean(setting[1]);
+                getServletContext()
+                    .log("Updating content verification preference for owner wget SVI module");
+                ownerDbManager.updateWgetVerificationPreference(ds, wgetContentVerification);
                 break;
               default:
                 break;

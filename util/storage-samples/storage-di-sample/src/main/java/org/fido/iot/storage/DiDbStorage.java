@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,6 +43,8 @@ import org.fido.iot.protocol.DispatchException;
 import org.fido.iot.protocol.InvalidJwtException;
 import org.fido.iot.protocol.InvalidMessageException;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
+import org.fido.iot.protocol.ondie.OnDieCertPath;
+import org.fido.iot.protocol.ondie.OnDieService;
 
 /**
  * Device Initialization Database Storage.
@@ -49,7 +54,7 @@ public class DiDbStorage implements DiServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final CertificateResolver resolver;
-
+  private final OnDieService onDieService;
   private Composite voucher;
 
   /**
@@ -58,13 +63,16 @@ public class DiDbStorage implements DiServerStorage {
    * @param cryptoService The cryptoService for signature operations.
    * @param dataSource    The SQL datasource.
    * @param resolver      The Certificate resolver.
+   * @param onDieService  Service for OnDie functions.
    */
   public DiDbStorage(CryptoService cryptoService,
       DataSource dataSource,
-      CertificateResolver resolver) {
+      CertificateResolver resolver,
+      OnDieService onDieService) {
     this.cryptoService = cryptoService;
     this.dataSource = dataSource;
     this.resolver = resolver;
+    this.onDieService = onDieService;
   }
 
   @Override
@@ -113,27 +121,57 @@ public class DiDbStorage implements DiServerStorage {
 
     if (keyType == Const.PK_SECP256R1 || keyType == Const.PK_SECP384R1) {
       Certificate[] issuerChain = resolver.getCertChain(keyType);
-      chain = createChain(
-          mstr.getAsBytes(Const.FOURTH_KEY),
-          issuerChain,
-          validityDays);
-      int hashType = cryptoService.getCompatibleHashType(issuerChain[0].getPublicKey());
-      chainHash = cryptoService.hash(hashType, chain.toBytes());
+
+      if (mstr.get(Const.FOURTH_KEY) != Optional.empty()) {
+        chain = createChain(
+                mstr.getAsBytes(Const.FOURTH_KEY),
+                issuerChain,
+                validityDays);
+        int hashType = getCryptoService().getCompatibleHashType(issuerChain[0].getPublicKey());
+        chainHash = cryptoService.hash(hashType, chain.toBytes());
+      }
+
       publicKey = cryptoService.encode(issuerChain[0].getPublicKey(),
               cryptoService.getCompatibleEncoding(issuerChain[0].getPublicKey()));
     } else if (keyType == Const.PK_RSA2048RESTR) {
       // EPID type device
       Certificate[] issuerChain = resolver.getCertChain(keyType);
-      publicKey = cryptoService.encode(issuerChain[0].getPublicKey(), Const.PK_ENC_CRYPTO);
-      chain = null;
-      chain = Composite.newArray();
+      publicKey = cryptoService.encode(issuerChain[0].getPublicKey(),
+              cryptoService.getCompatibleEncoding(issuerChain[0].getPublicKey()));
+    } else if (keyType == Const.PK_ONDIE_ECDSA_384) {
+      // Ondie ECDSA type device
+      // build the cert chain and hash for the OnDie ECDSA device
       try {
-        chain.set(chain.size(), issuerChain[0].getEncoded());
-      } catch (CertificateEncodingException ex) {
-        throw new InvalidMessageException("Unsupported keytype in mstr: " + keyType);
-      }
+        OnDieCertPath onDieCertPath = new OnDieCertPath();
 
-      chainHash = Composite.newArray();
+        final CertPath certPath =
+                onDieCertPath.buildCertPath(mstr.getAsBytes(Const.FOURTH_KEY),
+                        this.onDieService.getOnDieCache());
+
+        // validate test signature against certpath
+        if (!onDieService.validateSignature(
+                (List<Certificate>) certPath.getCertificates(),
+                serialNo.getBytes(),
+                mstr.getAsBytes(Const.FIFTH_KEY))) {
+          throw new InvalidMessageException("OnDie test signature failure.");
+        }
+
+        chain = Composite.newArray();
+        for (Certificate cert : certPath.getCertificates()) {
+          chain.set(chain.size(), cert.getEncoded());
+        }
+
+        int hashType = getCryptoService().getCompatibleHashType(
+                certPath.getCertificates().get(0).getPublicKey());
+
+        chainHash = cryptoService.hash(hashType, chain.toBytes());
+
+        publicKey = cryptoService.encode(certPath.getCertificates().get(0).getPublicKey(),
+                cryptoService.getCompatibleEncoding(
+                        certPath.getCertificates().get(0).getPublicKey()));
+      } catch (Exception ex) {
+        throw new InvalidMessageException(ex.getMessage());
+      }
     } else {
       // placeholder for future device types
       throw new InvalidMessageException("Unsupported keytype in mstr: " + keyType);
@@ -291,7 +329,7 @@ public class DiDbStorage implements DiServerStorage {
 
       X509CertificateHolder certHolder = null;
 
-      try (CloseableKey signingKey = resolver.getPrivateKey(issuerChain[0])) {
+      try (CloseableKey signingKey = resolver.getPrivateKey(issuerCert)) {
         ContentSigner signer = signer = jcaBuilder.build(signingKey.get());
 
         final X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(
