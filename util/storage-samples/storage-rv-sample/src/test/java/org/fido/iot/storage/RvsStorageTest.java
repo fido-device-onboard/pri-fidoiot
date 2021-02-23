@@ -5,6 +5,7 @@ package org.fido.iot.storage;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -160,7 +161,7 @@ public class RvsStorageTest {
   void Test() throws Exception {
 
     BasicDataSource ds = new BasicDataSource();
-    OnDieCache odc = new OnDieCache("", true, "", null);
+    OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);
     OnDieService ods = new OnDieService(odc, false);
 
     ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);

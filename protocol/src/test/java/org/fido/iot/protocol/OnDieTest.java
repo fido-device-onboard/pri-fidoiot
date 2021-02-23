@@ -3,6 +3,7 @@
 
 package org.fido.iot.protocol;
 
+import java.net.URI;
 import org.fido.iot.protocol.ondie.OnDieCache;
 import org.fido.iot.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.Disabled;
@@ -53,7 +54,7 @@ class OnDieTest {
   OnDieCache getTestOnDieCache() throws Exception {
     if (onDieCache == null) {
       onDieCache = new OnDieCache(
-              getClass().getClassLoader().getResource("cachedir").getFile(),
+              getClass().getClassLoader().getResource("cachedir").toURI(),
               false,
               null,
               null);
@@ -84,7 +85,7 @@ class OnDieTest {
 
     try {
       OnDieCache onDieCache = new OnDieCache(
-              tempDir.toString(),
+              URI.create(tempDir.toString()),
               true,
               "",
               null);
@@ -121,7 +122,7 @@ class OnDieTest {
               "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
 
       onDieCache = new OnDieCache(
-              getClass().getClassLoader().getResource("cachedir").getFile(),
+              getClass().getClassLoader().getResource("cachedir").toURI(),
               false,
               null,
               rootCaList);
@@ -140,7 +141,7 @@ class OnDieTest {
   void testOnDieCacheLoadZip() throws Exception {
     if (onDieCache == null) {
       onDieCache = new OnDieCache(
-              getClass().getClassLoader().getResource("cachedir").getFile(),
+              getClass().getClassLoader().getResource("cachedir").toURI(),
               false,
               zipFileUrl,
               null);

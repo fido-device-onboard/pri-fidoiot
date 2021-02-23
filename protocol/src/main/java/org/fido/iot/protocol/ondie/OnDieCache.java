@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -24,7 +25,7 @@ import java.util.zip.ZipInputStream;
 public class OnDieCache {
 
   private boolean autoUpdate = false;
-  private String cacheDir = "";
+  private URI cacheDir;
   private boolean initialized = false;
 
   List<String> rootCaList = new ArrayList<String>(Arrays.asList(
@@ -46,7 +47,7 @@ public class OnDieCache {
    * @param artifactZipUrl URL of zip file containing certs and crls
    *                            (only used if autoUpdate is set to true)
    */
-  public OnDieCache(final String cacheDir,
+  public OnDieCache(final URI cacheDir,
                     final boolean autoUpdate,
                     final String artifactZipUrl,
                     final List<String> rootCaCerts) {
@@ -81,8 +82,6 @@ public class OnDieCache {
         throw new IOException("OnDieCertCache: cache directory must be a directory: " + cacheDir);
       }
 
-      this.cacheDir = cacheDir;
-      this.autoUpdate = autoUpdate;
       if (autoUpdate) {
         // update local cache
         copyFromUrlSources();
@@ -114,7 +113,7 @@ public class OnDieCache {
         if (zipEntry.getName().startsWith("content/OnDieCA")
             && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
           Path p = Paths.get(zipEntry.getName());
-          File newFile = new File(cacheDir, p.getFileName().toString());
+          File newFile = new File(cacheDir.resolve(p.getFileName().toString()));
           FileOutputStream fos = new FileOutputStream(newFile);
           byte[] buffer = new byte[1024];
           int len;
@@ -168,7 +167,7 @@ public class OnDieCache {
           file.renameTo(targetFile);
           file.delete();
         }
-        Files.delete(Paths.get(cacheDir, cacheUpdatedTouchFile));
+        Files.delete(Paths.get(cacheDir.resolve(cacheUpdatedTouchFile)));
         return true;
       }
     }

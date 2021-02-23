@@ -6,6 +6,7 @@ package org.fido.iot.sample;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -117,7 +118,7 @@ public class OwnerContextListener implements ServletContextListener {
     if (sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR) != null
             && !sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
       OnDieCache odc = new OnDieCache(
-              sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR),
+              URI.create(sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR)),
               sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
               sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
               null);
