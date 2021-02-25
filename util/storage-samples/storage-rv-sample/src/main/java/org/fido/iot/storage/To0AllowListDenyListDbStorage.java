@@ -33,9 +33,8 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
    * @param dataSource A SQL datasource.
    */
   public To0AllowListDenyListDbStorage(CryptoService cryptoService,
-                                       DataSource dataSource,
-                                       OnDieService ods) {
-    super(cryptoService, dataSource, ods);
+                                       DataSource dataSource) {
+    super(cryptoService, dataSource);
   }
 
   /**
