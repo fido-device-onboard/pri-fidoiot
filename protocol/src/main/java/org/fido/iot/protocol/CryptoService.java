@@ -684,10 +684,8 @@ public class CryptoService {
     if (rawHeader instanceof byte[]) {
       final byte[] protectedHeader = cose.getAsBytes(Const.COSE_SIGN1_PROTECTED);
       header1 = Composite.fromObject(protectedHeader);
-    } else if (rawHeader instanceof Map) {
-      header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
     } else {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Illegal protected header encoding");
     }
     final int algId = header1.getAsNumber(Const.COSE_ALG).intValue();
     final ByteBuffer payload = cose.getAsByteBuffer(Const.COSE_SIGN1_PAYLOAD);
