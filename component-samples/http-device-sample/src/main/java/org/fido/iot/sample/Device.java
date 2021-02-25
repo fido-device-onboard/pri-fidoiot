@@ -131,7 +131,7 @@ public class Device {
   }
 
   byte[] createSecret() {
-    return myCryptoService.getRandomBytes(384 / 8);
+    return myCryptoService.getRandomBytes(512 / 8);
   }
 
   void doDeviceInit() {
