@@ -87,11 +87,7 @@ public class TestListener implements ServletContextListener {
       public void failed(Composite request, Composite reply) {
 
       }
-
-      @Override
-      public OnDieService getOnDieService() {
-        return null;
-      }
+      
     };
 
     To0ServerService to0Service = new To0ServerService() {
