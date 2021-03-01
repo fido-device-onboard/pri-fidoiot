@@ -54,7 +54,7 @@ public abstract class To0ServerService extends MessagingService {
     if ((cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP256R1)
         || (cryptoService.getPublicKeyType(publicKey) == Const.PK_SECP384R1)) {
 
-      cryptoService.verifyVoucher(voucher, getStorage().getOnDieService());
+      cryptoService.verifyVoucher(voucher);
     }
 
     byte[] nonce3 = getStorage().getNonce3();

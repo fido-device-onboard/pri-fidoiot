@@ -74,7 +74,7 @@ public class RvContextListener implements ServletContextListener {
             switch (request.getAsNumber(Const.SM_MSG_ID).intValue()) {
               case Const.TO0_HELLO:
               case Const.TO0_OWNER_SIGN:
-                return createTo0Service(cs, ds, ods);
+                return createTo0Service(cs, ds);
               case Const.TO1_HELLO_RV:
               case Const.TO1_PROVE_TO_RV:
                 return createTo1Service(cs, ds, ods);
@@ -117,15 +117,14 @@ public class RvContextListener implements ServletContextListener {
   public void contextDestroyed(ServletContextEvent sce) {}
 
   private To0ServerService createTo0Service(CryptoService cs,
-                                            DataSource ds,
-                                            OnDieService ods) {
+                                            DataSource ds) {
     return new To0ServerService() {
       private To0ServerStorage storage;
 
       @Override
       public To0ServerStorage getStorage() {
         if (storage == null) {
-          storage = new To0AllowListDenyListDbStorage(cs, ds, ods);
+          storage = new To0AllowListDenyListDbStorage(cs, ds);
         }
         return storage;
       }
