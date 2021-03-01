@@ -44,7 +44,7 @@ public class VoucherExtensionService {
     PublicKey prevOwnerPubKey;
     //For the first entry, the hash is SHA[TO2.ProveOPHdr.OVHeader|\|TO2.ProveOPHdr.HMac].
     Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
-    if (entries.size() == 0) {
+    if (entries == null || entries.size() == 0) {
       byte[] ovhBytes = ovh.toBytes();
       byte[] macBytes = mac.toBytes();
       ByteBuffer prevInfo = ByteBuffer.allocate(ovhBytes.length + macBytes.length);

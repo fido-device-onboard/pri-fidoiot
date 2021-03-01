@@ -27,7 +27,6 @@ public class To0DbStorage implements To0ServerStorage {
 
   private final CryptoService cryptoService;
   protected final DataSource dataSource;
-  private final OnDieService onDieService;
   private byte[] nonce3;
 
   /**
@@ -35,12 +34,10 @@ public class To0DbStorage implements To0ServerStorage {
    *
    * @param cryptoService A crypto Service.
    * @param dataSource    A SQL datasource.
-   * @param ods service object used for OnDie operations
    */
-  public To0DbStorage(CryptoService cryptoService, DataSource dataSource, OnDieService ods) {
+  public To0DbStorage(CryptoService cryptoService, DataSource dataSource) {
     this.cryptoService = cryptoService;
     this.dataSource = dataSource;
-    this.onDieService = ods;
   }
 
   @Override
@@ -62,7 +59,10 @@ public class To0DbStorage implements To0ServerStorage {
     PublicKey pubKey = getCryptoService().decode(encodedKey);
     String ownerX509String = getCryptoService().getFingerPrint(pubKey);
     pubKey = getCryptoService().getDevicePublicKey(voucher);
-    Composite deviceX509 = getCryptoService().encode(pubKey, Const.PK_ENC_X509);
+    Composite deviceX509 = Composite.newArray();
+    if (pubKey != null) {
+      deviceX509 = getCryptoService().encode(pubKey, Const.PK_ENC_X509);
+    }
 
     String sql = ""
         + "MERGE INTO RV_REDIRECTS  "
@@ -187,10 +187,6 @@ public class To0DbStorage implements To0ServerStorage {
 
   protected CryptoService getCryptoService() {
     return cryptoService;
-  }
-
-  public OnDieService getOnDieService() {
-    return onDieService;
   }
 
   protected String getToken(Composite request) {

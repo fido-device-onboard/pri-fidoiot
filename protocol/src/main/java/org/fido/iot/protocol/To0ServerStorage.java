@@ -34,6 +34,4 @@ public interface To0ServerStorage extends StorageEvents {
    */
   long storeRedirectBlob(Composite voucher, long requestedWait, byte[] signedBlob);
 
-  OnDieService getOnDieService();
-
 }
