@@ -13,7 +13,7 @@ public class OwnerAppSettings {
   public static final String TO2_PORT = "owner_to2_port";
 
   // part of the path of exposed web APIs
-  public static final String WEB_PATH = "/fido/100/msg";
+  public static final String WEB_PATH = "/fdo/100/msg";
 
   // H2 database configuration keys and constants
   public static final String DB_URL = "owner_database_connection_url";
