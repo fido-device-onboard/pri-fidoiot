@@ -170,13 +170,10 @@ public class OwnerContextListener implements ServletContextListener {
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
     manager.importVoucher(ds, Composite.fromObject(VOUCHER));
-    // do a clean-up to avoid exception due to stale data.
-    manager.removeSviFromDevice(ds,
-        Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID));
     manager.loadSampleServiceInfo(ds,
-        Composite.fromObject(VOUCHER).getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID),
-        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)),
-        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
+        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)));
+    manager.loadSampleDeviceTypeSviStringMapping(
+        ds, Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
     manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set
