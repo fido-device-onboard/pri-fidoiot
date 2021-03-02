@@ -113,7 +113,7 @@ public class WebClient implements Runnable {
       } else if (sslMode.toLowerCase().equals("prod")) {
 
         String trustStoreFile = System.getProperty("ssl_truststore","truststore");
-        String trustStorePwd = System.getProperty("ssl_truststore_password");
+        String trustStorePwd = System.getProperty("ssl_truststore_password"," ");
         String trustStoreType = System.getProperty("ssl_truststore_type","PKCS12");
 
         final KeyStore trustKeyStore = KeyStore.getInstance(trustStoreType);
@@ -181,15 +181,19 @@ public class WebClient implements Runnable {
         + "/msg/" + Integer.toString(msgId);
   }
 
-  private DispatchResult sendMessage(Composite message) throws IOException, InterruptedException {
-    String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
-        message.getAsNumber(Const.SM_MSG_ID).intValue());
-
-    if (url.startsWith("https")) {
+  private void getClient() {
+    if (baseUri.startsWith("https")) {
       getHttpsClient();
     } else {
       getHttpClient();
     }
+  }
+
+  private DispatchResult sendMessage(Composite message) throws IOException, InterruptedException {
+    String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
+        message.getAsNumber(Const.SM_MSG_ID).intValue());
+
+    getClient();
 
     HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
         .uri(URI.create(url));
