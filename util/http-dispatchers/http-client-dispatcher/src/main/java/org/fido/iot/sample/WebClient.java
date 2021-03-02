@@ -33,8 +33,7 @@ import org.fido.iot.protocol.MessageDispatcher;
  */
 public class WebClient implements Runnable {
 
-  private static final String DEVICE_SSL_MODE = "device.ssl.mode";
-
+  private static final String SSL_MODE = "fido.ssl.mode";
   private final MessageDispatcher dispatcher;
   private HttpClient httpClient;
   private String baseUri;
@@ -79,14 +78,16 @@ public class WebClient implements Runnable {
     }
     return sslParameters;
   }
+
   /**
    * Get SSLContext for making request.
    */
   public SSLContext getSslContext() throws KeyManagementException, NoSuchAlgorithmException {
     try {
 
-      String sslMode = System.getProperty(DEVICE_SSL_MODE, "test");
-      if (sslMode.equals("test")) {
+      String sslMode = System.getProperty(SSL_MODE, "test");
+
+      if (sslMode.toLowerCase().equals("test")) {
 
         // Validity of certificate is not checked.
         TrustManager[] trustAllCerts = new TrustManager[] {
@@ -94,19 +95,22 @@ public class WebClient implements Runnable {
               public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[0];
               }
+
               public void checkClientTrusted(
                   java.security.cert.X509Certificate[] certs, String authType) {
               }
+
               public void checkServerTrusted(
                   java.security.cert.X509Certificate[] certs, String authType) {
               }
+
             }
         };
 
         SSLContext sslContext = SSLContext.getInstance("SSL");
         sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
         return sslContext;
-      } else {
+      } else if (sslMode.toLowerCase().equals("prod")) {
         //load values from catalina propeties
         String keyStoreFile = "ocs-keystore.p12";
         String keyStorePwd = "RT2y!KlP5";
@@ -141,11 +145,10 @@ public class WebClient implements Runnable {
         return sslContext;
 
 
+      } else {
+        throw new RuntimeException("Invalid SSL mode. Use TEST or PROD.");
       }
       //SSLContext sslContext = SSLContext.getDefault();
-
-
-
       //SSLContext sc = SSLContext.getInstance("SSL");
       //SSLContext sslContext = SSLContext.getDefault();
       //sc.init(null, trustAllCerts, new SecureRandom());
@@ -156,6 +159,7 @@ public class WebClient implements Runnable {
       return null;
     }
   }
+
   protected HttpClient getHttpsClient() {
     if (httpClient == null) {
       try {
@@ -236,6 +240,9 @@ public class WebClient implements Runnable {
             authInfo.set(Const.PI_TOKEN, authArray[1]);
           }
         }
+
+
+
       }
       Composite reply = Composite.newArray()
           .set(Const.SM_LENGTH, Const.DEFAULT)
