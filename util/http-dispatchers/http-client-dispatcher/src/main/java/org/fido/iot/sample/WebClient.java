@@ -3,15 +3,26 @@
 
 package org.fido.iot.sample;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.DispatchResult;
@@ -21,6 +32,8 @@ import org.fido.iot.protocol.MessageDispatcher;
  * Represents a WebClient for dispatching HTTP messages.
  */
 public class WebClient implements Runnable {
+
+  private static final String DEVICE_SSL_MODE = "device.ssl.mode";
 
   private final MessageDispatcher dispatcher;
   private HttpClient httpClient;
@@ -66,6 +79,98 @@ public class WebClient implements Runnable {
     }
     return sslParameters;
   }
+  /**
+   * Get SSLContext for making request.
+   */
+  public SSLContext getSslContext() throws KeyManagementException, NoSuchAlgorithmException {
+    try {
+
+      String sslMode = System.getProperty(DEVICE_SSL_MODE, "test");
+      if (sslMode.equals("test")) {
+
+        // Validity of certificate is not checked.
+        TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+              public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+              }
+              public void checkClientTrusted(
+                  java.security.cert.X509Certificate[] certs, String authType) {
+              }
+              public void checkServerTrusted(
+                  java.security.cert.X509Certificate[] certs, String authType) {
+              }
+            }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+        return sslContext;
+      } else {
+        //load values from catalina propeties
+        String keyStoreFile = "ocs-keystore.p12";
+        String keyStorePwd = "RT2y!KlP5";
+        String keyStoreType = "PKCS12";
+
+        String trustStoreFile = "mfg-trustore";
+        String trustStorePwd = "intel123";
+        String trustStoreType = "PKCS12";
+
+        final KeyStore identityKeyStore = KeyStore.getInstance(keyStoreType);
+        final File keystoreFile = new File(keyStoreFile);
+        final FileInputStream identityKeyStoreFile = new FileInputStream(keystoreFile);
+        identityKeyStore.load(identityKeyStoreFile, keyStorePwd.toCharArray());
+
+        final KeyManagerFactory kmf =
+            KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(identityKeyStore, keyStorePwd.toCharArray());
+        final KeyManager[] km = kmf.getKeyManagers();
+
+        final KeyStore trustKeyStore = KeyStore.getInstance(trustStoreType);
+        final File truststoreFile = new File(trustStoreFile);
+        final FileInputStream trustKeyStoreFile = new FileInputStream(truststoreFile);
+        trustKeyStore.load(trustKeyStoreFile, trustStorePwd.toCharArray());
+
+        final TrustManagerFactory tmf =
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustKeyStore);
+        final TrustManager[] tm = tmf.getTrustManagers();
+
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tm, SecureRandom.getInstanceStrong());
+        return sslContext;
+
+
+      }
+      //SSLContext sslContext = SSLContext.getDefault();
+
+
+
+      //SSLContext sc = SSLContext.getInstance("SSL");
+      //SSLContext sslContext = SSLContext.getDefault();
+      //sc.init(null, trustAllCerts, new SecureRandom());
+
+      //     return sc;
+    } catch (Exception e) {
+      System.out.println("Error occurred while creating ssl context. " + e.getMessage());
+      return null;
+    }
+  }
+  protected HttpClient getHttpsClient() {
+    if (httpClient == null) {
+      try {
+        httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .sslContext(getSslContext())
+            .sslParameters(getSslParematers())
+            .build();
+      } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return httpClient;
+  }
 
   protected HttpClient getHttpClient() {
     if (httpClient == null) {
@@ -96,7 +201,11 @@ public class WebClient implements Runnable {
     String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
-    getHttpClient();
+    if (url.startsWith("https")) {
+      getHttpsClient();
+    } else {
+      getHttpClient();
+    }
 
     HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
         .uri(URI.create(url));
