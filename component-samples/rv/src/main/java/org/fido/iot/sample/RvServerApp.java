@@ -6,7 +6,9 @@ package org.fido.iot.sample;
 import java.nio.file.Path;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
@@ -19,6 +21,10 @@ public class RvServerApp {
           ? Integer.parseInt(RvConfigLoader.loadConfig(RvAppSettings.TO0_TO1_PORT))
           : 8040;
 
+  private static final String RV_SCHEME =
+      null != RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME)
+          ? RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME) : "http";
+
   private static String getMessagePath(int msgId) {
     return RvAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
   }
@@ -26,8 +32,6 @@ public class RvServerApp {
   /** Runs the RV Application service. */
   public static void main(String[] args) {
     Tomcat tomcat = new Tomcat();
-
-    tomcat.setPort(RV_PORT);
 
     System.setProperty(
         RvAppSettings.SERVER_PATH,
@@ -76,6 +80,42 @@ public class RvServerApp {
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
 
+    Service service = tomcat.getService();
+    Connector httpsConnector = new Connector();
+
+    if (RV_SCHEME.toLowerCase().equals("https")) {
+
+      httpsConnector.setPort(RV_PORT);
+      httpsConnector.setSecure(true);
+      httpsConnector.setScheme(RV_SCHEME);
+
+      Path keyStoreFile =
+          Path.of(RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PATH));
+      String keystorePass =
+          RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PASSWORD);
+
+      httpsConnector.setProperty("keystorePass", keystorePass);
+      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+      httpsConnector.setProperty("clientAuth", "false");
+      httpsConnector.setProperty("sslProtocol", "TLS");
+      httpsConnector.setProperty("SSLEnabled", "true");
+      service.addConnector(httpsConnector);
+      tomcat.setConnector(httpsConnector);
+
+    } else if (RV_SCHEME.toLowerCase().equals("http")) {
+
+      Connector httpConnector = new Connector();
+      httpConnector.setPort(RV_PORT);
+      httpConnector.setScheme(RV_SCHEME);
+      httpConnector.setRedirectPort(8443);
+      httpConnector.setProperty("protocol", "HTTP/1.1");
+      httpConnector.setProperty("connectionTimeout", "20000");
+      service.addConnector(httpConnector);
+      tomcat.setConnector(httpConnector);
+
+    } else {
+      throw new RuntimeException("Unsupported Protocol Scheme Selected.");
+    }
     tomcat.getConnector();
     try {
       tomcat.start();

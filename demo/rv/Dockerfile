@@ -13,6 +13,7 @@ RUN mkdir -p /home/sdouser/lib
 
 # Setup rv dependencies
 COPY ./lib ./lib/
+COPY ./certs ./certs/
 COPY config.properties .
 COPY rv.jar .
 COPY rv-entrypoint.sh .
