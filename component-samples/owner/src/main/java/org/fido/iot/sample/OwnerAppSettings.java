@@ -12,6 +12,15 @@ public class OwnerAppSettings {
   // the port at which Owner is listening for TO2
   public static final String TO2_PORT = "owner_to2_port";
 
+  // To set the default protocol scheme
+  public static final String OWNER_SCHEME = "owner_protocol_scheme";
+
+  // SSL Keystore info
+  public static final String SSL_KEYSTORE_PATH = "owner_ssl_keystore";
+  public static final String SSL_KEYSTORE_PASSWORD = "owner_ssl_keystore-password";
+  public static final String SSL_TRUSTSTORE_PATH = "owner_ssl_keystore";
+  public static final String SSL_TRUSTSTORE_PASSWORD = "owner_ssl_keystore-password";
+
   // part of the path of exposed web APIs
   public static final String WEB_PATH = "/fdo/100/msg";
 
