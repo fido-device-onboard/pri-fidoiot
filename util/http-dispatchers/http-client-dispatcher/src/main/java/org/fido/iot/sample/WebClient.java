@@ -33,7 +33,7 @@ import org.fido.iot.protocol.MessageDispatcher;
  */
 public class WebClient implements Runnable {
 
-  private static final String SSL_MODE = "fido.ssl.mode";
+  private static final String SSL_MODE = "fido_ssl_mode";
   private final MessageDispatcher dispatcher;
   private HttpClient httpClient;
   private String baseUri;
@@ -111,24 +111,10 @@ public class WebClient implements Runnable {
         sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
         return sslContext;
       } else if (sslMode.toLowerCase().equals("prod")) {
-        //load values from catalina propeties
-        String keyStoreFile = "ocs-keystore.p12";
-        String keyStorePwd = "RT2y!KlP5";
-        String keyStoreType = "PKCS12";
 
-        String trustStoreFile = "mfg-trustore";
-        String trustStorePwd = "intel123";
-        String trustStoreType = "PKCS12";
-
-        final KeyStore identityKeyStore = KeyStore.getInstance(keyStoreType);
-        final File keystoreFile = new File(keyStoreFile);
-        final FileInputStream identityKeyStoreFile = new FileInputStream(keystoreFile);
-        identityKeyStore.load(identityKeyStoreFile, keyStorePwd.toCharArray());
-
-        final KeyManagerFactory kmf =
-            KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(identityKeyStore, keyStorePwd.toCharArray());
-        final KeyManager[] km = kmf.getKeyManagers();
+        String trustStoreFile = System.getProperty("ssl_truststore","truststore");
+        String trustStorePwd = System.getProperty("ssl_truststore_password");
+        String trustStoreType = System.getProperty("ssl_truststore_type","PKCS12");
 
         final KeyStore trustKeyStore = KeyStore.getInstance(trustStoreType);
         final File truststoreFile = new File(trustStoreFile);
@@ -144,16 +130,10 @@ public class WebClient implements Runnable {
         sslContext.init(null, tm, SecureRandom.getInstanceStrong());
         return sslContext;
 
-
       } else {
         throw new RuntimeException("Invalid SSL mode. Use TEST or PROD.");
       }
-      //SSLContext sslContext = SSLContext.getDefault();
-      //SSLContext sc = SSLContext.getInstance("SSL");
-      //SSLContext sslContext = SSLContext.getDefault();
-      //sc.init(null, trustAllCerts, new SecureRandom());
 
-      //     return sc;
     } catch (Exception e) {
       System.out.println("Error occurred while creating ssl context. " + e.getMessage());
       return null;
