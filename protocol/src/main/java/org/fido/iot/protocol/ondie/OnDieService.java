@@ -6,18 +6,16 @@ package org.fido.iot.protocol.ondie;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -107,6 +105,14 @@ public class OnDieService {
       return false;
     }
 
+    // validate that the cert chain is anchored to correct root CA
+    try {
+      if (!isRootCa(((X509Certificate) certChain.get(certChain.size() - 1)).getEncoded())) {
+        return false;
+      }
+    } catch (CertificateEncodingException ex) {
+      return false;
+    }
     return validateSignature(certChain.get(0).getPublicKey(), signedData, signature);
   }
 

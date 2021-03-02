@@ -75,7 +75,7 @@ public class To2ServerApp {
     Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
 
     System.out.println("Working Directory = " + odcPath.toString());
-    ctx.addParameter("ods.cacheDir",  odcPath.toString());
+    ctx.addParameter("ods.cacheDir",  odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations", "true");

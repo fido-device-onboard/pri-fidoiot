@@ -832,53 +832,31 @@ public class CryptoService {
    * Verifies certificate chain.
    *
    * @param certChain ownership voucher device certificate chain
-   * @param onDieChain true if OnDie, false otherwise
    */
-  public void verifyCertChain(Composite certChain, boolean onDieChain) {
-    LinkedList<X509Certificate> x509certs = new LinkedList<>();
-
+  public void verifyCertChain(Composite certChain) {
+    X509Certificate leafCertificate = null;
     try {
       final CertPath cp = getCertPath(certChain);
-
-      for (int i = 1; i < certChain.size(); i++) {
-        X509Certificate x509Certificate = (X509Certificate) cp.getCertificates().get(i);
-        x509certs.add(x509Certificate);
-      }
+      leafCertificate = (X509Certificate) cp.getCertificates().get(0);
     } catch (CertificateException e) {
       throw new CryptoServiceException(e);
     }
 
-    X509Certificate leafCertificate = x509certs.getFirst();
     verifyLeafPubKeyData(leafCertificate);
-    if (!onDieChain) {
-      verifyLeafCertPrivileges(leafCertificate);
-    }
+    verifyLeafCertPrivileges(leafCertificate);
   }
 
   /**
    * Verifies ownership voucher.
    *
    * @param voucher ownership voucher
-   * @param onDieService service for OnDie operations
    */
-  public void verifyVoucher(Composite voucher, OnDieService onDieService) {
-
-    boolean isOnDieChain = false;
-    try {
-      final CertPath cp = getCertPath(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
-      X509Certificate x509Certificate =
-              (X509Certificate) cp.getCertificates().get(cp.getCertificates().size() - 1);
-      if (onDieService != null) {
-        isOnDieChain = onDieService.isRootCa(x509Certificate.getEncoded());
-      }
-    } catch (Exception ex) {
-      // if cannot verify OnDie then fall back to default
-    }
+  public void verifyVoucher(Composite voucher) {
 
     verifyHash(
             voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
             voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
-    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN), isOnDieChain);
+    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
     verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 
@@ -1644,6 +1622,9 @@ public class CryptoService {
     Object chain = voucher.get(Const.OV_DEV_CERT_CHAIN);
     if (chain != null) {
       Composite certs = Composite.fromObject(chain);
+      if (certs.size() == 0) {
+        return null; // no cert chain so most likely a MAROE EPID device
+      }
       try {
         CertPath path = getCertPath(certs);
         return path.getCertificates().get(0).getPublicKey();
