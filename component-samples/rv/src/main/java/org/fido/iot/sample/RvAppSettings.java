@@ -9,7 +9,7 @@ public class RvAppSettings {
   public static final String TO0_TO1_PORT = "rv_port";
 
   // part of the path of exposed web APIs
-  public static final String WEB_PATH = "/fido/100/msg";
+  public static final String WEB_PATH = "/fdo/100/msg";
 
   // H2 database configuration keys and constants
   public static final String DB_URL = "rv_database_connection_url";
