@@ -9,7 +9,9 @@ import java.security.Provider;
 import java.security.Security;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -31,6 +33,10 @@ public class ManufacturerApp {
       .loadConfig(ManufacturerAppSettings.DI_PORT)
           ? Integer.parseInt(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_PORT))
           : 8039;
+
+  private static final String DI_SCHEME =
+      null != ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_SCHEME)
+          ? ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_SCHEME) : "http";
 
   private static String getMessagePath(int msgId) {
     return ManufacturerAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
@@ -55,7 +61,6 @@ public class ManufacturerApp {
     }
 
     Tomcat tomcat = new Tomcat();
-    tomcat.setPort(DI_PORT);
 
     //set the path of tomcat
     System.setProperty(ManufacturerAppSettings.SERVER_PATH,
@@ -143,6 +148,43 @@ public class ManufacturerApp {
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
+
+    Service service = tomcat.getService();
+    Connector httpsConnector = new Connector();
+
+    if (DI_SCHEME.toLowerCase().equals("https")) {
+
+      httpsConnector.setPort(DI_PORT);
+      httpsConnector.setSecure(true);
+      httpsConnector.setScheme(DI_SCHEME);
+
+      Path keyStoreFile =
+          Path.of(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PATH));
+      String keystorePass =
+          ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PASSWORD);
+
+      httpsConnector.setProperty("keystorePass", keystorePass);
+      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+      httpsConnector.setProperty("clientAuth", "false");
+      httpsConnector.setProperty("sslProtocol", "TLS");
+      httpsConnector.setProperty("SSLEnabled", "true");
+      service.addConnector(httpsConnector);
+      tomcat.setConnector(httpsConnector);
+
+    } else if (DI_SCHEME.toLowerCase().equals("http")) {
+
+      Connector httpConnector = new Connector();
+      httpConnector.setPort(DI_PORT);
+      httpConnector.setScheme(DI_SCHEME);
+      httpConnector.setRedirectPort(8443);
+      httpConnector.setProperty("protocol", "HTTP/1.1");
+      httpConnector.setProperty("connectionTimeout", "20000");
+      service.addConnector(httpConnector);
+      tomcat.setConnector(httpConnector);
+
+    } else {
+      throw new RuntimeException("Unsupported Protocol Scheme Selected.");
+    }
 
     tomcat.getConnector();
     try {

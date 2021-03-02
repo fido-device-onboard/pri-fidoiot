@@ -7,6 +7,13 @@ public class ManufacturerAppSettings {
 
   public static final String DI_PORT = "manufacturer_di_port";
 
+  // To set the default protocol scheme
+  public static final String DI_SCHEME = "mfg_protocol_scheme";
+
+  // SSL Keystore info
+  public static final String SSL_KEYSTORE_PATH = "mfg.ssl.keystore";
+  public static final String SSL_KEYSTORE_PASSWORD = "mfg.ssl.keystore-password";
+
   // part of the path of exposed web APIs
   public static final String WEB_PATH = "/fdo/100/msg";
   
