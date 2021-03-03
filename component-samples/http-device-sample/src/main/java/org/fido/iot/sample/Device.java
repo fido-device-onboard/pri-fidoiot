@@ -55,6 +55,8 @@ public class Device {
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
   private static final String PROPERTY_SERVICE_INFO_MTU = "fido.iot.device.service.info.mtu";
   private static final String PROPERTY_CRED_REUSE_SUPPORT = "fido.iot.device.cred.reuse";
+  private static final String PROPERTY_CIPHER_SUITE = "fido.iot.cipher";
+
   private static boolean rvBypass;
 
   private static final Logger logger = LogManager.getLogger();
@@ -330,7 +332,8 @@ public class Device {
 
       @Override
       public String getCipherSuiteName() {
-        return Const.AES128_CTR_HMAC256_ALG_NAME;
+        return System.getProperties().getProperty(
+            PROPERTY_CIPHER_SUITE, Const.AES128_CTR_HMAC256_ALG_NAME);
       }
 
       @Override
