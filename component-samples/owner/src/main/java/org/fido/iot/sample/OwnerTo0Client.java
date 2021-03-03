@@ -111,6 +111,11 @@ public class OwnerTo0Client {
 
     List<String> paths = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_OWNER_ONLY);
 
+    if (paths.size() == 0) {
+      System.out.println("No Directives found. Invalid RVInfo Blob in " + guid.toString());
+      throw new IOException("TO0 failed for " + guid.toString() + ".");
+    }
+
     for (String path : paths) {
 
       try {
