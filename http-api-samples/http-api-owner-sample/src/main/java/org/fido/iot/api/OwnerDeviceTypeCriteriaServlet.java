@@ -1,10 +1,6 @@
-// Copyright 2020 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
 package org.fido.iot.api;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,7 +10,9 @@ import javax.sql.DataSource;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.storage.OwnerDbManager;
 
-public class OwnerSviServlet extends HttpServlet {
+public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
+
+  private static final String DELIMITER = " ";
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -25,19 +23,23 @@ public class OwnerSviServlet extends HttpServlet {
       return;
     }
 
-    UUID guid = UUID.fromString(req.getParameter("guid"));
-    String sviDelimeted = req.getReader().lines().collect(Collectors.joining());
-    if (guid == null || sviDelimeted == null) {
-      resp.setStatus(400);
-      return;
-    }
-
     try {
-      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      OwnerDbManager ownerDbManager = new OwnerDbManager();
-      // remove previous associations by default, since we have to upload the entire SVI list
-      ownerDbManager.removeSviFromDevice(ds, guid);
-      ownerDbManager.assignSviToDevice(ds, guid, sviDelimeted);
+      String requestBody = req.getReader().lines().collect(Collectors.joining());
+      if (requestBody != null) {
+
+        DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+        OwnerDbManager ownerDbManager = new OwnerDbManager();
+
+        String[] deviceTypeCriteria = requestBody.split(DELIMITER);
+        if (deviceTypeCriteria.length != 3) {
+          getServletContext().log("Invalid request has been provided.");
+          resp.setStatus(400);
+          return;
+        }
+
+        ownerDbManager.addDeviceTypeCriteria(
+            ds, deviceTypeCriteria[0], deviceTypeCriteria[1], deviceTypeCriteria[2]);
+      }
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -47,15 +49,15 @@ public class OwnerSviServlet extends HttpServlet {
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    UUID guid = UUID.fromString(req.getParameter("guid"));
-    if (guid == null) {
+    String deviceType = req.getParameter("devicetype");
+    if (deviceType == null) {
       resp.setStatus(400);
       return;
     }
 
     try {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      new OwnerDbManager().removeSviFromDevice(ds, guid);
+      new OwnerDbManager().removeDeviceTypeCriteria(ds, deviceType);
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }

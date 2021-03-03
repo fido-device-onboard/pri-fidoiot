@@ -89,7 +89,7 @@ public class WebClient implements Runnable {
     if (baseUri.endsWith("/")) {
       leadPath = "";
     }
-    return baseUri + leadPath + "fido/" + Integer.toString(protocolVersion)
+    return baseUri + leadPath + "fdo/" + Integer.toString(protocolVersion)
         + "/msg/" + Integer.toString(msgId);
   }
 

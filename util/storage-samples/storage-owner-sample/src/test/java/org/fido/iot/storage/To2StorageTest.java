@@ -66,7 +66,7 @@ public class To2StorageTest {
       + "034200042c02709032b3fc1696ab55b1ecf8e44795b92cb21b6a681265e54d525c8533fb74b0c0310166ef11b"
       + "0f32aef76e135f86acdd65633267de932b31df43e50c625a310300e300c0603551d13040530030101ff300a06"
       + "082a8648ce3d0403020348003045022100a5419b823613d24eb701e440b4f3368be5675ba72461a272bc52eeb"
-      + "96c3e414002204e70d27b631cb6efc26aa0c027e1e53eaef1ec5074203683d1ecbb9de129c6928184a1012640"
+      + "96c3e414002204e70d27b631cb6efc26aa0c027e1e53eaef1ec5074203683d1ecbb9de129c692818443a1012680"
       + "588e8382085820b7db8ebbceb119147d28a70ae50de328cdb7d7984ecf147b90d117ac721a6c128208582082d"
       + "4659e9dbbc7fac58ad015faf42ac0947ee511d752ab37edc42eb0d969df28830d025840595504d86d062f2f2c"
       + "72600ec90ca1701885fdf4947778bf3a0ed70d286225bd88b1b099491aadd5e935e486de088e73ec11de6b619"
@@ -139,7 +139,7 @@ public class To2StorageTest {
   String filename = "sample_file";
   String url = "http://host/file.tmp";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-  ",sdo_wget:filename=filename,sdo_sys:url=url";
+  ",sdo_wget:filename=filename,sdo_wget:url=url";
 
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
@@ -170,20 +170,18 @@ public class To2StorageTest {
     };
   }
 
-  private void insertSampleServiceInfo(UUID uuid, DataSource ds, OwnerDbManager ownerDbManager) {
+  private void insertSampleServiceInfo(DataSource ds, OwnerDbManager ownerDbManager) {
 
     ownerDbManager.addServiceInfo(ds, "activate_mod", activateMod.getBytes());
     ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
     ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
     ownerDbManager.addServiceInfo(ds, "filename", filename.getBytes());
     ownerDbManager.addServiceInfo(ds, "url", url.getBytes());
-
-    ownerDbManager.removeSviFromDevice(ds, uuid);
-    ownerDbManager.assignSviToDevice(ds, uuid, sviString);
   }
 
   private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
     ownerDbManager.loadTo2Settings(ds);
+    ownerDbManager.addDeviceTypeOwnerSviString(ds, "default", sviString);
   }
 
   @Test
@@ -384,9 +382,7 @@ public class To2StorageTest {
       OwnerDbManager dbsManager = new OwnerDbManager();
       dbsManager.createTables(ds);
       dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
-      insertSampleServiceInfo(Composite.fromObject(VOUCHER)
-          .getAsComposite(Const.OV_HEADER)
-          .getAsUuid(Const.OVH_GUID), ds, dbsManager);
+      insertSampleServiceInfo(ds, dbsManager);
       insertSampleSettings(ds, dbsManager);
 
       DispatchResult dr = to2ClientService.getHelloMessage();

@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.crypto.BadPaddingException;
@@ -677,7 +678,15 @@ public class CryptoService {
       }
       return false;
     }
-    final Composite header1 = cose.getAsComposite(Const.COSE_SIGN1_PROTECTED);
+
+    final Composite header1;
+    final Object rawHeader = cose.get(Const.COSE_SIGN1_PROTECTED);
+    if (rawHeader instanceof byte[]) {
+      final byte[] protectedHeader = cose.getAsBytes(Const.COSE_SIGN1_PROTECTED);
+      header1 = Composite.fromObject(protectedHeader);
+    } else {
+      throw new UnsupportedOperationException("Illegal protected header encoding");
+    }
     final int algId = header1.getAsNumber(Const.COSE_ALG).intValue();
     final ByteBuffer payload = cose.getAsByteBuffer(Const.COSE_SIGN1_PAYLOAD);
     final byte[] sig = cose.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
@@ -832,53 +841,31 @@ public class CryptoService {
    * Verifies certificate chain.
    *
    * @param certChain ownership voucher device certificate chain
-   * @param onDieChain true if OnDie, false otherwise
    */
-  public void verifyCertChain(Composite certChain, boolean onDieChain) {
-    LinkedList<X509Certificate> x509certs = new LinkedList<>();
-
+  public void verifyCertChain(Composite certChain) {
+    X509Certificate leafCertificate = null;
     try {
       final CertPath cp = getCertPath(certChain);
-
-      for (int i = 1; i < certChain.size(); i++) {
-        X509Certificate x509Certificate = (X509Certificate) cp.getCertificates().get(i);
-        x509certs.add(x509Certificate);
-      }
+      leafCertificate = (X509Certificate) cp.getCertificates().get(0);
     } catch (CertificateException e) {
       throw new CryptoServiceException(e);
     }
 
-    X509Certificate leafCertificate = x509certs.getFirst();
     verifyLeafPubKeyData(leafCertificate);
-    if (!onDieChain) {
-      verifyLeafCertPrivileges(leafCertificate);
-    }
+    verifyLeafCertPrivileges(leafCertificate);
   }
 
   /**
    * Verifies ownership voucher.
    *
    * @param voucher ownership voucher
-   * @param onDieService service for OnDie operations
    */
-  public void verifyVoucher(Composite voucher, OnDieService onDieService) {
-
-    boolean isOnDieChain = false;
-    try {
-      final CertPath cp = getCertPath(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
-      X509Certificate x509Certificate =
-              (X509Certificate) cp.getCertificates().get(cp.getCertificates().size() - 1);
-      if (onDieService != null) {
-        isOnDieChain = onDieService.isRootCa(x509Certificate.getEncoded());
-      }
-    } catch (Exception ex) {
-      // if cannot verify OnDie then fall back to default
-    }
+  public void verifyVoucher(Composite voucher) {
 
     verifyHash(
             voucher.getAsComposite(Const.OV_HEADER).getAsComposite(Const.OVH_CERT_CHAIN_HASH),
             voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN).toBytes());
-    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN), isOnDieChain);
+    verifyCertChain(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
     verify(voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN));
   }
 
@@ -892,9 +879,13 @@ public class CryptoService {
    */
   public Composite sign(PrivateKey signingKey, byte[] payload, int coseSignatureAlg) {
 
+    final byte[] protectedHeader = Composite.newMap()
+        .set(Const.COSE_ALG, coseSignatureAlg)
+        .toBytes();
+
     final Composite cos = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap().set(Const.COSE_ALG, coseSignatureAlg))
-        .set(Const.COSE_SIGN1_UNPROTECTED, Const.EMPTY_BYTE)
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
+        .set(Const.COSE_SIGN1_UNPROTECTED, Composite.newMap())
         .set(Const.COSE_SIGN1_PAYLOAD, payload);
 
     try {
@@ -1327,10 +1318,11 @@ public class CryptoService {
       throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
 
+    byte[] protectedHeader = Composite.newMap()
+        .set(Const.ETM_AES_PLAIN_TYPE, aesType)
+        .toBytes();
     Composite cose0 = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED,
-            Composite.newMap()
-                .set(Const.ETM_AES_PLAIN_TYPE, aesType))
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
         .set(Const.COSE_SIGN1_UNPROTECTED,
             Composite.newMap()
                 .set(Const.ETM_AES_IV, iv))
@@ -1348,10 +1340,13 @@ public class CryptoService {
     }
     byte[] payload = cose0.toBytes();
     Composite mac = hash(hmacType, secret, payload);
+
+    protectedHeader = Composite.newMap()
+        .set(Const.ETM_MAC_TYPE, hmacType)
+        .toBytes();
     Composite mac0 = Composite.newArray()
-        .set(Const.COSE_SIGN1_PROTECTED, Composite.newMap()
-            .set(Const.ETM_MAC_TYPE, hmacType))
-        .set(Const.COSE_SIGN1_UNPROTECTED, Const.EMPTY_BYTE)
+        .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
+        .set(Const.COSE_SIGN1_UNPROTECTED, Composite.newMap())
         .set(Const.COSE_SIGN1_PAYLOAD, payload)
         .set(Const.COSE_SIGN1_SIGNATURE, mac.getAsBytes(Const.HASH));
 
@@ -1517,7 +1512,8 @@ public class CryptoService {
       cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(iv));
       final byte[] ciphered = cose0.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
       final byte[] mac1 = message.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
-      final Composite prh = message.getAsComposite(Const.COSE_SIGN1_PROTECTED);
+      final byte[] protectedHeader = message.getAsBytes(Const.COSE_SIGN1_PROTECTED);
+      final Composite prh = Composite.fromObject(protectedHeader);
       int macType = prh.getAsNumber(Const.ETM_MAC_TYPE).intValue();
 
       Composite mac2 = hash(macType, svk, cose0.toBytes());
@@ -1644,6 +1640,9 @@ public class CryptoService {
     Object chain = voucher.get(Const.OV_DEV_CERT_CHAIN);
     if (chain != null) {
       Composite certs = Composite.fromObject(chain);
+      if (certs.size() == 0) {
+        return null; // no cert chain so most likely a MAROE EPID device
+      }
       try {
         CertPath path = getCertPath(certs);
         return path.getCertificates().get(0).getPublicKey();

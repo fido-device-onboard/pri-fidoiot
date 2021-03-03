@@ -26,7 +26,7 @@ public class To2ServerApp {
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
 
-  private static final String WEB_PATH = "/fido/100/msg";
+  private static final String WEB_PATH = "/fdo/100/msg";
   private static final String DB_PATH = Path.of(System.getProperty("user.dir"),
       "target", "data", "ops").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
@@ -75,7 +75,7 @@ public class To2ServerApp {
     Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
 
     System.out.println("Working Directory = " + odcPath.toString());
-    ctx.addParameter("ods.cacheDir",  odcPath.toString());
+    ctx.addParameter("ods.cacheDir",  odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations", "true");

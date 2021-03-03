@@ -15,6 +15,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fido.iot.api.AssignCustomerServlet;
 import org.fido.iot.api.DiApiServlet;
+import org.fido.iot.api.RvInfoServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -30,7 +31,7 @@ public class DiApp {
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
 
-  private static final String WEB_PATH = "/fido/100/msg";
+  private static final String WEB_PATH = "/fdo/100/msg";
   private static final String DB_PATH = Path.of(System.getProperty("user.dir"),
       "target", "data", "mfg").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
@@ -87,7 +88,7 @@ public class DiApp {
     // OnDie cert cache is included with the protocol samples.
     Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
 
-    ctx.addParameter("ods.cacheDir", odcPath.toString());
+    ctx.addParameter("ods.cacheDir", odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations",
@@ -109,6 +110,9 @@ public class DiApp {
 
     wrapper = tomcat.addServlet(ctx, "AssignCustomerApi", new AssignCustomerServlet());
     wrapper.addMapping("/api/v1/assign/*");
+
+    wrapper = tomcat.addServlet(ctx, "UpdateRvInfoApi", new RvInfoServlet());
+    wrapper.addMapping("/api/v1/rvinfo/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
