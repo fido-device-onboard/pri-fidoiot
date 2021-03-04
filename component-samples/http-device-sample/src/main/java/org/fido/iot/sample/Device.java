@@ -4,6 +4,7 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -295,12 +296,15 @@ public class Device {
         if (null != signedBlob.get()) {
           break;
         }
+        try {
+          logger.info("TO1 URL is " + url);
 
-        logger.info("TO1 URL is " + url);
-
-        DispatchResult dr = to1Service.getHelloMessage();
-        WebClient client = new WebClient(url, dr, to1Dispatcher);
-        client.run();
+          DispatchResult dr = to1Service.getHelloMessage();
+          WebClient client = new WebClient(url, dr, to1Dispatcher);
+          client.run();
+        } catch (RuntimeException e) {
+          logger.info("Unable to contact RV at " + url + ". " + e.getMessage());
+        }
       }
     } else {
       logger.info("RVBypass flag is set, Skipping T01.");
@@ -482,10 +486,13 @@ public class Device {
       }
 
       logger.info("TO2 URL is " + url);
-
-      DispatchResult dr = to2Service.getHelloMessage();
-      WebClient client = new WebClient(url, dr, to2Dispatcher);
-      client.run();
+      try {
+        DispatchResult dr = to2Service.getHelloMessage();
+        WebClient client = new WebClient(url, dr, to2Dispatcher);
+        client.run();
+      } catch (RuntimeException e) {
+        logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
+      }
     }
   }
 
