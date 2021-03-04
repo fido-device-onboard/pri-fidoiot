@@ -6,6 +6,7 @@ package org.fido.iot.storage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +44,7 @@ import org.fido.iot.protocol.To2ClientStorage;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
 import org.junit.jupiter.api.TestMethodOrder;
+
 
 @TestMethodOrder(Alphanumeric.class)
 public class To2StorageTest {
@@ -121,6 +123,25 @@ public class To2StorageTest {
       + "AwEHoUQDQgAEpYLwcuxqR0bY58l0VYpsTsaUzpFCCpeN3bmV0gHp5xLHMwvBFRyO\n"
       + "tlYxN0Xax8cEDsfvIuVJYhYytbOGPkZ8mA==\n"
       + "-----END EC PRIVATE KEY-----";
+
+  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
+      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
+      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
 
   private static final String BASE_PATH = Path.of(
       System.getProperty("user.dir"),
@@ -204,6 +225,7 @@ public class To2StorageTest {
   private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
     ownerDbManager.loadTo2Settings(ds);
     ownerDbManager.addDeviceTypeOwnerSviString(ds, "default", sviString);
+    ownerDbManager.addCustomer(ds, 1, "owner", ownerKeysPem);
   }
 
   @Test
@@ -403,9 +425,9 @@ public class To2StorageTest {
 
       OwnerDbManager dbsManager = new OwnerDbManager();
       dbsManager.createTables(ds);
-      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
       insertSampleServiceInfo(ds, dbsManager);
       insertSampleSettings(ds, dbsManager);
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 
@@ -627,6 +649,72 @@ public class To2StorageTest {
               "devmod:os", "Linux");
           }
       );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void updateReplacementKeyCustomerIdTest() {
+    String args[] = new String[] {"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+      assertDoesNotThrow(
+          () -> {
+            dbsManager.addCustomer(
+                ds,
+                100,
+                "Test",
+                "-----BEGIN PUBLIC KEY-----\n"
+                    + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+                    + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+                    + "-----END PUBLIC KEY-----\n");
+            dbsManager.updateReplacementKeyCustomerId(
+                ds, UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"), 100);
+          });
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void addAndRemoveCustomerTest() {
+    String args[] = new String[] {"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          () -> {
+            dbsManager.addCustomer(
+                ds,
+                100,
+                "Test",
+                "-----BEGIN PUBLIC KEY-----\n"
+                    + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+                    + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+                    + "-----END PUBLIC KEY-----\n");
+            dbsManager.removeCustomer(ds, String.valueOf(100));
+          });
 
     } catch (SQLException throwables) {
       throwables.printStackTrace();
