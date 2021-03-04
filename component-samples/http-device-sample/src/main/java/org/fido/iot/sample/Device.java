@@ -205,7 +205,7 @@ public class Device {
       }
     };
 
-    String url = System.getProperties().getProperty(PROPERTY_DI_URL, "https://localhost:8039/");
+    String url = System.getProperties().getProperty(PROPERTY_DI_URL, "http://localhost:8039/");
     logger.info("DI URL is " + url);
 
     DispatchResult dr = service.getHelloMessage();
