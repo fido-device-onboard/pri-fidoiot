@@ -234,7 +234,7 @@ public abstract class To2ServerService extends MessagingService {
           (getStorage()
               .getMaxDeviceServiceInfoMtuSz()
               .equals(String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE))
-              ? PrimitivesUtil.getCborNullBytes()
+              ? null
               : Integer.parseInt(getStorage().getMaxDeviceServiceInfoMtuSz())));
 
       body = getCryptoService().encrypt(payload.toBytes(),
