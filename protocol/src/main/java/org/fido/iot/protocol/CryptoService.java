@@ -39,6 +39,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
@@ -50,9 +51,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.crypto.BadPaddingException;
@@ -61,8 +60,15 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CCMBlockCipher;
+import org.bouncycastle.crypto.params.CCMParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
@@ -196,6 +202,9 @@ public class CryptoService {
       case Const.AES128_CTR_HMAC256_ALG_NAME:
       case Const.AES256_CTR_HMAC384_ALG_NAME:
         return Cipher.getInstance("AES/CTR/NoPadding");
+      case Const.AES128_GCM_ALG_NAME:
+      case Const.AES256_GCM_ALG_NAME:
+        return Cipher.getInstance("AES/GCM/NoPadding");
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
@@ -1303,8 +1312,14 @@ public class CryptoService {
     return shSe;
   }
 
-  protected Composite encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv, String cipherName) {
+  private boolean isSimpleEncryptedMessage(int aesType) {
+    return Const.ETM_AES128_GCM == aesType
+        || Const.ETM_AES256_GCM == aesType
+        || Const.ETM_AES_CCM_64_128_128 == aesType
+        || Const.ETM_AES_CCM_64_128_256 == aesType;
+  }
 
+  private int cipherNameToAesType(String cipherName) {
     int aesType;
     if (cipherName.equals(Const.AES128_CTR_HMAC256_ALG_NAME)) {
       aesType = Const.ETM_AES128_CTR;
@@ -1314,19 +1329,44 @@ public class CryptoService {
       aesType = Const.ETM_AES256_CBC;
     } else if (cipherName.equals(Const.AES256_CTR_HMAC384_ALG_NAME)) {
       aesType = Const.ETM_AES256_CTR;
+    } else if (cipherName.equals(Const.AES128_GCM_ALG_NAME)) {
+      aesType = Const.ETM_AES128_GCM;
+    } else if (cipherName.equals(Const.AES256_GCM_ALG_NAME)) {
+      aesType = Const.ETM_AES256_GCM;
+    } else if (cipherName.equals(Const.AES_CCM_64_128_128_ALG_NAME)) {
+      aesType = Const.ETM_AES_CCM_64_128_128;
+    } else if (cipherName.equals(Const.AES_CCM_64_128_256_ALG_NAME)) {
+      aesType = Const.ETM_AES_CCM_64_128_256;
     } else {
       throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
 
+    return aesType;
+  }
+
+  private byte[] buildEncrypt0ProtectedHeader(int aesType) {
+
     byte[] protectedHeader = Composite.newMap()
         .set(Const.ETM_AES_PLAIN_TYPE, aesType)
         .toBytes();
+    return protectedHeader;
+  }
+
+  protected Composite encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv, String cipherName) {
+
+    int aesType = cipherNameToAesType(cipherName);
+    byte[] protectedHeader = buildEncrypt0ProtectedHeader(aesType);
+
     Composite cose0 = Composite.newArray()
         .set(Const.COSE_SIGN1_PROTECTED, protectedHeader)
         .set(Const.COSE_SIGN1_UNPROTECTED,
             Composite.newMap()
                 .set(Const.ETM_AES_IV, iv))
         .set(Const.COSE_SIGN1_PAYLOAD, ciphered);
+
+    if (isSimpleEncryptedMessage(aesType)) { // not all encrypted messages use the 'composed' type
+      return cose0;
+    }
 
     int hmacType;
     if (cipherName.equals(Const.AES128_CTR_HMAC256_ALG_NAME)
@@ -1488,6 +1528,33 @@ public class CryptoService {
     }
   }
 
+  private int coseEncrypt0ToAesType(Composite encrypt0) {
+    // aesType is encoded in the protected header, and lets us decide if this is a simple
+    // or composed message.
+    final byte[] protectedHeader = encrypt0.getAsBytes(Const.COSE_SIGN1_PROTECTED);
+    final Composite prh = Composite.fromObject(protectedHeader);
+    final int aesType = prh.getAsNumber(Const.ETM_AES_PLAIN_TYPE).intValue();
+
+    return aesType;
+  }
+
+  private Cipher aesTypeToCipher(int aesType)
+      throws NoSuchPaddingException, NoSuchAlgorithmException {
+
+    switch (aesType) {
+      case Const.ETM_AES128_CTR:
+      case Const.ETM_AES256_CTR:
+        return Cipher.getInstance("AES/CTR/NoPadding");
+
+      case Const.ETM_AES128_GCM:
+      case Const.ETM_AES256_GCM:
+        return Cipher.getInstance("AES/GCM/NoPadding");
+
+      default:
+        throw new UnsupportedOperationException("AESType: " + aesType);
+    }
+  }
+
   /**
    * Decrypts a message.
    *
@@ -1497,34 +1564,114 @@ public class CryptoService {
    */
   public byte[] decrypt(Composite message, Composite state) {
     try {
-      final Cipher cipher = getCipherInstance(state.getAsString(Const.FIRST_KEY));
       final Composite keys = state.getAsComposite(Const.SECOND_KEY);
-      //final byte[] iv = state.getAsBytes(Const.THIRD_KEY);
       final byte[] sek = keys.getAsBytes(Const.FIRST_KEY);
       final byte[] svk = keys.getAsBytes(Const.SECOND_KEY);
       final Key keySpec = new SecretKeySpec(sek, Const.AES);
 
-      final Composite cose0 = Composite.fromObject(message.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+      final Composite cose0;
+      int aesType = coseEncrypt0ToAesType(message);
+      final byte[] aad;
+
+      if (isSimpleEncryptedMessage(aesType)) {
+
+        cose0 = message;
+        aad = Composite.newArray()
+            .set(0, Const.COSE_CONTEXT_ENCRYPT0)
+            .set(1, cose0.getAsBytes(Const.COSE_SIGN1_PROTECTED))
+            .set(2, new byte[0])
+            .toBytes();
+
+      } else { // legacy (composed) message
+
+        cose0 = Composite.fromObject(message.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+        aad = new byte[0];
+        int macType = aesType; // what we thought was AES type is really MAC type, and...
+        aesType = coseEncrypt0ToAesType(cose0); // the REAL AES type is wrapped
+        final byte[] mac1 = message.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
+
+        Composite mac2 = hash(macType, svk, cose0.toBytes());
+        this.verifyBytes(mac1, mac2.getAsBytes(Const.HASH));
+
+      }
 
       final Composite uph = cose0.getAsComposite(Const.COSE_SIGN1_UNPROTECTED);
       final byte[] iv = uph.getAsBytes(Const.ETM_AES_IV);
 
-      cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(iv));
-      final byte[] ciphered = cose0.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
-      final byte[] mac1 = message.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
-      final byte[] protectedHeader = message.getAsBytes(Const.COSE_SIGN1_PROTECTED);
-      final Composite prh = Composite.fromObject(protectedHeader);
-      int macType = prh.getAsNumber(Const.ETM_MAC_TYPE).intValue();
 
-      Composite mac2 = hash(macType, svk, cose0.toBytes());
-      this.verifyBytes(mac1, mac2.getAsBytes(Const.HASH));
 
-      return cipher.doFinal(ciphered);
+      if (isCcmCipher(aesType)) {
+
+        final byte[] ciphered = cose0.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+        return ccmEncrypt(false, ciphered, sek, iv, aad);
+
+      } else {
+
+        AlgorithmParameterSpec cipherParams;
+        if (isGcmCipher(aesType)) { // GCM ciphers use GCMParameterSpec
+          cipherParams = new GCMParameterSpec(Const.GCM_TAG_LENGTH, iv);
+        } else {
+          cipherParams = new IvParameterSpec(iv);
+        }
+
+        final Cipher cipher = aesTypeToCipher(aesType);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, cipherParams);
+        cipher.updateAAD(aad, 0, aad.length);
+
+        final byte[] ciphered = cose0.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+        return cipher.doFinal(ciphered);
+
+      }
     } catch (NoSuchPaddingException | NoSuchAlgorithmException
         | InvalidAlgorithmParameterException | InvalidKeyException
         | BadPaddingException | IllegalBlockSizeException e) {
       throw new CryptoServiceException(e);
     }
+  }
+
+  private boolean isCtrCipher(String name) {
+    return Const.AES128_CTR_HMAC256_ALG_NAME.equals(name)
+        || Const.AES256_CTR_HMAC384_ALG_NAME.equals(name);
+  }
+
+  private boolean isGcmCipher(String name) {
+    return Const.AES128_GCM_ALG_NAME.equals(name)
+        || Const.AES256_GCM_ALG_NAME.equals(name);
+  }
+
+  private boolean isGcmCipher(int type) {
+    return Const.ETM_AES128_GCM == type || Const.ETM_AES256_GCM == type;
+  }
+
+  private boolean isCcmCipher(String name) {
+    return Const.AES_CCM_64_128_128_ALG_NAME.equals(name)
+        || Const.AES_CCM_64_128_256_ALG_NAME.equals(name);
+  }
+
+  private boolean isCcmCipher(int type) {
+    return Const.ETM_AES_CCM_64_128_128 == type || Const.ETM_AES_CCM_64_128_256 == type;
+  }
+
+  private byte[] ccmEncrypt(
+      boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv, byte[] aad) {
+
+    final int macSize = 128; // All CCM cipher modes use this size
+
+    BlockCipher engine = new AESEngine();
+    CCMParameters params = new CCMParameters(new KeyParameter(sek), macSize, iv, null);
+
+    CCMBlockCipher cipher = new CCMBlockCipher(engine);
+    cipher.init(forEncryption, params);
+    byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
+    int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
+    cipher.processAADBytes(aad, 0, aad.length);
+    try {
+      cipher.doFinal(outputText, outputLen);
+    } catch (InvalidCipherTextException e) {
+      throw new RuntimeException(e);
+    }
+
+    return outputText;
   }
 
   /**
@@ -1537,19 +1684,62 @@ public class CryptoService {
   public Composite encrypt(byte[] payload, Composite state) {
     try {
       final String cipherName = state.getAsString(Const.FIRST_KEY);
-      final Cipher cipher = getCipherInstance(cipherName);
       final Composite keys = state.getAsComposite(Const.SECOND_KEY);
-      final byte[] iv = state.getAsBytes(Const.THIRD_KEY);
       final byte[] sek = keys.getAsBytes(Const.FIRST_KEY);
       final byte[] sev = keys.getAsBytes(Const.SECOND_KEY);
       final Key keySpec = new SecretKeySpec(sek, Const.AES);
 
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(iv));
+      final byte[] iv;
+      if (isCtrCipher(cipherName)) {
+        iv = state.getAsBytes(Const.THIRD_KEY);
+      } else if (isCcmCipher(cipherName)) { // CCM modes use a 7-byte nonce
+        iv = getRandomBytes(7);
+      } else { // all other ciphers use a random IV
+        iv = getRandomBytes(sek.length);
+      }
 
-      final byte[] ciphered = cipher.doFinal(payload);
+      int aesType = cipherNameToAesType(cipherName);
+      byte[] protectedHeader = buildEncrypt0ProtectedHeader(aesType);
+
+      byte[] aad;
+      if (isCcmCipher(cipherName) || isGcmCipher(cipherName)) {
+        // Simple encrypt0 types use AAD as described in the COSE spec
+        aad = Composite.newArray()
+            .set(0, Const.COSE_CONTEXT_ENCRYPT0)
+            .set(1, protectedHeader)
+            .set(2, new byte[0])
+            .toBytes();
+      } else {
+        aad = new byte[0];
+      }
+
+      final byte[] ciphered;
+      if (isCcmCipher(cipherName)) {
+
+        ciphered = ccmEncrypt(true, payload, sek, iv, aad);
+
+      } else {
+
+        AlgorithmParameterSpec cipherParams;
+        if (isGcmCipher(cipherName)) { // GCM ciphers use GCMParameterSpec
+          cipherParams = new GCMParameterSpec(Const.GCM_TAG_LENGTH, iv);
+        } else {
+          cipherParams = new IvParameterSpec(iv);
+        }
+
+        final Cipher cipher = getCipherInstance(cipherName);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, cipherParams);
+        cipher.updateAAD(aad, 0, aad.length);
+        ciphered = cipher.doFinal(payload);
+
+      }
 
       Composite message = encryptThenMac(sev, ciphered, iv, cipherName);
-      updateIv(ciphered.length, state);
+
+      if (isCtrCipher(cipherName)) {
+        updateIv(ciphered.length, state);
+      }
+
       return message;
 
     } catch (NoSuchPaddingException | NoSuchAlgorithmException
@@ -1570,22 +1760,38 @@ public class CryptoService {
 
     final Composite state = Composite.newArray();
 
+    state.set(Const.FIRST_KEY, cipherSuite);
+
     if (cipherSuite.equals(Const.AES128_CTR_HMAC256_ALG_NAME)) {
-      state.set(Const.FIRST_KEY, Const.AES128_CTR_HMAC256_ALG_NAME);
+
       state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
       state.set(Const.THIRD_KEY, getCtrIv());
       state.set(Const.FOURTH_KEY, 0L);
+
     } else if (cipherSuite.equals(Const.AES128_CBC_HMAC256_ALG_NAME)) {
-      state.set(Const.FIRST_KEY, Const.AES128_CBC_HMAC256_ALG_NAME);
+
       state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
+
     } else if (cipherSuite.equals(Const.AES256_CTR_HMAC384_ALG_NAME)) {
-      state.set(Const.FIRST_KEY, Const.AES256_CTR_HMAC384_ALG_NAME);
+
       state.set(Const.SECOND_KEY, getLargerKdf(shSe));
       state.set(Const.THIRD_KEY, getCtrIv());
       state.set(Const.FOURTH_KEY, 0L);
+
     } else if (cipherSuite.equals(Const.AES256_CBC_HMAC384_ALG_NAME)) {
-      state.set(Const.FIRST_KEY, Const.AES256_CBC_HMAC384_ALG_NAME);
+
       state.set(Const.SECOND_KEY, getLargerKdf(shSe));
+
+    } else if (cipherSuite.equals(Const.AES128_GCM_ALG_NAME)
+        || cipherSuite.equals(Const.AES_CCM_64_128_128_ALG_NAME)) {
+
+      state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
+
+    } else if (cipherSuite.equals(Const.AES256_GCM_ALG_NAME)
+        || cipherSuite.equals(Const.AES_CCM_64_128_256_ALG_NAME)) {
+
+      state.set(Const.SECOND_KEY, getLargerKdf(shSe));
+
     } else {
       throw new CryptoServiceException(new NoSuchAlgorithmException(cipherSuite));
     }
