@@ -108,7 +108,16 @@ public final class Const {
   public static final int SDO_CLAIM_KEXB = 3;
 
   public static final int ETM_AES128_GCM = 1;
-  public static final int ETM_AES128_CCM = 10;
+  public static final int ETM_AES256_GCM = 3;
+  public static final int ETM_AES_CCM_64_128_128 = 32;
+  public static final int ETM_AES_CCM_64_128_256 = 33;
+
+  public static final String AES128_GCM_ALG_NAME = "AES128GCM";
+  public static final String AES256_GCM_ALG_NAME = "AES256GCM";
+  public static final String AES_CCM_64_128_128_ALG_NAME = "AES-CCM-64-128-128";
+  public static final String AES_CCM_64_128_256_ALG_NAME = "AES-CCM-64-128-256";
+
+  public static final int GCM_TAG_LENGTH = 128; // all GCM modes use a 128-bit tag
 
   public static final int ETM_AES128_CTR = 30; //not defined in spec
   public static final int ETM_AES256_CTR = 35; //not defined in spec
@@ -442,4 +451,6 @@ public final class Const {
 
   public static final int SERVICE_INFO_MTU_MIN_SIZE = 256;
   public static final int OWNER_THRESHOLD_DEFAULT_MTU_SIZE = 8192;
+
+  public static final String COSE_CONTEXT_ENCRYPT0 = "Encrypt0";
 }
