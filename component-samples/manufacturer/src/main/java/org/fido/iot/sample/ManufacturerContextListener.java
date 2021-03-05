@@ -112,23 +112,24 @@ public class ManufacturerContextListener implements ServletContextListener {
     OnDieService initialOds = null;
     if (sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR) != null
             && !sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
-      OnDieCache odc = new OnDieCache(
-              URI.create(sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR)),
-              sc.getInitParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE)
-                      .toLowerCase().equals("true"),
-              sc.getInitParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS),
-              null);
 
       try {
+        OnDieCache odc = new OnDieCache(
+                URI.create(sc.getInitParameter(ManufacturerAppSettings.ONDIE_CACHEDIR)),
+                sc.getInitParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE)
+                        .toLowerCase().equals("true"),
+                sc.getInitParameter(ManufacturerAppSettings.ONDIE_SOURCE_URLS),
+                null);
+
         odc.initializeCache();
+
+        initialOds = new OnDieService(odc,
+                sc.getInitParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                        .toLowerCase().equals("true"));
+
       } catch (Exception ex) {
-        throw new RuntimeException("OnDie initialization error");
+        throw new RuntimeException("OnDie initialization error: " + ex.getMessage());
       }
-
-      initialOds = new OnDieService(odc,
-              sc.getInitParameter(ManufacturerAppSettings.ONDIE_CHECK_REVOCATIONS)
-                      .toLowerCase().equals("true"));
-
     }
     final OnDieService ods = initialOds;
 

@@ -179,20 +179,36 @@ public class To2ContextListener implements ServletContextListener {
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
-    OnDieCache odc = new OnDieCache(
-            URI.create(sc.getInitParameter("ods.cacheDir")),
-            sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-            sc.getInitParameter("ods.zipArtifactUrl"),
-            null);
+    // To maintain backwards compatibility with installation without
+    // any OnDie settings or installations that do not wish to use
+    // OnDie we will check if the one required setting is present.
+    // If not then the ods object is set to null and operation should
+    // proceed without error. If an OnDie operation is attempted then
+    // an error will occur at that time and the user will need to
+    // correct their configuration.
+    OnDieService initialOds = null;
+    if (sc.getInitParameter("ods.cacheDir") != null
+            && !sc.getInitParameter("ods.cacheDir").isEmpty()) {
 
-    try {
-      odc.initializeCache();
-    } catch (Exception ex) {
-      // TODO - need to handle exception
+      try {
+        OnDieCache odc = new OnDieCache(
+                URI.create(sc.getInitParameter("ods.cacheDir")),
+                sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+                sc.getInitParameter("ods.zipArtifactUrl"),
+                null);
+
+        odc.initializeCache();
+
+        initialOds = new OnDieService(odc,
+                sc.getInitParameter("ods.checkRevocations").equals("true"));
+
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error: " + ex.getMessage());
+      }
     }
 
-    final OnDieService ods = new OnDieService(odc,
-            sc.getInitParameter("ods.checkRevocations").equals("true"));
+    final OnDieService ods = initialOds;
+
     sc.setAttribute("onDieService", ods);
 
     resolver = new KeyResolver() {
