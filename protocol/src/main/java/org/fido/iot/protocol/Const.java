@@ -91,13 +91,13 @@ public final class Const {
   public static final int SVI_VALUE = 1;
 
   //EAT Claims
-  public static final long EAT_SDO_IOT = -19260421; // need IANA number
-  public static final long EAT_MAROE_PREFIX = -19260422;// need IANA number
+  public static final long EAT_SDO_IOT = -17760707; // need IANA number
+  public static final long EAT_MAROE_PREFIX = -17760708;// need IANA number
   public static final long EAT_NONCE = 9; //from spec
   public static final long EAT_UEID = 10; // from spec
   public static final int EAT_RAND = 1;
   public static final long CUPH_NONCE = -17760701;// need IANA number
-  public static final long EUPH_NONCE = CUPH_NONCE;
+  public static final long EUPH_NONCE = -17760709;// need IANA number
   public static final long CUPH_PUBKEY = -17760702;// need IANA number
 
   public static final long COSEAES128CBC = -17760703; // need IANA number
