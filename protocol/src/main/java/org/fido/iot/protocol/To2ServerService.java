@@ -165,6 +165,16 @@ public abstract class To2ServerService extends MessagingService {
       payload.set(Const.THIRD_KEY, nonce7);
       payload.set(Const.FOURTH_KEY, replacementKey);
 
+      // TO2SetupDevicePayload is signed by Owner2, which in this code is this owner
+      // probably replacing the manufacturer-owner.
+      try (CloseableKey key =
+          new CloseableKey(getStorage().getOwnerSigningKey(ownerPublicKey))) {
+        payload = getCryptoService().sign(
+            key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
+      } catch (IOException e) {
+        throw new DispatchException(e);
+      }
+
       body = getCryptoService().encrypt(
           payload.toBytes(),
           getStorage().getOwnerState());

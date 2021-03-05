@@ -241,6 +241,16 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite body = request.getAsComposite(Const.SM_BODY);
     Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+
+    // Once decrypted, the TO2SetupDevicePayload must have its signature verified.
+    // The verification key is explicitly contained in the message body.
+    byte[] signedBytes = message.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+    Composite signedBody = Composite.fromObject(signedBytes);
+    Composite encodedKey = signedBody.getAsComposite(Const.FOURTH_KEY);
+    PublicKey verificationKey = getCryptoService().decode(encodedKey);
+    getCryptoService().verify(verificationKey, message, null, null, null);
+    message = signedBody; // signature ok, focus on payload
+
     byte[] receivedNonce7 = message.getAsBytes(Const.THIRD_KEY);
     getCryptoService().verifyBytes(receivedNonce7, nonce7);
 
