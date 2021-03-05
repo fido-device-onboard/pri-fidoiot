@@ -94,11 +94,10 @@ public abstract class To2ClientService extends DeviceService {
       Composite deviceState = getCryptoService()
           .getKeyExchangeMessage(getStorage().getKexSuiteName(), Const.KEY_EXCHANGE_B, ownerKey);
 
-      byte[] ownSecret = getCryptoService().getSharedSecret(this.kexA, deviceState, null);
+      KeyExchangeResult kxResult = getCryptoService().getSharedSecret(this.kexA, deviceState, null);
 
       this.ownState = getCryptoService()
-          .getEncryptionState(ownSecret,
-              getStorage().getCipherSuiteName());
+          .getEncryptionState(kxResult, getStorage().getCipherSuiteName());
 
       byte[] ueid = getCryptoService()
           .getUeidFromGuid(

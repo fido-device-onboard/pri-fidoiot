@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -1137,7 +1138,7 @@ public class CryptoService {
     }
   }
 
-  protected byte[] getEcdhSharedSecret(byte[] message, Composite ownState) {
+  protected KeyExchangeResult getEcdhSharedSecret(byte[] message, Composite ownState) {
     try {
       final Composite theirState = decodeEcdhMessage(message);
       final byte[] theirX = theirState.getAsBytes(Const.FIRST_KEY);
@@ -1178,7 +1179,7 @@ public class CryptoService {
       }
 
       buffer.flip();
-      return Composite.unwrap(buffer);
+      return new KeyExchangeResult(Composite.unwrap(buffer), new byte[0]);
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
       throw new CryptoServiceException(e);
     }
@@ -1192,7 +1193,7 @@ public class CryptoService {
    * @param decryptionKey The decryption key for use in asymmetric exchanges
    * @return The shared secrete based on the state and message.
    */
-  public byte[] getSharedSecret(byte[] message, Composite ownState, Key decryptionKey) {
+  public KeyExchangeResult getSharedSecret(byte[] message, Composite ownState, Key decryptionKey) {
 
     final String alg = ownState.getAsString(Const.SECOND_KEY);
     switch (alg) {
@@ -1276,18 +1277,13 @@ public class CryptoService {
     }
   }
 
-  protected byte[] getAsymkexSharedSecret(byte[] message, Composite ownState, Key decryptionKey) {
+  protected KeyExchangeResult getAsymkexSharedSecret(
+      byte[] message, Composite ownState, Key decryptionKey) {
 
     String party = ownState.getAsString(Const.THIRD_KEY);
-    int len = ownState.getAsNumber(Const.FOURTH_KEY).intValue();
-
-    byte[] shSe = new byte[2 * len];
-    ByteBuffer bb = ByteBuffer.wrap(shSe);
 
     switch (party) {
       case Const.KEY_EXCHANGE_A:
-
-        bb.put(ownState.getAsBytes(Const.FIRST_KEY));
 
         byte[] b;
         try {
@@ -1297,19 +1293,15 @@ public class CryptoService {
         } catch (GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
-        bb.put(b);
-        break;
+        return new KeyExchangeResult(b, ownState.getAsBytes(Const.FIRST_KEY));
 
       case Const.KEY_EXCHANGE_B:
-        bb.put(message);
-        bb.put(ownState.getAsBytes(Const.FIFTH_KEY));
-        break;
+        return new KeyExchangeResult(ownState.getAsBytes(Const.FIFTH_KEY), message);
 
       default:
         throw new IllegalArgumentException(party);
     }
 
-    return shSe;
   }
 
   private boolean isSimpleEncryptedMessage(int aesType) {
@@ -1393,94 +1385,46 @@ public class CryptoService {
     return mac0;
   }
 
-  protected Composite getSmallerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
-    ByteBuffer buffer = ByteBuffer
-        .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
-    buffer.put((byte) 1);
-    buffer.put(Const.KDF_STRING);
-    buffer.put((byte) 0);
-    buffer.put(Const.PROV_CIPHER);
-    buffer.put(shSe);
-    buffer.flip();
-    Composite hash = hash(Const.HMAC_SHA_256, Const.HMAC_ZERO, Composite.unwrap(buffer));
-    buffer = ByteBuffer.wrap(hash.getAsBytes(Const.HASH));
-    byte[] sek = new byte[(Const.BIT_LEN_256 / Byte.SIZE) / 2];//16 bytes
-    buffer.get(sek);
+  // Key Derivation Function (KDF).
+  //
+  // See NIST SP 800-108, FDO spec section 3.6.4
+  // Where possible, variable names are chosen to match those documents.
+  protected byte[] kdf(
+      int size,      // the number of bytes to derive (L)
+      String prfId,  // the JCE ID of the PRF to use
+      KeyExchangeResult kxResult) // the sharedSecret and contextRandom
+      throws
+      InvalidKeyException,
+      IOException,
+      NoSuchAlgorithmException {
 
-    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
-    buffer = ByteBuffer
-        .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
+    Mac prf = Mac.getInstance(prfId);
+    prf.init(new SecretKeySpec(kxResult.shSe, prfId));
 
-    buffer.put((byte) 2);
-    buffer.put(Const.KDF_STRING);
-    buffer.put((byte) 0);
-    buffer.put(Const.PROV_HMAC);
-    buffer.put(shSe);
-    buffer.flip();
+    final int h = prf.getMacLength(); // (h) the length (in bits) of the output of the PRF
+    final int l = size;  // (L) the length (in bits) of the derived keying material
+    // (n) the number of iterations of the PRF needed to generate L bits of
+    // keying material.  We count in bytes, but the result is the same.
+    final int n = Double.valueOf(Math.ceil((double)l / (double)h)).intValue();
 
-    hash = hash(Const.HMAC_SHA_256, Const.HMAC_ZERO, Composite.unwrap(buffer));
-    buffer = ByteBuffer.wrap(hash.getAsBytes(Const.HASH));
-    byte[] svk = new byte[Const.BIT_LEN_256 / Byte.SIZE]; //32 bytes
-    buffer.get(svk);
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
 
-    return Composite.newArray()
-        .set(Const.FIRST_KEY, sek)
-        .set(Const.SECOND_KEY, svk);
-  }
+    for (int i = 0; n > i; i++) {
 
-  protected Composite getLargerKdf(byte[] shSe) {
-    //HMAC-SHA-256[0,(byte)1||"FIDO-KDF"||(byte)0||"AutomaticOnboard-cipher"||ShSe]
-    ByteBuffer buffer = ByteBuffer
-        .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_CIPHER.length + shSe.length);
-    buffer.put((byte) 1);
-    buffer.put(Const.KDF_STRING);
-    buffer.put((byte) 0);
-    buffer.put(Const.PROV_CIPHER);
-    buffer.put(shSe);
-    buffer.flip();
-    Composite hash = hash(Const.HMAC_SHA_384, Const.HMAC_ZERO, Composite.unwrap(buffer));
-    buffer = ByteBuffer.wrap(hash.getAsBytes(Const.HASH));
-    byte[] sek = new byte[Const.BIT_LEN_256 / Byte.SIZE]; // 32 bytes
-    buffer.get(sek);
+      prf.reset();
 
-    //HMAC-SHA-256[0,(byte)2||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
-    buffer = ByteBuffer
-        .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
+      // write K(i) to the prf...
+      prf.update((byte)i); // [i]2
+      prf.update("FIDO-KDF".getBytes(StandardCharsets.UTF_8)); // Label
+      prf.update((byte)0); // 0x00, separator
+      prf.update("AutomaticOnboardTunnel".getBytes(StandardCharsets.UTF_8)); // Context (part 1)
+      prf.update(kxResult.contextRand);                                      // Context (part 2)
+      prf.update((byte)((l >> 8) & 0xff)); // [L]2, upper byte
+      prf.update((byte)(l & 0xff));        // [L]2, lower byte
+      result.write(prf.doFinal());  // append K(i) to the cumulative result
+    }
 
-    buffer.put((byte) 2);
-    buffer.put(Const.KDF_STRING);
-    buffer.put((byte) 0);
-    buffer.put(Const.PROV_HMAC);
-    buffer.put(shSe);
-    buffer.flip();
-    hash = hash(Const.HMAC_SHA_384, Const.HMAC_ZERO, Composite.unwrap(buffer));
-    buffer = ByteBuffer.wrap(hash.getAsBytes(Const.HASH));
-    byte[] svk1 = new byte[Const.BIT_LEN_384 / Byte.SIZE]; //48 bytes
-    buffer.get(svk1);
-
-    //HMAC-SHA-256[0,(byte)3||"FIDO-KDF"||(byte)0||"AutomaticOnboard-hmac"||ShSe]
-    buffer = ByteBuffer
-        .allocate(1 + Const.KDF_STRING.length + 1 + Const.PROV_HMAC.length + shSe.length);
-    buffer.put((byte) 3);
-    buffer.put(Const.KDF_STRING);
-    buffer.put((byte) 0);
-    buffer.put(Const.PROV_HMAC);
-    buffer.put(shSe);
-    buffer.flip();
-    hash = hash(Const.HMAC_SHA_384, Const.HMAC_ZERO, Composite.unwrap(buffer));
-    buffer = ByteBuffer.wrap(hash.getAsBytes(Const.HASH));
-    byte[] svk2 = new byte[(Const.BIT_LEN_256 / Byte.SIZE) / 2];//16 bytes
-    buffer.get(svk2);
-
-    buffer = ByteBuffer.allocate(svk1.length + svk2.length);
-    buffer.put(svk1);
-    buffer.put(svk2);
-    buffer.flip();
-
-    return Composite.newArray()
-        .set(Const.FIRST_KEY, sek)
-        .set(Const.SECOND_KEY, Composite.unwrap(buffer)); //svk
+    return result.toByteArray();
   }
 
   protected byte[] getCtrIv() {
@@ -1752,49 +1696,80 @@ public class CryptoService {
   /**
    * gets the the encryption state.
    *
-   * @param shSe        Shared secret.
+   * @param kxResult    Shared secret and contextRandom.
    * @param cipherSuite The cipher suite to use.
    * @return A Composite encryption state.
    */
-  public Composite getEncryptionState(byte[] shSe, String cipherSuite) {
+  public Composite getEncryptionState(KeyExchangeResult kxResult, String cipherSuite) {
 
     final Composite state = Composite.newArray();
 
     state.set(Const.FIRST_KEY, cipherSuite);
 
-    if (cipherSuite.equals(Const.AES128_CTR_HMAC256_ALG_NAME)) {
+    // The second key in the state object must be a Composite of at most two values:
+    // the SEK and the SVK, or
+    // the SEVK, which is how we'll treat a single (SEK) key.
+    final int sekSize;
+    final int svkSize;
+    final String prfId;
 
-      state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
-      state.set(Const.THIRD_KEY, getCtrIv());
-      state.set(Const.FOURTH_KEY, 0L);
+    if (cipherSuite.equals(Const.AES128_CTR_HMAC256_ALG_NAME)
+          || cipherSuite.equals(Const.AES128_CBC_HMAC256_ALG_NAME)) {
 
-    } else if (cipherSuite.equals(Const.AES128_CBC_HMAC256_ALG_NAME)) {
+      // 128-bit AES (SEK), 256-bit HMAC (SVK)
+      sekSize = 16;
+      svkSize = 32;
+      prfId   = Const.HMAC_256_ALG_NAME; // see table in FDO spec 4.4
 
-      state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
+    } else if (cipherSuite.equals(Const.AES256_CTR_HMAC384_ALG_NAME)
+          || cipherSuite.equals(Const.AES256_CBC_HMAC384_ALG_NAME)) {
 
-    } else if (cipherSuite.equals(Const.AES256_CTR_HMAC384_ALG_NAME)) {
-
-      state.set(Const.SECOND_KEY, getLargerKdf(shSe));
-      state.set(Const.THIRD_KEY, getCtrIv());
-      state.set(Const.FOURTH_KEY, 0L);
-
-    } else if (cipherSuite.equals(Const.AES256_CBC_HMAC384_ALG_NAME)) {
-
-      state.set(Const.SECOND_KEY, getLargerKdf(shSe));
+      // 256-bit AES (SEK), 512-bit HMAC (SVK) (HMAC-384 needs a 512-bit key)
+      sekSize = 32;
+      svkSize = 64;
+      prfId   = Const.HMAC_384_ALG_NAME; // see table in FDO spec 4.4
 
     } else if (cipherSuite.equals(Const.AES128_GCM_ALG_NAME)
-        || cipherSuite.equals(Const.AES_CCM_64_128_128_ALG_NAME)) {
+          || cipherSuite.equals(Const.AES_CCM_64_128_128_ALG_NAME)) {
 
-      state.set(Const.SECOND_KEY, getSmallerKdf(shSe));
+      // 128-bit AES (SEVK)
+      sekSize = 16;
+      svkSize = 0;
+      prfId   = Const.HMAC_256_ALG_NAME; // see table in FDO spec 4.4
 
     } else if (cipherSuite.equals(Const.AES256_GCM_ALG_NAME)
-        || cipherSuite.equals(Const.AES_CCM_64_128_256_ALG_NAME)) {
+          || cipherSuite.equals(Const.AES_CCM_64_128_256_ALG_NAME)) {
 
-      state.set(Const.SECOND_KEY, getLargerKdf(shSe));
+      // 256-bit AES (SEVK)
+      sekSize = 32;
+      svkSize = 0;
+      prfId   = Const.HMAC_256_ALG_NAME; // see table in FDO spec 4.4
 
     } else {
-      throw new CryptoServiceException(new NoSuchAlgorithmException(cipherSuite));
+      throw new IllegalArgumentException("unrecognized cipher suite: " + cipherSuite);
     }
+
+    final byte[] keyMaterial;
+    try {
+      keyMaterial = kdf(sekSize + svkSize, prfId, kxResult);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    // Build the composite containing the keys, as expected downstream, and put it in the state
+    Composite keys = Composite.newArray()
+        .set(Const.FIRST_KEY, Arrays.copyOfRange(keyMaterial, 0, sekSize))
+        .set(Const.SECOND_KEY, Arrays.copyOfRange(keyMaterial, sekSize, sekSize + svkSize));
+    state.set(Const.SECOND_KEY, keys);
+
+    // CTR modes need specialized IV information
+    if (cipherSuite.equals(Const.AES128_CTR_HMAC256_ALG_NAME)
+          || cipherSuite.equals(Const.AES256_CTR_HMAC384_ALG_NAME)) {
+
+      state.set(Const.THIRD_KEY, getCtrIv());
+      state.set(Const.FOURTH_KEY, 0L);
+    }
+
     return state;
   }
 
@@ -1896,4 +1871,5 @@ public class CryptoService {
     byte[] digest = messageDigest.digest(derBytes);
     return Composite.toString(digest);
   }
+
 }

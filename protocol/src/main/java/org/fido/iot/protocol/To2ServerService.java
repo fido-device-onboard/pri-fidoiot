@@ -130,10 +130,10 @@ public abstract class To2ServerService extends MessagingService {
 
       Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
       PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
-      byte[] devSecret = getCryptoService().getSharedSecret(kexB,
+      KeyExchangeResult kxResult = getCryptoService().getSharedSecret(kexB,
           getStorage().getOwnerState(), getStorage().getOwnerSigningKey(ownerPublicKey));
 
-      Composite cipherState = getCryptoService().getEncryptionState(devSecret,
+      Composite cipherState = getCryptoService().getEncryptionState(kxResult,
           getStorage().getCipherName());
       getStorage().setOwnerState(cipherState);
 
