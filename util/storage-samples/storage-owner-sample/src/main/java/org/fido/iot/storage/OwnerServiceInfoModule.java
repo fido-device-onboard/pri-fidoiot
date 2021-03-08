@@ -54,7 +54,7 @@ public class OwnerServiceInfoModule implements ServiceInfoModule {
       throw new RuntimeException(e);
     }
 
-    if (!sviString.equals("null")) {
+    if (sviString != null && !sviString.equals("null")) {
       String[] keys = sviString.split(SVI_ARRAY_DELIMETER);
       for (String key : keys) {
         String[] keyElements = key.split(SVI_ENTRY_DELIMETER);
