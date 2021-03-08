@@ -144,7 +144,7 @@ public class DiStorageTest {
   }
 
   @Test
-  void test() throws Exception {
+  void Test() throws Exception {
 
     Security.addProvider(new BouncyCastleProvider());
 
