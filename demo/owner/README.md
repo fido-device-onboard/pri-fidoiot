@@ -206,6 +206,7 @@ By default, the Owner uses HTTP for all communications on port 8042. In addition
     | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
     | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
     | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
+    | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:<owner-https-port>?ipaddress=127.0.0.1 |
 
     **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
     Avoid using the default keystore available for production deployment.

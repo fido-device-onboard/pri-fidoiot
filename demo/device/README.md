@@ -86,11 +86,11 @@ The rendezvous and owner servers must be available during this step.
     java -D<other-flags> -Dfido_ssl_mode=TEST device.jar
   ```
 
-  Make sure to add the `-Dfido_ssl_mode=TEST`. Default SSL mode is `TEST`.
+  Make sure to add the `-Dfido_ssl_mode=TEST`.
 
   * `PROD` mode where certificate verification is carried out. Useful for production deployment.
   ```
-    java -D<other-flags> -Dfido_ssl_mode=PROD -Dssl_trustore=<trust-store-path> -Dssl_truststore-password=<truststore-pass> -Dssl_truststore_type=<truststore-type> -jar device.jar
+    java -D<other-flags> -Dfido_ssl_mode=PROD -Dssl_trustore=<trust-store-path> -Dssl_truststore_password=<truststore-pass> -Dssl_truststore_type=<truststore-type> -jar device.jar
   ```
 
   Make sure to add all required truststore flags if the ssl_mode is `PROD`. Default ssl_truststore_type is PKCS12.
