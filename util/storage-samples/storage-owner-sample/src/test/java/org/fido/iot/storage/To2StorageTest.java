@@ -624,7 +624,7 @@ public class To2StorageTest {
       OwnerDbManager dbsManager = new OwnerDbManager();
       assertDoesNotThrow(
           ()-> { dbsManager.addDeviceTypeCriteria(ds, "default",
-              "wget", "next");
+              "devmod:os", "Linux");
           }
       );
 
