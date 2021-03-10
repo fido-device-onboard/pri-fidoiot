@@ -112,7 +112,7 @@ public abstract class To2ClientService extends DeviceService {
       Composite payload = Composite.newMap()
           .set(Const.EAT_NONCE, nonce6)
           .set(Const.EAT_UEID, ueid)
-          .set(Const.EAT_SDO_IOT, iotPayload);
+          .set(Const.EAT_FDO, iotPayload);
 
       Composite signature = null;
       try (CloseableKey key = new CloseableKey(getStorage().getSigningKey())) {

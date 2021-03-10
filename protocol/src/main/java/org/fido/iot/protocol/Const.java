@@ -91,7 +91,7 @@ public final class Const {
   public static final int SVI_VALUE = 1;
 
   //EAT Claims
-  public static final long EAT_SDO_IOT = -17760707; // need IANA number
+  public static final long EAT_FDO = -17760707; // need IANA number
   public static final long EAT_MAROE_PREFIX = -17760708;// need IANA number
   public static final long EAT_NONCE = 9; //from spec
   public static final long EAT_UEID = 10; // from spec

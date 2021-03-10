@@ -125,7 +125,7 @@ public abstract class To2ServerService extends MessagingService {
       Composite payload = Composite.fromObject(
           body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
-      Composite iotClaim = payload.getAsComposite(Const.EAT_SDO_IOT);
+      Composite iotClaim = payload.getAsComposite(Const.EAT_FDO);
       byte[] kexB = iotClaim.getAsBytes(Const.FIRST_KEY);
 
       Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
