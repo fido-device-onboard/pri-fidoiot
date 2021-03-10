@@ -4,6 +4,7 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -55,6 +56,8 @@ public class Device {
   private static final String PROPERTY_RANDOMS = "fido.iot.randoms";
   private static final String PROPERTY_SERVICE_INFO_MTU = "fido.iot.device.service.info.mtu";
   private static final String PROPERTY_CRED_REUSE_SUPPORT = "fido.iot.device.cred.reuse";
+  private static final String PROPERTY_CIPHER_SUITE = "fido.iot.cipher";
+
   private static boolean rvBypass;
 
   private static final Logger logger = LogManager.getLogger();
@@ -295,12 +298,15 @@ public class Device {
         if (null != signedBlob.get()) {
           break;
         }
+        try {
+          logger.info("TO1 URL is " + url);
 
-        logger.info("TO1 URL is " + url);
-
-        DispatchResult dr = to1Service.getHelloMessage();
-        WebClient client = new WebClient(url, dr, to1Dispatcher);
-        client.run();
+          DispatchResult dr = to1Service.getHelloMessage();
+          WebClient client = new WebClient(url, dr, to1Dispatcher);
+          client.run();
+        } catch (RuntimeException e) {
+          logger.info("Unable to contact RV at " + url + ". " + e.getMessage());
+        }
       }
     } else {
       logger.info("RVBypass flag is set, Skipping T01.");
@@ -330,7 +336,8 @@ public class Device {
 
       @Override
       public String getCipherSuiteName() {
-        return Const.AES128_CTR_HMAC256_ALG_NAME;
+        return System.getProperties().getProperty(
+            PROPERTY_CIPHER_SUITE, Const.AES128_CTR_HMAC256_ALG_NAME);
       }
 
       @Override
@@ -482,10 +489,13 @@ public class Device {
       }
 
       logger.info("TO2 URL is " + url);
-
-      DispatchResult dr = to2Service.getHelloMessage();
-      WebClient client = new WebClient(url, dr, to2Dispatcher);
-      client.run();
+      try {
+        DispatchResult dr = to2Service.getHelloMessage();
+        WebClient client = new WebClient(url, dr, to2Dispatcher);
+        client.run();
+      } catch (RuntimeException e) {
+        logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
+      }
     }
   }
 

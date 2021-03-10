@@ -4,6 +4,7 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
@@ -110,6 +111,11 @@ public class OwnerTo0Client {
 
     List<String> paths = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_OWNER_ONLY);
 
+    if (paths.size() == 0) {
+      System.out.println("No Directives found. Invalid RVInfo Blob in " + guid.toString());
+      throw new IOException("TO0 failed for " + guid.toString() + ".");
+    }
+
     for (String path : paths) {
 
       try {
@@ -119,6 +125,8 @@ public class OwnerTo0Client {
         if (responseWait > 0) {
           break;
         }
+      } catch (RuntimeException e) {
+        System.out.println("Unable to connect with RV at " + path + ". " + e.getMessage());
       } catch (Exception e) {
         System.out.println("TO0 failed for " + guid.toString() + "." + e.getMessage());
         throw e;
