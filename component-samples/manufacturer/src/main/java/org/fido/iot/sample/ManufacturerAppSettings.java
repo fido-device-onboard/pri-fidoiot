@@ -11,8 +11,8 @@ public class ManufacturerAppSettings {
   public static final String DI_SCHEME = "mfg_protocol_scheme";
 
   // SSL Keystore info
-  public static final String SSL_KEYSTORE_PATH = "mfg.ssl.keystore";
-  public static final String SSL_KEYSTORE_PASSWORD = "mfg.ssl.keystore-password";
+  public static final String SSL_KEYSTORE_PATH = "mfg_ssl_keystore";
+  public static final String SSL_KEYSTORE_PASSWORD = "mfg_ssl_keystore-password";
 
   // part of the path of exposed web APIs
   public static final String WEB_PATH = "/fdo/100/msg";

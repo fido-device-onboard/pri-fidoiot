@@ -73,3 +73,24 @@ $ mvn -Dfido.iot.pem.dev=<device-PEM-file> exec:java
 The device will be onboarded.
 
 The rendezvous and owner servers must be available during this step.
+
+# Configuring Device for HTTPS/TLS communication
+
+- Copy the truststore containing all the required certificates to `demo/device` folder.
+
+- You can execute the device in two modes:
+
+  * `TEST` mode where certificate verification is skipped. Useful for https development or testing.
+
+  ```
+    java -D<other-flags> -Dfido_ssl_mode=TEST device.jar
+  ```
+
+  Make sure to add the `-Dfido_ssl_mode=TEST`. Default SSL mode is `TEST`.
+
+  * `PROD` mode where certificate verification is carried out. Useful for production deployment.
+  ```
+    java -D<other-flags> -Dfido_ssl_mode=PROD -Dssl_trustore=<trust-store-path> -Dssl_truststore-password=<truststore-pass> -Dssl_truststore_type=<truststore-type> -jar device.jar
+  ```
+
+  Make sure to add all required truststore flags if the ssl_mode is `PROD`. Default ssl_truststore_type is PKCS12.

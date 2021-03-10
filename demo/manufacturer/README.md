@@ -112,3 +112,24 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 The PKCS12 keystore file \<fido-iot-src\>/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<fido-iot-src\>/demo/manufacturer/manufacturer_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
+
+# Configuring Manufacturer for HTTPS/TLS Communication
+
+By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. In addition to that, the PRI-Manufacturer can be configured to handle HTTPS request from the device.
+
+- Generate the Keystore/Certificate for the PRI-manufacturer
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
+
+- Copy the generated Keystore/Certificate to `demo/manufacturer/certs` folder.
+
+- Update the following environment varibles in `demo/manufacturer/manufacturer.env` file
+
+    |  Variable            |  Value            |             description       |
+    | ---------------------|-------------------|-------------------------------|
+    | mfg_protocol_scheme  | https             | To enable HTTPS communication.|
+    | mfg_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
+    | mfg_ssl_keystore-password| keystore-password | password of the keystore. |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
+    Avoid using the default keystore available for production deployment.
