@@ -11,6 +11,7 @@ public class OwnerAppSettings {
 
   // the port at which Owner is listening for TO2
   public static final String TO2_PORT = "owner_to2_port";
+  public static final String OWNER_HTTPS_PORT = "owner_https_port";
 
   // To set the default protocol scheme
   public static final String OWNER_SCHEME = "owner_protocol_scheme";

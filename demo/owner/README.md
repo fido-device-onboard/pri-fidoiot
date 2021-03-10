@@ -194,11 +194,12 @@ By default, the Owner uses HTTP for all communications on port 8042. In addition
 
 - Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
 
-- Update the following environment varibles in `demo/rv/owner.env` file
+- Update the following environment varibles in `demo/owner/owner.env` file
 
     |  Variable              |  Value            |             Description       |
     | -----------------------|-------------------|-------------------------------|
     | owner_protocol_scheme  | https             | To enable HTTPS communication.|
+    | owner_https_port       | port number       | The given port will be used for HTTPS communication. |
     | fido_ssl_mode          | TEST / PROD       | If set to `TEST`, then SSL verification is disabled. If set to `PROD`, then certificate verification is initiated. |
     | owner_ssl_keystore     | keystore-filename | Filename of Keystore that is present in the certs folder.|
     | owner_ssl_keystore-password| keystore-password | Password of the keystore. |

@@ -21,6 +21,11 @@ public class RvServerApp {
           ? Integer.parseInt(RvConfigLoader.loadConfig(RvAppSettings.TO0_TO1_PORT))
           : 8040;
 
+  private static final int RV_HTTPS_PORT =
+      null != RvConfigLoader.loadConfig(RvAppSettings.RV_HTTPS_PORT)
+          ? Integer.parseInt(RvConfigLoader.loadConfig(RvAppSettings.RV_HTTPS_PORT))
+          : 8443;
+
   private static final String RV_SCHEME =
       null != RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME)
           ? RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME) : "http";
@@ -85,7 +90,7 @@ public class RvServerApp {
 
     if (RV_SCHEME.toLowerCase().equals("https")) {
 
-      httpsConnector.setPort(RV_PORT);
+      httpsConnector.setPort(RV_HTTPS_PORT);
       httpsConnector.setSecure(true);
       httpsConnector.setScheme(RV_SCHEME);
 
@@ -100,22 +105,17 @@ public class RvServerApp {
       httpsConnector.setProperty("sslProtocol", "TLS");
       httpsConnector.setProperty("SSLEnabled", "true");
       service.addConnector(httpsConnector);
-      tomcat.setConnector(httpsConnector);
-
-    } else if (RV_SCHEME.toLowerCase().equals("http")) {
-
-      Connector httpConnector = new Connector();
-      httpConnector.setPort(RV_PORT);
-      httpConnector.setScheme(RV_SCHEME);
-      httpConnector.setRedirectPort(8443);
-      httpConnector.setProperty("protocol", "HTTP/1.1");
-      httpConnector.setProperty("connectionTimeout", "20000");
-      service.addConnector(httpConnector);
-      tomcat.setConnector(httpConnector);
-
-    } else {
-      throw new RuntimeException("Unsupported Protocol Scheme Selected.");
     }
+
+    Connector httpConnector = new Connector();
+    httpConnector.setPort(RV_PORT);
+    httpConnector.setScheme("http");
+    httpConnector.setRedirectPort(RV_HTTPS_PORT);
+    httpConnector.setProperty("protocol", "HTTP/1.1");
+    httpConnector.setProperty("connectionTimeout", "20000");
+    service.addConnector(httpConnector);
+    tomcat.setConnector(httpConnector);
+
     tomcat.getConnector();
     try {
       tomcat.start();

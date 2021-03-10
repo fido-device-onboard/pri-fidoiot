@@ -169,7 +169,7 @@ public class OwnerContextListener implements ServletContextListener {
     // create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
-    manager.importVoucher(ds, Composite.fromObject(VOUCHER));
+    //manager.importVoucher(ds, Composite.fromObject(VOUCHER));
     manager.loadSampleServiceInfo(ds,
         Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)));
     manager.loadSampleDeviceTypeSviStringMapping(

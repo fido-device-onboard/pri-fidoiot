@@ -127,9 +127,10 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
-    | mfg_protocol_scheme  | https             | To enable HTTPS communication.|
-    | mfg_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
-    | mfg_ssl_keystore-password| keystore-password | password of the keystore. |
+    | manufacturer_protocol_scheme  | https             | To enable HTTPS communication.|
+    | manufacturer_https_port | Port for HTTPS communication | The given port number will be opened for HTTPS communication. |
+    | manufacturer_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
+    | manufacturer_ssl_keystore-password| keystore-password | password of the keystore. |
 
     **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
     Avoid using the default keystore available for production deployment.

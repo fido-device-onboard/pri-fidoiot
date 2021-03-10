@@ -34,6 +34,11 @@ public class ManufacturerApp {
           ? Integer.parseInt(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_PORT))
           : 8039;
 
+  private static final int DI_HTTPS_PORT =
+      null != ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_HTTPS_PORT)
+          ? Integer.parseInt(ManufacturerConfigLoader.loadConfig(
+          ManufacturerAppSettings.DI_HTTPS_PORT)) : 443;
+
   private static final String DI_SCHEME =
       null != ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_SCHEME)
           ? ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DI_SCHEME) : "http";
@@ -154,7 +159,7 @@ public class ManufacturerApp {
 
     if (DI_SCHEME.toLowerCase().equals("https")) {
 
-      httpsConnector.setPort(DI_PORT);
+      httpsConnector.setPort(DI_HTTPS_PORT);
       httpsConnector.setSecure(true);
       httpsConnector.setScheme(DI_SCHEME);
 
@@ -169,22 +174,17 @@ public class ManufacturerApp {
       httpsConnector.setProperty("sslProtocol", "TLS");
       httpsConnector.setProperty("SSLEnabled", "true");
       service.addConnector(httpsConnector);
-      tomcat.setConnector(httpsConnector);
 
-    } else if (DI_SCHEME.toLowerCase().equals("http")) {
-
-      Connector httpConnector = new Connector();
-      httpConnector.setPort(DI_PORT);
-      httpConnector.setScheme(DI_SCHEME);
-      httpConnector.setRedirectPort(8443);
-      httpConnector.setProperty("protocol", "HTTP/1.1");
-      httpConnector.setProperty("connectionTimeout", "20000");
-      service.addConnector(httpConnector);
-      tomcat.setConnector(httpConnector);
-
-    } else {
-      throw new RuntimeException("Unsupported Protocol Scheme Selected.");
     }
+
+    Connector httpConnector = new Connector();
+    httpConnector.setPort(DI_PORT);
+    httpConnector.setScheme("http");
+    httpConnector.setRedirectPort(DI_HTTPS_PORT);
+    httpConnector.setProperty("protocol", "HTTP/1.1");
+    httpConnector.setProperty("connectionTimeout", "20000");
+    service.addConnector(httpConnector);
+    tomcat.setConnector(httpConnector);
 
     tomcat.getConnector();
     try {

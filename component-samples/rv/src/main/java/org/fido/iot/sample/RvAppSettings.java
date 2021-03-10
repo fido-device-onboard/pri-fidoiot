@@ -7,6 +7,7 @@ public class RvAppSettings {
 
   // the port at which Rv is listening for TO0 & TO1
   public static final String TO0_TO1_PORT = "rv_port";
+  public static final String RV_HTTPS_PORT = "rv_https_port";
 
   // To set the default protocol scheme
   public static final String RV_SCHEME = "rv_protocol_scheme";

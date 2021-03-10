@@ -140,6 +140,8 @@ By default, the RV uses HTTP for all communications on port 8040. In addition to
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
     | rv_protocol_scheme  | https             | To enable HTTPS communication.|
+    | rv_https_port       | port number       | The given port number will be used for HTTPS
+    communication. |
     | rv_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
     | rv_ssl_keystore-password| keystore-password | password of the keystore. |
 
