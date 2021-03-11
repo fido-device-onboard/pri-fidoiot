@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 package org.fido.iot.certutils;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.cert.Certificate;
@@ -35,5 +36,16 @@ public class CertTest {
     List<Certificate> certs = PemLoader.loadCerts(ownerKeyPem);
     assertTrue(certs.size() > 0);
 
+  }
+
+  @Test
+  void invalidCert() throws Exception {
+
+    String tamperedCert = ownerKeyPem.replace("e","ee");
+
+    assertThrows(java.lang.RuntimeException.class,
+        ()->{
+          List<Certificate> certs = PemLoader.loadCerts(tamperedCert);
+        });
   }
 }
