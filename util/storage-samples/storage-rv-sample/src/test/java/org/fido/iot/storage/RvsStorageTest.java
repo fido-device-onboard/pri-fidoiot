@@ -3,17 +3,24 @@
 
 package org.fido.iot.storage;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.fido.iot.protocol.ondie.OnDieCache;
 import org.fido.iot.protocol.ondie.OnDieService;
 import org.h2.tools.Server;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.RendezvousBlobDecoder;
@@ -32,7 +39,9 @@ import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
 import org.fido.iot.protocol.To1ServerService;
 import org.fido.iot.protocol.To1ServerStorage;
+import org.junit.jupiter.api.TestMethodOrder;
 
+@TestMethodOrder(Alphanumeric.class)
 public class RvsStorageTest {
 
   private static final String DB_HOST = "localhost";
@@ -117,6 +126,19 @@ public class RvsStorageTest {
       "target", "data",
       "rvs").toString();
 
+  static BasicDataSource ds = new BasicDataSource();
+  static {
+
+    ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH.toString());
+    ds.setDriverClassName("org.h2.Driver");
+    ds.setUsername(DB_USER);
+    ds.setPassword(DB_PASSWORD);
+
+    ds.setMinIdle(5);
+    ds.setMaxIdle(10);
+    ds.setMaxOpenPreparedStatements(100);
+  }
+
   private To1ServerService createTo1Service(CryptoService cs, DataSource ds, OnDieService ods) {
     return new To1ServerService() {
       private To1ServerStorage storage;
@@ -157,7 +179,60 @@ public class RvsStorageTest {
   }
 
   @Test
-  void Test() throws Exception {
+  void importAllowDenyListTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      RvsDbManager rvsDbManager = new RvsDbManager();
+
+      assertDoesNotThrow( ()-> {
+            rvsDbManager.createAllowListDenyListTables(ds);
+            rvsDbManager.importGuidFromDenyList(ds);
+            rvsDbManager.importAllowListKeyHash(ds);
+            rvsDbManager.importDenyListKeyHash(ds);
+          });
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void to0AllowListDenyListDbStorageTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    try {
+      server = Server.createTcpServer(args).start();
+      CryptoService cs = new CryptoService();
+      To0AllowListDenyListDbStorage storage = new To0AllowListDenyListDbStorage(cs, ds);
+      long waitSec = storage.storeRedirectBlob(
+          Composite.fromObject(VOUCHER), 1000, new byte[10]);
+      assertTrue(waitSec > 0);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void accTest() throws Exception {
 
     BasicDataSource ds = new BasicDataSource();
     OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);

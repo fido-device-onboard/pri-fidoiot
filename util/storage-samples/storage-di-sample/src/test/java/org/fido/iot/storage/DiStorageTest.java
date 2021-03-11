@@ -3,10 +3,12 @@
 
 package org.fido.iot.storage;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.util.List;
@@ -92,6 +94,19 @@ public class DiStorageTest {
       + "57669636550f0956089c0df4c349c61f460457e87eb8184447f000001696c6f63616c686f7374191f68038208"
       + "58205603b28472872ecbb5d4981fbaa91664ec8627ea395d2bbee7a85e0f99a7ed34";
 
+  static BasicDataSource ds = new BasicDataSource();
+  static {
+
+    ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH.toString());
+    ds.setDriverClassName("org.h2.Driver");
+    ds.setUsername(DB_USER);
+    ds.setPassword(DB_PASSWORD);
+
+    ds.setMinIdle(5);
+    ds.setMaxIdle(10);
+    ds.setMaxOpenPreparedStatements(100);
+  }
+
   final CertificateResolver resolver = new CertificateResolver() {
     @Override
     public CloseableKey getPrivateKey(Certificate cert) {
@@ -132,16 +147,6 @@ public class DiStorageTest {
   void Test() throws Exception {
 
     Security.addProvider(new BouncyCastleProvider());
-    final BasicDataSource ds = new BasicDataSource();
-
-    ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH.toString());
-    ds.setDriverClassName("org.h2.Driver");
-    ds.setUsername(DB_USER);
-    ds.setPassword(DB_PASSWORD);
-
-    ds.setMinIdle(5);
-    ds.setMaxIdle(10);
-    ds.setMaxOpenPreparedStatements(100);
 
     OnDieCache odc = new OnDieCache(URI.create(""), true, "", null);
     try {
@@ -289,5 +294,58 @@ public class DiStorageTest {
         server.stop();
       }
     }
+  }
+
+  @Test
+  void addRvInfoTest() {
+
+    Server server = null;
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    try {
+      server = Server.createTcpServer(args).start();
+
+      DiDbManager manager = new DiDbManager();
+      manager.createTables(ds);
+      manager.addRvInfo(ds,"http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040");
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void assignCustomerToVoucherTest() {
+
+    Server server = null;
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    try {
+      server = Server.createTcpServer(args).start();
+
+      DiDbManager manager = new DiDbManager();
+      manager.createTables(ds);
+      manager.assignCustomerToVoucher(ds,1,"ew122132332-4442-3232c2c3-2c3232");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void createVoucherTest() {
+    DiDbStorage storage = new DiDbStorage(null,null,null,null);
+    Composite createParams = Composite.newArray();
+    assertThrows(java.lang.RuntimeException.class,
+        ()->{
+          storage.createVoucher(createParams);
+        });
+
   }
 }
