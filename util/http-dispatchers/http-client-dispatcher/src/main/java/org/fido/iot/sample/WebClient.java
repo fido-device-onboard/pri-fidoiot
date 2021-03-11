@@ -3,16 +3,27 @@
 
 package org.fido.iot.sample;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.DispatchResult;
@@ -23,6 +34,7 @@ import org.fido.iot.protocol.MessageDispatcher;
  */
 public class WebClient implements Runnable {
 
+  private static final String SSL_MODE = "fido_ssl_mode";
   private final MessageDispatcher dispatcher;
   private HttpClient httpClient;
   private String baseUri;
@@ -68,6 +80,83 @@ public class WebClient implements Runnable {
     return sslParameters;
   }
 
+  /**
+   * Get SSLContext for making request.
+   */
+  public SSLContext getSslContext() throws KeyManagementException, NoSuchAlgorithmException {
+    try {
+
+      String sslMode = System.getProperty(SSL_MODE, "test");
+
+      if (sslMode.toLowerCase().equals("test")) {
+
+        // Validity of certificate is not checked.
+        TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+              public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+              }
+
+              public void checkClientTrusted(
+                  java.security.cert.X509Certificate[] certs, String authType) {
+              }
+
+              public void checkServerTrusted(
+                  java.security.cert.X509Certificate[] certs, String authType) {
+              }
+
+            }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+        return sslContext;
+      } else if (sslMode.toLowerCase().equals("prod")) {
+
+        String trustStoreFile = System.getProperty("ssl_truststore","truststore");
+        String trustStorePwd = System.getProperty("ssl_truststore_password"," ");
+        String trustStoreType = System.getProperty("ssl_truststore_type","PKCS12");
+
+        final KeyStore trustKeyStore = KeyStore.getInstance(trustStoreType);
+        final File truststoreFile = new File(trustStoreFile);
+        final FileInputStream trustKeyStoreFile = new FileInputStream(truststoreFile);
+        trustKeyStore.load(trustKeyStoreFile, trustStorePwd.toCharArray());
+
+        final TrustManagerFactory tmf =
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustKeyStore);
+        final TrustManager[] tm = tmf.getTrustManagers();
+
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tm, SecureRandom.getInstanceStrong());
+        return sslContext;
+
+      } else {
+        throw new RuntimeException("Invalid SSL mode. Use TEST or PROD.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("Error occurred while creating ssl context. " + e.getMessage());
+      return null;
+    }
+  }
+
+  protected HttpClient getHttpsClient() {
+    if (httpClient == null) {
+      try {
+        httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .sslContext(getSslContext())
+            .sslParameters(getSslParematers())
+            .build();
+      } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return httpClient;
+  }
+
   protected HttpClient getHttpClient() {
     if (httpClient == null) {
       try {
@@ -93,11 +182,19 @@ public class WebClient implements Runnable {
         + "/msg/" + Integer.toString(msgId);
   }
 
+  private void getClient() {
+    if (baseUri.startsWith("https")) {
+      getHttpsClient();
+    } else {
+      getHttpClient();
+    }
+  }
+
   private DispatchResult sendMessage(Composite message) throws IOException, InterruptedException {
     String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
-    getHttpClient();
+    getClient();
 
     HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
         .uri(URI.create(url));
@@ -128,6 +225,9 @@ public class WebClient implements Runnable {
             authInfo.set(Const.PI_TOKEN, authArray[1]);
           }
         }
+
+
+
       }
       Composite reply = Composite.newArray()
           .set(Const.SM_LENGTH, Const.DEFAULT)
