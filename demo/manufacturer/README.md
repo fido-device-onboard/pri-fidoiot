@@ -117,7 +117,7 @@ The PKCS12 keystore file \<fido-iot-src\>/demo/manufacturer/manufacturer_keystor
 
 By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. In addition to that, the PRI-Manufacturer can be configured to handle HTTPS request from the device.
 
-- Generate the Keystore/Certificate for the PRI-manufacturer
+- Generate the Keystore/Certificate for the PRI-manufacturer. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
   * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
 

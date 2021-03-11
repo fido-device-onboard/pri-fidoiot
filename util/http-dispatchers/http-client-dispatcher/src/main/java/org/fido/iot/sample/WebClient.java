@@ -89,7 +89,7 @@ public class WebClient implements Runnable {
       String sslMode = System.getProperty(SSL_MODE, "test");
 
       if (sslMode.toLowerCase().equals("test")) {
-        System.out.println("HTTPS test mode");
+
         // Validity of certificate is not checked.
         TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
