@@ -196,19 +196,21 @@ public class DiContextListener implements ServletContextListener {
     OnDieService initialOds = null;
     if (sc.getInitParameter("ods.cacheDir") != null
             && !sc.getInitParameter("ods.cacheDir").isEmpty()) {
-      OnDieCache odc = new OnDieCache(
-              URI.create(sc.getInitParameter("ods.cacheDir")),
-              sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
-              sc.getInitParameter("ods.zipArtifactUrl"),
-              null);
       try {
-        odc.initializeCache();
-      } catch (Exception ex) {
-        throw new RuntimeException("OnDie initialization error");
-      }
+        OnDieCache odc = new OnDieCache(
+                URI.create(sc.getInitParameter("ods.cacheDir")),
+                sc.getInitParameter("ods.autoUpdate").toLowerCase().equals("true"),
+                sc.getInitParameter("ods.zipArtifactUrl"),
+                null);
 
-      initialOds = new OnDieService(odc,
-              sc.getInitParameter("ods.checkRevocations").equals("true"));
+        odc.initializeCache();
+
+        initialOds = new OnDieService(odc,
+                sc.getInitParameter("ods.checkRevocations").equals("true"));
+
+      } catch (Exception ex) {
+        throw new RuntimeException("OnDie initialization error: " + ex.getMessage());
+      }
     }
     final OnDieService ods = initialOds;
 
