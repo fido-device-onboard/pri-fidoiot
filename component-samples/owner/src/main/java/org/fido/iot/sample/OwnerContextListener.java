@@ -90,21 +90,24 @@ public class OwnerContextListener implements ServletContextListener {
     OnDieService initialOds = null;
     if (sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR) != null
             && !sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
-      OnDieCache odc = new OnDieCache(
-              URI.create(sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR)),
-              sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
-              sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
-              null);
 
       try {
+        OnDieCache odc = new OnDieCache(
+                URI.create(sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR)),
+                sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
+                sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
+                null);
+
         odc.initializeCache();
+
+        initialOds = new OnDieService(odc,
+                sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
+                        .toLowerCase().equals("true"));
+
       } catch (Exception ex) {
-        throw new RuntimeException("OnDie initialization error");
+        throw new RuntimeException("OnDie initialization error: " + ex.getMessage());
       }
 
-      initialOds = new OnDieService(odc,
-              sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
-                      .toLowerCase().equals("true"));
     }
     final OnDieService ods = initialOds;
 
