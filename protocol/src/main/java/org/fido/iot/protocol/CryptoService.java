@@ -20,6 +20,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -198,11 +199,14 @@ public class CryptoService {
   }
 
   protected Cipher getCipherInstance(String algName)
-      throws NoSuchPaddingException, NoSuchAlgorithmException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
     switch (algName) {
       case Const.AES128_CTR_HMAC256_ALG_NAME:
       case Const.AES256_CTR_HMAC384_ALG_NAME:
         return Cipher.getInstance("AES/CTR/NoPadding");
+      case Const.AES128_CBC_HMAC256_ALG_NAME:
+      case Const.AES256_CBC_HMAC384_ALG_NAME:
+        return Cipher.getInstance("AES/CBC/PKCS7Padding", BCPROV);
       case Const.AES128_GCM_ALG_NAME:
       case Const.AES256_GCM_ALG_NAME:
         return Cipher.getInstance("AES/GCM/NoPadding");
@@ -1490,6 +1494,10 @@ public class CryptoService {
       case Const.ETM_AES256_CTR:
         return Cipher.getInstance("AES/CTR/NoPadding");
 
+      case Const.ETM_AES128_CBC:
+      case Const.ETM_AES256_CBC:
+        return Cipher.getInstance("AES/CBC/PKCS7Padding", BCPROV);
+
       case Const.ETM_AES128_GCM:
       case Const.ETM_AES256_GCM:
         return Cipher.getInstance("AES/GCM/NoPadding");
@@ -1638,8 +1646,8 @@ public class CryptoService {
         iv = state.getAsBytes(Const.THIRD_KEY);
       } else if (isCcmCipher(cipherName)) { // CCM modes use a 7-byte nonce
         iv = getRandomBytes(7);
-      } else { // all other ciphers use a random IV
-        iv = getRandomBytes(sek.length);
+      } else { // all other ciphers use a random IV, AES only uses 16 bytes despite key length
+        iv = getRandomBytes(Const.IV_SIZE);
       }
 
       int aesType = cipherNameToAesType(cipherName);
@@ -1686,7 +1694,7 @@ public class CryptoService {
 
       return message;
 
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException | NoSuchProviderException
         | InvalidAlgorithmParameterException | InvalidKeyException
         | BadPaddingException | IllegalBlockSizeException e) {
       throw new CryptoServiceException(e);
