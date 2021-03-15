@@ -13,6 +13,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerCustomerServlet;
 import org.fido.iot.api.OwnerDeviceSviStringServlet;
 import org.fido.iot.api.OwnerDeviceTypeCriteriaServlet;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
@@ -156,6 +157,9 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "deviceTypeCriteriaServlet",
         new OwnerDeviceTypeCriteriaServlet());
     wrapper.addMapping("/api/v1/owner/devicetype/criteria/*");
+    wrapper = tomcat.addServlet(ctx, "ownerCustomerServlet",
+        new OwnerCustomerServlet());
+    wrapper.addMapping("/api/v1/owner/customer/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
