@@ -7,15 +7,16 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT Owner Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Owner Component sample source.
+For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/owner/
+$ cd <pri-src>/component-samples/owner/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into \<fido-iot-src\>/demo/owner/.
+This will copy the required executables and libraries into \<pri-src\>/component-samples/demo/owner/.
 
-# Configuring the FIDO IoT Owner Sample
+# Configuring the FDO PRI Owner Sample
 
 Some required runtime arguments
 
@@ -132,7 +133,7 @@ Refer to [Demo README](../README.md) for steps to configure owner to support OnD
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fido-iot-src>/service/component-samples/owner/src/main/java/org/fido/iot/sample/OwnerServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<pri-src>/component-samples/owner/src/main/java/org/fidoalliance/fdo/sample/OwnerServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <owner_db_port>
@@ -145,9 +146,9 @@ webAllowOthers = true
 
 Refer to the section [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fido-iot-src\>/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE*** The database file located at \<pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
-# FIDO IoT Owner REST APIs
+# FDO PRI Owner REST APIs
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
@@ -174,7 +175,7 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 
 # Inserting keys into Owner keystore
 
-The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fido-iot-src\>/demo/owner/owner_keystore.p12.
+The PKCS12 keystore file \<pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<pri-src\>/component-samples/demo/owner/owner_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 

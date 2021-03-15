@@ -7,13 +7,14 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT HTTP Device Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) HTTP Device Component sample source.
+For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/http-device-sample/
+$ cd <pri-src>/component-samples/http-device-sample/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into <fido-iot-src>/demo/device/.
+This will copy the required executables and libraries into <pri-src>/component-samples/demo/device/.
 
 ### Configuring the device service
 
@@ -53,7 +54,7 @@ Some software settings are runtime-configurable via Java properties.  They inclu
 # Starting the Device service
 
 ```
-$ cd <fido-iot-src>/demo/device
+$ cd <pri-src>/component-samples/demo/device
 $ mvn -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
 ```
 

@@ -9,12 +9,13 @@
 # Getting the executable
 
 Use the following commands to build FIDO IoT Manufacturer Component sample source.
+For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/manufacturer/
+$ cd <pri-src>/component-samples/manufacturer/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into \<fido-iot-src\>/demo/manufacturer/.
+This will copy the required executables and libraries into \<pri-src\>/component-samples/demo/manufacturer/.
 
 # Configuring the FIDO IoT Manufacturer Sample
 
@@ -82,7 +83,7 @@ Refer to [Demo README](../README.md) for steps to configure manufacturer to supp
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fido-iot-src>/service/component-samples/manufacturer/src/main/java/org/fido/iot/sample/ManufacturerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<pri-src>/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <manufacturer_db_port>
@@ -95,7 +96,7 @@ webAllowOthers = true
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fido-iot-src\>/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE*** The database file located at \<pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FIDO IoT Manufacturer REST APIs
 
@@ -109,7 +110,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Inserting keys into Manufacturer keystore
 
-The PKCS12 keystore file \<fido-iot-src\>/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<fido-iot-src\>/demo/manufacturer/manufacturer_keystore.p12.
+The PKCS12 keystore file \<pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
@@ -121,9 +122,9 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 
   * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
 
-- Copy the generated Keystore/Certificate to `demo/manufacturer/certs` folder.
+- Copy the generated Keystore/Certificate to `<pri-src>/component-samples/demo/manufacturer/certs` folder.
 
-- Update the following environment varibles in `demo/manufacturer/manufacturer.env` file
+- Update the following environment varibles in `<pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
 
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
