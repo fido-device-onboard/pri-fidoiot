@@ -1309,30 +1309,30 @@ public class CryptoService {
   }
 
   private boolean isSimpleEncryptedMessage(int aesType) {
-    return Const.ETM_AES128_GCM == aesType
-        || Const.ETM_AES256_GCM == aesType
-        || Const.ETM_AES_CCM_64_128_128 == aesType
-        || Const.ETM_AES_CCM_64_128_256 == aesType;
+    return Const.COSEAES128GCM == aesType
+        || Const.COSEAES256GCM == aesType
+        || Const.COSEAESCCM_64_128_128 == aesType
+        || Const.COSEAESCCM_64_128_256 == aesType;
   }
 
   private int cipherNameToAesType(String cipherName) {
     int aesType;
     if (cipherName.equals(Const.AES128_CTR_HMAC256_ALG_NAME)) {
-      aesType = Const.ETM_AES128_CTR;
+      aesType = Const.COSEAES128CTR;
     } else if (cipherName.equals(Const.AES128_CBC_HMAC256_ALG_NAME)) {
-      aesType = Const.ETM_AES128_CBC;
+      aesType = Const.COSEAES128CBC;
     } else if (cipherName.equals(Const.AES256_CBC_HMAC384_ALG_NAME)) {
-      aesType = Const.ETM_AES256_CBC;
+      aesType = Const.COSEAES256CBC;
     } else if (cipherName.equals(Const.AES256_CTR_HMAC384_ALG_NAME)) {
-      aesType = Const.ETM_AES256_CTR;
+      aesType = Const.COSEAES256CTR;
     } else if (cipherName.equals(Const.AES128_GCM_ALG_NAME)) {
-      aesType = Const.ETM_AES128_GCM;
+      aesType = Const.COSEAES128GCM;
     } else if (cipherName.equals(Const.AES256_GCM_ALG_NAME)) {
-      aesType = Const.ETM_AES256_GCM;
+      aesType = Const.COSEAES256GCM;
     } else if (cipherName.equals(Const.AES_CCM_64_128_128_ALG_NAME)) {
-      aesType = Const.ETM_AES_CCM_64_128_128;
+      aesType = Const.COSEAESCCM_64_128_128;
     } else if (cipherName.equals(Const.AES_CCM_64_128_256_ALG_NAME)) {
-      aesType = Const.ETM_AES_CCM_64_128_256;
+      aesType = Const.COSEAESCCM_64_128_256;
     } else {
       throw new CryptoServiceException(new NoSuchAlgorithmException());
     }
@@ -1490,16 +1490,16 @@ public class CryptoService {
       throws NoSuchPaddingException, NoSuchAlgorithmException {
 
     switch (aesType) {
-      case Const.ETM_AES128_CTR:
-      case Const.ETM_AES256_CTR:
+      case Const.COSEAES128CTR:
+      case Const.COSEAES256CTR:
         return Cipher.getInstance("AES/CTR/NoPadding");
 
-      case Const.ETM_AES128_CBC:
-      case Const.ETM_AES256_CBC:
+      case Const.COSEAES128CBC:
+      case Const.COSEAES256CBC:
         return Cipher.getInstance("AES/CBC/PKCS7Padding", BCPROV);
 
-      case Const.ETM_AES128_GCM:
-      case Const.ETM_AES256_GCM:
+      case Const.COSEAES128GCM:
+      case Const.COSEAES256GCM:
         return Cipher.getInstance("AES/GCM/NoPadding");
 
       default:
@@ -1592,7 +1592,7 @@ public class CryptoService {
   }
 
   private boolean isGcmCipher(int type) {
-    return Const.ETM_AES128_GCM == type || Const.ETM_AES256_GCM == type;
+    return Const.COSEAES128GCM == type || Const.COSEAES256GCM == type;
   }
 
   private boolean isCcmCipher(String name) {
@@ -1601,7 +1601,7 @@ public class CryptoService {
   }
 
   private boolean isCcmCipher(int type) {
-    return Const.ETM_AES_CCM_64_128_128 == type || Const.ETM_AES_CCM_64_128_256 == type;
+    return Const.COSEAESCCM_64_128_128 == type || Const.COSEAESCCM_64_128_256 == type;
   }
 
   private byte[] ccmEncrypt(

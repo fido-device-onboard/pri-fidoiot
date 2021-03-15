@@ -100,17 +100,17 @@ public final class Const {
   public static final long EUPH_NONCE = -17760709;// need IANA number
   public static final long CUPH_PUBKEY = -17760702;// need IANA number
 
-  public static final long COSEAES128CBC = -17760703; // need IANA number
-  public static final long COSEAES128CTR = -17760704; // need IANA number
-  public static final long COSEAES256CBC = -17760705; // need IANA number
-  public static final long COSEAES256CTR = -17760706; // need IANA number
+  public static final int COSEAES128CBC = -17760703; // need IANA number
+  public static final int COSEAES128CTR = -17760704; // need IANA number
+  public static final int COSEAES256CBC = -17760705; // need IANA number
+  public static final int COSEAES256CTR = -17760706; // need IANA number
 
   public static final int SDO_CLAIM_KEXB = 3;
 
-  public static final int ETM_AES128_GCM = 1;
-  public static final int ETM_AES256_GCM = 3;
-  public static final int ETM_AES_CCM_64_128_128 = 32;
-  public static final int ETM_AES_CCM_64_128_256 = 33;
+  public static final int COSEAES128GCM = 1;
+  public static final int COSEAES256GCM = 3;
+  public static final int COSEAESCCM_64_128_128 = 32;
+  public static final int COSEAESCCM_64_128_256 = 33;
 
   public static final String AES128_GCM_ALG_NAME = "AES128GCM";
   public static final String AES256_GCM_ALG_NAME = "AES256GCM";
@@ -118,11 +118,6 @@ public final class Const {
   public static final String AES_CCM_64_128_256_ALG_NAME = "AES-CCM-64-128-256";
 
   public static final int GCM_TAG_LENGTH = 128; // all GCM modes use a 128-bit tag
-
-  public static final int ETM_AES128_CTR = 30; //not defined in spec
-  public static final int ETM_AES256_CTR = 35; //not defined in spec
-  public static final int ETM_AES128_CBC = 20; //not defined in spec
-  public static final int ETM_AES256_CBC = 25; //not define in spec
 
   public static final long ETM_AES_IV = 5;
   public static final long ETM_AES_PLAIN_TYPE = 1;
