@@ -1413,7 +1413,7 @@ public class CryptoService {
 
     ByteArrayOutputStream result = new ByteArrayOutputStream();
 
-    for (int i = 0; n > i; i++) {
+    for (int i = 1; n >= i; i++) { // NIST SP 800-108 loops from 1 to n, not 0 to n - 1!
 
       prf.reset();
 
