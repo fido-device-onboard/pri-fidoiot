@@ -182,7 +182,8 @@ public class ManufacturerContextListener implements ServletContextListener {
               String alias = aliases.next();
               Certificate[] certificateChain = mfgKeyStore.getCertificateChain(alias);
               if (certificateChain != null && certificateChain.length > 0
-                  && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)) {
+                  && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)
+                  && publicKeyType == cs.getPublicKeyType(certificateChain[0].getPublicKey())) {
                 return certificateChain;
               }
             }
