@@ -94,11 +94,10 @@ public abstract class To2ClientService extends DeviceService {
       Composite deviceState = getCryptoService()
           .getKeyExchangeMessage(getStorage().getKexSuiteName(), Const.KEY_EXCHANGE_B, ownerKey);
 
-      byte[] ownSecret = getCryptoService().getSharedSecret(this.kexA, deviceState, null);
+      KeyExchangeResult kxResult = getCryptoService().getSharedSecret(this.kexA, deviceState, null);
 
       this.ownState = getCryptoService()
-          .getEncryptionState(ownSecret,
-              getStorage().getCipherSuiteName());
+          .getEncryptionState(kxResult, getStorage().getCipherSuiteName());
 
       byte[] ueid = getCryptoService()
           .getUeidFromGuid(
@@ -113,7 +112,7 @@ public abstract class To2ClientService extends DeviceService {
       Composite payload = Composite.newMap()
           .set(Const.EAT_NONCE, nonce6)
           .set(Const.EAT_UEID, ueid)
-          .set(Const.EAT_SDO_IOT, iotPayload);
+          .set(Const.EAT_FDO, iotPayload);
 
       Composite signature = null;
       try (CloseableKey key = new CloseableKey(getStorage().getSigningKey())) {
@@ -241,6 +240,16 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite body = request.getAsComposite(Const.SM_BODY);
     Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+
+    // Once decrypted, the TO2SetupDevicePayload must have its signature verified.
+    // The verification key is explicitly contained in the message body.
+    byte[] signedBytes = message.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+    Composite signedBody = Composite.fromObject(signedBytes);
+    Composite encodedKey = signedBody.getAsComposite(Const.FOURTH_KEY);
+    PublicKey verificationKey = getCryptoService().decode(encodedKey);
+    getCryptoService().verify(verificationKey, message, null, null, null);
+    message = signedBody; // signature ok, focus on payload
+
     byte[] receivedNonce7 = message.getAsBytes(Const.THIRD_KEY);
     getCryptoService().verifyBytes(receivedNonce7, nonce7);
 
