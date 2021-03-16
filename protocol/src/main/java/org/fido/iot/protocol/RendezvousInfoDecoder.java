@@ -237,13 +237,25 @@ public class RendezvousInfoDecoder {
       if (value != null
           && (value == Const.RV_PROT_HTTP || value == Const.RV_PROT_HTTPS)) {
 
-        //default http value
-        String devPort = "80";
-        String ownerPort = devPort;
-        String protocol = "http://";
+        String devPort = "";
+        String ownerPort = "";
+        String protocol = "";
 
-        //override with https
-        if (value == Const.RV_PROT_HTTPS) {
+        if (filter == Const.RV_DEV_ONLY) {
+          //Device protocol based on the RVProtocol value.
+
+          //default http value
+          devPort = "80";
+          ownerPort = devPort;
+          protocol = "http://";
+
+          //override with https
+          if (value == Const.RV_PROT_HTTPS) {
+            protocol = "https://";
+            ownerPort = devPort = "443";
+          }
+        } else if (filter == Const.RV_OWNER_ONLY) {
+          //The Owner always chooses HTTPS for communication.
           protocol = "https://";
           ownerPort = devPort = "443";
         }

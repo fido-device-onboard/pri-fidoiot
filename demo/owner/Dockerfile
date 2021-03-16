@@ -13,6 +13,7 @@ RUN mkdir -p /home/owner/lib /home/owner/serviceinfo
 
 # Setup owner dependencies
 COPY ./lib ./lib/
+COPY ./certs ./certs/
 COPY ./serviceinfo ./serviceinfo/
 COPY owner.jar .
 COPY owner_keystore.p12 .

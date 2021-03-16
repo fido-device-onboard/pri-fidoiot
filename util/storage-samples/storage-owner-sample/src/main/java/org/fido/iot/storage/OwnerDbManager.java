@@ -44,47 +44,64 @@ public class OwnerDbManager {
     try (Connection conn = dataSource.getConnection();
         Statement stmt = conn.createStatement()) {
 
-      String sql = "CREATE TABLE IF NOT EXISTS "
-          + "TO2_DEVICES("
-          + "GUID CHAR(36) PRIMARY KEY, "
-          + "VOUCHER BLOB, "
-          + "WAIT_SECONDS_REQUEST INT NOT NULL DEFAULT 3600, "
-          + "WAIT_SECONDS_RESPONSE INT NULL DEFAULT NULL, "
-          + "CREATED TIMESTAMP NOT NULL, "
-          + "TO0_STARTED TIMESTAMP NULL DEFAULT NULL, "
-          + "TO0_COMPLETED TIMESTAMP NULL DEFAULT NULL, "
-          + "TO2_STARTED TIMESTAMP NULL DEFAULT NULL, "
-          + "TO2_COMPLETED TIMESTAMP NULL DEFAULT NULL, "
-          + "REPLACEMENT_GUID CHAR(36), "
-          + "REPLACEMENT_RVINFO BLOB, "
-          + "REPLACEMENT_HMAC BLOB, "
-          + "REPLACEMENT_VOUCHER BLOB, "
-          + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
-          + "PRIMARY KEY (GUID), "
-          + "UNIQUE (GUID)"
-          + ");";
+      String sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "OWNER_CUSTOMERS ("
+              + "CUSTOMER_ID INT NOT NULL DEFAULT 1, "
+              + "NAME VARCHAR(255), "
+              + "KEYS VARCHAR(4096), "
+              + "UNIQUE (CUSTOMER_ID)"
+              + ");";
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
-          + "TO2_SESSIONS("
-          + "SESSION_ID CHAR(36) PRIMARY KEY, "
-          + "VOUCHER BLOB, "
-          + "OWNER_STATE BLOB,"
-          + "CIPHER_NAME VARCHAR(36), "
-          + "NONCE6 BINARY(16), "
-          + "NONCE7 BINARY(16), "
-          + "SIGINFOA BLOB, "
-          + "SERVICEINFO_BLOB BLOB, "
-          + "CREATED TIMESTAMP,"
-          + "UPDATED TIMESTAMP,"
-          + "PRIMARY KEY (SESSION_ID), "
-          + "UNIQUE (SESSION_ID)"
-          + ");";
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "TO2_DEVICES("
+              + "GUID CHAR(36) PRIMARY KEY, "
+              + "VOUCHER BLOB, "
+              + "WAIT_SECONDS_REQUEST INT NOT NULL DEFAULT 3600, "
+              + "WAIT_SECONDS_RESPONSE INT NULL DEFAULT NULL, "
+              + "CREATED TIMESTAMP NOT NULL, "
+              + "TO0_STARTED TIMESTAMP NULL DEFAULT NULL, "
+              + "TO0_COMPLETED TIMESTAMP NULL DEFAULT NULL, "
+              + "TO2_STARTED TIMESTAMP NULL DEFAULT NULL, "
+              + "TO2_COMPLETED TIMESTAMP NULL DEFAULT NULL, "
+              + "REPLACEMENT_GUID CHAR(36), "
+              + "REPLACEMENT_RVINFO BLOB, "
+              + "REPLACEMENT_HMAC BLOB, "
+              + "CUSTOMER_ID INT, "
+              + "REPLACEMENT_VOUCHER BLOB, "
+              + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
+              + "PRIMARY KEY (GUID), "
+              + "UNIQUE (GUID), "
+              + "FOREIGN KEY (CUSTOMER_ID) REFERENCES "
+              + "OWNER_CUSTOMERS(CUSTOMER_ID) ON DELETE CASCADE"
+              + ");";
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "TO2_SESSIONS("
+              + "SESSION_ID CHAR(36) PRIMARY KEY, "
+              + "VOUCHER BLOB, "
+              + "OWNER_STATE BLOB,"
+              + "CIPHER_NAME VARCHAR(36), "
+              + "NONCE6 BINARY(16), "
+              + "NONCE7 BINARY(16), "
+              + "SIGINFOA BLOB, "
+              + "SERVICEINFO_BLOB BLOB, "
+              + "CREATED TIMESTAMP,"
+              + "UPDATED TIMESTAMP,"
+              + "PRIMARY KEY (SESSION_ID), "
+              + "UNIQUE (SESSION_ID)"
+              + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
               + "TO2_SETTINGS("
               + "ID INT NOT NULL, "
               + "DEVICE_SERVICE_INFO_MTU_SIZE INT NOT NULL, "
@@ -96,46 +113,50 @@ public class OwnerDbManager {
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
-          + "OWNER_SERVICEINFO("
-          + "SVI_ID CHAR(36) PRIMARY KEY, "
-          + "CONTENT BLOB, "
-          + "CONTENT_LENGTH BIGINT, "
-          + "PRIMARY KEY (SVI_ID) "
-          + ");";
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "OWNER_SERVICEINFO("
+              + "SVI_ID CHAR(36) PRIMARY KEY, "
+              + "CONTENT BLOB, "
+              + "CONTENT_LENGTH BIGINT, "
+              + "PRIMARY KEY (SVI_ID) "
+              + ");";
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
-          + "DEVICE_TYPE_OWNERSVI_STRING("
-          + "DEVICE_TYPE CHAR(255), "
-          + "OWNERSVI_STRING CHAR(2147483647), "
-          + "PRIMARY KEY (DEVICE_TYPE),"
-          + "UNIQUE (DEVICE_TYPE)"
-          + ");";
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "DEVICE_TYPE_OWNERSVI_STRING("
+              + "DEVICE_TYPE CHAR(255), "
+              + "OWNERSVI_STRING CHAR(2147483647), "
+              + "PRIMARY KEY (DEVICE_TYPE),"
+              + "UNIQUE (DEVICE_TYPE)"
+              + ");";
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
-          + "DEVICE_TYPE_OWNERSVI_CRITERIA("
-          + "DEVICE_TYPE CHAR(255), "
-          + "CRITERIA CHAR(2147483647), "
-          + "EXPECTED_VALUE CHAR(2147483647), "
-          + "PRIMARY KEY (DEVICE_TYPE, CRITERIA),"
-          + "FOREIGN KEY (DEVICE_TYPE) REFERENCES "
-          + "DEVICE_TYPE_OWNERSVI_STRING(DEVICE_TYPE) ON DELETE CASCADE"
-          + ");";
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "DEVICE_TYPE_OWNERSVI_CRITERIA("
+              + "DEVICE_TYPE CHAR(255), "
+              + "CRITERIA CHAR(2147483647), "
+              + "EXPECTED_VALUE CHAR(2147483647), "
+              + "PRIMARY KEY (DEVICE_TYPE, CRITERIA),"
+              + "FOREIGN KEY (DEVICE_TYPE) REFERENCES "
+              + "DEVICE_TYPE_OWNERSVI_STRING(DEVICE_TYPE) ON DELETE CASCADE"
+              + ");";
 
       stmt.executeUpdate(sql);
 
-      sql = "CREATE TABLE IF NOT EXISTS "
-          + "GUID_DEVICEDSI("
-          + "GUID CHAR(36) NOT NULL, "
-          + "DSI_KEY CHAR(100) NOT NULL, "
-          + "DSI_VALUE BLOB NOT NULL, "
-          + "PRIMARY KEY (GUID, DSI_KEY), "
-          + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
-          + ");";
+      sql =
+          "CREATE TABLE IF NOT EXISTS "
+              + "GUID_DEVICEDSI("
+              + "GUID CHAR(36) NOT NULL, "
+              + "DSI_KEY CHAR(100) NOT NULL, "
+              + "DSI_VALUE BLOB NOT NULL, "
+              + "PRIMARY KEY (GUID, DSI_KEY), "
+              + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
+              + ");";
 
       stmt.executeUpdate(sql);
     } catch (SQLException e) {
@@ -157,7 +178,7 @@ public class OwnerDbManager {
     String sql = ""
         + "MERGE INTO TO2_DEVICES  "
         + "KEY (GUID) "
-        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?); ";
+        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?); ";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -176,8 +197,9 @@ public class OwnerDbManager {
       pstmt.setBytes(11, ovh
           .getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes());
       pstmt.setBytes(12, null);
-      pstmt.setBytes(13, null);
-      pstmt.setInt(14, 0);
+      pstmt.setInt(13,  1);
+      pstmt.setBytes(14, null);
+      pstmt.setInt(15, 0);
 
       pstmt.executeUpdate();
 
@@ -327,6 +349,30 @@ public class OwnerDbManager {
   }
 
   /**
+   * Update the replacementRvInfo for given currentGuid.
+   *
+   * @param ds Datasource instance
+   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param replacementKey Customer ID for replacement key.
+   */
+  public void updateReplacementKeyCustomerId(DataSource ds, UUID currentGuid,
+      int replacementKey) {
+
+    String sql = "UPDATE TO2_DEVICES"
+        + " SET CUSTOMER_ID = ?"
+        + " WHERE GUID = ?;";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setInt(1, replacementKey);
+      pstmt.setString(2, currentGuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Update the replacementGuid for given currentGuid.
    *
    * @param ds Datasource instance
@@ -393,6 +439,33 @@ public class OwnerDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, String.valueOf(mtu));
       pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Ads a customer to the Customers table.
+   *
+   * @param ds   The datasource to use.
+   * @param id   The id of the customer.
+   * @param name The name of the customer.
+   * @param keys A PEM string containing public keys.
+   */
+  public void addCustomer(DataSource ds, int id, String name, String keys) {
+
+    String sql = ""
+        + "MERGE INTO OWNER_CUSTOMERS   "
+        + "KEY (CUSTOMER_ID) "
+        + "VALUES (?,?,?); ";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setInt(1, id);
+      pstmt.setString(2, name);
+      pstmt.setString(3, keys);
+      pstmt.executeUpdate();
+
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -702,6 +775,24 @@ public class OwnerDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setString(1, deviceType);
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Removes customer keys entry corresponding to the customer ID.
+   *
+   * @param ds Datasource
+   * @param customerId customer ID
+   */
+  public void removeCustomer(DataSource ds, String customerId) {
+    String sql = "DELETE FROM OWNER_CUSTOMERS WHERE CUSTOMER_ID = ?;";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, customerId);
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);

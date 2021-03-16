@@ -31,14 +31,21 @@ public class ServiceInfoEncoder {
    * @return
    */
   public static Composite encodeDeviceServiceInfo(List<Composite> keyValuePairs, boolean isMore) {
-    Composite svi = Composite.newArray();
-    for (Composite keyValuePair : keyValuePairs) {
-      svi.set(svi.size(), keyValuePair);
+    Composite serviceInfoKeyVal = Composite.newArray();
+    for (Composite serviceInfoKv : keyValuePairs) {
+      serviceInfoKeyVal.set(serviceInfoKeyVal.size(), serviceInfoKv);
+    }
+
+    // If ServiceInfoKeyVal is empty, don't encode it.
+    // Empty ServiceInfo should be [], not [[]].
+    Composite serviceInfo = Composite.newArray();
+    if (0 < serviceInfoKeyVal.size()) {
+      serviceInfo.set(Const.FIRST_KEY, serviceInfoKeyVal);
     }
 
     return Composite.newArray()
         .set(Const.FIRST_KEY, isMore)
-        .set(Const.SECOND_KEY, Composite.newArray().set(Const.FIRST_KEY, svi));
+        .set(Const.SECOND_KEY, serviceInfo);
   }
 
   /**
@@ -52,14 +59,21 @@ public class ServiceInfoEncoder {
   public static Composite encodeOwnerServiceInfo(List<Composite> keyValuePairs, boolean isMore,
       boolean isDone) {
 
-    Composite svi = Composite.newArray();
-    for (Composite keyValuePair : keyValuePairs) {
-      svi.set(svi.size(), keyValuePair);
+    Composite serviceInfoKeyVal = Composite.newArray();
+    for (Composite serviceInfoKv : keyValuePairs) {
+      serviceInfoKeyVal.set(serviceInfoKeyVal.size(), serviceInfoKv);
+    }
+
+    // If ServiceInfoKeyVal is empty, don't encode it.
+    // Empty ServiceInfo should be [], not [[]].
+    Composite serviceInfo = Composite.newArray();
+    if (0 < serviceInfoKeyVal.size()) {
+      serviceInfo.set(Const.FIRST_KEY, serviceInfoKeyVal);
     }
 
     return Composite.newArray()
         .set(Const.FIRST_KEY, isMore)
         .set(Const.SECOND_KEY, isDone)
-        .set(Const.THIRD_KEY, Composite.newArray().set(Const.FIRST_KEY, svi));
+        .set(Const.THIRD_KEY, serviceInfo);
   }
 }
