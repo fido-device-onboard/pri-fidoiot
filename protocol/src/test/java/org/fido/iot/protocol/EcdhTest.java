@@ -31,10 +31,10 @@ public class EcdhTest {
     byte[] kexA = ownerState.getAsBytes(Const.FIRST_KEY);
     byte[] kexB = deviceState.getAsBytes(Const.FIRST_KEY);
 
-    byte[] ownSecret = cryptoService.getSharedSecret(kexA, deviceState, null);
-    byte[] devSecret = cryptoService.getSharedSecret(kexB, ownerState, null);
+    KeyExchangeResult ownSecret = cryptoService.getSharedSecret(kexA, deviceState, null);
+    KeyExchangeResult devSecret = cryptoService.getSharedSecret(kexB, ownerState, null);
 
-    if (ByteBuffer.wrap(ownSecret).compareTo(ByteBuffer.wrap(devSecret)) != 0) {
+    if (ByteBuffer.wrap(ownSecret.shSe).compareTo(ByteBuffer.wrap(devSecret.shSe)) != 0) {
       throw new RuntimeException("Shared secret does not match");
     }
 
