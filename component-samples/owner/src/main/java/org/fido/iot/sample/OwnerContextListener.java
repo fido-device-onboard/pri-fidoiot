@@ -117,12 +117,12 @@ public class OwnerContextListener implements ServletContextListener {
     // correct their configuration.
     OnDieService initialOds = null;
     if (sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR) != null
-            && !sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
+        && !sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR).isEmpty()) {
       OnDieCache odc = new OnDieCache(
-              URI.create(sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR)),
-              sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
-              sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
-              null);
+          URI.create(sc.getInitParameter(OwnerAppSettings.ONDIE_CACHEDIR)),
+          sc.getInitParameter(OwnerAppSettings.ONDIE_AUTOUPDATE).toLowerCase().equals("true"),
+          sc.getInitParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT),
+          null);
 
       try {
         odc.initializeCache();
@@ -131,11 +131,10 @@ public class OwnerContextListener implements ServletContextListener {
       }
 
       initialOds = new OnDieService(odc,
-              sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
-                      .toLowerCase().equals("true"));
+          sc.getInitParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS)
+              .toLowerCase().equals("true"));
     }
     final OnDieService ods = initialOds;
-
 
     resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
         sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
@@ -170,10 +169,6 @@ public class OwnerContextListener implements ServletContextListener {
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
     manager.importVoucher(ds, Composite.fromObject(VOUCHER));
-    manager.loadSampleServiceInfo(ds,
-        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)));
-    manager.loadSampleDeviceTypeSviStringMapping(
-        ds, Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
     manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set
@@ -203,8 +198,8 @@ public class OwnerContextListener implements ServletContextListener {
   }
 
   private To2ServerService createTo2Service(CryptoService cs,
-                                            DataSource ds,
-                                            OnDieService ods) {
+      DataSource ds,
+      OnDieService ods) {
     return new To2ServerService() {
       private To2ServerStorage storage;
 
@@ -228,7 +223,7 @@ public class OwnerContextListener implements ServletContextListener {
       OwnerTo0Client to0Client = new OwnerTo0Client(new CryptoService(), ds,
           new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
               sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD)),
-              guid, to0Util);
+          guid, to0Util);
       to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();
     } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {

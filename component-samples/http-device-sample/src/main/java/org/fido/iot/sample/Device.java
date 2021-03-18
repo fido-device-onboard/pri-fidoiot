@@ -4,21 +4,16 @@
 package org.fido.iot.sample;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -38,15 +33,12 @@ import org.fido.iot.protocol.MessageDispatcher;
 import org.fido.iot.protocol.MessagingService;
 import org.fido.iot.protocol.RendezvousBlobDecoder;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
-import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To1ClientService;
 import org.fido.iot.protocol.To1ClientStorage;
 import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
-import org.fido.iot.serviceinfo.ServiceInfo;
-import org.fido.iot.serviceinfo.ServiceInfoEntry;
-import org.fido.iot.serviceinfo.ServiceInfoMarshaller;
-import org.fido.iot.serviceinfo.ServiceInfoSequence;
+import org.fido.iot.serviceinfo.FdoSys;
+import org.fido.iot.serviceinfo.ModuleManager;
 
 public class Device {
 
@@ -65,10 +57,7 @@ public class Device {
   final CryptoService myCryptoService;
   final KeyPair myKeys;
   final CredentialStorage myCredStore;
-  final DeviceServiceInfoModule deviceServiceInfoModule;
-  private long serviceInfoCount = 0;
-  private long serviceInfoPosition = 0;
-  private ServiceInfoMarshaller marshaller;
+  final ModuleManager modules;
 
   Device() throws IOException {
     Properties p = System.getProperties();
@@ -82,16 +71,25 @@ public class Device {
     String pem = Files.readString(
         Paths.get(p.getProperty(PROPERTY_DEV_PEM, "device.pem")));
     myKeys = new KeyPair(PemLoader.loadPublicKeys(pem).get(0), PemLoader.loadPrivateKey(pem));
-    deviceServiceInfoModule = new DeviceServiceInfoModule();
+
+    DeviceDevMod devMod = new DeviceDevMod();
+    devMod.addModuleName(FdoSys.NAME);
+    //devMod.AddModuleName(FdoWget.NAME);
+
+    modules = new ModuleManager();
+    modules.setDeviceMode(true);
+
+    modules.addModule(devMod);
+    modules.addModule(new DeviceSysModule());
+    //modules.AddModule(new DeviceWgetModule());
+
   }
 
   /**
    * The shell entry-point for the Java Device.
    *
-   * @param argv
-   *     The shell ARGV list.
-   * @throws Exception
-   *     If the protocol fails for any reason.
+   * @param argv The shell ARGV list.
+   * @throws Exception If the protocol fails for any reason.
    */
   public static void main(String[] argv) throws Exception {
     new Device().run();
@@ -314,8 +312,9 @@ public class Device {
 
     To2ClientStorage to2Storage = new To2ClientStorage() {
 
-      int deviceServiceInfoMtuSize = 0;
+      int deviceServiceInfoMtuSize = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       String ownerServiceInfoMtuSize = String.valueOf(0);
+
 
       @Override
       public void starting(Composite request, Composite reply) {
@@ -359,6 +358,9 @@ public class Device {
       @Override
       public String getMaxOwnerServiceInfoMtuSz() {
         ownerServiceInfoMtuSize = System.getProperties().getProperty(PROPERTY_SERVICE_INFO_MTU);
+        if (ownerServiceInfoMtuSize == null) {
+          ownerServiceInfoMtuSize = Integer.toString(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+        }
         return ownerServiceInfoMtuSize;
       }
 
@@ -380,28 +382,18 @@ public class Device {
 
       @Override
       public void setMaxDeviceServiceInfoMtuSz(int mtu) {
-        deviceServiceInfoMtuSize = mtu;
+        if (mtu > Const.DEFAULT_SERVICE_INFO_MTU_SIZE) {
+          deviceServiceInfoMtuSize = mtu;
+        }
+
+        modules.setMtu(deviceServiceInfoMtuSize);
         prepareServiceInfo();
       }
 
+
       @Override
       public Composite getNextServiceInfo() {
-        marshaller.register(new DeviceServiceInfoModule());
-        Iterable<Supplier<ServiceInfo>> serviceInfos = marshaller.marshal();
-        List<Composite> svi = new LinkedList<Composite>();
-        final Iterator<Supplier<ServiceInfo>> it = serviceInfos.iterator();
-        if (it.hasNext()) {
-          ServiceInfo serviceInfo = it.next().get();
-          Iterator<ServiceInfoEntry> marshalledEntries = serviceInfo.iterator();
-          while (marshalledEntries.hasNext()) {
-            ServiceInfoEntry marshalledEntry = marshalledEntries.next();
-            Composite innerArray = ServiceInfoEncoder.encodeValue(marshalledEntry.getKey(),
-                      marshalledEntry.getValue().getContent());
-            svi.add(innerArray);
-            }
-          return ServiceInfoEncoder.encodeDeviceServiceInfo(svi, true);
-        }
-        return ServiceInfoEncoder.encodeDeviceServiceInfo(Collections.EMPTY_LIST, false);
+        return modules.getNextServiceInfo();
       }
 
       @Override
@@ -429,30 +421,13 @@ public class Device {
 
       @Override
       public void prepareServiceInfo() {
-        marshaller = new ServiceInfoMarshaller(
-                getMaxDeviceServiceInfoMtuSz(),
-                wrappedCreds.get().getAsUuid(Const.DC_GUID));
-        marshaller.register(new DeviceServiceInfoModule());
+        UUID guid = credentials.getAsUuid(Const.DC_GUID);
+        modules.prepare(guid);
       }
 
       @Override
       public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
-        deviceServiceInfoModule.putServiceInfo(
-            wrappedCreds.get().getAsUuid(Const.DC_GUID),
-            new ServiceInfoEntry(info.getAsString(Const.FIRST_KEY),
-                new ServiceInfoSequence(info.getAsString(Const.FIRST_KEY)) {
-
-                  @Override
-                  public Object getContent() {
-                    return info.get(Const.SECOND_KEY);
-                  }
-
-                  @Override
-                  public long length() {
-                    // Return 0 as length is not supposed to be used anywhere
-                    return 0;
-                  }
-                }));
+        modules.setServiceInfo(info, isMore);
       }
     };
 

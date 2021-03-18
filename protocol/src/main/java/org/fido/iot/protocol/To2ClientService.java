@@ -392,10 +392,18 @@ public abstract class To2ClientService extends DeviceService {
 
     Composite sviValues = svi.getAsComposite(Const.THIRD_KEY);
     Composite values = sviValues.size() > 0 ? sviValues.getAsComposite(Const.FIRST_KEY)
-            : Composite.newArray();
-    for (int i = 0; i < values.size(); i++) {
+        : Composite.newArray();
+
+    int numOfValues = values.size();
+    for (int i = 0; i < numOfValues; i++) {
       Composite sviValue = values.getAsComposite(i);
-      getStorage().setServiceInfo(sviValue, isMore, isDone);
+      boolean moreFlag = true;
+      boolean doneFlag = false;
+      if (i == numOfValues - 1) {
+        moreFlag = isMore;
+        doneFlag = isDone;
+      }
+      getStorage().setServiceInfo(sviValue, moreFlag, doneFlag);
     }
 
     Composite payload = getStorage().getNextServiceInfo();

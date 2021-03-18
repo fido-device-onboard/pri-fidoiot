@@ -9,13 +9,13 @@ import java.nio.charset.StandardCharsets;
 /**
  * Constants common to the sdosys management agent and service.
  */
-public final class SdoWget {
+public final class FdoWget {
 
   public static final Charset CHARSET = StandardCharsets.UTF_8;
-  public static final String NAME = "sdo_wget";
-  public static final String KEY_ACTIVE = "active";
-  public static final String KEY_FILENAME = "filename";
-  public static final String KEY_URL = "url";
-  public static final String KEY_SHA = "sha-384";
+  public static final String NAME = "fdo_wget";
+  public static final String KEY_ACTIVE = NAME + ":active";
+  public static final String KEY_FILENAME = NAME + ":filename";
+  public static final String KEY_URL = NAME + ":url";
+  public static final String KEY_SHA = NAME + ":sha-384";
 }
 
