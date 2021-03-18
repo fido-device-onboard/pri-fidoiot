@@ -11,7 +11,7 @@ node('ubuntu18.04-OnDemand'){
   stage('build'){
     sh 'mvn clean install'
     print "Archive the artifacts"
-    sh 'tar -czvf demo.tar.gz demo/'
+    sh 'cd component-samples && tar -czvf demo.tar.gz demo && mv demo.tar.gz ..'
     archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
 
@@ -32,7 +32,7 @@ node('ubuntu18.04-OnDemand'){
 
       // Extract and copy the demo.tar content to the location
       sh '''
-        cp -r demo/* sdo-test/binaries/pri-fidoiot
+        cp -r component-samples/demo/* sdo-test/binaries/pri-fidoiot
       '''
 
       // Setting the TEST_DIR and executing smoke test
