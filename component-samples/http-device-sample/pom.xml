@@ -30,8 +30,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <bcpkix.version>1.66</bcpkix.version>
-    <bcprov.version>1.66</bcprov.version>
+    <bcpkix.version>1.68</bcpkix.version>
+    <bcprov.version>1.68</bcprov.version>
     <junit-jupiter.version>5.7.0-M1</junit-jupiter.version>
     <log4j.version>2.13.3</log4j.version>
 
