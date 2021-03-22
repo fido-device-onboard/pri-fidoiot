@@ -124,3 +124,25 @@ $ cat example_allowlist_publickey.der | openssl dgst -sha256 | awk '/s/{print to
 ```
 
 ***NOTE:*** Input file cert.pem is an X509 certificate.
+
+# Configuring RV for HTTPS/TLS Communication
+
+By default, the RV uses HTTP for all communications on port 8040. In addition to that, the RV can be configured to handle HTTPS request from the owner & device on port 8443.
+
+- Generate the Keystore/Certificate for the RV. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Rendezvous server. Refer the above section to generate the keystore.
+
+- Copy the generated Keystore/Certificate to `demo/rv/certs` folder.
+
+- Update the following environment varibles in `demo/rv/rv.env` file
+
+    |  Variable            |  Value            |             description       |
+    | ---------------------|-------------------|-------------------------------|
+    | rv_protocol_scheme  | https             | To enable HTTPS communication.|
+    | rv_https_port       | port number       | The given port number will be used for HTTPS communication. |
+    | rv_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
+    | rv_ssl_keystore-password| keystore-password | password of the keystore. |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of RV.
+    Avoid using the default keystore available for production deployment.

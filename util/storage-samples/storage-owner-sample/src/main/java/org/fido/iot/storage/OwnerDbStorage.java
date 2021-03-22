@@ -12,9 +12,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
+import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.CryptoService;
@@ -250,7 +256,45 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public Composite getReplacementOwnerKey() {
-    return getCryptoService().getOwnerPublicKey(voucher);
+    List<PublicKey> certs = null;
+
+    String sql =
+        "SELECT KEYS FROM OWNER_CUSTOMERS WHERE CUSTOMER_ID =  "
+            + "(SELECT CUSTOMER_ID FROM TO2_DEVICES WHERE GUID = ?)";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, guid.toString());
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          certs = PemLoader.loadPublicKeys(rs.getString(1));
+        }
+      }
+    } catch (SQLException e) {
+      /* If no customerId is found in the DB,
+      current ownerkey is returned as replacement owner key.
+      The scenario will default to reuse case.
+      */
+      return getCryptoService().getOwnerPublicKey(voucher);
+    }
+
+    int keyType =
+        getCryptoService()
+            .getPublicKeyType(
+                getCryptoService().decode(getCryptoService().getOwnerPublicKey(voucher)));
+
+    PublicKey ownerPub = null;
+
+    for (PublicKey pub : certs) {
+      int ownerType = getCryptoService().getPublicKeyType(pub);
+      if (ownerType == keyType) {
+        ownerPub = pub;
+        break;
+      }
+    }
+
+    return getCryptoService().encode(ownerPub,
+        getCryptoService().getCompatibleEncoding(ownerPub));
   }
 
   @Override

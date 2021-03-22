@@ -18,6 +18,7 @@ public class OwnerSetupInfoServlet extends HttpServlet {
 
   private static final String SETUPINFO_GUID = "guid";
   private static final String SETUPINFO_RVINFO = "rvinfo";
+  private static final String SETUPINFO_OWNER_CUSTOMER_ID = "ownerkey";
   private static final String SETUPINFO_ARRAY_DELIMETER = ",";
   private static final String SETUPINFO_VALUE_DELIMETER = ":=";
 
@@ -48,19 +49,20 @@ public class OwnerSetupInfoServlet extends HttpServlet {
     try {
       String requestBody = req.getReader().lines().collect(Collectors.joining());
 
-      // Request format: guid==<guid>,rvinfo==<rvinfo>
+      // Request format: guid:=<guid>,rvinfo:=<rvinfo>,ownerkey:=<ownerkey>
       if (requestBody != null) {
         DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
         OwnerDbManager ownerDbManager = new OwnerDbManager();
 
         String[] setupInfos = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
-        if (setupInfos.length > 2) {
+        if (setupInfos.length > 3) {
           getServletContext().log("Invalid setupinfo request has been provided.");
           resp.setStatus(400);
           return;
         }
         UUID replacementGuid = null;
         String replacementRvInfo = null;
+        int replacementOwnerKeyCustomerId = 0;
         for (String setupInfo : setupInfos) {
           String[] si = setupInfo.split(SETUPINFO_VALUE_DELIMETER);
           if (si.length == 2) {
@@ -75,6 +77,15 @@ public class OwnerSetupInfoServlet extends HttpServlet {
                 getServletContext()
                     .log("Updating Replacement Rendezvous Info for " + currentGuid.toString());
                 ownerDbManager.updateDeviceReplacementRvinfo(ds, currentGuid, replacementRvInfo);;
+                break;
+              case SETUPINFO_OWNER_CUSTOMER_ID:
+                replacementOwnerKeyCustomerId = Integer.parseInt(si[1]);
+                getServletContext()
+                    .log(
+                        "Updating customer id for replacement owner key for "
+                            + currentGuid.toString());
+                ownerDbManager.updateReplacementKeyCustomerId(
+                    ds, currentGuid, replacementOwnerKeyCustomerId);
                 break;
               default:
                 break;

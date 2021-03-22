@@ -6,11 +6,15 @@ package org.fido.iot.sample;
 import java.nio.file.Path;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.fido.iot.api.OwnerCustomerServlet;
+import org.fido.iot.api.OwnerDeviceSviStringServlet;
 import org.fido.iot.api.OwnerDeviceTypeCriteriaServlet;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
@@ -29,6 +33,15 @@ public class OwnerServerApp {
       ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppSettings.TO2_PORT))
       : 8042;
 
+  private static final int OWNER_HTTPS_PORT =
+      null != OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_HTTPS_PORT)
+          ? Integer.parseInt(OwnerConfigLoader.loadConfig(
+          OwnerAppSettings.OWNER_HTTPS_PORT)) : 443;
+
+  private static final String OWNER_SCHEME =
+      null != OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_SCHEME)
+          ? OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_SCHEME) : "http";
+
   private static String getMessagePath(int msgId) {
     return OwnerAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
   }
@@ -40,7 +53,7 @@ public class OwnerServerApp {
    */
   public static void main(String[] args) {
     Tomcat tomcat = new Tomcat();
-    tomcat.setPort(TO2_PORT);
+
     // set the path of tomcat
     System.setProperty(OwnerAppSettings.SERVER_PATH,
         Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SERVER_PATH)).toAbsolutePath()
@@ -130,6 +143,9 @@ public class OwnerServerApp {
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
+    wrapper = tomcat.addServlet(ctx, "ownerCustomerServlet",
+        new OwnerCustomerServlet());
+    wrapper.addMapping("/api/v1/owner/customer/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
@@ -150,6 +166,39 @@ public class OwnerServerApp {
         OwnerAppSettings.AUTH_ROLE);
     tomcat.addUser(OwnerConfigLoader.loadConfig(OwnerAppSettings.API_USER),
         OwnerConfigLoader.loadConfig(OwnerAppSettings.API_PWD));
+
+
+    Service service = tomcat.getService();
+    Connector httpsConnector = new Connector();
+
+    if (OWNER_SCHEME.toLowerCase().equals("https")) {
+
+      httpsConnector.setPort(OWNER_HTTPS_PORT);
+      httpsConnector.setSecure(true);
+      httpsConnector.setScheme(OWNER_SCHEME);
+
+      Path keyStoreFile =
+          Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PATH));
+      String keystorePass =
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PASSWORD);
+
+      httpsConnector.setProperty("keystorePass", keystorePass);
+      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+      httpsConnector.setProperty("clientAuth", "false");
+      httpsConnector.setProperty("sslProtocol", "TLS");
+      httpsConnector.setProperty("SSLEnabled", "true");
+      service.addConnector(httpsConnector);
+
+    }
+
+    Connector httpConnector = new Connector();
+    httpConnector.setPort(TO2_PORT);
+    httpConnector.setScheme("http");
+    httpConnector.setRedirectPort(OWNER_HTTPS_PORT);
+    httpConnector.setProperty("protocol", "HTTP/1.1");
+    httpConnector.setProperty("connectionTimeout", "20000");
+    service.addConnector(httpConnector);
+    tomcat.setConnector(httpConnector);
 
     tomcat.getConnector();
     try {

@@ -71,13 +71,14 @@
       <groupId>org.fido.iot</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
-      <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.fido.iot</groupId>
       <artifactId>device</artifactId>
       <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 </project>

@@ -6,6 +6,14 @@ package org.fido.iot.sample;
 public class ManufacturerAppSettings {
 
   public static final String DI_PORT = "manufacturer_di_port";
+  public static final String DI_HTTPS_PORT = "manufacturer_https_port";
+
+  // To set the default protocol scheme
+  public static final String DI_SCHEME = "manufacturer_protocol_scheme";
+
+  // SSL Keystore info
+  public static final String SSL_KEYSTORE_PATH = "manufacturer_ssl_keystore";
+  public static final String SSL_KEYSTORE_PASSWORD = "manufacturer_ssl_keystore-password";
 
   // part of the path of exposed web APIs
   public static final String WEB_PATH = "/fdo/100/msg";

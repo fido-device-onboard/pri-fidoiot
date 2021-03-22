@@ -161,11 +161,13 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | POST /api/v1/owner/svi/settings/ | Updates the various fields of `TO2_SETTINGS` table for ID=1 field.<br/> Example input looks like 'devicemtu:=2000,ownerthreshold:=8192',wgetModContentVerification:=<boolean> <br/> For field: wgetModContentVerification, acceptable input values: true or false <br/> True: To enable content verification. <br/> False: To opt out of content verification| | application/text| values based on the field(s) to be modified.| |
 | POST /api/v1/owner/setupinfo/?id=current_guid | updates `Replacement GUID` or `Replacement RVInfo` or both in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or both. <br/> To update both GUID and RV Info: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\>| | |
 | GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the replacement Ownership Voucher for the GUID if TO2 is completed and resale/non-resale was selected. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/setupinfo?id=<device_guid> | Updates the replacement RendezvousInfo and GUID for the device. The setupinfo sring format is 'guid:=<replacement_device_guid_string>,rvinfo:=<replacement_rv_info_string>'. Both 'guid' and 'rvinfo' are optional. An example setupinfo string looks like 'guid:=64612afb-4ad9-4c69-a7d1-1cb1378157ec,rvinfo:=http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040'. | Query - id: Device GUID | application/text | Setupinfo string | |
+| POST /api/v1/owner/setupinfo?id=<device_guid> | Updates the replacement RendezvousInfo, GUID and customer ID (for owner2 key) for the device. The setupinfo sring format is 'guid:=<replacement_device_guid_string>,rvinfo:=<replacement_rv_info_string>,ownerkey:=<customer_id>'. Both 'guid', 'rvinfo' and 'ownerkey' are optional. An example setupinfo string looks like 'guid:=64612afb-4ad9-4c69-a7d1-1cb1378157ec,rvinfo:=http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040,ownerkey:=2'. | Query - id: Device GUID | application/text | Setupinfo string | |
 | POST /api/v1/owner/svi/string/ | Adds owner serviceinfo string for each device type | | application/text | devicetype followed by the owner svi string separated by space | |
 | DELETE /api/v1/owner/svi/string/?devicetype=<device_type> | Deletes device entry from `DEVICE_TYPE_OWNERSVI_STRING` table. | Query - devicetype: Device Type | | | |
 | POST /api/v1/owner/devicetype/criteria/ | Adds criteria for identifying device type based on the DSI keys sent by the device. **NOTE** The first device type for which all criteria matches is determined as the device type for the current device. Recommended to add more restrictive device criteria first followed by less restrictive ones | | application/text | Device type followed by DSI keys followed by expected values separated by space | |
 | DELETE /api/v1/owner/devicetype/criteria/?devicetype=<device_type> | Deletes device entry from `DEVICE_TYPE_OWNERSVI_CRITERIA` table. | Query - devicetype: Device Type  | | | |
+| POST /api/v1/owner/customer/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
+| DELETE /api/v1/owner/customer/?id=<customer_id> | Deletes device entry from `OWNER_CUSTOMERS` table. | Query - id: Customer Id  | | | |
 
 
 ***NOTE*** These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
@@ -181,3 +183,32 @@ The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains
 # Troubleshooting
 
 As the H2 DB grows, larger heap space will be required by the application to run the service. Default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issues.
+
+# Configuring Owner for HTTPS/TLS Communication
+
+By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS request from the device.
+
+- Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Owner server.
+
+- Copy the generated Keystore/Certificate to `demo/owner/certs` folder.
+
+- Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
+
+- Update the following environment varibles in `demo/owner/owner.env` file
+
+    |  Variable              |  Value            |             Description       |
+    | -----------------------|-------------------|-------------------------------|
+    | owner_protocol_scheme  | https             | To enable HTTPS communication.|
+    | owner_https_port       | port number       | The given port will be used for HTTPS communication. |
+    | fido_ssl_mode          | TEST / PROD       | If set to `TEST`, then SSL verification is disabled. If set to `PROD`, then certificate verification is initiated. |
+    | owner_ssl_keystore     | keystore-filename | Filename of Keystore that is present in the certs folder.|
+    | owner_ssl_keystore-password| keystore-password | Password of the keystore. |
+    | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
+    | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
+    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
+    | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
+    Avoid using the default keystore available for production deployment.

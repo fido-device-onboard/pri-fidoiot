@@ -3,17 +3,23 @@
 
 package org.fido.iot.storage;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.tools.Server;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
 import org.junit.jupiter.api.Test;
 import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.Composite;
@@ -28,7 +34,10 @@ import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
 import org.fido.iot.protocol.To2ServerService;
 import org.fido.iot.protocol.To2ServerStorage;
+import org.junit.jupiter.api.TestMethodOrder;
 
+
+@TestMethodOrder(Alphanumeric.class)
 public class To2StorageTest {
 
   private static final String DB_HOST = "localhost";
@@ -99,6 +108,25 @@ public class To2StorageTest {
       + "tlYxN0Xax8cEDsfvIuVJYhYytbOGPkZ8mA==\n"
       + "-----END EC PRIVATE KEY-----";
 
+  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
+      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
+      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
+      + "-----END PUBLIC KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----";
+
   private static final String BASE_PATH = Path.of(
       System.getProperty("user.dir"),
       "target", "data",
@@ -117,12 +145,27 @@ public class To2StorageTest {
       + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
       + "fi\r\n";
 
+   private static final String fileContent = "sample file";
+
   String activateMod = "true";
   String packageName = "linux64.sh";
   String filename = "sample_file";
   String url = "http://host/file.tmp";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
   ",sdo_wget:filename=filename,sdo_wget:url=url";
+
+  static BasicDataSource ds = new BasicDataSource();
+  static {
+    ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);
+    ds.setDriverClassName("org.h2.Driver");
+    ds.setUsername(DB_USER);
+    ds.setPassword(DB_PASSWORD);
+
+    ds.setMinIdle(5);
+    ds.setMaxIdle(10);
+    ds.setMaxOpenPreparedStatements(100);
+
+  }
 
   final KeyResolver keyResolver = new KeyResolver() {
     @Override
@@ -155,20 +198,22 @@ public class To2StorageTest {
 
   private void insertSampleServiceInfo(DataSource ds, OwnerDbManager ownerDbManager) {
 
-    //ownerDbManager.addServiceInfo(ds, "activate_mod", activateMod.getBytes());
-    //ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
-    //ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
-    //ownerDbManager.addServiceInfo(ds, "filename", filename.getBytes());
-    //ownerDbManager.addServiceInfo(ds, "url", url.getBytes());
+    ownerDbManager.addServiceInfo(ds, "activate_mod", activateMod.getBytes());
+    ownerDbManager.addServiceInfo(ds, "packageContent", packageContent.getBytes());
+    ownerDbManager.addServiceInfo(ds, "sample_file", fileContent.getBytes());
+    ownerDbManager.addServiceInfo(ds, "packageName", packageName.getBytes());
+    ownerDbManager.addServiceInfo(ds, "filename", filename.getBytes());
+    ownerDbManager.addServiceInfo(ds, "url", url.getBytes());
   }
 
   private void insertSampleSettings(DataSource ds, OwnerDbManager ownerDbManager) {
-    //ownerDbManager.loadTo2Settings(ds);
-    //ownerDbManager.addDeviceTypeOwnerSviString(ds, "default", sviString);
+    ownerDbManager.loadTo2Settings(ds);
+    ownerDbManager.addDeviceTypeOwnerSviString(ds, "default", sviString);
+    ownerDbManager.addCustomer(ds, 1, "owner", ownerKeysPem);
   }
 
   @Test
-  void Test() throws Exception {
+  void accTest() throws Exception {
 
     /** TODO: fix this
     Composite testV = Composite.fromObject(VOUCHER);
@@ -344,9 +389,9 @@ public class To2StorageTest {
 
       OwnerDbManager dbsManager = new OwnerDbManager();
       dbsManager.createTables(ds);
-      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
       insertSampleServiceInfo(ds, dbsManager);
       insertSampleSettings(ds, dbsManager);
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
 
       DispatchResult dr = to2ClientService.getHelloMessage();
 
@@ -373,6 +418,458 @@ public class To2StorageTest {
         // ignore
       }
     }*/
+  }
+
+  @Test
+  void removeVoucherTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    OwnerDbManager dbsManager = new OwnerDbManager();
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      int res = dbsManager.removeVoucher(ds, UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"));
+      assertTrue(res == 1);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+      if (server != null) {
+        server.stop();
+      }
+
+    }
+  }
+
+  @Test
+  void removeServiceInfoTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow( ()-> {
+      dbsManager.removeServiceInfo(ds, "mod"); });
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void updateDeviceReplacementRvinfoTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          ()-> { dbsManager.updateDeviceReplacementRvinfo(ds,
+              UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"),
+              "http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040");
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void updateDeviceReplacementGuidTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    OwnerDbManager dbsManager = new OwnerDbManager();
+    try {
+
+      server = Server.createTcpServer(args).start();
+      assertDoesNotThrow(
+          ()-> { dbsManager.updateDeviceReplacementGuid(ds,
+              UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"),
+              UUID.fromString("f0956089-c0df-4c34-9c61-f460457e77eb"));
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      dbsManager.removeVoucher(ds, UUID.fromString("f0956089-c0df-4c34-9c61-f460457e77eb"));
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void updateMtuTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          ()-> { dbsManager.updateMtu(ds,"OWNER_MTU_THRESHOLD", 5000);
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void updateWgetVerificationPreferenceTest() {
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          ()-> { dbsManager.updateWgetVerificationPreference(ds, true);
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void removeDeviceSviStringTest() {
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          ()-> { dbsManager.removeDeviceSviString(ds,"default_");
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void addDeviceTypeCriteriaTest() {
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          ()-> { dbsManager.addDeviceTypeCriteria(ds, "default",
+              "devmod:os", "Linux");
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void updateReplacementKeyCustomerIdTest() {
+    String args[] = new String[] {"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+      assertDoesNotThrow(
+          () -> {
+            dbsManager.addCustomer(
+                ds,
+                100,
+                "Test",
+                "-----BEGIN PUBLIC KEY-----\n"
+                    + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+                    + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+                    + "-----END PUBLIC KEY-----\n");
+            dbsManager.updateReplacementKeyCustomerId(
+                ds, UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"), 100);
+          });
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void addAndRemoveCustomerTest() {
+    String args[] = new String[] {"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbsManager = new OwnerDbManager();
+      assertDoesNotThrow(
+          () -> {
+            dbsManager.addCustomer(
+                ds,
+                100,
+                "Test",
+                "-----BEGIN PUBLIC KEY-----\n"
+                    + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+                    + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+                    + "-----END PUBLIC KEY-----\n");
+            dbsManager.removeCustomer(ds, String.valueOf(100));
+          });
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void fetchDevicesForTo0Test() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    OwnerDbManager dbsManager = new OwnerDbManager();
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      OwnerDbTo0Util storageUtils = new OwnerDbTo0Util();
+      List<UUID> uuid = storageUtils.fetchDevicesForTo0(ds);
+
+      assertTrue(uuid.size() > 0);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void getResponseWaitTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    OwnerDbManager dbsManager = new OwnerDbManager();
+    try {
+
+      server = Server.createTcpServer(args).start();
+
+      OwnerDbTo0Util storageUtils = new OwnerDbTo0Util();
+      List<UUID> uuid = storageUtils.fetchDevicesForTo0(ds);
+      long responseWait = storageUtils.getResponseWait(ds,uuid.get(0));
+      assertTrue(responseWait >= 0);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+
+  @Test
+  void getVoucherTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    UUID guid = UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb");
+    OwnerDbTo0Storage storage = new OwnerDbTo0Storage(ds, keyResolver, guid);
+    try {
+
+      server = Server.createTcpServer(args).start();
+      Composite voucher = storage.getVoucher();
+      assertTrue(voucher.size() > 0);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void getRequestWaitTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    UUID guid = UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb");
+    OwnerDbTo0Storage storage = new OwnerDbTo0Storage(ds, keyResolver, guid);
+    try {
+
+      server = Server.createTcpServer(args).start();
+      long reqWait = storage.getRequestWait();
+      assertTrue(reqWait > 0);
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void to2StateTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    UUID guid = UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb");
+    OwnerDbTo0Storage storage = new OwnerDbTo0Storage(ds, keyResolver, guid);
+    try {
+
+      server = Server.createTcpServer(args).start();
+      Composite request = Composite.newArray();
+      Composite response = Composite.newArray();
+
+      assertDoesNotThrow(
+          ()-> {
+            storage.starting(request,response);
+            storage.started(request,response);
+            storage.continued(request,response);
+            storage.completed(request,response);
+            storage.failed(request,response);
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+
+  }
+
+  @Test
+  void setResponseWaitTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    UUID guid = UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb");
+    OwnerDbTo0Storage storage = new OwnerDbTo0Storage(ds, keyResolver, guid);
+    try {
+
+      server = Server.createTcpServer(args).start();
+      assertDoesNotThrow(
+          ()-> { storage.setResponseWait(3600);
+          }
+      );
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
+  }
+
+  @Test
+  void insertWgetContentHashTest() {
+
+    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+    // start the TCP Server
+    Server server = null;
+    try {
+
+      server = Server.createTcpServer(args).start();
+      OwnerDbManager dbManager = new OwnerDbManager();
+      String res = dbManager.insertWgetContentHash(ds, sviString);
+      String expected = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent,"
+          + "sdo_wget:filename=filename,sdo_wget:url=url,sdo_wget:sha-384=sample_file_hash";
+      assert(res.equals(expected));
+
+    } catch (SQLException throwables) {
+      throwables.printStackTrace();
+    } finally {
+      if (server != null) {
+        server.stop();
+      }
+    }
   }
 }
 

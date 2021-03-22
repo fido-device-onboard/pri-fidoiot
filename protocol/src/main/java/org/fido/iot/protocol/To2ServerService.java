@@ -125,15 +125,15 @@ public abstract class To2ServerService extends MessagingService {
       Composite payload = Composite.fromObject(
           body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
-      Composite iotClaim = payload.getAsComposite(Const.EAT_SDO_IOT);
+      Composite iotClaim = payload.getAsComposite(Const.EAT_FDO);
       byte[] kexB = iotClaim.getAsBytes(Const.FIRST_KEY);
 
       Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
       PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
-      byte[] devSecret = getCryptoService().getSharedSecret(kexB,
+      KeyExchangeResult kxResult = getCryptoService().getSharedSecret(kexB,
           getStorage().getOwnerState(), getStorage().getOwnerSigningKey(ownerPublicKey));
 
-      Composite cipherState = getCryptoService().getEncryptionState(devSecret,
+      Composite cipherState = getCryptoService().getEncryptionState(kxResult,
           getStorage().getCipherName());
       getStorage().setOwnerState(cipherState);
 
@@ -164,6 +164,17 @@ public abstract class To2ServerService extends MessagingService {
       payload.set(Const.SECOND_KEY, replacementGuid);
       payload.set(Const.THIRD_KEY, nonce7);
       payload.set(Const.FOURTH_KEY, replacementKey);
+
+      // TO2SetupDevicePayload is signed by Owner2, which in this code is this owner
+      // probably replacing the manufacturer-owner.
+      PublicKey replPubKey = getCryptoService().decode(replacementKey);
+      try (CloseableKey key =
+          new CloseableKey(getStorage().getOwnerSigningKey(replPubKey))) {
+        payload = getCryptoService().sign(
+            key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(replPubKey));
+      } catch (IOException e) {
+        throw new DispatchException(e);
+      }
 
       body = getCryptoService().encrypt(
           payload.toBytes(),
@@ -224,7 +235,7 @@ public abstract class To2ServerService extends MessagingService {
           (getStorage()
               .getMaxDeviceServiceInfoMtuSz()
               .equals(String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE))
-              ? PrimitivesUtil.getCborNullBytes()
+              ? null
               : Integer.parseInt(getStorage().getMaxDeviceServiceInfoMtuSz())));
 
       body = getCryptoService().encrypt(payload.toBytes(),
