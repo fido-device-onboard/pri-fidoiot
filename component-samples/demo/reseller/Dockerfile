@@ -15,6 +15,7 @@ WORKDIR /home/reseller/
 
 # Setup reseller dependencies
 COPY ./lib ./lib/
+COPY ./certs ./certs
 COPY reseller.jar .
 COPY reseller_keystore.p12 .
 COPY reseller-entrypoint.sh .
