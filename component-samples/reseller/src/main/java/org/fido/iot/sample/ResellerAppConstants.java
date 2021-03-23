@@ -25,5 +25,10 @@ public class ResellerAppConstants {
   public static final String KEYSTORE_PWD = "reseller_keystore_password";
   public static final String KEYSTORE_PATH = "";
 
+  public static final String SSL_KEYSTORE_PATH = "reseller_ssl_keystore";
+  public static final String SSL_KEYSTORE_PASSWORD = "reseller_ssl_keystore-password";
+  public static final String RESELLER_HTTPS_PORT = "reseller_https_port";
+  public static final String RESELLER_PROTOCOL_SCHEME = "reseller_protocol_scheme";
+
   public static final String USER_DIR = "user.dir";
 }
