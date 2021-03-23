@@ -16,7 +16,7 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <name>Protocol HTTP TO0 Client Sample</name>
+  <name>HTTP TO0 Client Sample</name>
   <artifactId>http-client-to0-sample</artifactId>
   <packaging>jar</packaging>
 
