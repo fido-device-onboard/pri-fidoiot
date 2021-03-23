@@ -306,7 +306,8 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     return getCryptoService().encode(ownerPub,
-        getCryptoService().getCompatibleEncoding(ownerPub));
+            (keyType == Const.PK_RSA2048RESTR)
+            ? Const.PK_ENC_CRYPTO : getCryptoService().getCompatibleEncoding(ownerPub));
   }
 
   @Override
