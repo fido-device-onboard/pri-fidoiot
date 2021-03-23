@@ -16,8 +16,8 @@
     <version>0.5-SNAPSHOT</version>
   </parent>
 
-  <name>HTTP TO0 Client Sample</name>
-  <artifactId>http-client-to0-sample</artifactId>
+  <name>Protocol HTTP TO0 Client Sample</name>
+  <artifactId>protocol-http-client-to0-sample</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -120,7 +120,7 @@
           <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
           <workingDirectory>${project.build.outputDirectory}</workingDirectory>
-          <mainClass>org.fido.iot.sample.To0ClientApp</mainClass>
+          <mainClass>org.fido.iot.sample.To0ClientComponentApp</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
