@@ -277,9 +277,12 @@ public class To0ClientApp {
     Composite ovh = clientStorage.getVoucher().getAsComposite(Const.OV_HEADER);
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
+    // Protocol to0_to1_server (rv) only support http so we
+    // want to select the RV_DEV_ONLY filter here so the directive
+    // returned is http.
     List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
         rvi,
-        Const.RV_OWNER_ONLY);
+        Const.RV_DEV_ONLY);
 
     for (String path : paths) {
 
