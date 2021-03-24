@@ -23,7 +23,7 @@ import org.fido.iot.protocol.RendezvousInfoDecoder;
 import org.fido.iot.protocol.To0ClientService;
 import org.fido.iot.protocol.To0ClientStorage;
 
-public class To0ClientApp {
+public class To0ClientComponentApp {
 
   private static final int REQUEST_WS = 3600;
   private static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
@@ -278,7 +278,7 @@ public class To0ClientApp {
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
     List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
-        rvi, Const.RV_DEV_ONLY);
+        rvi, Const.RV_OWNER_ONLY);
 
     for (String path : paths) {
 
@@ -303,7 +303,7 @@ public class To0ClientApp {
    */
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
-    new To0ClientApp().run(args);
+    new To0ClientComponentApp().run(args);
     System.out.println("TO0 Client finished.");
     return;
   }
