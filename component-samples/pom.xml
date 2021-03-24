@@ -25,7 +25,6 @@
     <module>rv</module>
     <module>reseller</module>
     <module>http-device-sample</module>
-    <module>component-http-client-to0-sample</module>
   </modules>
 
 </project>
