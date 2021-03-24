@@ -5,6 +5,7 @@ package org.fido.iot.protocol;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
@@ -236,7 +237,7 @@ public class To2EcRsaTest extends BaseTemplate {
       }
     };
 
-    clientService = new To2ClientService() {
+    To2ClientService to2Service = new To2ClientService() {
       @Override
       public CryptoService getCryptoService() {
         return cryptoService;
@@ -247,6 +248,9 @@ public class To2EcRsaTest extends BaseTemplate {
         return clientStorage;
       }
     };
+
+    to2Service.setTo1d(generateSignedBlob(RSA3K_PEM));
+    clientService = to2Service;
 
     To2ServerStorage serverStorage = new To2ServerStorage() {
       @Override

@@ -5,6 +5,8 @@ package org.fido.iot.protocol;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -222,7 +224,7 @@ public class To2AsymkexTest extends BaseTemplate {
       }
     };
 
-    clientService = new To2ClientService() {
+    To2ClientService to2Service = new To2ClientService() {
       @Override
       protected To2ClientStorage getStorage() {
         return clientStorage;
@@ -233,6 +235,9 @@ public class To2AsymkexTest extends BaseTemplate {
         return cryptoService;
       }
     };
+
+    to2Service.setTo1d(generateSignedBlob(rsaKeyPem));
+    clientService = to2Service;
 
     To2ServerStorage serverStorage = new To2ServerStorage() {
       @Override

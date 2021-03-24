@@ -474,6 +474,7 @@ public class Device {
       to2Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
     } else {
       to2Urls = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
+      to2Service.setTo1d(signedBlob.get());
     }
 
     MessageDispatcher to2Dispatcher = new MessageDispatcher() {
