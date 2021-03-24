@@ -54,17 +54,8 @@ public class DeviceDevMod implements Module {
     devInfoList.add(
         ServiceInfoEncoder.encodeValue(DevMod.KEY_VERSION, System.getProperty("os.version")));
 
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("SDO reference device, using JRE ");
-    stringBuilder.append(System.getProperty("java.version"));
-    stringBuilder.append(" (");
-    stringBuilder.append(System.getProperty("java.vendor"));
-    stringBuilder.append(")");
     devInfoList.add(
-        ServiceInfoEncoder.encodeValue(DevMod.KEY_DEVICE, stringBuilder.toString()));
-
-    //list.add(
-    //   ServiceInfoEncoder.encodeValue(DevMod.KEY_SN, ""));
+        ServiceInfoEncoder.encodeValue(DevMod.KEY_DEVICE, "FDO-Pri-Device"));
 
     devInfoList.add(
         ServiceInfoEncoder.encodeValue(DevMod.KEY_PATHSEP, File.separator));
@@ -87,17 +78,13 @@ public class DeviceDevMod implements Module {
     devInfoList.add(
         ServiceInfoEncoder.encodeValue(DevMod.KEY_PROGENV, "bin:java"));
 
-    //list.add(
-    //   ServiceInfoEncoder.encodeValue(DevMod.KEY_MUDURL,
-    // "https://fidoalliance.org/mud/sample/device"));
-
     devInfoList.add(
         ServiceInfoEncoder.encodeValue(DevMod.KEY_NUMMODULES, moduleNames.size()));
 
     //add all the modules
     for (int i = 0; i < moduleNames.size(); i++) {
       Composite modules = Composite.newArray()
-          .set(0, i) //zero to num module index
+          .set(0, moduleNames.size()) //zero to num module index
           .set(1, 1) // the number returned
           .set(2, moduleNames.get(i)); //the module
       devInfoList.add(

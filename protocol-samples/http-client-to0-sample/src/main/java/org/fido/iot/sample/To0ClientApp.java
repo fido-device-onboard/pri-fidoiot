@@ -10,6 +10,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.fido.iot.certutils.PemLoader;
@@ -281,9 +282,14 @@ public class To0ClientApp {
 
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
-    List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
+    List<String> rviPaths = RendezvousInfoDecoder.getHttpDirectives(
         rvi,
         Const.RV_OWNER_ONLY);
+
+    List<String> paths = new ArrayList<>();
+    for (String path : rviPaths) {
+      paths.add(path.replaceAll("https://", "http://"));
+    }
 
     for (String path : paths) {
 

@@ -264,7 +264,7 @@ public class OwnerDbStorage implements To2ServerStorage {
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, guid.toString());
+      pstmt.setString(1, getGuid().toString());
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
           certs = PemLoader.loadPublicKeys(rs.getString(1));
@@ -356,7 +356,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public int getMaxOwnerServiceInfoMtuSz() {
 
-    int ownerMtuThreshold = 0;
+    int ownerMtuThreshold = ModuleManager.DEFAULT_MTU;
     String sql = "SELECT OWNER_MTU_THRESHOLD FROM TO2_SETTINGS WHERE ID = 1;";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql);) {

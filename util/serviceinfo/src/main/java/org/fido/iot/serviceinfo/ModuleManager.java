@@ -16,6 +16,7 @@ import org.fido.iot.protocol.ServiceInfoEncoder;
  */
 public class ModuleManager implements Module {
 
+  public static final int DEFAULT_MTU = 1300;
   private final List<Module> moduleList;
   private Composite state;
   private boolean isDevice;
@@ -167,18 +168,6 @@ public class ModuleManager implements Module {
     if (extra.size() > 0) {
       list.add(extra);
       state.set(Const.FOURTH_KEY, Composite.newArray());
-    }
-
-    if (true) {
-      Composite testPair = Composite.newArray()
-          .set(Const.FIRST_KEY, "fdo_sys:write")
-          .set(Const.SECOND_KEY, new byte[1277]);
-      List<Composite> testList = new ArrayList<>();
-      testList.add(testPair);
-      Composite tempSvi = ServiceInfoEncoder.encodeOwnerServiceInfo(
-          testList, isMore(), isDone());
-      int len = tempSvi.toBytes().length;
-      tempSvi.toString();
     }
 
     while (isMore()) {

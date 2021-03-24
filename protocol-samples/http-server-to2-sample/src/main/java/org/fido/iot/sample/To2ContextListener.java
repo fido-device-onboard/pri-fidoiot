@@ -151,6 +151,27 @@ public class To2ContextListener implements ServletContextListener {
       + "11e81f7a181a7b32e5823c564f36280793e3c1a022100bf193f7ffe4cd2ac8b7046cbe32a81de286b8f667a8c"
       + "96e045396ffca26c6c23";
 
+  private final String ownerPublicKeyPemEC256 = "-----BEGIN PUBLIC KEY-----\n"
+      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
+      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
+      + "-----END PUBLIC KEY-----\n";
+  private final String ownerPublicKeyPemEC384 = "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
+      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
+      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
+      + "-----END PUBLIC KEY-----\n";
+
+  private final String ownerPublicKeysPemRsa = "-----BEGIN PUBLIC KEY-----\n"
+      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
+      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
+      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
+      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
+      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
+      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
+      + "AwIDAQAB\n"
+      + "-----END PUBLIC KEY-----\n";
+
+
   private KeyResolver resolver;
 
   @Override
@@ -256,6 +277,15 @@ public class To2ContextListener implements ServletContextListener {
     //create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
+
+
+    //create default customer the owners default day
+    StringBuilder keyBuilder = new StringBuilder();
+
+    keyBuilder.append(ownerPublicKeyPemEC256);
+    keyBuilder.append(ownerPublicKeyPemEC384);
+    keyBuilder.append(ownerPublicKeysPemRsa);
+    manager.addCustomer(ds,1,"default",keyBuilder.toString());
 
     // if the optional "voucher" file is present then use
     // it. If not, then fall back to the hardcoded value.

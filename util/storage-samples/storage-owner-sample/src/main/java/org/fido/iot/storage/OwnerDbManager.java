@@ -76,7 +76,7 @@ public class OwnerDbManager {
               + "REPLACEMENT_GUID CHAR(36), "
               + "REPLACEMENT_RVINFO BLOB, "
               + "REPLACEMENT_HMAC BLOB, "
-              + "CUSTOMER_ID INT, "
+              + "CUSTOMER_ID INT , "
               + "REPLACEMENT_VOUCHER BLOB, "
               + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
               + "PRIMARY KEY (GUID), "
@@ -119,50 +119,51 @@ public class OwnerDbManager {
 
       stmt.executeUpdate(sql);
 
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "OWNER_SERVICEINFO("
-              + "SVI_ID CHAR(36) PRIMARY KEY, "
-              + "CONTENT BLOB, "
-              + "CONTENT_LENGTH BIGINT, "
-              + "PRIMARY KEY (SVI_ID) "
-              + ");";
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "DEVICE_MODULE_INFO ("
+          + "GUID CHAR(36) NOT NULL,"
+          + "ACTIVE BOOLEAN NOT NULL, "
+          + "OS_NAME VARCHAR(255) NOT NULL, "
+          + "OS_VERSION VARCHAR(255) NOT NULL,"
+          + "OS_ARCH VARCHAR(255) NOT NULL , "
+          + "DEVICE_TYPE VARCHAR(255) NOT NULL, "
+          + "SERIAL_NUMBER VARCHAR(255) NULL DEFAULT NULL, "
+          + "PATH_SEPARATOR VARCHAR(2) NOT NULL, "
+          + "FILE_NAME_SEPARATOR VARCHAR(2) NULL DEFAULT NULL,"
+          + "NEW_LINE_SEQUENCE VARCHAR(4) NULL DEFAULT NULL,"
+          + "TMP_DIR VARCHAR(512) NULL DEFAULT NULL,"
+          + "BIN_DIR VARCHAR(512) NULL DEFAULT NULL,"
+          + "PROG_ENV VARCHAR(512) NULL DEFAULT NULL,"
+          + "BIN_FORMATS VARCHAR(512) NOT NULL,"
+          + "MUD_URL VARCHAR(512) NULL DEFAULT NULL,"
+          + "MODULES CLOB NOT NULL,"
+          + "CREATED TIMESTAMP, "
+          + "FOREIGN KEY (GUID) REFERENCES "
+          + "TO2_DEVICES(GUID) ON DELETE CASCADE"
+          + ");";
 
       stmt.executeUpdate(sql);
 
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "DEVICE_TYPE_OWNERSVI_STRING("
-              + "DEVICE_TYPE CHAR(255), "
-              + "OWNERSVI_STRING CHAR(2147483647), "
-              + "PRIMARY KEY (DEVICE_TYPE),"
-              + "UNIQUE (DEVICE_TYPE)"
-              + ");";
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "SYSTEM_MODULE_RESOURCE("
+          + "RESOURCE_ID IDENTITY NOT NULL, "
+          + "CONTENT BLOB NULL DEFAULT NULL,"
+          + "CONTENT_TYPE_TAG CHAR(255) NOT NULL, "
+          + "RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
+          + "PRIORITY INT NOT NULL DEFAULT 1, "
+          + "FILE_NAME_TAG VARCHAR(1280) NULL DEFAULT NULL, "
+          + "GUID_TAG CHAR(36) NULL DEFAULT NULL, "
+          + "DEVICE_TYPE_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "OS_NAME_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "OS_VERSION_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "ARCHITECTURE_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "HASH_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(), "
+          + "PRIMARY KEY (RESOURCE_ID), "
+          + "UNIQUE (RESOURCE_ID)"
+          + ");";
 
       stmt.executeUpdate(sql);
-
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "DEVICE_TYPE_OWNERSVI_CRITERIA("
-              + "DEVICE_TYPE CHAR(255), "
-              + "CRITERIA CHAR(2147483647), "
-              + "EXPECTED_VALUE CHAR(2147483647), "
-              + "PRIMARY KEY (DEVICE_TYPE, CRITERIA),"
-              + "FOREIGN KEY (DEVICE_TYPE) REFERENCES "
-              + "DEVICE_TYPE_OWNERSVI_STRING(DEVICE_TYPE) ON DELETE CASCADE"
-              + ");";
-
-      stmt.executeUpdate(sql);
-
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "GUID_DEVICEDSI("
-              + "GUID CHAR(36) NOT NULL, "
-              + "DSI_KEY CHAR(100) NOT NULL, "
-              + "DSI_VALUE BLOB NOT NULL, "
-              + "PRIMARY KEY (GUID, DSI_KEY), "
-              + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
-              + ");";
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -202,7 +203,7 @@ public class OwnerDbManager {
       pstmt.setBytes(11, ovh
           .getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes());
       pstmt.setBytes(12, null);
-      pstmt.setInt(13,  1);
+      pstmt.setInt(13, 1);
       pstmt.setBytes(14, null);
       pstmt.setInt(15, 0);
 
@@ -269,8 +270,8 @@ public class OwnerDbManager {
   /**
    * Update the replacementRvInfo for given currentGuid.
    *
-   * @param ds Datasource instance
-   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param ds             Datasource instance
+   * @param currentGuid    The GUID of the device for which updates need to be made.
    * @param replacementKey Customer ID for replacement key.
    */
   public void updateReplacementKeyCustomerId(DataSource ds, UUID currentGuid,
@@ -390,6 +391,31 @@ public class OwnerDbManager {
   }
 
   /**
+   * Sets the device property of a field in the device info table.
+   *
+   * @param pstmt    The SQL prepare statement.
+   * @param columnId The column id to set.
+   * @param mapKey   The DevMod key we are setting.
+   * @param map      The map containing the values of the DevMod keys.
+   * @throws SQLException An SQL Exception.
+   */
+  private void setDeviceInfoProperty(PreparedStatement pstmt,
+      int columnId,
+      String mapKey,
+      Composite map) throws SQLException {
+    if (map.containsKey(mapKey)) {
+      Object value = map.get(mapKey);
+      if (value instanceof String) {
+        pstmt.setString(columnId, value.toString());
+      } else if (value instanceof Boolean) {
+        pstmt.setBoolean(columnId, (Boolean) value);
+      }
+    } else {
+      pstmt.setNull(columnId, Types.CHAR);
+    }
+  }
+
+  /**
    * Add device type to owner serviceinfo mapping.
    *
    * @param ds  Datasource instance.
@@ -480,7 +506,10 @@ public class OwnerDbManager {
     String sql = "SELECT "
         + "DEVICE_TYPE,"
         + "MODULES,"
-        + "FILE_NAME_SEPARATOR "
+        + "FILE_NAME_SEPARATOR, "
+        + "OS_NAME, "
+        + "OS_VERSION,  "
+        + "OS_ARCH "
         + "FROM DEVICE_MODULE_INFO WHERE GUID = ?";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -490,6 +519,10 @@ public class OwnerDbManager {
           map.set(DevMod.KEY_DEVICE, rs.getString(1));
           map.set(DevMod.KEY_MODULES, rs.getString(2));
           map.set(DevMod.KEY_SEP, rs.getString(3));
+          map.set(DevMod.KEY_OS, rs.getString(4));
+          map.set(DevMod.KEY_VERSION, rs.getString(5));
+          map.set(DevMod.KEY_ARCH, rs.getString(6));
+
         }
       }
     } catch (SQLException e) {
@@ -513,10 +546,17 @@ public class OwnerDbManager {
 
     Composite resList = Composite.newArray();
     String deviceType = devInfo.getAsString(DevMod.KEY_DEVICE);
-    String sql = "SELECT RESOURCE_ID, CONTENT_TYPE_TAG "
+    String osName = devInfo.getAsString(DevMod.KEY_OS);
+    String osVersion = devInfo.getAsString(DevMod.KEY_VERSION);
+    String archType = devInfo.getAsString(DevMod.KEY_ARCH);
+
+    String sql = "SELECT RESOURCE_ID, CONTENT_TYPE_TAG, UPDATED "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (GUID_TAG = ? OR GUID_TAG IS NULL ) AND "
         + "(DEVICE_TYPE_TAG = ? OR DEVICE_TYPE_TAG IS NULL ) AND "
+        + "(OS_NAME_TAG  = ? OR OS_NAME_TAG IS NULL ) AND "
+        + "(OS_VERSION_TAG = ? OR OS_VERSION_TAG IS NULL ) AND "
+        + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
         + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:active') "
@@ -525,11 +565,15 @@ public class OwnerDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, guid);
       pstmt.setString(2, deviceType);
+      pstmt.setString(3, osName);
+      pstmt.setString(4, osVersion);
+      pstmt.setString(5, archType);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Composite resItem = Composite.newArray();
           resItem.set(Const.FIRST_KEY, rs.getString(1));
           resItem.set(Const.SECOND_KEY, rs.getString(2));
+          resItem.set(Const.THIRD_KEY, rs.getString(3));
           resList.set(resList.size(), resItem);
         }
       }
@@ -552,10 +596,12 @@ public class OwnerDbManager {
     String sql = "SELECT "
         + "CONTENT "
         + "FROM SYSTEM_MODULE_RESOURCE "
-        + "WHERE RESOURCE_ID = ?;";
+        + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
+        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, resourceId);
+      pstmt.setString(2, resourceId);
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
           return rs.getBytes(1);
@@ -586,10 +632,13 @@ public class OwnerDbManager {
         + "LENGTH(CONTENT), "
         + "CONTENT, "
         + "FROM SYSTEM_MODULE_RESOURCE "
-        + "WHERE RESOURCE_ID = ?;";
+        + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
+        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, resourceId);
+      pstmt.setString(2, resourceId);
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
           int maxValue = rs.getInt(1);
@@ -783,18 +832,11 @@ public class OwnerDbManager {
   }
 
 
-      pstmt.setString(1, deviceType);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   /**
    * Add device type criteria.
    *
-   * @param ds Datasource
-   * @param criteria DSI key(s) for identifying device type
+   * @param ds            Datasource
+   * @param criteria      DSI key(s) for identifying device type
    * @param expectedValue expected value for DSI keys included in criteria
    */
   public void addDeviceTypeCriteria(
@@ -816,7 +858,7 @@ public class OwnerDbManager {
   /**
    * Remove device type identifier criteria for a particular device type.
    *
-   * @param ds Datasource
+   * @param ds         Datasource
    * @param deviceType device type
    */
   public void removeDeviceTypeCriteria(DataSource ds, String deviceType) {
@@ -834,7 +876,7 @@ public class OwnerDbManager {
   /**
    * Removes customer keys entry corresponding to the customer ID.
    *
-   * @param ds Datasource
+   * @param ds         Datasource
    * @param customerId customer ID
    */
   public void removeCustomer(DataSource ds, String customerId) {

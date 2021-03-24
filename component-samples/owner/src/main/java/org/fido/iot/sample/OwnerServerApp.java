@@ -14,8 +14,6 @@ import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerCustomerServlet;
-import org.fido.iot.api.OwnerDeviceSviStringServlet;
-import org.fido.iot.api.OwnerDeviceTypeCriteriaServlet;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
