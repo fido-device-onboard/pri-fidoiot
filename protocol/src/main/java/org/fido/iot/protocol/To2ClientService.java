@@ -30,6 +30,7 @@ public abstract class To2ClientService extends DeviceService {
   protected byte[] nonce7;
   protected byte[] kexA;
   protected Composite ownState;
+  private Composite to1d;
   private boolean rvBypass;
 
   protected Enumeration<Composite> dviEnumerator;
@@ -46,6 +47,10 @@ public abstract class To2ClientService extends DeviceService {
 
   protected Composite getHeaderHash() {
     return hdrHash;
+  }
+
+  public void setTo1d(Composite to1d) {
+    this.to1d = to1d;
   }
 
   protected void verifyEntry(int entryNum, Composite entry) {
@@ -186,7 +191,11 @@ public abstract class To2ClientService extends DeviceService {
 
     // Skipping to1d verification, if the RVBypass flag is set.
     if (!rvBypass) {
-      //TODO: verify to1d
+      //CUPHOwnerPubKey must be able to verify the signature of the TO1d signedBlob message
+      if (!getCryptoService().verify(verifyKey, to1d, null, null, null)) {
+        //If T01d signature does not verify, Then T02 should fail with error message.
+        throw new InvalidMessageException();
+      }
     }
 
     //calculate and set hdrHash

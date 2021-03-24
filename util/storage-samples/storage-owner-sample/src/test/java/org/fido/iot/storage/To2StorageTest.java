@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.SQLException;
@@ -136,27 +137,30 @@ public class To2StorageTest {
 
   private static final String packageContent =
       "#!/bin/bash\r\n"
-      + "filename=payload.bin\r\n"
-      + "cksum_tx=1612472339\r\n"
-      + "cksum_rx=$(cksum $filename | cut -d ' ' -f 1)\r\n"
-      + "if [ $cksum_tx -eq $cksum_rx  ]; then\r\n"
-      + "  echo \"Device onboarded successfully.\"\r\n"
-      + "  echo \"Device onboarded successfully.\" > result.txt\r\n"
-      + "else\r\n"
-      + "  echo \"ServiceInfo file transmission failed.\"\r\n"
-      + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
-      + "fi\r\n";
+          + "filename=payload.bin\r\n"
+          + "cksum_tx=1612472339\r\n"
+          + "cksum_rx=$(cksum $filename | cut -d ' ' -f 1)\r\n"
+          + "if [ $cksum_tx -eq $cksum_rx  ]; then\r\n"
+          + "  echo \"Device onboarded successfully.\"\r\n"
+          + "  echo \"Device onboarded successfully.\" > result.txt\r\n"
+          + "else\r\n"
+          + "  echo \"ServiceInfo file transmission failed.\"\r\n"
+          + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
+          + "fi\r\n";
 
-   private static final String fileContent = "sample file";
+  private static final String fileContent = "sample file";
+  private static final String to1dRV = "http://localhost:8042?ipaddress=127.0.0.1";
+  protected static final long responseWait = 3600;
 
   String activateMod = "true";
   String packageName = "linux64.sh";
   String filename = "sample_file";
   String url = "http://host/file.tmp";
   String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-  ",sdo_wget:filename=filename,sdo_wget:url=url";
+      ",sdo_wget:filename=filename,sdo_wget:url=url";
 
   static BasicDataSource ds = new BasicDataSource();
+
   static {
     ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);
     ds.setDriverClassName("org.h2.Driver");
@@ -218,208 +222,208 @@ public class To2StorageTest {
   void accTest() throws Exception {
 
     /** TODO: fix this
-    Composite testV = Composite.fromObject(VOUCHER);
-    BasicDataSource ds = new BasicDataSource();
+     Composite testV = Composite.fromObject(VOUCHER);
+     BasicDataSource ds = new BasicDataSource();
 
-    ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);
-    ds.setDriverClassName("org.h2.Driver");
-    ds.setUsername(DB_USER);
-    ds.setPassword(DB_PASSWORD);
+     ds.setUrl("jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + BASE_PATH);
+     ds.setDriverClassName("org.h2.Driver");
+     ds.setUsername(DB_USER);
+     ds.setPassword(DB_PASSWORD);
 
-    ds.setMinIdle(5);
-    ds.setMaxIdle(10);
-    ds.setMaxOpenPreparedStatements(100);
-    CryptoService cs = new CryptoService();
-    //DeviceServiceInfoModule deviceServiceInfoModule = new DeviceServiceInfoModule();
+     ds.setMinIdle(5);
+     ds.setMaxIdle(10);
+     ds.setMaxOpenPreparedStatements(100);
+     CryptoService cs = new CryptoService();
+     //DeviceServiceInfoModule deviceServiceInfoModule = new DeviceServiceInfoModule();
 
-    To2ClientStorage to2ClientStorage = new To2ClientStorage() {
-      @Override
-      public void starting(Composite request, Composite reply) {
+     To2ClientStorage to2ClientStorage = new To2ClientStorage() {
+    @Override public void starting(Composite request, Composite reply) {
 
-      }
+    }
 
-      @Override
-      public void started(Composite request, Composite reply) {
+    @Override public void started(Composite request, Composite reply) {
 
-      }
+    }
 
-      @Override
-      public void continuing(Composite request, Composite reply) {
-        Composite info = request.getAsComposite(Const.SM_PROTOCOL_INFO);
-        if (info.containsKey(Const.PI_TOKEN)) {
-          clientToken = info.getAsString(Const.PI_TOKEN);
-        }
-        reply.set(Const.SM_PROTOCOL_INFO,
-            Composite.newMap().set(Const.PI_TOKEN, clientToken));
-      }
+    @Override public void continuing(Composite request, Composite reply) {
+    Composite info = request.getAsComposite(Const.SM_PROTOCOL_INFO);
+    if (info.containsKey(Const.PI_TOKEN)) {
+    clientToken = info.getAsString(Const.PI_TOKEN);
+    }
+    reply.set(Const.SM_PROTOCOL_INFO,
+    Composite.newMap().set(Const.PI_TOKEN, clientToken));
+    }
 
-      @Override
-      public void continued(Composite request, Composite reply) {
+    @Override public void continued(Composite request, Composite reply) {
 
-      }
+    }
 
-      @Override
-      public void completed(Composite request, Composite reply) {
+    @Override public void completed(Composite request, Composite reply) {
 
-      }
+    }
 
-      @Override
-      public void failed(Composite request, Composite reply) {
-      }
+    @Override public void failed(Composite request, Composite reply) {
+    }
 
-      @Override
-      public Composite getDeviceCredentials() {
-        return Composite.fromObject(deviceCreds);
-      }
+    @Override public Composite getDeviceCredentials() {
+    return Composite.fromObject(deviceCreds);
+    }
 
-      @Override
-      public PrivateKey getSigningKey() {
-        return PemLoader.loadPrivateKey(devKeyPem);
-      }
+    @Override public PrivateKey getSigningKey() {
+    return PemLoader.loadPrivateKey(devKeyPem);
+    }
 
-      @Override
-      public Composite getSigInfoA() {
-        return cs.getSignInfo(
-            PemLoader.loadCerts(devKeyPem)
-                .get(0)
-                .getPublicKey());
-      }
+    @Override public Composite getSigInfoA() {
+    return cs.getSignInfo(
+    PemLoader.loadCerts(devKeyPem)
+    .get(0)
+    .getPublicKey());
+    }
 
-      @Override
-      public byte[] getMaroePrefix() {
-        return null;
-      }
+    @Override public byte[] getMaroePrefix() {
+    return null;
+    }
 
-      @Override
-      public String getKexSuiteName() {
-        return Const.ECDH_ALG_NAME;
-      }
+    @Override public String getKexSuiteName() {
+    return Const.ECDH_ALG_NAME;
+    }
 
-      @Override
-      public String getCipherSuiteName() {
-        return Const.AES128_CTR_HMAC256_ALG_NAME;
-      }
+    @Override public String getCipherSuiteName() {
+    return Const.AES128_CTR_HMAC256_ALG_NAME;
+    }
 
-      @Override
-      public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
-        return null;
-      }
+    @Override public byte[] getReplacementHmacSecret(Composite newCredentials, boolean isReuse) {
+    return null;
+    }
 
-      @Override
-      public void prepareServiceInfo() {
+    @Override public void prepareServiceInfo() {
 
-        //toOwnerInfo = ServiceInfoEncoder.encodeDeviceServiceInfo(list, false);
-      }
+    //toOwnerInfo = ServiceInfoEncoder.encodeDeviceServiceInfo(list, false);
+    }
 
-      @Override
-      public Composite getNextServiceInfo() {
-        Composite result = toOwnerInfo;
-        toOwnerInfo = ServiceInfoEncoder.encodeDeviceServiceInfo(
-            Collections.EMPTY_LIST, false);
-        return result;
-      }
+    @Override public Composite getNextServiceInfo() {
+    Composite result = toOwnerInfo;
+    toOwnerInfo = ServiceInfoEncoder.encodeDeviceServiceInfo(
+    Collections.EMPTY_LIST, false);
+    return result;
+    }
 
-      @Override
-      public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
-        //Length field is zero as it will not be used by putServiceInfo.
+    @Override public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
+    //Length field is zero as it will not be used by putServiceInfo.
 
-      }
+    }
 
-      @Override
-      public void setMaxDeviceServiceInfoMtuSz(int mtu) {
-        prepareServiceInfo();
-      }
+    @Override public void setMaxDeviceServiceInfoMtuSz(int mtu) {
+    prepareServiceInfo();
+    }
 
-      @Override
-      public int getMaxDeviceServiceInfoMtuSz() {
-        return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
-      }
+    @Override public int getMaxDeviceServiceInfoMtuSz() {
+    return Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+    }
 
-      @Override
-      public String getMaxOwnerServiceInfoMtuSz() {
-        return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
-      }
+    @Override public String getMaxOwnerServiceInfoMtuSz() {
+    return String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+    }
 
-      @Override
-      public boolean isDeviceCredReuseSupported() {
-        return true;
-      }
+    @Override public boolean isDeviceCredReuseSupported() {
+    return true;
+    }
+
     };
 
-    To2ClientService to2ClientService = new To2ClientService() {
-      @Override
-      protected To2ClientStorage getStorage() {
-        return to2ClientStorage;
-      }
+     To2ClientService to2ClientService = new To2ClientService() {
+    @Override protected To2ClientStorage getStorage() {
+    return to2ClientStorage;
+    }
 
-      @Override
-      public CryptoService getCryptoService() {
-        return cs;
-      }
+    @Override public CryptoService getCryptoService() {
+    return cs;
+    }
     };
 
-    MessageDispatcher clientDispatcher = new MessageDispatcher() {
-      @Override
-      protected MessagingService getMessagingService(Composite request) {
-        return to2ClientService;
-      }
+     Composite to0d = Composite.newArray()
+     .set(Const.TO0D_VOUCHER, VOUCHER)
+     .set(Const.TO0D_WAIT_SECONDS, responseWait)
+     .set(Const.TO0D_NONCE3, cs.getRandomBytes(Const.NONCE16_SIZE));
 
-      @Override
-      protected void failed(Exception e) {
-        fail(e);
-      }
+     Composite unsignedRedirect = RendezvousBlobDecoder.decode(to1dRV);
+     Composite to1dBlob = unsignedRedirect;
+     Composite to01Payload = Composite.newArray()
+     .set(Const.TO1D_RV, to1dBlob);
+
+     Composite voucher = Composite.fromObject(VOUCHER);
+     Composite ovHeader = voucher.getAsComposite(Const.OV_HEADER);
+     PublicKey publicKey = cs.decode(ovHeader.getAsComposite(Const.OVH_PUB_KEY));
+     int hashType = cs.getCompatibleHashType(publicKey);
+     Composite hash = cs.hash(hashType, to0d.toBytes());
+
+     to01Payload.set(Const.TO1D_TO0D_HASH, hash);
+
+     Composite signedBlob = null;
+     signedBlob = cs.sign(
+     PemLoader.loadPrivateKey(ownerKeyPem), to01Payload.toBytes(),
+     cs.getCoseAlgorithm((Key) PemLoader.loadPrivateKey(ownerKeyPem)));
+
+     to2ClientService.setTo1d(signedBlob);
+
+     MessageDispatcher clientDispatcher = new MessageDispatcher() {
+    @Override protected MessagingService getMessagingService(Composite request) {
+    return to2ClientService;
+    }
+
+    @Override protected void failed(Exception e) {
+    fail(e);
+    }
     };
 
-    MessageDispatcher serverDispatcher = new MessageDispatcher() {
-      @Override
-      protected MessagingService getMessagingService(Composite request) {
-        return createTo2Service(cs, ds);
-      }
+     MessageDispatcher serverDispatcher = new MessageDispatcher() {
+    @Override protected MessagingService getMessagingService(Composite request) {
+    return createTo2Service(cs, ds);
+    }
 
-      @Override
-      protected void failed(Exception e) {
-        fail(e);
-      }
+    @Override protected void failed(Exception e) {
+    fail(e);
+    }
     };
 
-    String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
-    // start the TCP Server
-    Server server = null;
-    try {
+     String args[] = new String[]{"-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT};
+     // start the TCP Server
+     Server server = null;
+     try {
 
-      server = Server.createTcpServer(args).start();
+     server = Server.createTcpServer(args).start();
 
-      OwnerDbManager dbsManager = new OwnerDbManager();
-      dbsManager.createTables(ds);
-      insertSampleServiceInfo(ds, dbsManager);
-      insertSampleSettings(ds, dbsManager);
-      dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
+     OwnerDbManager dbsManager = new OwnerDbManager();
+     dbsManager.createTables(ds);
+     insertSampleServiceInfo(ds, dbsManager);
+     insertSampleSettings(ds, dbsManager);
+     dbsManager.importVoucher(ds, Composite.fromObject(VOUCHER));
 
-      DispatchResult dr = to2ClientService.getHelloMessage();
+     DispatchResult dr = to2ClientService.getHelloMessage();
 
-      while (!dr.isDone()) {
-        dr = serverDispatcher.dispatch(dr.getReply());
-        dr = clientDispatcher.dispatch(dr.getReply());
-      }
+     while (!dr.isDone()) {
+     dr = serverDispatcher.dispatch(dr.getReply());
+     dr = clientDispatcher.dispatch(dr.getReply());
+     }
 
-      dr = to2ClientService.getHelloMessage();
+     dr = to2ClientService.getHelloMessage();
 
-      while (!dr.isDone()) {
-        dr = serverDispatcher.dispatch(dr.getReply());
-        dr = clientDispatcher.dispatch(dr.getReply());
-      }
+     while (!dr.isDone()) {
+     dr = serverDispatcher.dispatch(dr.getReply());
+     dr = clientDispatcher.dispatch(dr.getReply());
+     }
 
-    } finally {
-      if (server != null) {
-        server.stop();
-      }
-      try {
-        // cleanup serviceinfo files that were created during test execution
-        Files.deleteIfExists(Paths.get(System.getProperty("user.dir"), packageName));
-      } catch (IOException e) {
-        // ignore
-      }
-    }*/
+     } finally {
+     if (server != null) {
+     server.stop();
+     }
+     try {
+     // cleanup serviceinfo files that were created during test execution
+     Files.deleteIfExists(Paths.get(System.getProperty("user.dir"), packageName));
+     } catch (IOException e) {
+     // ignore
+     }
+     }*/
   }
 
   @Test
@@ -449,7 +453,6 @@ public class To2StorageTest {
 
   @Test
   void removeServiceInfoTest() {
-
 
   }
 

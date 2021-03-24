@@ -282,14 +282,14 @@ public class To0ClientApp {
 
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
-    List<String> rviPaths = RendezvousInfoDecoder.getHttpDirectives(
-        rvi,
-        Const.RV_OWNER_ONLY);
 
-    List<String> paths = new ArrayList<>();
-    for (String path : rviPaths) {
-      paths.add(path.replaceAll("https://", "http://"));
-    }
+    // Protocol to0_to1_server (rv) only support http so we
+    // want to select the RV_DEV_ONLY filter here so the directive
+    // returned is http.
+    List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
+        rvi,
+        Const.RV_DEV_ONLY);
+
 
     for (String path : paths) {
 
