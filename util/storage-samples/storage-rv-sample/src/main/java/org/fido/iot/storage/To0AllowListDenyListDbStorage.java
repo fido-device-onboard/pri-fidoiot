@@ -94,7 +94,12 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
     PublicKey pubKey = getCryptoService().decode(encodedKey);
     String ownerX509String = getCryptoService().getFingerPrint(pubKey);
     pubKey = getCryptoService().getDevicePublicKey(voucher);
-    Composite deviceX509 = getCryptoService().encode(pubKey, Const.PK_ENC_X509);
+    Composite deviceX509 = Composite.newArray();
+    // In the case of MAROE devices, the pubkey is not in the voucher
+    // so there can be no x509 value for the device key.
+    if (pubKey != null) {
+      deviceX509 = getCryptoService().encode(pubKey, Const.PK_ENC_X509);
+    }
 
     String sql = "" + "MERGE INTO RV_REDIRECTS  " + "KEY (GUID) " + "VALUES (?,?,?,?,?,?,?); ";
 

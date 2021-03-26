@@ -27,5 +27,11 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.fido.iot</groupId>
+      <artifactId>protocol</artifactId>
+      <version>0.5-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

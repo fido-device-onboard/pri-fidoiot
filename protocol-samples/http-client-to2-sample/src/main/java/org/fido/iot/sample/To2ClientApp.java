@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.fido.iot.certutils.PemLoader;
 import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
@@ -20,6 +21,8 @@ import org.fido.iot.protocol.RendezvousBlobDecoder;
 import org.fido.iot.protocol.ServiceInfoEncoder;
 import org.fido.iot.protocol.To2ClientService;
 import org.fido.iot.protocol.To2ClientStorage;
+import org.fido.iot.serviceinfo.DevMod;
+import org.fido.iot.serviceinfo.FdoSys;
 
 public class To2ClientApp {
 
@@ -47,17 +50,17 @@ public class To2ClientApp {
       + "-----END EC PRIVATE KEY-----";
 
   private static final String deviceCreds = ""
-      + "87f51864582054686973206973206120534841323536206b657920666f7220686d616320616c6a44656d6f4"
-      + "4657669636550f0956089c0df4c349c61f460457e87eb81858205696c6f63616c686f73748203191f68820c"
-      + "018202447f0000018204191f68820858205603b28472872ecbb5d4981fbaa91664ec8627ea395d2bbee7a85"
-      + "e0f99a7ed34";
+      + "87f5186458401124dc2801de1a8d31978c0efc205871469cbe851eb226838219ffa66f0c1ffc3550bdfdb50fe"
+      + "b58b8573b062769b85a08ae9cb18bcf1e5d5721f0e73c8ba9a36b4a61766120446576696365502e1418ebc810"
+      + "49c4a0db91c4d0a5830681858205696c6f63616c686f73748203191f68820c018202447f0000018204191f688"
+      + "2085820ed185035537d763a654abff5221057d87d67db967c9a32eff4951c87b97870a8";
+
 
   private static final String rendezvousBlob = ""
-
-      + "84a1012640583a828184447f000001696c6f63616c686f7374191f6a0382085820ce3c1c4cb5660e7a77c932"
-      + "3cf332aa44d8fc3eb25bc8e35d7e6a00c801a904ae58483046022100e8567558ac85c022179115803bbc60e9"
-      + "bef173d1a7ff526b543e375af5a7e0b1022100d2819d635f658e4e7b1954d2b631a4b25119e8b80c4a3c1935"
-      + "aa7d05477b32f3";
+      + "8443a10126a0583a828184447f000001696c6f63616c686f7374191f6a038208582041187109a25d530d15274"
+      + "a7da8cf4e1454dcdd6dc9d54163964d25d01b7e411058483046022100da17d87dc544de0a0ab3bed3977087b0"
+      + "33a22297ec206edecbfd96625cc87821022100d4cee67572868868b2e69e7eac932f94346ccd91faa42c9ed7a"
+      + "a83635cedf965";
 
   private CryptoService cryptoService;
   private Composite to1dBlob = Composite.fromObject(rendezvousBlob);
@@ -90,6 +93,7 @@ public class To2ClientApp {
   private To2ClientStorage clientStorage = new To2ClientStorage() {
     private String clientToken;
     private Composite toOwnerInfo;
+    int maxServiceInfoSize = 0;
 
     @Override
     public void starting(Composite request, Composite reply) {
@@ -172,9 +176,59 @@ public class To2ClientApp {
 
     @Override
     public void prepareServiceInfo() {
-      Composite value = ServiceInfoEncoder.encodeValue("devmod:active", "true");
       List<Composite> list = new ArrayList<>();
-      list.add(value);
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_ACTIVE, true));
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_OS, "linux"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_ARCH, "X86_64"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_BIN, "x86:X86_64"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_VERSION, "Ubuntu* 16.0.4LTS"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_DEVICE, "ProtocolDevice"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_SN, "AABCCDDDEEF"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_PATHSEP, "/"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_SEP, ":"));
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_NL, "\n"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_TMP, "/tmp"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_DIR, "/home/fido"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_PROGENV, "bin:java:py3:py2"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_MUDURL, "https://example.com/devB"));
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_NUMMODULES, 1));
+
+      Composite modules = Composite.newArray()
+          .set(0, 0) //zero to num module index
+          .set(1, 1) // the number returned
+          .set(2, FdoSys.NAME); //the module
+
+      list.add(
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_MODULES, modules));
+
       toOwnerInfo = ServiceInfoEncoder.encodeDeviceServiceInfo(list, false);
     }
 
@@ -189,11 +243,27 @@ public class To2ClientApp {
     @Override
     public void setServiceInfo(Composite info, boolean isMore, boolean isDone) {
 
+      String name = info.getAsString(Const.FIRST_KEY);
+      Object value = info.get(Const.SECOND_KEY);
+      System.out.print(name);
+      System.out.print("=");
+      if (value instanceof String
+          || value instanceof Boolean
+          || value instanceof Number) {
+        System.out.print(value.toString());
+      } else if (value instanceof byte[]) {
+        System.out.print(Composite.toString((byte[]) value));
+      } else if (value instanceof Map || value instanceof List) {
+        Composite composite = info.getAsComposite(Const.SECOND_KEY);
+        System.out.print(composite.toString());
+      }
+      System.out.println();
     }
 
     @Override
     public void setMaxDeviceServiceInfoMtuSz(int mtu) {
 
+      prepareServiceInfo();
     }
 
     @Override

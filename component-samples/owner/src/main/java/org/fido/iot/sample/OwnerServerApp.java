@@ -14,12 +14,8 @@ import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fido.iot.api.OwnerCustomerServlet;
-import org.fido.iot.api.OwnerDeviceSviStringServlet;
-import org.fido.iot.api.OwnerDeviceTypeCriteriaServlet;
 import org.fido.iot.api.OwnerReplacementVoucherServlet;
-import org.fido.iot.api.OwnerServiceInfoValuesServlet;
 import org.fido.iot.api.OwnerSetupInfoServlet;
-import org.fido.iot.api.OwnerSviSettingsServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
@@ -32,8 +28,8 @@ public class OwnerServerApp {
 
   private static final int TO2_PORT = null != OwnerConfigLoader
       .loadConfig(OwnerAppSettings.TO2_PORT)
-          ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppSettings.TO2_PORT))
-          : 8042;
+      ? Integer.parseInt(OwnerConfigLoader.loadConfig(OwnerAppSettings.TO2_PORT))
+      : 8042;
 
   private static final int OWNER_HTTPS_PORT =
       null != OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_HTTPS_PORT)
@@ -87,13 +83,13 @@ public class OwnerServerApp {
 
     try {
       ctx.addParameter(OwnerAppSettings.ONDIE_CACHEDIR,
-              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CACHEDIR));
       ctx.addParameter(OwnerAppSettings.ONDIE_AUTOUPDATE,
-              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_AUTOUPDATE));
       ctx.addParameter(OwnerAppSettings.ONDIE_ZIP_ARTIFACT,
-              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_ZIP_ARTIFACT));
       ctx.addParameter(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS,
-              OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
+          OwnerConfigLoader.loadConfig(OwnerAppSettings.ONDIE_CHECK_REVOCATIONS));
     } catch (Exception ex) {
       // ondie is optional so if config cannot be loaded just default to no config
     }
@@ -141,22 +137,10 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "replacementVoucherServlet",
         new OwnerReplacementVoucherServlet());
     wrapper.addMapping("/api/v1/owner/newvoucher/*");
-    wrapper = tomcat.addServlet(ctx, "serviceinfoServlet",
-        new OwnerServiceInfoValuesServlet());
-    wrapper.addMapping("/api/v1/owner/svivalues/*");
     wrapper = tomcat.addServlet(ctx, "setupinfoServlet",
         new OwnerSetupInfoServlet());
     wrapper.addMapping("/api/v1/owner/setupinfo/*");
     wrapper.setAsyncSupported(true);
-    wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
-            new OwnerSviSettingsServlet());
-    wrapper.addMapping("/api/v1/owner/svi/settings/*");
-    wrapper = tomcat.addServlet(ctx, "deviceSviStringServlet",
-        new OwnerDeviceSviStringServlet());
-    wrapper.addMapping("/api/v1/owner/svi/string/*");
-    wrapper = tomcat.addServlet(ctx, "deviceTypeCriteriaServlet",
-        new OwnerDeviceTypeCriteriaServlet());
-    wrapper.addMapping("/api/v1/owner/devicetype/criteria/*");
     wrapper = tomcat.addServlet(ctx, "ownerCustomerServlet",
         new OwnerCustomerServlet());
     wrapper.addMapping("/api/v1/owner/customer/*");

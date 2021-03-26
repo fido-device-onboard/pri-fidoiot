@@ -184,10 +184,6 @@ public class OwnerContextListener implements ServletContextListener {
     manager.createTables(ds);
     manager.addCustomer(ds, 1, "owner", ownerKeysPem);
     manager.addCustomer(ds, 2, "owner2", owner2KeysPem);
-    manager.loadSampleServiceInfo(ds,
-        Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_VALUES_PATH)));
-    manager.loadSampleDeviceTypeSviStringMapping(
-        ds, Paths.get(sc.getInitParameter(OwnerAppSettings.SAMPLE_SVI_PATH)));
     manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set

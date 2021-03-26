@@ -115,10 +115,10 @@ public abstract class To2ServerService extends MessagingService {
       Composite certPath = voucher.getAsComposite(Const.OV_DEV_CERT_CHAIN);
 
       if (!getCryptoService().verify(deviceKey,
-            body,
-            sigInfoA,
-            getStorage().getOnDieService(),
-            certPath)) {
+          body,
+          sigInfoA,
+          getStorage().getOnDieService(),
+          certPath)) {
         throw new InvalidMessageException();
       }
 
@@ -266,9 +266,14 @@ public abstract class To2ServerService extends MessagingService {
       Composite sviValues = svi.size() > 0 ? svi.getAsComposite(Const.FIRST_KEY)
           : Composite.newArray();
 
-      for (int i = 0; i < sviValues.size(); i++) {
+      int numOfValues = sviValues.size();
+      for (int i = 0; i < numOfValues; i++) {
         Composite sviValue = sviValues.getAsComposite(i);
-        getStorage().setServiceInfo(sviValue, isMore);
+        boolean moreFlag = true;
+        if (i == numOfValues - 1) {
+          moreFlag = isMore;
+        }
+        getStorage().setServiceInfo(sviValue, moreFlag);
       }
 
       Composite payload = getStorage().getNextServiceInfo();
@@ -345,7 +350,7 @@ public abstract class To2ServerService extends MessagingService {
         && ovh.getAsUuid(Const.OVH_GUID).equals(getStorage().getReplacementGuid())
         && (null != getStorage().getReplacementRvInfo()
         && Arrays.equals(ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes(),
-            getStorage().getReplacementRvInfo().toBytes()))
+        getStorage().getReplacementRvInfo().toBytes()))
         && (null != getStorage().getReplacementOwnerKey()
         && Arrays.equals(pubKey.toBytes(), getStorage().getReplacementOwnerKey().toBytes()))) {
       return true;
