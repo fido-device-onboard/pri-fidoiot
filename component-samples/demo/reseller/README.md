@@ -128,3 +128,25 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 The PKCS12 keystore file \<fido-iot-src\>/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fido-iot-src\>/demo/reseller/reseller_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
+
+# Configuring Reseller for HTTPS/TLS Communication
+
+By default, the Reseller uses HTTP for all communications on port 8070. In addition to that, the Reseller can be configured to handle HTTPS request.
+
+- Generate the Keystore/Certificate for the Reseller. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Reseller server.
+
+- Copy the generated Keystore/Certificate to `reseller/certs` folder.
+
+- Update the following environment varibles in `reseller/reseller.env` file
+
+    |  Variable            |  Value            |             description       |
+    | ---------------------|-------------------|-------------------------------|
+    | reseller_protocol_scheme  | https             | To enable HTTPS communication.|
+    | reseller_https_port       | port number       | The given port number will be used for HTTPS communication. |
+    | reseller_ssl_keystore     | keystore-filename | filename of Keystore that is present in the `reseller/certs` folder.|
+    | reseller_ssl_keystore_password| keystore-password | password of the keystore. |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Reseller.
+    Avoid using the default keystore available for production deployment.

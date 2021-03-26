@@ -6,7 +6,9 @@ package org.fido.iot.sample;
 import java.nio.file.Path;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -19,6 +21,20 @@ public class ResellerServerApp {
   private static final String CATALINA_HOME = "catalina.home";
   private static final String AUTH_ROLE = "api";
 
+  private static final int RESELLER_PORT =
+      null != ResellerConfigLoader.loadConfig(ResellerAppConstants.API_PORT)
+          ? Integer.parseInt(ResellerConfigLoader.loadConfig(
+          ResellerAppConstants.API_PORT)) : 8070;
+
+  private static final int RESELLER_HTTPS_PORT =
+      null != ResellerConfigLoader.loadConfig(ResellerAppConstants.RESELLER_HTTPS_PORT)
+          ? Integer.parseInt(ResellerConfigLoader.loadConfig(
+          ResellerAppConstants.RESELLER_HTTPS_PORT)) : 8072;
+
+  private static final String RESELLER_SCHEME =
+      null != ResellerConfigLoader.loadConfig(ResellerAppConstants.RESELLER_PROTOCOL_SCHEME)
+          ? ResellerConfigLoader.loadConfig(ResellerAppConstants.RESELLER_PROTOCOL_SCHEME) : "http";
+
   /**
    * Application main.
    *
@@ -28,8 +44,6 @@ public class ResellerServerApp {
 
     Tomcat tomcat = new Tomcat();
 
-    tomcat.setPort(
-        Integer.parseInt(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_PORT)));
 
     System.out.println(System.getProperty("user.dir"));
     // set the path of tomcat
@@ -93,6 +107,40 @@ public class ResellerServerApp {
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
     wrapper.setLoadOnStartup(3);
+
+    Service service = tomcat.getService();
+    Connector httpsConnector = new Connector();
+
+    if (RESELLER_SCHEME.toLowerCase().equals("https")) {
+
+      httpsConnector.setPort(RESELLER_HTTPS_PORT);
+      httpsConnector.setSecure(true);
+      httpsConnector.setScheme(RESELLER_SCHEME);
+
+      Path keyStoreFile =
+          Path.of(ResellerConfigLoader.loadConfig(ResellerAppConstants.SSL_KEYSTORE_PATH));
+      String keystorePass =
+          ResellerConfigLoader.loadConfig(ResellerAppConstants.SSL_KEYSTORE_PASSWORD);
+
+      httpsConnector.setProperty("keystorePass", keystorePass);
+      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+      httpsConnector.setProperty("clientAuth", "false");
+      httpsConnector.setProperty("sslProtocol", "TLS");
+      httpsConnector.setProperty("SSLEnabled", "true");
+      service.addConnector(httpsConnector);
+
+    }
+
+    Connector httpConnector = new Connector();
+    httpConnector.setPort(RESELLER_PORT);
+    httpConnector.setScheme("http");
+    httpConnector.setRedirectPort(RESELLER_HTTPS_PORT);
+    httpConnector.setProperty("protocol", "HTTP/1.1");
+    httpConnector.setProperty("connectionTimeout", "20000");
+    service.addConnector(httpConnector);
+    tomcat.setConnector(httpConnector);
+
+    tomcat.getConnector();
 
     //setup digest auth
     LoginConfig config = new LoginConfig();

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.UUID;
 import org.fido.iot.certutils.PemLoader;
@@ -24,6 +26,8 @@ public class BaseTemplate {
       "http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040";
 
   protected static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
+
+  protected static final long responseWait = 3600;
 
   protected static String mfgKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
@@ -98,6 +102,7 @@ public class BaseTemplate {
 
   protected Composite voucher;
   protected Composite deviceCreds;
+  protected Composite to01Payload;
 
   protected Composite createTestVoucher() {
     Composite voucher = Composite.newArray();
@@ -229,6 +234,33 @@ public class BaseTemplate {
         .set(Const.TO1D_RV, unsignedRedirect)
         .set(Const.TO1D_TO0D_HASH, Const.EMPTY_MESSAGE);
 
+  }
+
+  protected Composite generateSignedBlob(String key) {
+
+    CryptoService cs = new CryptoService();
+    Composite to0d = Composite.newArray()
+        .set(Const.TO0D_VOUCHER, voucher)
+        .set(Const.TO0D_WAIT_SECONDS, responseWait)
+        .set(Const.TO0D_NONCE3, cs.getRandomBytes(Const.NONCE16_SIZE));
+
+    Composite to1dBlob = unsignedRedirect;
+    to01Payload = Composite.newArray()
+        .set(Const.TO1D_RV, to1dBlob);
+
+    Composite ovHeader = voucher.getAsComposite(Const.OV_HEADER);
+    PublicKey mfgPublic = cryptoService.decode(ovHeader.getAsComposite(Const.OVH_PUB_KEY));
+    int hashType = cryptoService.getCompatibleHashType(mfgPublic);
+    Composite hash = cryptoService.hash(hashType, to0d.toBytes());
+
+    to01Payload.set(Const.TO1D_TO0D_HASH, hash);
+
+    Composite signedBlob = null;
+    signedBlob = cs.sign(
+        PemLoader.loadPrivateKey(key), to01Payload.toBytes(),
+        cs.getCoseAlgorithm((Key) PemLoader.loadPrivateKey(key)));
+
+    return signedBlob;
   }
 
   protected void runClient(DispatchResult dr) throws Exception {

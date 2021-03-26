@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fido.iot.protocol.RendezvousBlobDecoder;
 import org.fido.iot.sample.DeviceServiceInfoModule;
 import org.fido.iot.sample.DeviceServiceInfoSequence;
 import org.fido.iot.serviceinfo.ServiceInfo;
@@ -161,7 +163,9 @@ public class To2StorageTest {
       + "  echo \"ServiceInfo file transmission failed.\" > result.txt\r\n"
       + "fi\r\n";
 
-   private static final String fileContent = "sample file";
+  private static final String fileContent = "sample file";
+  private static final String to1dRV = "http://localhost:8042?ipaddress=127.0.0.1";
+  protected static final long responseWait = 3600;
 
   String activateMod = "true";
   String packageName = "linux64.sh";
@@ -378,6 +382,7 @@ public class To2StorageTest {
       public boolean isDeviceCredReuseSupported() {
         return true;
       }
+
     };
 
     To2ClientService to2ClientService = new To2ClientService() {
@@ -391,6 +396,31 @@ public class To2StorageTest {
         return cs;
       }
     };
+
+    Composite to0d = Composite.newArray()
+        .set(Const.TO0D_VOUCHER, VOUCHER)
+        .set(Const.TO0D_WAIT_SECONDS, responseWait)
+        .set(Const.TO0D_NONCE3, cs.getRandomBytes(Const.NONCE16_SIZE));
+
+    Composite unsignedRedirect = RendezvousBlobDecoder.decode(to1dRV);
+    Composite to1dBlob = unsignedRedirect;
+    Composite to01Payload = Composite.newArray()
+        .set(Const.TO1D_RV, to1dBlob);
+
+    Composite voucher = Composite.fromObject(VOUCHER);
+    Composite ovHeader = voucher.getAsComposite(Const.OV_HEADER);
+    PublicKey publicKey = cs.decode(ovHeader.getAsComposite(Const.OVH_PUB_KEY));
+    int hashType = cs.getCompatibleHashType(publicKey);
+    Composite hash = cs.hash(hashType, to0d.toBytes());
+
+    to01Payload.set(Const.TO1D_TO0D_HASH, hash);
+
+    Composite signedBlob = null;
+    signedBlob = cs.sign(
+        PemLoader.loadPrivateKey(ownerKeyPem), to01Payload.toBytes(),
+        cs.getCoseAlgorithm((Key) PemLoader.loadPrivateKey(ownerKeyPem)));
+
+    to2ClientService.setTo1d(signedBlob);
 
     MessageDispatcher clientDispatcher = new MessageDispatcher() {
       @Override
