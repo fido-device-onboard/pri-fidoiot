@@ -37,8 +37,8 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
           return;
         }
 
-        ownerDbManager.addDeviceTypeCriteria(
-            ds, deviceTypeCriteria[0], deviceTypeCriteria[1], deviceTypeCriteria[2]);
+        //ownerDbManager.addDeviceTypeCriteria(
+        //    ds, deviceTypeCriteria[0], deviceTypeCriteria[1], deviceTypeCriteria[2]);
       }
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
@@ -56,8 +56,8 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
     }
 
     try {
-      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      new OwnerDbManager().removeDeviceTypeCriteria(ds, deviceType);
+      //DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+      //new OwnerDbManager().removeDeviceTypeCriteria(ds, deviceType);
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
