@@ -16,7 +16,11 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -41,6 +45,8 @@ public class WebClient implements Runnable {
   private String sslAlgorithm = "TLS";
   private SSLParameters sslParameters;
   private DispatchResult helloMessage;
+  private ExecutorService executor;
+  private final Duration httpClientTimeout = Duration.ofSeconds(15);
 
   /**
    * Constructs a WebClient instance.
@@ -149,6 +155,8 @@ public class WebClient implements Runnable {
             .followRedirects(HttpClient.Redirect.NEVER)
             .sslContext(getSslContext())
             .sslParameters(getSslParematers())
+            .connectTimeout(httpClientTimeout)
+            .executor(executor)
             .build();
       } catch (NoSuchAlgorithmException | KeyManagementException e) {
         throw new RuntimeException(e);
@@ -165,6 +173,8 @@ public class WebClient implements Runnable {
             .followRedirects(HttpClient.Redirect.NEVER)
             .sslContext(SSLContext.getInstance(sslAlgorithm))
             .sslParameters(getSslParematers())
+            .connectTimeout(httpClientTimeout)
+            .executor(executor)
             .build();
       } catch (NoSuchAlgorithmException e) {
         throw new RuntimeException(e);
@@ -194,53 +204,59 @@ public class WebClient implements Runnable {
     String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
+    executor = Executors.newSingleThreadExecutor();
     getClient();
 
-    HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
-        .uri(URI.create(url));
+    try {
+      HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+          .uri(URI.create(url));
 
-    byte[] body = message.getAsComposite(Const.SM_BODY).toBytes();
-    reqBuilder.setHeader("Content-Type", Const.HTTP_APPLICATION_CBOR);
+      byte[] body = message.getAsComposite(Const.SM_BODY).toBytes();
+      reqBuilder.setHeader("Content-Type", Const.HTTP_APPLICATION_CBOR);
 
-    Composite info = message.getAsComposite(Const.SM_PROTOCOL_INFO);
-    if (info.containsKey(Const.PI_TOKEN)) {
-      reqBuilder.setHeader(Const.HTTP_AUTHORIZATION,
-          Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
-    }
-
-    reqBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body));
-
-    HttpResponse<byte[]> hr = httpClient
-        .send(reqBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
-
-    if (hr.statusCode() == Const.HTTP_OK) {
-
-      Composite authInfo = Composite.newMap();
-      Optional<String> msgType = hr.headers().firstValue(Const.HTTP_MESSAGE_TYPE);
-      Optional<String> authToken = hr.headers().firstValue(Const.HTTP_AUTHORIZATION);
-      if (authToken.isPresent()) {
-        String[] authArray = authToken.get().split("\\s+");
-        if (authArray.length > 1) {
-          if (authArray[0].compareToIgnoreCase(Const.HTTP_BEARER) == 0) {
-            authInfo.set(Const.PI_TOKEN, authArray[1]);
-          }
-        }
-
-
-
+      Composite info = message.getAsComposite(Const.SM_PROTOCOL_INFO);
+      if (info.containsKey(Const.PI_TOKEN)) {
+        reqBuilder.setHeader(Const.HTTP_AUTHORIZATION,
+            Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
       }
-      Composite reply = Composite.newArray()
-          .set(Const.SM_LENGTH, Const.DEFAULT)
-          .set(Const.SM_MSG_ID, Integer.valueOf(msgType.get()))
-          .set(Const.SM_PROTOCOL_VERSION,
-              message.getAsNumber(Const.SM_PROTOCOL_VERSION))
-          .set(Const.SM_PROTOCOL_INFO, authInfo)
-          .set(Const.SM_BODY, Composite.fromObject(hr.body()));
 
-      return new DispatchResult(reply, false);
+      reqBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body));
+
+      HttpResponse<byte[]> hr = httpClient
+          .send(reqBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
+
+      if (hr.statusCode() == Const.HTTP_OK) {
+
+        Composite authInfo = Composite.newMap();
+        Optional<String> msgType = hr.headers().firstValue(Const.HTTP_MESSAGE_TYPE);
+        Optional<String> authToken = hr.headers().firstValue(Const.HTTP_AUTHORIZATION);
+        if (authToken.isPresent()) {
+          String[] authArray = authToken.get().split("\\s+");
+          if (authArray.length > 1) {
+            if (authArray[0].compareToIgnoreCase(Const.HTTP_BEARER) == 0) {
+              authInfo.set(Const.PI_TOKEN, authArray[1]);
+            }
+          }
+
+
+        }
+        Composite reply = Composite.newArray()
+            .set(Const.SM_LENGTH, Const.DEFAULT)
+            .set(Const.SM_MSG_ID, Integer.valueOf(msgType.get()))
+            .set(Const.SM_PROTOCOL_VERSION,
+                message.getAsNumber(Const.SM_PROTOCOL_VERSION))
+            .set(Const.SM_PROTOCOL_INFO, authInfo)
+            .set(Const.SM_BODY, Composite.fromObject(hr.body()));
+
+        return new DispatchResult(reply, false);
+      }
+      throw new RuntimeException("http status: " + hr.statusCode());
+    } finally {
+      // To clean httpClient threads and avoid memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
+      System.gc();
     }
-
-    throw new RuntimeException("http status: " + hr.statusCode());
 
   }
 

@@ -25,5 +25,5 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
-    pids_limit: 100
+    pids_limit: 500
     network_mode: host
