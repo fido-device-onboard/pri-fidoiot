@@ -4,6 +4,7 @@
 package org.fido.iot.storage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,10 +14,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -24,7 +28,9 @@ import org.fido.iot.protocol.Composite;
 import org.fido.iot.protocol.Const;
 import org.fido.iot.protocol.CryptoService;
 import org.fido.iot.protocol.RendezvousInfoDecoder;
-import org.fido.iot.serviceinfo.SdoWget;
+import org.fido.iot.serviceinfo.DevMod;
+import org.fido.iot.serviceinfo.FdoSys;
+import org.fido.iot.serviceinfo.FdoWget;
 
 /**
  * Owner Database Manager.
@@ -70,7 +76,7 @@ public class OwnerDbManager {
               + "REPLACEMENT_GUID CHAR(36), "
               + "REPLACEMENT_RVINFO BLOB, "
               + "REPLACEMENT_HMAC BLOB, "
-              + "CUSTOMER_ID INT, "
+              + "CUSTOMER_ID INT , "
               + "REPLACEMENT_VOUCHER BLOB, "
               + "OWNER_SERVICE_INFO_MTU_SIZE INT NULL DEFAULT NULL, "
               + "PRIMARY KEY (GUID), "
@@ -113,52 +119,52 @@ public class OwnerDbManager {
 
       stmt.executeUpdate(sql);
 
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "OWNER_SERVICEINFO("
-              + "SVI_ID CHAR(36) PRIMARY KEY, "
-              + "CONTENT BLOB, "
-              + "CONTENT_LENGTH BIGINT, "
-              + "PRIMARY KEY (SVI_ID) "
-              + ");";
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "DEVICE_MODULE_INFO ("
+          + "GUID CHAR(36) NOT NULL,"
+          + "ACTIVE BOOLEAN NOT NULL, "
+          + "OS_NAME VARCHAR(255) NOT NULL, "
+          + "OS_VERSION VARCHAR(255) NOT NULL,"
+          + "OS_ARCH VARCHAR(255) NOT NULL , "
+          + "DEVICE_TYPE VARCHAR(255) NOT NULL, "
+          + "SERIAL_NUMBER VARCHAR(255) NULL DEFAULT NULL, "
+          + "PATH_SEPARATOR VARCHAR(2) NOT NULL, "
+          + "FILE_NAME_SEPARATOR VARCHAR(2) NULL DEFAULT NULL,"
+          + "NEW_LINE_SEQUENCE VARCHAR(4) NULL DEFAULT NULL,"
+          + "TMP_DIR VARCHAR(512) NULL DEFAULT NULL,"
+          + "BIN_DIR VARCHAR(512) NULL DEFAULT NULL,"
+          + "PROG_ENV VARCHAR(512) NULL DEFAULT NULL,"
+          + "BIN_FORMATS VARCHAR(512) NOT NULL,"
+          + "MUD_URL VARCHAR(512) NULL DEFAULT NULL,"
+          + "MODULES CLOB NOT NULL,"
+          + "CREATED TIMESTAMP, "
+          + "FOREIGN KEY (GUID) REFERENCES "
+          + "TO2_DEVICES(GUID) ON DELETE CASCADE"
+          + ");";
 
       stmt.executeUpdate(sql);
 
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "DEVICE_TYPE_OWNERSVI_STRING("
-              + "DEVICE_TYPE CHAR(255), "
-              + "OWNERSVI_STRING CHAR(2147483647), "
-              + "PRIMARY KEY (DEVICE_TYPE),"
-              + "UNIQUE (DEVICE_TYPE)"
-              + ");";
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "SYSTEM_MODULE_RESOURCE("
+          + "RESOURCE_ID IDENTITY NOT NULL, "
+          + "CONTENT BLOB NULL DEFAULT NULL,"
+          + "CONTENT_TYPE_TAG CHAR(255) NOT NULL, "
+          + "RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
+          + "PRIORITY INT NOT NULL DEFAULT 1, "
+          + "FILE_NAME_TAG VARCHAR(1280) NULL DEFAULT NULL, "
+          + "GUID_TAG CHAR(36) NULL DEFAULT NULL, "
+          + "DEVICE_TYPE_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "OS_NAME_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "OS_VERSION_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "ARCHITECTURE_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "HASH_TAG VARCHAR(255) NULL DEFAULT NULL, "
+          + "UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(), "
+          + "PRIMARY KEY (RESOURCE_ID), "
+          + "UNIQUE (RESOURCE_ID)"
+          + ");";
 
       stmt.executeUpdate(sql);
 
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "DEVICE_TYPE_OWNERSVI_CRITERIA("
-              + "DEVICE_TYPE CHAR(255), "
-              + "CRITERIA CHAR(2147483647), "
-              + "EXPECTED_VALUE CHAR(2147483647), "
-              + "PRIMARY KEY (DEVICE_TYPE, CRITERIA),"
-              + "FOREIGN KEY (DEVICE_TYPE) REFERENCES "
-              + "DEVICE_TYPE_OWNERSVI_STRING(DEVICE_TYPE) ON DELETE CASCADE"
-              + ");";
-
-      stmt.executeUpdate(sql);
-
-      sql =
-          "CREATE TABLE IF NOT EXISTS "
-              + "GUID_DEVICEDSI("
-              + "GUID CHAR(36) NOT NULL, "
-              + "DSI_KEY CHAR(100) NOT NULL, "
-              + "DSI_VALUE BLOB NOT NULL, "
-              + "PRIMARY KEY (GUID, DSI_KEY), "
-              + "FOREIGN KEY (GUID) REFERENCES TO2_DEVICES(GUID) ON DELETE CASCADE"
-              + ");";
-
-      stmt.executeUpdate(sql);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -197,7 +203,7 @@ public class OwnerDbManager {
       pstmt.setBytes(11, ovh
           .getAsComposite(Const.OVH_RENDEZVOUS_INFO).toBytes());
       pstmt.setBytes(12, null);
-      pstmt.setInt(13,  1);
+      pstmt.setInt(13, 1);
       pstmt.setBytes(14, null);
       pstmt.setInt(15, 0);
 
@@ -220,7 +226,7 @@ public class OwnerDbManager {
     int result = 0;
 
     String sql = ""
-        + "DELETE FROM TO2_DEVICES  WHERE GUID = ?";
+        + "DELETE FROM TO2_DEVICES WHERE GUID = ?";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -236,99 +242,12 @@ public class OwnerDbManager {
     return result;
   }
 
-  /**
-   * Add service info to the database.
-   *
-   * @param ds Datasource
-   * @param serviceInfoId Serviceinfo Identifier
-   * @param serviceInfo Serviceinfo as byte array
-   */
-  public void addServiceInfo(DataSource ds, String serviceInfoId, byte[] serviceInfo) {
-    String sql = ""
-        + "MERGE INTO OWNER_SERVICEINFO  "
-        + "KEY (SVI_ID) "
-        + "VALUES (?,?,?); ";
-
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-      pstmt.setString(1, serviceInfoId);
-      pstmt.setBytes(2, serviceInfo);
-      pstmt.setInt(3, serviceInfo.length);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Remove Service info value as identified by serviceinfoId from the database.
-   *
-   * @param ds Datasource
-   * @param serviceInfoId Serviceinfo Identifier
-   */
-  public void removeServiceInfo(DataSource ds, String serviceInfoId) {
-    String sql = "DELETE FROM OWNER_SERVICEINFO WHERE SVI_ID = ?;";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-      pstmt.setString(1, serviceInfoId);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-
-   * Load Sample Owner service info from the file-system.
-   *
-   * @param ds Datasource instance
-   * @param sviValues Path to 'sample-values' directory containing serviceinfo
-   */
-  public void loadSampleServiceInfo(DataSource ds, Path sviValues) {
-    if (sviValues == null || !sviValues.toFile().isDirectory()) {
-      return;
-    }
-    try (Stream<Path> files = Files.walk(sviValues, 1)) {
-      files.map(Path::toAbsolutePath).filter(Files::isRegularFile).forEach((path) -> {
-        try {
-          byte[] value = Files.readAllBytes(path);
-          addServiceInfo(ds, path.getFileName().toString(), value);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      });
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Loads sample device type to owner string mapping from file-system.
-   *
-   * @param ds Datasource instance
-   * @param svi Path to 'sample-svi.csv' file that contains device type to svi
-   *     string mapping
-   */
-  public void loadSampleDeviceTypeSviStringMapping(DataSource ds, Path svi) {
-
-    if (svi == null) {
-      return;
-    }
-    try {
-      String sviString = Files.readString(svi);
-      addDeviceTypeOwnerSviString(ds, "default", sviString);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   /**
    * Update the replacementRvInfo for given currentGuid.
    *
-   * @param ds Datasource instance
-   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param ds                Datasource instance
+   * @param currentGuid       The GUID of the device for which updates need to be made.
    * @param replacementRvInfo The replacement/new RvInfo for the device.
    */
   public void updateDeviceReplacementRvinfo(DataSource ds, UUID currentGuid,
@@ -351,8 +270,8 @@ public class OwnerDbManager {
   /**
    * Update the replacementRvInfo for given currentGuid.
    *
-   * @param ds Datasource instance
-   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param ds             Datasource instance
+   * @param currentGuid    The GUID of the device for which updates need to be made.
    * @param replacementKey Customer ID for replacement key.
    */
   public void updateReplacementKeyCustomerId(DataSource ds, UUID currentGuid,
@@ -375,8 +294,8 @@ public class OwnerDbManager {
   /**
    * Update the replacementGuid for given currentGuid.
    *
-   * @param ds Datasource instance
-   * @param currentGuid The GUID of the device for which updates need to be made.
+   * @param ds              Datasource instance
+   * @param currentGuid     The GUID of the device for which updates need to be made.
    * @param replacementGuid The replacement/new GUID for the device.
    */
   public void updateDeviceReplacementGuid(DataSource ds, UUID currentGuid, UUID replacementGuid) {
@@ -410,7 +329,7 @@ public class OwnerDbManager {
         + "VALUES (1,1300,8192,FALSE);";
 
     try (Connection conn = ds.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -420,9 +339,9 @@ public class OwnerDbManager {
   /**
    * Update the given field with the required MTU size in TO2_SETTINGS table.
    *
-   * @param ds Datasource instance
+   * @param ds    Datasource instance
    * @param field Database column name
-   * @param mtu maximum MTU size
+   * @param mtu   maximum MTU size
    */
   public void updateMtu(DataSource ds, String field, int mtu) {
 
@@ -472,67 +391,301 @@ public class OwnerDbManager {
   }
 
   /**
-   * Add device type to owner serviceinfo mapping.
+   * Sets the device property of a field in the device info table.
    *
-   * @param ds Datasource
-   * @param deviceType device type
-   * @param ownerSviString owner serviceinfo string
+   * @param pstmt    The SQL prepare statement.
+   * @param columnId The column id to set.
+   * @param mapKey   The DevMod key we are setting.
+   * @param map      The map containing the values of the DevMod keys.
+   * @throws SQLException An SQL Exception.
    */
-  public void addDeviceTypeOwnerSviString(DataSource ds, String deviceType, String ownerSviString) {
-
-    if (!ownerSviString.equals("null")) {
-      ownerSviString = insertModActivateSviEntry(ownerSviString);
-      if (checkWgetInSviString(ownerSviString) && isWgetVerificationEnabled(ds)) {
-        ownerSviString = insertWgetContentHash(ds, ownerSviString);
-      }
-    }
-
-    if (checkSviIdReferentialIntegrity(ds, ownerSviString)) {
-      String sql = "MERGE INTO DEVICE_TYPE_OWNERSVI_STRING VALUES (?,?);";
-      try (Connection conn = ds.getConnection();
-          PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setString(1, deviceType);
-        pstmt.setString(2, ownerSviString);
-        pstmt.executeUpdate();
-      } catch (SQLException e) {
-        throw new RuntimeException(e);
+  private void setDeviceInfoProperty(PreparedStatement pstmt,
+      int columnId,
+      String mapKey,
+      Composite map) throws SQLException {
+    if (map.containsKey(mapKey)) {
+      Object value = map.get(mapKey);
+      if (value instanceof String) {
+        pstmt.setString(columnId, value.toString());
+      } else if (value instanceof Boolean) {
+        pstmt.setBoolean(columnId, (Boolean) value);
       }
     } else {
-      System.out.println("Invalid serviceinfo string provided");
+      pstmt.setNull(columnId, Types.CHAR);
     }
   }
 
   /**
-   * For every module change in sviString, inserts mod:active SVI entry.
+   * Add device type to owner serviceinfo mapping.
    *
-   * @param sviString svi mapping string to be updated
-   * @return updated sviString with activate module entries
+   * @param ds  Datasource instance.
+   * @param map A map containing all DevMod Keys and values.
    */
-  public String insertModActivateSviEntry(String sviString) {
-    StringBuilder sb = new StringBuilder();
-    List<String> sviEntries = Arrays.asList(sviString.split(","));
-    List<String> modSequence = new ArrayList<>();
+  public void addDeviceInfo(DataSource ds, Composite map) {
 
-    for (String sviEntry : sviEntries) {
-      String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-      String[] modMsgDelimeted = sviEntryArray[0].split(SVI_MODMSG_DELIMETER);
-      modSequence.add(modMsgDelimeted[0]);
+    String sql = "INSERT INTO DEVICE_MODULE_INFO ("
+        + "GUID,"
+        + "ACTIVE,"
+        + "OS_NAME, "
+        + "OS_VERSION, "
+        + "OS_ARCH, "
+        + "DEVICE_TYPE, "
+        + "SERIAL_NUMBER, "
+        + "PATH_SEPARATOR, "
+        + "FILE_NAME_SEPARATOR, "
+        + "NEW_LINE_SEQUENCE,"
+        + "TMP_DIR,"
+        + "BIN_DIR,"
+        + "PROG_ENV,"
+        + "BIN_FORMATS,"
+        + "MUD_URL, "
+        + "MODULES, "
+        + "CREATED"
+        + ") VALUES ("
+        + "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"
+        + ");";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      setDeviceInfoProperty(pstmt, 1, "guid", map);
+      setDeviceInfoProperty(pstmt, 2, DevMod.KEY_ACTIVE, map);
+      setDeviceInfoProperty(pstmt, 3, DevMod.KEY_OS, map);
+      setDeviceInfoProperty(pstmt, 4, DevMod.KEY_VERSION, map);
+      setDeviceInfoProperty(pstmt, 5, DevMod.KEY_ARCH, map);
+      setDeviceInfoProperty(pstmt, 6, DevMod.KEY_DEVICE, map);
+      setDeviceInfoProperty(pstmt, 7, DevMod.KEY_SN, map);
+      setDeviceInfoProperty(pstmt, 8, DevMod.KEY_PATHSEP, map);
+      setDeviceInfoProperty(pstmt, 9, DevMod.KEY_SEP, map);
+      setDeviceInfoProperty(pstmt, 10, DevMod.KEY_NL, map);
+      setDeviceInfoProperty(pstmt, 11, DevMod.KEY_TMP, map);
+      setDeviceInfoProperty(pstmt, 12, DevMod.KEY_DIR, map);
+      setDeviceInfoProperty(pstmt, 13, DevMod.KEY_PROGENV, map);
+      setDeviceInfoProperty(pstmt, 14, DevMod.KEY_BIN, map);
+      setDeviceInfoProperty(pstmt, 15, DevMod.KEY_MUDURL, map);
+      setDeviceInfoProperty(pstmt, 16, DevMod.KEY_MODULES, map);
+
+      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
+      pstmt.setTimestamp(17, created);
+
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
     }
-
-    sb.append(modSequence.get(0));
-    sb.append(":active=activate_mod,");
-    sb.append(sviEntries.get(0) + ",");
-    for (int i = 1; i < modSequence.size(); i++) {
-      if (!(modSequence.get(i - 1).equals(modSequence.get(i)))) {
-        sb.append(modSequence.get(i));
-        sb.append(":active=activate_mod,");
-      }
-      sb.append(sviEntries.get(i) + ",");
-    }
-
-    sb.deleteCharAt(sb.length() - 1);
-    return sb.toString();
   }
+
+
+  /**
+   * Removes the device info record from the database.
+   *
+   * @param ds   Datasource instance.
+   * @param guid The guid of the device.
+   */
+  public void removeDeviceInfo(DataSource ds, String guid) {
+    String sql = "DELETE FROM DEVICE_MODULE_INFO WHERE GUID = ?";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, guid);
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
+  /**
+   * Get the deviceinfo from the Database.
+   *
+   * @param ds   Datasource instance.
+   * @param guid The guid of the device.
+   * @return A Composite map containing DevMod name value pairs.
+   */
+  public Composite getDeviceInfo(DataSource ds, String guid) {
+    Composite map = Composite.newMap();
+    // Read the file content whose hash needs to be calculated.
+    String sql = "SELECT "
+        + "DEVICE_TYPE,"
+        + "MODULES,"
+        + "FILE_NAME_SEPARATOR, "
+        + "OS_NAME, "
+        + "OS_VERSION,  "
+        + "OS_ARCH "
+        + "FROM DEVICE_MODULE_INFO WHERE GUID = ?";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, guid);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          map.set(DevMod.KEY_DEVICE, rs.getString(1));
+          map.set(DevMod.KEY_MODULES, rs.getString(2));
+          map.set(DevMod.KEY_SEP, rs.getString(3));
+          map.set(DevMod.KEY_OS, rs.getString(4));
+          map.set(DevMod.KEY_VERSION, rs.getString(5));
+          map.set(DevMod.KEY_ARCH, rs.getString(6));
+
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return map;
+  }
+
+
+  /**
+   * Gets the list of system resources to return to the device.
+   *
+   * @param ds      Datasource instance.
+   * @param guid    The guid of the device.
+   * @param devInfo A Map of keys returned from the DevMod.
+   * @return A Composite array of resources id an their types.
+   */
+  public Composite getSystemResources(DataSource ds,
+      String guid,
+      Composite devInfo) {
+
+    Composite resList = Composite.newArray();
+    String deviceType = devInfo.getAsString(DevMod.KEY_DEVICE);
+    String osName = devInfo.getAsString(DevMod.KEY_OS);
+    String osVersion = devInfo.getAsString(DevMod.KEY_VERSION);
+    String archType = devInfo.getAsString(DevMod.KEY_ARCH);
+
+    String sql = "SELECT RESOURCE_ID, CONTENT_TYPE_TAG, UPDATED "
+        + "FROM SYSTEM_MODULE_RESOURCE "
+        + "WHERE (GUID_TAG = ? OR GUID_TAG IS NULL ) AND "
+        + "(DEVICE_TYPE_TAG = ? OR DEVICE_TYPE_TAG IS NULL ) AND "
+        + "(OS_NAME_TAG  = ? OR OS_NAME_TAG IS NULL ) AND "
+        + "(OS_VERSION_TAG = ? OR OS_VERSION_TAG IS NULL ) AND "
+        + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
+        + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active') "
+        + "ORDER BY PRIORITY ASC";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, guid);
+      pstmt.setString(2, deviceType);
+      pstmt.setString(3, osName);
+      pstmt.setString(4, osVersion);
+      pstmt.setString(5, archType);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          Composite resItem = Composite.newArray();
+          resItem.set(Const.FIRST_KEY, rs.getString(1));
+          resItem.set(Const.SECOND_KEY, rs.getString(2));
+          resItem.set(Const.THIRD_KEY, rs.getString(3));
+          resList.set(resList.size(), resItem);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return resList;
+  }
+
+  /**
+   * Gets the Content of a resource.
+   *
+   * @param ds         Datasource instance.
+   * @param resourceId The resource id.
+   * @return The content as a byte array.
+   */
+  public byte[] getSystemResourceContent(DataSource ds,
+      String resourceId) {
+
+    String sql = "SELECT "
+        + "CONTENT "
+        + "FROM SYSTEM_MODULE_RESOURCE "
+        + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
+        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, resourceId);
+      pstmt.setString(2, resourceId);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getBytes(1);
+
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    throw new RuntimeException(new NoSuchElementException());
+  }
+
+  /**
+   * The a byte range within the content of a resource.
+   *
+   * @param ds         Datasource instance.
+   * @param resourceId The resource id.
+   * @param start      The start byte of the range.
+   * @param end        The last byte to return in the range.
+   * @return The bytes at the specified range.
+   */
+  public byte[] getSystemResourceContentWithRange(DataSource ds,
+      String resourceId,
+      int start,
+      int end) {
+    Composite state = Composite.newArray();
+    String sql = "SELECT "
+        + "LENGTH(CONTENT), "
+        + "CONTENT, "
+        + "FROM SYSTEM_MODULE_RESOURCE "
+        + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
+        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, resourceId);
+      pstmt.setString(2, resourceId);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          int maxValue = rs.getInt(1);
+          try (InputStream input = rs.getBinaryStream(2)) {
+            if (start > 0) {
+              input.skip(start);
+            }
+            int len = end - start;
+            if ((start + len) > maxValue) {
+              len = maxValue - start;
+            }
+            return input.readNBytes(len);
+          }
+        }
+      }
+    } catch (SQLException | IOException e) {
+      throw new RuntimeException(e);
+    }
+    throw new RuntimeException(new NoSuchElementException());
+  }
+
+  /**
+   * Gets the value of the FILE_NAME tag of the resource.
+   *
+   * @param ds         Datasource instance.
+   * @param resourceId The resource id.
+   * @return The value of the FILE_NAME tag.
+   */
+  public String getSystemResourcesFileName(DataSource ds, String resourceId) {
+    Composite state = Composite.newArray();
+    String sql = "SELECT FILE_NAME_TAG "
+        + "FROM SYSTEM_MODULE_RESOURCE "
+        + "WHERE RESOURCE_ID = ?;";
+    try (Connection conn = ds.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, resourceId);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    throw new RuntimeException(new NoSuchElementException());
+  }
+
 
   /**
    * Determines if wget module is included in svi.
@@ -547,7 +700,7 @@ public class OwnerDbManager {
     for (String sviEntry : sviEntries) {
       String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
       String[] modMsgDelimeted = sviEntryArray[0].split(SVI_MODMSG_DELIMETER);
-      if (modMsgDelimeted[0].equals(SdoWget.NAME)) {
+      if (modMsgDelimeted[0].equals(FdoWget.NAME)) {
         return true;
       }
     }
@@ -579,53 +732,9 @@ public class OwnerDbManager {
   }
 
   /**
-   * Ensures the referential integrity between OWNER_SERVICEINFO and DEVICE_TYPE_OWNERSVI_STRING
-   * tables.
-   *
-   * <p>SVI_ID specified in OwnerServiceInfo string must exist in OWNER_SERVICEINFO table.
-   *
-   * @param ds Datasource
-   * @param ownerSviString owner serviceinfo string
-   */
-  private boolean checkSviIdReferentialIntegrity(DataSource ds, String ownerSviString) {
-
-    if (ownerSviString.equals("null")) {
-      return true;
-    }
-
-    ArrayList<String> expectedSviIds = new ArrayList<>();
-    ArrayList<String> actualSviIds = new ArrayList<>();
-
-    String[] sviMappings = ownerSviString.split(SVI_ARRAY_DELIMETER);
-    for (String sviMapping : sviMappings) {
-      if (sviMapping.split(SVI_MODMSG_DELIMETER).length != 2) {
-        return false;
-      }
-      expectedSviIds.add(sviMapping.split(SVI_ENTRY_DELIMETER)[1]);
-    }
-
-    String sql = "SELECT SVI_ID FROM OWNER_SERVICEINFO;";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      try (ResultSet rs = pstmt.executeQuery()) {
-
-        while (rs.next()) {
-          actualSviIds.add(rs.getString(1));
-        }
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-    if (actualSviIds.containsAll(expectedSviIds)) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Updates content verification preference for wget module.
    *
-   * @param ds Datasource instance
+   * @param ds                            Datasource instance
    * @param contentVerificationPreference true or false
    */
   public void updateWgetVerificationPreference(
@@ -661,7 +770,7 @@ public class OwnerDbManager {
       // Get the filename whose hash needs to be calculated.
       if (sviEntryArray[0]
           .trim()
-          .equals(SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_FILENAME)) {
+          .equals(FdoWget.NAME + SVI_MODMSG_DELIMETER + FdoWget.KEY_FILENAME)) {
         String filename = null;
         String sviId = null;
         byte[] sviContent = null;
@@ -700,11 +809,11 @@ public class OwnerDbManager {
             (new CryptoService().hash(Const.SHA_384, sviContent)).getAsBytes(Const.HASH);
 
         // Adds the hash entry to OWNER_SERVICEINFO table.
-        addServiceInfo(ds, sviId, wgetFileContentHash);
+        //addServiceInfo(ds, sviId, wgetFileContentHash);
 
         // add the mapping to GUID_OWNERSVI
         newSviEntries.add(
-            (SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_SHA + SVI_ENTRY_DELIMETER + sviId));
+            (FdoWget.NAME + SVI_MODMSG_DELIMETER + FdoWget.KEY_SHA + SVI_ENTRY_DELIMETER + sviId));
       }
     }
 
@@ -712,7 +821,7 @@ public class OwnerDbManager {
     for (String sviEntry : sviEntries) {
       sb.append(sviEntry + ",");
       String[] sviEntryArray = sviEntry.split(SVI_ENTRY_DELIMETER);
-      if (sviEntryArray[0].trim().equals(SdoWget.NAME + SVI_MODMSG_DELIMETER + SdoWget.KEY_URL)) {
+      if (sviEntryArray[0].trim().equals(FdoWget.NAME + SVI_MODMSG_DELIMETER + FdoWget.KEY_URL)) {
         sb.append(newSviEntries.get(i) + ",");
         i++;
       }
@@ -722,29 +831,12 @@ public class OwnerDbManager {
     return sb.toString();
   }
 
-  /**
-   * Remove Service info value as identified by serviceinfoId from the database.
-   *
-   * @param ds Datasource
-   * @param deviceType Serviceinfo Identifier
-   */
-  public void removeDeviceSviString(DataSource ds, String deviceType) {
-    String sql = "DELETE FROM DEVICE_TYPE_OWNERSVI_STRING WHERE DEVICE_TYPE = ?;";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-      pstmt.setString(1, deviceType);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   /**
    * Add device type criteria.
    *
-   * @param ds Datasource
-   * @param criteria DSI key(s) for identifying device type
+   * @param ds            Datasource
+   * @param criteria      DSI key(s) for identifying device type
    * @param expectedValue expected value for DSI keys included in criteria
    */
   public void addDeviceTypeCriteria(
@@ -766,7 +858,7 @@ public class OwnerDbManager {
   /**
    * Remove device type identifier criteria for a particular device type.
    *
-   * @param ds Datasource
+   * @param ds         Datasource
    * @param deviceType device type
    */
   public void removeDeviceTypeCriteria(DataSource ds, String deviceType) {
@@ -784,7 +876,7 @@ public class OwnerDbManager {
   /**
    * Removes customer keys entry corresponding to the customer ID.
    *
-   * @param ds Datasource
+   * @param ds         Datasource
    * @param customerId customer ID
    */
   public void removeCustomer(DataSource ds, String customerId) {

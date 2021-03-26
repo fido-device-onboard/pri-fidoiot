@@ -72,10 +72,10 @@ public class To2ServerApp {
     ctx.addParameter("trace", "");
 
     // OnDie cert cache is included with the protocol samples.
-    Path odcPath = Paths.get(System.getProperty("user.dir"),"../", "onDieCache");
+    Path odcPath = Paths.get(System.getProperty("user.dir"), "../", "onDieCache");
 
     System.out.println("Working Directory = " + odcPath.toString());
-    ctx.addParameter("ods.cacheDir",  odcPath.toUri().toString());
+    ctx.addParameter("ods.cacheDir", odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");
     ctx.addParameter("ods.checkRevocations", "true");

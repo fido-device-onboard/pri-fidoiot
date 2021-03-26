@@ -6,7 +6,7 @@ package org.fido.iot.serviceinfo;
 /**
  * Constants common to the sdodev management agent and service.
  */
-public final class SdoDev {
+public final class DevMod {
 
   public static final String NAME = "devmod";
   public static final String KEY_ACTIVE = NAME + ":active";
