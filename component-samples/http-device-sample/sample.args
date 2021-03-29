@@ -11,27 +11,27 @@
 # A device without a credential is considered uninitialized and must run Device Initialization (DI)
 # or its equivalent before ownership can be transferred.
 # 
--Dfido.iot.device.credential=credential.bin
+-Dfidoalliance.fdo.device.credential=credential.bin
 
 # The PEM-encoded file containing the device's keys, both public and private.
 #
--Dfido.iot.pem.dev=device.pem
+-Dfidoalliance.fdo.pem.dev=device.pem
 
 # The URL at which the Device Initialization server may be contacted, if there is no credential.
 #
--Dfido.iot.url.di=http://localhost:8039/
+-Dfidoalliance.fdo.url.di=http://localhost:8039/
 
 # The JCE SecureRandom sources to be used, in a comma-separated list in order of preference.
 #
--Dfido.iot.randoms="NativePRNG,Windows-PRNG"
+-Dfidoalliance.fdo.randoms="NativePRNG,Windows-PRNG"
 
 # The ServiceInfo MTU to be advertised from device to owner.
 #
--Dfido.iot.device.service.info.mtu=1300
+-Dfidoalliance.fdo.device.service.info.mtu=1300
 
 # Set to true to enable the credential reuse protocol in the device.
 # 
--Dfido.iot.device.cred.reuse=true
+-Dfidoalliance.fdo.device.cred.reuse=true
 
 # The cipher algorithm to use during TO2.
 #
@@ -46,4 +46,4 @@
 # AES-CCM-64-128-128
 # AES-CCM-64-128-256
 #
--Dfido.iot.cipher=AES128/CTR/HMAC-SHA256
+-Dfidoalliance.fdo.cipher=AES128/CTR/HMAC-SHA256
