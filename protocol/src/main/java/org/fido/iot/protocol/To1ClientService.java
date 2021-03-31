@@ -16,7 +16,7 @@ public abstract class To1ClientService extends DeviceService {
     getStorage().continuing(request, reply);
     Composite body = request.getAsComposite(Const.SM_BODY);
 
-    byte[] nonce4 = body.getAsBytes(Const.FIRST_KEY);
+    byte[] nonceTo1Proof = body.getAsBytes(Const.FIRST_KEY);
     body.verifyMaxKey(Const.SECOND_KEY);
 
     byte[] ueid = getCryptoService().getUeidFromGuid(
@@ -24,7 +24,7 @@ public abstract class To1ClientService extends DeviceService {
 
     //build EAT token based on private key and sign
     Composite payload = Composite.newMap()
-        .set(Const.EAT_NONCE, nonce4)
+        .set(Const.EAT_NONCE, nonceTo1Proof)
         .set(Const.EAT_UEID, ueid);
 
     Composite signature = null;

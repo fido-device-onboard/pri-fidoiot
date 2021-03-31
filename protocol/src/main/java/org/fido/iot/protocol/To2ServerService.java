@@ -23,7 +23,7 @@ public abstract class To2ServerService extends MessagingService {
       Composite body = request.getAsComposite(Const.SM_BODY);
 
       UUID guid = body.getAsUuid(Const.FIRST_KEY);
-      byte[] nonce5 = body.getAsBytes(Const.SECOND_KEY);
+      byte[] nonceTo2ProveOv = body.getAsBytes(Const.SECOND_KEY);
       String kexName = body.getAsString(Const.THIRD_KEY);
       String cipherName = body.getAsString(Const.FOURTH_KEY);
       Composite sigInfoA = body.getAsComposite(Const.FIFTH_KEY);
@@ -41,16 +41,16 @@ public abstract class To2ServerService extends MessagingService {
           .set(Const.FIRST_KEY, voucher.getAsComposite(Const.OV_HEADER))
           .set(Const.SECOND_KEY, voucher.getAsComposite(Const.OV_ENTRIES).size())
           .set(Const.THIRD_KEY, voucher.getAsComposite(Const.OV_HMAC))
-          .set(Const.FOURTH_KEY, nonce5)
+          .set(Const.FOURTH_KEY, nonceTo2ProveOv)
           .set(Const.FIFTH_KEY, getCryptoService().getSigInfoB(sigInfoA))
           .set(Const.SIXTH_KEY, ownerState.getAsBytes(Const.FIRST_KEY));
 
-      byte[] nonce6 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
-      getStorage().setNonce6(nonce6);
+      byte[] nonceTo2ProveDv = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
+      getStorage().setNonceTo2ProveDv(nonceTo2ProveDv);
       getStorage().setSigInfoA(sigInfoA);
       Composite ownerKey = getCryptoService().getOwnerPublicKey(voucher);
       Composite uph = Composite.newMap()
-          .set(Const.CUPH_NONCE, nonce6)
+          .set(Const.CUPH_NONCE, nonceTo2ProveDv)
           .set(Const.CUPH_PUBKEY, ownerKey);
 
       Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
@@ -138,8 +138,8 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().setOwnerState(cipherState);
 
       Composite unp = body.getAsComposite(Const.COSE_SIGN1_UNPROTECTED);
-      byte[] nonce7 = unp.getAsBytes(Const.EUPH_NONCE);
-      getStorage().setNonce7(nonce7);
+      byte[] nonceTo2SetupDv = unp.getAsBytes(Const.EUPH_NONCE);
+      getStorage().setNonceTo2SetupDv(nonceTo2SetupDv);
 
       payload = Composite.newArray();
 
@@ -162,7 +162,7 @@ public abstract class To2ServerService extends MessagingService {
 
       payload.set(Const.FIRST_KEY, replacementRvInfo);
       payload.set(Const.SECOND_KEY, replacementGuid);
-      payload.set(Const.THIRD_KEY, nonce7);
+      payload.set(Const.THIRD_KEY, nonceTo2SetupDv);
       payload.set(Const.FOURTH_KEY, replacementKey);
 
       // TO2SetupDevicePayload is signed by Owner2, which in this code is this owner
@@ -296,9 +296,9 @@ public abstract class To2ServerService extends MessagingService {
       Composite body = request.getAsComposite(Const.SM_BODY);
       Composite message = Composite.fromObject(
           getCryptoService().decrypt(body, getStorage().getOwnerState()));
-      byte[] nonce6 = message.getAsBytes(Const.FIRST_KEY);
+      byte[] nonceTo2ProveDv = message.getAsBytes(Const.FIRST_KEY);
 
-      getCryptoService().verifyBytes(nonce6, getStorage().getNonce6());
+      getCryptoService().verifyBytes(nonceTo2ProveDv, getStorage().getNonceTo2ProveDv());
 
       Composite voucher = getStorage().getVoucher();
       Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
@@ -325,7 +325,7 @@ public abstract class To2ServerService extends MessagingService {
       }
 
       Composite payload = Composite.newArray()
-          .set(Const.FIRST_KEY, getStorage().getNonce7());
+          .set(Const.FIRST_KEY, getStorage().getNonceTo2SetupDv());
 
       body = getCryptoService().encrypt(
           payload.toBytes(),

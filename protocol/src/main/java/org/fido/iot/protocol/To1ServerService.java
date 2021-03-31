@@ -25,13 +25,13 @@ public abstract class To1ServerService extends MessagingService {
 
       getStorage().setGuid(guid);
 
-      byte[] nonce4 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
-      getStorage().setNonce4(nonce4);
+      byte[] nonceTo1Proof = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
+      getStorage().setNonceTo1Proof(nonceTo1Proof);
       Composite sigA = body.getAsComposite(Const.SECOND_KEY);
       getStorage().setSigInfoA(sigA);
 
       body = Composite.newArray()
-          .set(Const.FIRST_KEY, nonce4)
+          .set(Const.FIRST_KEY, nonceTo1Proof)
           .set(Const.SECOND_KEY,
               getCryptoService().getSigInfoB(sigA));
 
@@ -72,7 +72,7 @@ public abstract class To1ServerService extends MessagingService {
       Composite payload = Composite.fromObject(
           body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
-      byte[] nonce4 = payload.getAsBytes(Const.EAT_NONCE);
+      byte[] nonceTo1Proof = payload.getAsBytes(Const.EAT_NONCE);
       UUID ueGuid = getCryptoService().getGuidFromUeid(
           payload.getAsBytes(Const.EAT_UEID));
       UUID deviceId = getStorage().getGuid();
@@ -81,7 +81,7 @@ public abstract class To1ServerService extends MessagingService {
         throw new InvalidMessageException(ueGuid.toString());
       }
 
-      cryptoService.verifyBytes(nonce4, getStorage().getNonce4());
+      cryptoService.verifyBytes(nonceTo1Proof, getStorage().getNonceTo1Proof());
 
       reply.set(Const.SM_MSG_ID, Const.TO1_RV_REDIRECT);
       reply.set(Const.SM_BODY, getStorage().getRedirectBlob());

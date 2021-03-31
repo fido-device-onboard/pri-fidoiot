@@ -20,10 +20,10 @@ public abstract class To0ServerService extends MessagingService {
     request.getAsComposite(Const.SM_BODY).verifyMaxKey(Const.NO_KEYS);
 
     byte[] nonce = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
-    getStorage().setNonce3(nonce);
-    Composite nonce3 = Composite.newArray().set(Const.FIRST_KEY, nonce);
+    getStorage().setNonceTo0Sign(nonce);
+    Composite nonceTo0Sign = Composite.newArray().set(Const.FIRST_KEY, nonce);
     reply.set(Const.SM_MSG_ID, Const.TO0_HELLO_ACK);
-    reply.set(Const.SM_BODY, nonce3);
+    reply.set(Const.SM_BODY, nonceTo0Sign);
     getStorage().started(request, reply);
   }
 
@@ -46,8 +46,8 @@ public abstract class To0ServerService extends MessagingService {
     //reads to0d data
     Composite voucher = to0d.getAsComposite(Const.TO0D_VOUCHER);
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    byte[] to0dNonce3 = to0d.getAsBytes(Const.TO0D_NONCE3);
-    to0d.verifyMaxKey(Const.TO0D_NONCE3);
+    byte[] to0dNonceTo0Sign = to0d.getAsBytes(Const.TO0D_NONCETO0SIGN);
+    to0d.verifyMaxKey(Const.TO0D_NONCETO0SIGN);
 
     //verifying voucher
     PublicKey publicKey = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
@@ -57,8 +57,8 @@ public abstract class To0ServerService extends MessagingService {
       cryptoService.verifyVoucher(voucher);
     }
 
-    byte[] nonce3 = getStorage().getNonce3();
-    cryptoService.verifyBytes(nonce3, to0dNonce3);
+    byte[] nonceTo0Sign = getStorage().getNonceTo0Sign();
+    cryptoService.verifyBytes(nonceTo0Sign, to0dNonceTo0Sign);
 
     Composite pubKeyEntry = getCryptoService().getOwnerPublicKey(voucher);
     PublicKey verificationKey = cryptoService.decode(pubKeyEntry);
