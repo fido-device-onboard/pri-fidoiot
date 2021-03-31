@@ -8,17 +8,17 @@
 # Getting the executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) HTTP Device Component sample source.
-For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <pri-src>/component-samples/http-device-sample/
+$ cd <fdo-pri-src>/component-samples/http-device-sample/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into <pri-src>/component-samples/demo/device/.
+This will copy the required executables and libraries into <fdo-pri-src>/component-samples/demo/device/.
 
 ### Configuring the device service
 
-Some software settings are runtime-configurable via Java properties.  They include:
+Device runtime arguments:
 
 - `fidoalliance.fdo.randoms`
 
@@ -44,17 +44,17 @@ Some software settings are runtime-configurable via Java properties.  They inclu
 
   Maximum MTU Size for ServiceInfo that owner can send to the device.
   If not set, default MTU size of 1300 bytes will be used for ServiceInfo transfers to device.
-  
+
 - `fidoalliance.fdo.device.cred.reuse`
 
   Property to enable or disable support for device credential reuse.
-  
+
   Default is true.
 
 # Starting the Device service
 
 ```
-$ cd <pri-src>/component-samples/demo/device
+$ cd <fdo-pri-src>/component-samples/demo/device
 $ mvn -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
 ```
 
@@ -82,12 +82,10 @@ The rendezvous and owner servers must be available during this step.
 - You can execute the device in two modes:
 
   * `TEST` mode where certificate verification is skipped. Useful for https development or testing.
-
-  ```
+```
     java -D<other-flags> -Dfido_ssl_mode=TEST device.jar
   ```
-
-  Make sure to add the `-Dfido_ssl_mode=TEST`.
+Make sure to add the `-Dfido_ssl_mode=TEST`.
 
   * `PROD` mode where certificate verification is carried out. Useful for production deployment.
   ```
