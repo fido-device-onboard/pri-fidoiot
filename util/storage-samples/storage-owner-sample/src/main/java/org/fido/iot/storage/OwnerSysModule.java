@@ -142,10 +142,17 @@ public class OwnerSysModule implements Module {
 
     message.set(Const.FIRST_KEY, contentType);
     switch (contentType) {
-      case FdoSys.KEY_ACTIVE:
-        message.set(Const.SECOND_KEY, true);
+      case FdoSys.KEY_ACTIVE: {
+
+        byte[] content = new OwnerDbManager().getSystemResourceContent(dataSource, resId);
+        if (content.length == 1 && content[0] == -11) {
+          message.set(Const.SECOND_KEY, true);
+        } else {
+          message.set(Const.SECOND_KEY, false);
+        }
         incrementIndex();
-        break;
+      }
+      break;
       case FdoSys.KEY_FILEDESC:
         message.set(Const.SECOND_KEY,
             new OwnerDbManager().getSystemResourcesFileName(dataSource, resId));

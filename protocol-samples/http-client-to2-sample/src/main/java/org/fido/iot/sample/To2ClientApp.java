@@ -74,6 +74,8 @@ public class To2ClientApp {
 
     DispatchResult dr = clientService.getHelloMessage();
 
+    clientService.setTo1d(to1dBlob);
+
     List<String> paths = RendezvousBlobDecoder.getHttpDirectives(to1dBlob);
 
     for (String path : paths) {

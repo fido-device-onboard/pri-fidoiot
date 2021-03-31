@@ -836,23 +836,13 @@ public class OwnerDbManager {
    * Add device type criteria.
    *
    * @param ds            Datasource
-   * @param criteria      DSI key(s) for identifying device type
-   * @param expectedValue expected value for DSI keys included in criteria
+   * @param map     tags of the resource
+   * @param input binary content
    */
-  public void addDeviceTypeCriteria(
-      DataSource ds, String deviceType, String criteria, String expectedValue) {
+  public void addSystemResource(
+      DataSource ds, Composite map,InputStream input) {
 
-    removeDeviceTypeCriteria(ds, deviceType);
-    String sql = "MERGE INTO DEVICE_TYPE_OWNERSVI_CRITERIA VALUES (?,?,?);";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, deviceType);
-      pstmt.setString(2, criteria);
-      pstmt.setString(3, expectedValue);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
+
   }
 
   /**
