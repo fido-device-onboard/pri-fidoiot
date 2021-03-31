@@ -291,9 +291,31 @@ public class To2ContextListener implements ServletContextListener {
     // it. If not, then fall back to the hardcoded value.
     try {
       FileInputStream fis = new FileInputStream("voucher");
-      byte[] voucherBytes = fis.readAllBytes();
-      manager.importVoucher(ds, Composite.fromObject(voucherBytes));
+      Composite voucher = Composite.fromObject(fis.readAllBytes());
+
+      // select the owner key based on key type in the voucher
+      PublicKey devicePubkey = cs.getDevicePublicKey(voucher);
+      String pemValue = ownerKeyPemEC256;
+      if (devicePubkey instanceof ECKey) {
+        int bitLength = ((ECKey) devicePubkey).getParams().getCurve().getField().getFieldSize();
+        if (bitLength == Const.BIT_LEN_256) {
+          pemValue = ownerKeyPemEC256;
+        } else if (bitLength == Const.BIT_LEN_384) {
+          pemValue = ownerKeyPemEC384;
+        }
+      } else if (devicePubkey == null) {
+        pemValue = ownerKeyPemRsa;
+      } else {
+        throw new RuntimeException("unknown public key type in voucher");
+      }
+
+      manager.addCustomer(ds, 1, "owner", pemValue);
+      manager.addCustomer(ds, 2, "owner2", pemValue);
+      manager.importVoucher(ds, voucher);
+
     } catch (Exception ex) {
+      manager.addCustomer(ds, 1, "owner", ownerKeyPemEC256);
+      manager.addCustomer(ds, 2, "owner2", ownerKeyPemEC256);
       manager.importVoucher(ds, Composite.fromObject(sampleVoucher));
     }
   }
