@@ -39,8 +39,8 @@ public class OwnerDbStorage implements To2ServerStorage {
   private OnDieService onDieService;
   private Composite ownerState;
   private String cipherName;
-  private byte[] nonce6;
-  private byte[] nonce7;
+  private byte[] nonceTo2ProveDv;
+  private byte[] nonceTo2SetupDv;
   private Composite voucher;
   private String sessionId;
   private byte[] replacementHmac;
@@ -76,13 +76,13 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public byte[] getNonce6() {
-    return nonce6;
+  public byte[] getNonceTo2ProveDv() {
+    return nonceTo2ProveDv;
   }
 
   @Override
-  public void setNonce6(byte[] nonce) {
-    nonce6 = nonce;
+  public void setNonceTo2ProveDv(byte[] nonce) {
+    nonceTo2ProveDv = nonce;
   }
 
   @Override
@@ -172,17 +172,17 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public void setNonce7(byte[] nonce7) {
-    this.nonce7 = nonce7;
+  public void setNonceTo2SetupDv(byte[] nonceTo2SetupDv) {
+    this.nonceTo2SetupDv = nonceTo2SetupDv;
     String sql = "UPDATE TO2_SESSIONS "
-        + "SET NONCE7 = ?,"
+        + "SET NONCETO2SETUPDV = ?,"
         + "UPDATED = ? "
         + "WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-      pstmt.setBytes(1, nonce7);
+      pstmt.setBytes(1, nonceTo2SetupDv);
       Timestamp updatedAt = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(2, updatedAt);
       pstmt.setString(3, sessionId);
@@ -196,8 +196,8 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
-  public byte[] getNonce7() {
-    return nonce7;
+  public byte[] getNonceTo2SetupDv() {
+    return nonceTo2SetupDv;
   }
 
   @Override
@@ -402,8 +402,8 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new InvalidJwtException();
     }
 
-    String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCE6, NONCE7, SIGINFOA, "
-        + " SERVICEINFO_BLOB "
+    String sql = "SELECT VOUCHER, OWNER_STATE, CIPHER_NAME, NONCETO2PROVEDV, NONCETO2SETUPDV, "
+        + "SIGINFOA, SERVICEINFO_BLOB "
         + "FROM TO2_SESSIONS WHERE SESSION_ID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -416,8 +416,8 @@ public class OwnerDbStorage implements To2ServerStorage {
           voucher = Composite.fromObject(rs.getBinaryStream(1));
           ownerState = Composite.fromObject(rs.getBinaryStream(2));
           cipherName = rs.getString(3);
-          nonce6 = rs.getBytes(4);
-          nonce7 = rs.getBytes(5);
+          nonceTo2ProveDv = rs.getBytes(4);
+          nonceTo2SetupDv = rs.getBytes(5);
           sigInfoA = Composite.fromObject(rs.getBinaryStream(6));
           if (rs.getBlob(7) != null) {
             try (InputStream inputStream = rs.getBlob(7).getBinaryStream()) {
@@ -526,8 +526,8 @@ public class OwnerDbStorage implements To2ServerStorage {
         + "VOUCHER,"
         + "OWNER_STATE,"
         + "CIPHER_NAME, "
-        + "NONCE6,"
-        + "NONCE7,"
+        + "NONCETO2PROVEDV,"
+        + "NONCETO2SETUPDV,"
         + "SIGINFOA,"
         + "CREATED,"
         + "UPDATED) "
@@ -540,8 +540,8 @@ public class OwnerDbStorage implements To2ServerStorage {
       pstmt.setBytes(2, voucher.toBytes());
       pstmt.setBytes(3, ownerState.toBytes());
       pstmt.setString(4, cipherName);
-      pstmt.setBytes(5, nonce6);
-      pstmt.setBytes(6, nonce7);
+      pstmt.setBytes(5, nonceTo2ProveDv);
+      pstmt.setBytes(6, nonceTo2SetupDv);
       pstmt.setBytes(7, sigInfoA.toBytes());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(8, created);

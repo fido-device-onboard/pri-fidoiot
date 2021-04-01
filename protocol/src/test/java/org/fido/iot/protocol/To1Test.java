@@ -15,7 +15,7 @@ import org.fido.iot.certutils.PemLoader;
 
 public class To1Test extends BaseTemplate {
 
-  private byte[] storedNonce4;
+  private byte[] storedNonceTo1Proof;
   private Composite storedBlob;
   private UUID storedGuid;
   private String serverToken;
@@ -37,7 +37,7 @@ public class To1Test extends BaseTemplate {
     clientToken = null;
     storedBlob = null;
     storedGuid = null;
-    storedNonce4 = null;
+    storedNonceTo1Proof = null;
 
     final To1ClientStorage clientStorage = new To1ClientStorage() {
       @Override
@@ -130,13 +130,13 @@ public class To1Test extends BaseTemplate {
       }
 
       @Override
-      public byte[] getNonce4() {
-        return storedNonce4;
+      public byte[] getNonceTo1Proof() {
+        return storedNonceTo1Proof;
       }
 
       @Override
-      public void setNonce4(byte[] nonce4) {
-        storedNonce4 = nonce4;
+      public void setNonceTo1Proof(byte[] nonceTo1Proof) {
+        storedNonceTo1Proof = nonceTo1Proof;
       }
 
       public OnDieService getOnDieService() {

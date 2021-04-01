@@ -81,7 +81,7 @@ public class ServletTest {
 
     assertTrue(hr.statusCode() == Const.HTTP_OK);
     Composite reply = Composite.fromObject(hr.body());
-    byte[] nonce3 = reply.getAsBytes(Const.FIRST_KEY);
+    byte[] nonceTo0Sign = reply.getAsBytes(Const.FIRST_KEY);
 
     //get bearer token from http
     for (String value : hr.headers().allValues(Const.HTTP_AUTHORIZATION)) {

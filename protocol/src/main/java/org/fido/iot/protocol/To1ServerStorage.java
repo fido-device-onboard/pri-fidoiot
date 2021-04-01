@@ -17,9 +17,9 @@ public interface To1ServerStorage extends StorageEvents {
 
   void setGuid(UUID guid);
 
-  byte[] getNonce4();
+  byte[] getNonceTo1Proof();
 
-  void setNonce4(byte[] nonce4);
+  void setNonceTo1Proof(byte[] nonceTo1Proof);
 
   public Composite getSigInfoA();
 

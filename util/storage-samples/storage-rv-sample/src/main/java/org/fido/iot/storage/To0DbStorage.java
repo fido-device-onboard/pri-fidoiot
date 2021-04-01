@@ -27,7 +27,7 @@ public class To0DbStorage implements To0ServerStorage {
 
   private final CryptoService cryptoService;
   protected final DataSource dataSource;
-  private byte[] nonce3;
+  private byte[] nonceTo0Sign;
 
   /**
    * Constructs a To0DbStorage instance.
@@ -41,13 +41,13 @@ public class To0DbStorage implements To0ServerStorage {
   }
 
   @Override
-  public byte[] getNonce3() {
-    return nonce3;
+  public byte[] getNonceTo0Sign() {
+    return nonceTo0Sign;
   }
 
   @Override
-  public void setNonce3(byte[] nonce3) {
-    this.nonce3 = nonce3;
+  public void setNonceTo0Sign(byte[] nonceTo0Sign) {
+    this.nonceTo0Sign = nonceTo0Sign;
   }
 
   @Override
@@ -116,14 +116,14 @@ public class To0DbStorage implements To0ServerStorage {
 
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          nonce3 = rs.getBytes(1);
+          nonceTo0Sign = rs.getBytes(1);
         }
       }
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    if (nonce3 == null) {
+    if (nonceTo0Sign == null) {
       throw new InvalidJwtException(token);
     }
 
@@ -152,7 +152,7 @@ public class To0DbStorage implements To0ServerStorage {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setString(1, sessionId);
-      pstmt.setBytes(2, nonce3);
+      pstmt.setBytes(2, nonceTo0Sign);
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(3, created);
 

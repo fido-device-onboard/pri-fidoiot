@@ -17,7 +17,7 @@ public class To0Test extends BaseTemplate {
   private byte[] storedBlob;
   private Composite storedVoucher;
   private Long waitResponse;
-  private byte[] storedNonce3;
+  private byte[] storedNonceTo0Sign;
   private String serverToken = guid.toString();
   private String clientToken;
 
@@ -108,14 +108,14 @@ public class To0Test extends BaseTemplate {
 
     To0ServerStorage serverStorage = new To0ServerStorage() {
       @Override
-      public byte[] getNonce3() {
-        return storedNonce3;
+      public byte[] getNonceTo0Sign() {
+        return storedNonceTo0Sign;
       }
 
       @Override
-      public void setNonce3(byte[] nonce3) {
+      public void setNonceTo0Sign(byte[] nonceTo0Sign) {
 
-        storedNonce3 = nonce3;
+        storedNonceTo0Sign = nonceTo0Sign;
       }
 
       public OnDieService getOnDieService() {

@@ -129,8 +129,8 @@ public final class Const {
 
   //hashtype
   public static final int HASH_NA = 0; // not available (reuse protocol only)
-  public static final int SHA_256 = 8; // Not defined in COSE
-  public static final int SHA_384 = 14; // Not defined in COSE
+  public static final int SHA_256 = -16;
+  public static final int SHA_384 = -43;
   public static final int SHA_512 = 10; // only in reuse protocol
 
   //Java Algorithm names for HASH
@@ -160,9 +160,6 @@ public final class Const {
   public static final int PK_RSA = 4; // RSA key (unrestricted)
   public static final int PK_SECP256R1 = 13; // ECDSA secp256r1 = NIST-P-256 = prime256v1
   public static final int PK_SECP384R1 = 14; // ECDSA secp384r1 = NIST-P-384
-  public static final int PK_EPIDv10 = 90; // Intel EPID, version 1.0
-  public static final int PK_EPIDv11 = 91; // Intel EPID, version 1.1
-  public static final int PK_EPIDv20 = 92; // Intel EPID, version 2.0
   public static final int PK_ONDIE_ECDSA_384 = 93;
 
   //Java Algorithm names for Signatures
@@ -195,8 +192,8 @@ public final class Const {
   public static final int BIT_LEN_3K = 3 * 1024;
 
   //EPID SigInfo Types
-  public static final int SG_EPIDv10 = 90; // Intel EPID, version 1.0
-  public static final int SG_EPIDv11 = 91; // Intel EPID, version 1.1
+  public static final int SG_EPIDv10 = -2000810; // Intel EPID, version 1.0
+  public static final int SG_EPIDv11 = -2000811; // Intel EPID, version 1.1
 
   //EPID GroupID lengths
   public static final int GID_LEN_EPIDv10 = 4;
@@ -331,7 +328,7 @@ public final class Const {
 
   public static final int TO0D_VOUCHER = 0;
   public static final int TO0D_WAIT_SECONDS = 1;
-  public static final int TO0D_NONCE3 = 2;
+  public static final int TO0D_NONCETO0SIGN = 2;
 
   //TO1D indexes
   public static final int TO1D_RV = 0;

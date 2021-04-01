@@ -16,13 +16,13 @@ public interface To2ServerStorage extends StorageEvents {
 
   PrivateKey getOwnerSigningKey(PublicKey key);
 
-  byte[] getNonce6();
+  byte[] getNonceTo2ProveDv();
 
-  void setNonce6(byte[] nonce);
+  void setNonceTo2ProveDv(byte[] nonce);
 
-  byte[] getNonce7();
+  byte[] getNonceTo2SetupDv();
 
-  void setNonce7(byte[] nonce);
+  void setNonceTo2SetupDv(byte[] nonce);
 
   void setOwnerState(Composite ownerState);
 
