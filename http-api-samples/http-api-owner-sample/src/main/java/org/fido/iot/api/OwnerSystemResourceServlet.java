@@ -1,4 +1,4 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2021 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fido.iot.api;
@@ -24,6 +24,11 @@ import org.fido.iot.protocol.Const;
 import org.fido.iot.serviceinfo.ModuleManager;
 
 public class OwnerSystemResourceServlet extends HttpServlet {
+
+
+  public static final int UNSUPPORTED_MEDIA = 415;
+  public static final int NOT_FOUND = 404;
+  public static final int BAD_REQUEST = 400;
 
   public static final String BYTES_TAG = "bytes";
   public static final String ID_TAG = "id";
@@ -52,17 +57,50 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     return Composite.decodeHex(hex.toString());
   }
 
-  private String getWhereClause(HttpServletRequest req) {
+  private void applyValues(HttpServletRequest req, PreparedStatement stmt) throws SQLException {
+    // the order of columns here must match the ones in getWhere()
+    int columnId = 1;
     String id = req.getParameter(ID_TAG);
+    if (id != null) {
+      stmt.setLong(columnId++, Long.parseLong(id));
+    }
     String crid = req.getParameter(CRID_TAG);
-    String guid = req.getParameter(GUID_TAG);
-    String device = req.getParameter(DEVICE_TAG);
-    String os = req.getParameter(OS_TAG);
-    String version = req.getParameter(VERSION_TAG);
-    String arch = req.getParameter(ARCH_TAG);
+    if (crid != null) {
+      stmt.setLong(columnId++, Long.parseLong(crid));
+    }
     String fileName = req.getParameter(FILENAME_TAG);
+    if (fileName != null) {
+      stmt.setString(columnId++, fileName);
+    }
     String priority = req.getParameter(PRIORITY_TAG);
+    if (priority != null) {
+      stmt.setInt(columnId++, Integer.parseInt(priority));
+    }
+    String guid = req.getParameter(GUID_TAG);
+    if (guid != null) {
+      stmt.setString(columnId++, guid);
+    }
+    String device = req.getParameter(DEVICE_TAG);
+    if (device != null) {
+      stmt.setString(columnId++, device);
+    }
+    String os = req.getParameter(OS_TAG);
+    if (os != null) {
+      stmt.setString(columnId++, os);
+    }
+    String version = req.getParameter(VERSION_TAG);
+    if (version != null) {
+      stmt.setString(columnId++, version);
+    }
+    String arch = req.getParameter(ARCH_TAG);
+    if (arch != null) {
+      stmt.setString(columnId++, arch);
+    }
     String hash = req.getParameter(HASH_TAG);
+    if (hash != null) {
+      stmt.setString(columnId++, hash);
+    }
+
     String module = req.getParameter(MODULE_TAG);
     String varName = req.getParameter(VAR_TAG);
     String contentType = null;
@@ -70,98 +108,74 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     if (module != null && varName != null) {
       contentType = module + ModuleManager.MODULE_DELIMITER + varName;
     }
+    if (contentType != null) {
+      stmt.setString(columnId++, contentType);
+    }
 
-    StringBuilder whereString = new StringBuilder("WHERE ");
+  }
 
+  private String getWhereClause(HttpServletRequest req) {
+    StringBuilder whereString = new StringBuilder(" WHERE 1 = 1 ");
+
+    String id = req.getParameter(ID_TAG);
     if (id != null) {
-      whereString.append("RESOURCE_ID = ");
-      whereString.append(id.toString());
-    } else {
-      String and = "";
-      if (crid != null) {
-        whereString.append(and);
-        whereString.append("CONTENT_RESOURCE_TAG = ");
-        whereString.append(crid.toString());
-        and = WHERE_AND;
-      }
+      whereString.append(WHERE_AND);
+      whereString.append("RESOURCE_ID = ?");
+    }
+    String crid = req.getParameter(CRID_TAG);
+    if (crid != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("CONTENT_RESOURCE_TAG = ?");
+    }
+    String fileName = req.getParameter(FILENAME_TAG);
+    if (fileName != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("FILE_NAME_TAG = ?");
+    }
+    String priority = req.getParameter(PRIORITY_TAG);
+    if (priority != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("PRIORITY = ?");
+    }
+    String guid = req.getParameter(GUID_TAG);
+    if (guid != null) {
+      whereString.append("GUID_TAG = ?");
+    }
+    String device = req.getParameter(DEVICE_TAG);
+    if (device != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("DEVICE_TYPE_TAG = ?");
+    }
+    String os = req.getParameter(OS_TAG);
+    if (os != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("OS_NAME_TAG = ?");
+    }
+    String version = req.getParameter(VERSION_TAG);
+    if (version != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("OS_VERSION_TAG = ?");
+    }
+    String arch = req.getParameter(ARCH_TAG);
+    if (arch != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("ARCHITECTURE_TAG = ?");
+    }
+    String hash = req.getParameter(HASH_TAG);
+    if (hash != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("HASH_TAG = ?");
+    }
 
-      if (fileName != null) {
-        whereString.append(and);
-        whereString.append("FILE_NAME_TAG = ");
-        whereString.append("'");
-        whereString.append(fileName);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (priority != null) {
-        whereString.append(and);
-        whereString.append("priority = ");
-        whereString.append(priority.toString());
-        and = WHERE_AND;
-      }
-
-      if (guid != null) {
-        whereString.append(and);
-        whereString.append("GUID_TAG = ");
-        whereString.append("'");
-        whereString.append(guid);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (device != null) {
-        whereString.append(and);
-        whereString.append("DEVICE_TYPE_TAG = ");
-        whereString.append("'");
-        whereString.append(device);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (os != null) {
-        whereString.append(and);
-        whereString.append("OS_NAME_TAG = ");
-        whereString.append("'");
-        whereString.append(os);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (version != null) {
-        whereString.append(and);
-        whereString.append("OS_VERSION_TAG = ");
-        whereString.append("'");
-        whereString.append(version);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (arch != null) {
-        whereString.append(and);
-        whereString.append("ARCHITECTURE_TAG = ");
-        whereString.append("'");
-        whereString.append(arch);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (hash != null) {
-        whereString.append(and);
-        whereString.append("HASH_TAG = ");
-        whereString.append("'");
-        whereString.append(hash);
-        whereString.append("'");
-        and = WHERE_AND;
-      }
-
-      if (contentType != null) {
-        whereString.append(and);
-        whereString.append("CONTENT_TYPE_TAG = ");
-        whereString.append("'");
-        whereString.append(contentType);
-        whereString.append("'");
-      }
+    String module = req.getParameter(MODULE_TAG);
+    String varName = req.getParameter(VAR_TAG);
+    String contentType = null;
+    if (module != null && varName != null) {
+      contentType = module + ModuleManager.MODULE_DELIMITER + varName;
+    }
+    if (contentType != null) {
+      whereString.append(WHERE_AND);
+      whereString.append("CONTENT_TYPE_TAG = ?");
     }
     return whereString.toString();
   }
@@ -187,9 +201,10 @@ public class OwnerSystemResourceServlet extends HttpServlet {
 
     try (Connection conn = ((DataSource) getServletContext().getAttribute("datasource"))
         .getConnection();
-        Statement stmt = conn.createStatement()) {
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-      try (ResultSet rs = stmt.executeQuery(sql)) {
+      applyValues(req, pstmt);
+      try (ResultSet rs = pstmt.executeQuery(sql)) {
         resp.setContentType("text/plain");
         try (PrintWriter writer = new PrintWriter(resp.getOutputStream())) {
           int count = 0;
@@ -249,7 +264,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
           }
 
           if (count == 0) {
-            resp.setStatus(404); //not found
+            resp.setStatus(NOT_FOUND); //not found
           }
         }
       }
@@ -263,23 +278,24 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    String id = req.getParameter(ID_TAG);
+    String where = getWhereClause(req);
+    String sql = "DELETE FROM SYSTEM_MODULE_RESOURCE WHERE CONTENT_RESOURCE_TAG = "
+        + "(SELECT RESOURCE_ID FROM SYSTEM_MODULE_RESOURCE " + where + ")";
 
     try (Connection conn = ((DataSource) getServletContext().getAttribute("datasource"))
         .getConnection();
-        Statement stmt = conn.createStatement()) {
+        PreparedStatement pstmt1 = conn.prepareStatement(sql)) {
 
-      String where = getWhereClause(req);
-      String sql = "DELETE FROM SYSTEM_MODULE_RESOURCE WHERE CONTENT_RESOURCE_TAG = "
-          + "(SELECT RESOURCE_ID FROM SYSTEM_MODULE_RESOURCE " + where + ")";
+      applyValues(req, pstmt1);
 
-      int count1 = stmt.executeUpdate(sql);
-
-      sql = "DELETE FROM SYSTEM_MODULE_RESOURCE " + getWhereClause(req);
-
-      int count2 = stmt.executeUpdate(sql);
-      if (count1 == 0 && count2 == 0) {
-        resp.setStatus(404);
+      int count1 = pstmt1.executeUpdate();
+      sql = "DELETE FROM SYSTEM_MODULE_RESOURCE " + where;
+      try (PreparedStatement pstmt2 = conn.prepareStatement(sql)) {
+        applyValues(req, pstmt2);
+        int count2 = pstmt2.executeUpdate();
+        if (count1 == 0 && count2 == 0) {
+          resp.setStatus(NOT_FOUND);
+        }
       }
 
     } catch (SQLException e) {
@@ -291,7 +307,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/octet-stream") != 0) {
-      resp.setStatus(415); //unsupported meida
+      resp.setStatus(UNSUPPORTED_MEDIA); //unsupported meida
       return;
     }
 
@@ -314,7 +330,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
 
     if (contentType == null) {
-      resp.setStatus(400); //bad request
+      resp.setStatus(BAD_REQUEST); //bad request
       return;
     }
 
@@ -441,12 +457,12 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       }
 
       Timestamp updated = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(2,updated);
+      pstmt.setTimestamp(2, updated);
 
       int count = pstmt.executeUpdate();
 
       if (count == 0) {
-        resp.setStatus(404);
+        resp.setStatus(NOT_FOUND);
       }
 
     } catch (SQLException e) {
