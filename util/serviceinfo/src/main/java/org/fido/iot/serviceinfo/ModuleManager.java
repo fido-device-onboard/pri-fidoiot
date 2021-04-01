@@ -1,4 +1,4 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2021 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fido.iot.serviceinfo;
@@ -182,6 +182,9 @@ public class ModuleManager implements Module {
       if (len > mtu) {
         list.remove(kvPair);
         state.set(Const.FOURTH_KEY, kvPair);//set extra
+        break;
+      }
+      if (kvPair.size() == 0) {
         break;
       }
     }

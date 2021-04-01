@@ -149,7 +149,7 @@ public class OwnerDbManager {
           + "RESOURCE_ID IDENTITY NOT NULL, "
           + "CONTENT BLOB NULL DEFAULT NULL,"
           + "CONTENT_TYPE_TAG CHAR(255) NOT NULL, "
-          + "RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
+          + "CONTENT_RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
           + "PRIORITY INT NOT NULL DEFAULT 1, "
           + "FILE_NAME_TAG VARCHAR(1280) NULL DEFAULT NULL, "
           + "GUID_TAG CHAR(36) NULL DEFAULT NULL, "
@@ -597,7 +597,7 @@ public class OwnerDbManager {
         + "CONTENT "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+        + "(RESOURCE_ID = (SELECT CONTENT_RESOURCE_TAG WHERE RESOURCE_ID = ?))";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, resourceId);
@@ -633,7 +633,7 @@ public class OwnerDbManager {
         + "CONTENT, "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+        + "(RESOURCE_ID = (SELECT CONTENT_RESOURCE_TAG WHERE RESOURCE_ID = ?))";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {

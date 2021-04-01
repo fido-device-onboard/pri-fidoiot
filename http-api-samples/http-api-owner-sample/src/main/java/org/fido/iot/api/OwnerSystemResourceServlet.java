@@ -27,7 +27,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
 
   public static final String BYTES_TAG = "bytes";
   public static final String ID_TAG = "id";
-  public static final String RID_TAG = "rid";
+  public static final String CRID_TAG = "crid";
   public static final String GUID_TAG = "guid";
   public static final String DEVICE_TAG = "device";
   public static final String OS_TAG = "os";
@@ -54,7 +54,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
 
   private String getWhereClause(HttpServletRequest req) {
     String id = req.getParameter(ID_TAG);
-    String rid = req.getParameter(RID_TAG);
+    String crid = req.getParameter(CRID_TAG);
     String guid = req.getParameter(GUID_TAG);
     String device = req.getParameter(DEVICE_TAG);
     String os = req.getParameter(OS_TAG);
@@ -78,10 +78,10 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       whereString.append(id.toString());
     } else {
       String and = "";
-      if (rid != null) {
+      if (crid != null) {
         whereString.append(and);
-        whereString.append("RESOURCE_TAG = ");
-        whereString.append(rid.toString());
+        whereString.append("CONTENT_RESOURCE_TAG = ");
+        whereString.append(crid.toString());
         and = WHERE_AND;
       }
 
@@ -172,7 +172,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     String sql = "SELECT "
         + "RESOURCE_ID, "
         + "CONTENT_TYPE_TAG, "
-        + "RESOURCE_TAG, "
+        + "CONTENT_RESOURCE_TAG, "
         + "PRIORITY, "
         + "FILE_NAME_TAG, "
         + "GUID_TAG, "
@@ -270,7 +270,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         Statement stmt = conn.createStatement()) {
 
       String where = getWhereClause(req);
-      String sql = "DELETE FROM SYSTEM_MODULE_RESOURCE WHERE RESOURCE_TAG = "
+      String sql = "DELETE FROM SYSTEM_MODULE_RESOURCE WHERE CONTENT_RESOURCE_TAG = "
           + "(SELECT RESOURCE_ID FROM SYSTEM_MODULE_RESOURCE " + where + ")";
 
       int count1 = stmt.executeUpdate(sql);
@@ -296,7 +296,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
 
     String byteString = req.getParameter(BYTES_TAG);
-    String rid = req.getParameter(RID_TAG);
+    String rid = req.getParameter(CRID_TAG);
     String guid = req.getParameter(GUID_TAG);
     String device = req.getParameter(DEVICE_TAG);
     String os = req.getParameter(OS_TAG);
@@ -327,7 +327,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         + "INSERT INTO SYSTEM_MODULE_RESOURCE ( "
         + "CONTENT,"
         + "CONTENT_TYPE_TAG, "
-        + "RESOURCE_TAG, "
+        + "CONTENT_RESOURCE_TAG, "
         + "PRIORITY, "
         + "FILE_NAME_TAG, "
         + "GUID_TAG, "
