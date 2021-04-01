@@ -11,18 +11,18 @@ import org.fido.iot.protocol.ondie.OnDieService;
 public interface To0ServerStorage extends StorageEvents {
 
   /**
-   * Gets the nonce3 value from storage.
+   * Gets the nonceTo0Sign value from storage.
    *
    * @return
    */
-  byte[] getNonce3();
+  byte[] getNonceTo0Sign();
 
   /**
-   * Sets the nonce3 value to store.
+   * Sets the nonceTo0Sign value to store.
    *
-   * @param nonce3 The nonce value to store.
+   * @param nonceTo0Sign The nonce value to store.
    */
-  void setNonce3(byte[] nonce3);
+  void setNonceTo0Sign(byte[] nonceTo0Sign);
 
   /**
    * Stores the redirect blob.

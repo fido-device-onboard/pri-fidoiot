@@ -18,8 +18,8 @@ public abstract class To0ClientService extends ClientService {
   protected void doHelloAck(Composite request, Composite reply) {
     getStorage().starting(request, reply);
     Composite body = request.getAsComposite(Const.SM_BODY);
-    byte[] nonce3 = body.getAsBytes(Const.FIRST_KEY);
-    if (nonce3.length != Const.NONCE16_SIZE) {
+    byte[] nonceTo0Sign = body.getAsBytes(Const.FIRST_KEY);
+    if (nonceTo0Sign.length != Const.NONCE16_SIZE) {
       throw new MessageBodyException();
     }
 
@@ -30,7 +30,7 @@ public abstract class To0ClientService extends ClientService {
     Composite to0d = Composite.newArray()
         .set(Const.TO0D_VOUCHER, voucher)
         .set(Const.TO0D_WAIT_SECONDS, getStorage().getRequestWait())
-        .set(Const.TO0D_NONCE3, nonce3);
+        .set(Const.TO0D_NONCETO0SIGN, nonceTo0Sign);
 
     Composite to1dBlob = getStorage().getRedirectBlob();
     Composite to01Payload = Composite.newArray()

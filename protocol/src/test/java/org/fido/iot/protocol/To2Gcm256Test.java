@@ -20,8 +20,8 @@ public class To2Gcm256Test extends BaseTemplate {
 
   private String serverToken = guid.toString();
   private String clientToken;
-  private byte[] storedNonce6;
-  private byte[] storedNonce7;
+  private byte[] storedNonceTo2ProveDv;
+  private byte[] storedNonceTo2SetupDv;
   private Composite storedOwnerState;
   private String storedCipherName;
   private UUID storedGuid;
@@ -36,8 +36,8 @@ public class To2Gcm256Test extends BaseTemplate {
   protected void setup() throws Exception {
 
     clientToken = null;
-    storedNonce6 = null;
-    storedNonce7 = null;
+    storedNonceTo2ProveDv = null;
+    storedNonceTo2SetupDv = null;
     storedOwnerState = null;
     storedCipherName = null;
     storedGuid = null;
@@ -188,23 +188,23 @@ public class To2Gcm256Test extends BaseTemplate {
       }
 
       @Override
-      public byte[] getNonce6() {
-        return storedNonce6;
+      public byte[] getNonceTo2ProveDv() {
+        return storedNonceTo2ProveDv;
       }
 
       @Override
-      public void setNonce6(byte[] nonce) {
-        storedNonce6 = nonce;
+      public void setNonceTo2ProveDv(byte[] nonce) {
+        storedNonceTo2ProveDv = nonce;
       }
 
       @Override
-      public byte[] getNonce7() {
-        return storedNonce7;
+      public byte[] getNonceTo2SetupDv() {
+        return storedNonceTo2SetupDv;
       }
 
       @Override
-      public void setNonce7(byte[] nonce) {
-        storedNonce7 = nonce;
+      public void setNonceTo2SetupDv(byte[] nonce) {
+        storedNonceTo2SetupDv = nonce;
       }
 
       @Override

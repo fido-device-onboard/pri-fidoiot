@@ -25,9 +25,9 @@ public abstract class To2ClientService extends DeviceService {
   protected Composite hdrHash;
   protected Composite voucherHdr;
   protected Composite cupKey;
-  protected byte[] nonce5;
-  protected byte[] nonce6;
-  protected byte[] nonce7;
+  protected byte[] nonceTo2ProveOv;
+  protected byte[] nonceTo2ProveDv;
+  protected byte[] nonceTo2SetupDv;
   protected byte[] kexA;
   protected Composite ownState;
   private Composite to1d;
@@ -115,7 +115,7 @@ public abstract class To2ClientService extends DeviceService {
           .set(Const.FIRST_KEY, deviceState.getAsBytes(Const.FIRST_KEY));
 
       Composite payload = Composite.newMap()
-          .set(Const.EAT_NONCE, nonce6)
+          .set(Const.EAT_NONCE, nonceTo2ProveDv)
           .set(Const.EAT_UEID, ueid)
           .set(Const.EAT_FDO, iotPayload);
 
@@ -127,9 +127,9 @@ public abstract class To2ClientService extends DeviceService {
         throw new DispatchException(e);
       }
 
-      nonce7 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
+      nonceTo2SetupDv = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
       Composite uph = Composite.newMap()
-          .set(Const.EUPH_NONCE, nonce7);
+          .set(Const.EUPH_NONCE, nonceTo2SetupDv);
 
       byte[] maroePrefix = getStorage().getMaroePrefix();
       if (maroePrefix != null) {
@@ -155,16 +155,16 @@ public abstract class To2ClientService extends DeviceService {
     Composite cose = request.getAsComposite(Const.SM_BODY);
     Composite payload = Composite.fromObject(cose.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
-    nonce6 = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
+    nonceTo2ProveDv = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
         .getAsBytes(Const.CUPH_NONCE);
 
     int entries = payload.getAsNumber(Const.SECOND_KEY).intValue();
-    byte[] receivedNonce5 = payload.getAsBytes(Const.FOURTH_KEY);
+    byte[] receivedNonceTo2ProveOv = payload.getAsBytes(Const.FOURTH_KEY);
     this.kexA = payload.getAsBytes(Const.SIXTH_KEY);
     this.numEntries = entries;
 
     //verify nonce from hello
-    getCryptoService().verifyBytes(receivedNonce5, nonce5);
+    getCryptoService().verifyBytes(receivedNonceTo2ProveOv, nonceTo2ProveOv);
 
     Composite hmac = payload.getAsComposite(Const.THIRD_KEY);
     Composite ovh = payload.getAsComposite(Const.FIRST_KEY);
@@ -259,8 +259,8 @@ public abstract class To2ClientService extends DeviceService {
     getCryptoService().verify(verificationKey, message, null, null, null);
     message = signedBody; // signature ok, focus on payload
 
-    byte[] receivedNonce7 = message.getAsBytes(Const.THIRD_KEY);
-    getCryptoService().verifyBytes(receivedNonce7, nonce7);
+    byte[] receivedNonceTo2SetupDv = message.getAsBytes(Const.THIRD_KEY);
+    getCryptoService().verifyBytes(receivedNonceTo2SetupDv, nonceTo2SetupDv);
 
     Composite ownerKey2 = message.getAsComposite(Const.FOURTH_KEY);
     Composite oldCreds = getStorage().getDeviceCredentials();
@@ -431,7 +431,7 @@ public abstract class To2ClientService extends DeviceService {
     if (isDone && isMore == false && isMore2 == false) {
       //change message to done
       payload = Composite.newArray()
-          .set(Const.FIRST_KEY, this.nonce6);
+          .set(Const.FIRST_KEY, this.nonceTo2ProveDv);
       reply.set(Const.SM_MSG_ID, Const.TO2_DONE);
     } else {
       reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO);
@@ -447,7 +447,7 @@ public abstract class To2ClientService extends DeviceService {
     Composite body = request.getAsComposite(Const.SM_BODY);
     Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    getCryptoService().verifyBytes(nonce7, message.getAsBytes(Const.FIRST_KEY));
+    getCryptoService().verifyBytes(nonceTo2SetupDv, message.getAsBytes(Const.FIRST_KEY));
 
     reply.clear();
     getStorage().completed(request, reply);
@@ -491,11 +491,11 @@ public abstract class To2ClientService extends DeviceService {
   public DispatchResult getHelloMessage() {
 
     Composite dc = getStorage().getDeviceCredentials();
-    nonce5 = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
+    nonceTo2ProveOv = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
     Composite body = Composite.newArray()
         .set(Const.FIRST_KEY,
             dc.getAsBytes(Const.DC_GUID))
-        .set(Const.SECOND_KEY, nonce5)
+        .set(Const.SECOND_KEY, nonceTo2ProveOv)
         .set(Const.THIRD_KEY, getStorage().getKexSuiteName())
         .set(Const.FOURTH_KEY, getStorage().getCipherSuiteName())
         .set(Const.FIFTH_KEY, getStorage().getSigInfoA());

@@ -39,16 +39,16 @@ public class TestListener implements ServletContextListener {
     CryptoService cryptoService = new CryptoService();
 
     To0ServerStorage serverStorage = new To0ServerStorage() {
-      byte[] nonce3;
+      byte[] nonceTo0Sign;
 
       @Override
-      public byte[] getNonce3() {
-        return nonce3;
+      public byte[] getNonceTo0Sign() {
+        return nonceTo0Sign;
       }
 
       @Override
-      public void setNonce3(byte[] nonce3) {
-        this.nonce3 = nonce3;
+      public void setNonceTo0Sign(byte[] nonceTo0Sign) {
+        this.nonceTo0Sign = nonceTo0Sign;
       }
 
       @Override

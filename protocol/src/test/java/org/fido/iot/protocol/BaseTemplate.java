@@ -242,7 +242,7 @@ public class BaseTemplate {
     Composite to0d = Composite.newArray()
         .set(Const.TO0D_VOUCHER, voucher)
         .set(Const.TO0D_WAIT_SECONDS, responseWait)
-        .set(Const.TO0D_NONCE3, cs.getRandomBytes(Const.NONCE16_SIZE));
+        .set(Const.TO0D_NONCETO0SIGN, cs.getRandomBytes(Const.NONCE16_SIZE));
 
     Composite to1dBlob = unsignedRedirect;
     to01Payload = Composite.newArray()

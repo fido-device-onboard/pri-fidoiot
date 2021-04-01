@@ -28,7 +28,7 @@ public class To1DbStorage implements To1ServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final OnDieService onDieService;
-  private byte[] nonce4;
+  private byte[] nonceTo1Proof;
   private UUID guid;
   private Composite sigInfoA;
 
@@ -46,13 +46,13 @@ public class To1DbStorage implements To1ServerStorage {
   }
 
   @Override
-  public byte[] getNonce4() {
-    return nonce4;
+  public byte[] getNonceTo1Proof() {
+    return nonceTo1Proof;
   }
 
   @Override
-  public void setNonce4(byte[] nonce4) {
-    this.nonce4 = nonce4;
+  public void setNonceTo1Proof(byte[] nonceTo1Proof) {
+    this.nonceTo1Proof = nonceTo1Proof;
   }
 
   @Override
@@ -129,7 +129,7 @@ public class To1DbStorage implements To1ServerStorage {
 
       pstmt.setString(1, sessionId);
       pstmt.setString(2, getGuid().toString());
-      pstmt.setBytes(3, nonce4);
+      pstmt.setBytes(3, nonceTo1Proof);
       pstmt.setBytes(4, sigInfoA.toBytes());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(5, created);
@@ -155,7 +155,7 @@ public class To1DbStorage implements To1ServerStorage {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           guid = UUID.fromString(rs.getString(1));
-          nonce4 = rs.getBytes(2);
+          nonceTo1Proof = rs.getBytes(2);
           sigInfoA = Composite.fromObject(rs.getBinaryStream(3));
         }
       }
@@ -163,7 +163,7 @@ public class To1DbStorage implements To1ServerStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    if (nonce4 == null) {
+    if (nonceTo1Proof == null) {
       throw new InvalidJwtException(token);
     }
 

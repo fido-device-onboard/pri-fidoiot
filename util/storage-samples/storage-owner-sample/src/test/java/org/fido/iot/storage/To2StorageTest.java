@@ -344,7 +344,7 @@ public class To2StorageTest {
      Composite to0d = Composite.newArray()
      .set(Const.TO0D_VOUCHER, VOUCHER)
      .set(Const.TO0D_WAIT_SECONDS, responseWait)
-     .set(Const.TO0D_NONCE3, cs.getRandomBytes(Const.NONCE16_SIZE));
+     .set(Const.TO0D_NONCETO0SIGN, cs.getRandomBytes(Const.NONCE16_SIZE));
 
      Composite unsignedRedirect = RendezvousBlobDecoder.decode(to1dRV);
      Composite to1dBlob = unsignedRedirect;
