@@ -51,7 +51,7 @@ The build creates artifacts which will be used in the rest of this guide.
 
 #### Starting the FIDO IoT Rendezvous (RV) HTTP Server
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-server-to0-to1-sample/
+$ cd <fido-iot-src>/protocol-samples/http-server-to0-to1-sample/
 $ mvn exec:java
 ```
 
@@ -60,7 +60,7 @@ The H2 database will listen on TCP port 8050.
 
 #### Starting the FIDO IoT Owner HTTP Server
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-server-to2-sample/
+$ cd <fido-iot-src>/protocol-samples/http-server-to2-sample/
 $ mvn exec:java
 ```
 
@@ -69,7 +69,7 @@ The H2 database will listen on TCP port 8051.
 
 #### Starting the FIDO IoT Device Initialization (DI) HTTP Server
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-server-di-sample/
+$ cd <fido-iot-src>/protocol-samples/http-server-di-sample/
 $ mvn exec:java
 ```
 
@@ -81,7 +81,7 @@ You can allow remote database console connections by setting webAllowOthers=true
 
 #### Running the FIDO IoT Device Initialization (DI) HTTP client
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-client-di-sample
+$ cd <fido-iot-src>/protocol-samples/http-client-di-sample
 $ mvn exec:java
 ```
 
@@ -93,7 +93,7 @@ Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
 
 #### Running the FIDO IoT To0 HTTP client
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-client-to0-sample
+$ cd <fido-iot-src>/protocol-samples/http-client-to0-sample
 $ mvn exec:java
 ```
 
@@ -102,7 +102,7 @@ TO0 Client finished.
 
 #### Running the FIDO IoT To1 HTTP client
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-client-to1-sample
+$ cd <fido-iot-src>/protocol-samples/http-client-to1-sample
 $ mvn exec:java
 ```
 
@@ -111,7 +111,7 @@ TO1 Client finished.
 
 ### Running the FIDO IoT To2 HTTP client
 ```
-$ cd <fido-iot-src>/service/protocol-samples/http-client-to2-sample
+$ cd <fido-iot-src>/protocol-samples/http-client-to2-sample
 $ mvn exec:java
 ```
 
@@ -143,7 +143,7 @@ To log in to the database and view records use the following information:
 ```
 "User Name:" = "sa"
 "Password:" = "" (blank)
-"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fido-iot-src>/service/protocol-samples/http-server-di-sample/target/data/mfg"
+"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fido-iot-src>/protocol-samples/http-server-di-sample/target/data/mfg"
 ```
 The path to the DB will be printed out in following format when the DI server is starting.
 
@@ -157,11 +157,11 @@ Remote access to H2 Sample Storage DB has been disabled by default. Enabling the
 
 To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in the following files:
 
-- To enable remote access for DI server DB, update file:  `<fido-iot-src>/service/protocol-samples/http-server-di-sample/src/main/java/org/fido/iot/sample/DiApp.java` <br/>
+- To enable remote access for DI server DB, update file:  `<fido-iot-src>/protocol-samples/http-server-di-sample/src/main/java/org/fido/iot/sample/DiApp.java` <br/>
 
 - To enable remote access for TO0-TO1 server DB, update file:  `<fido-iot-src>/service/protocol-samples/http-server-to0-to1-sample/src/main/java/org/fido/iot/sample/To0To1ServerApp.java` <br/>
 
-- To enable remote access for TO2 server DB, update file:  `<fido-iot-src>/service/protocol-samples/http-server-to2-sample/src/main/java/org/fido/iot/sample/To2ServerApp.java`
+- To enable remote access for TO2 server DB, update file:  `<fido-iot-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fido/iot/sample/To2ServerApp.java`
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
