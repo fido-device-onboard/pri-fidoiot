@@ -19,6 +19,7 @@ public class OwnerSysModule implements Module {
   private Composite state;
   private final DataSource dataSource;
   private static final int MAX_READ = 1277;
+  private static final int CBOR_TRUE = 0xF5;
 
 
   /**
@@ -142,10 +143,17 @@ public class OwnerSysModule implements Module {
 
     message.set(Const.FIRST_KEY, contentType);
     switch (contentType) {
-      case FdoSys.KEY_ACTIVE:
-        message.set(Const.SECOND_KEY, true);
+      case FdoSys.KEY_ACTIVE: {
+
+        byte[] content = new OwnerDbManager().getSystemResourceContent(dataSource, resId);
+        if (content.length == 1 && content[0] == CBOR_TRUE) {
+          message.set(Const.SECOND_KEY, true);
+        } else {
+          message.set(Const.SECOND_KEY, false);
+        }
         incrementIndex();
-        break;
+      }
+      break;
       case FdoSys.KEY_FILEDESC:
         message.set(Const.SECOND_KEY,
             new OwnerDbManager().getSystemResourcesFileName(dataSource, resId));

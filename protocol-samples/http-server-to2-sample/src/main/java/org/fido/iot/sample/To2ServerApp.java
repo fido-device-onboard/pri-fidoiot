@@ -10,6 +10,8 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.fido.iot.api.OwnerSviSettingsServlet;
+import org.fido.iot.api.OwnerSystemResourceServlet;
 import org.fido.iot.api.OwnerVoucherServlet;
 import org.fido.iot.protocol.Const;
 import org.h2.server.web.DbStarter;
@@ -97,6 +99,13 @@ public class To2ServerApp {
 
     wrapper = tomcat.addServlet(ctx, "OwnerVoucher", new OwnerVoucherServlet());
     wrapper.addMapping("/api/v1/device/vouchers");
+
+    wrapper = tomcat.addServlet(ctx, "SystemResource", new OwnerSystemResourceServlet());
+    wrapper.addMapping("/api/v1/device/svi");
+
+    wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
+        new OwnerSviSettingsServlet());
+    wrapper.addMapping("/api/v1/owner/svi/settings/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
