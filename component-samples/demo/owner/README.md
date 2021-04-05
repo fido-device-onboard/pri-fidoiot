@@ -103,13 +103,13 @@ Some required runtime arguments
 
 - `owner_api_user`
 
-  Username for the non-SDO REST API calls.
+  Username for the database REST API calls.
 
   Default value: apiUser
 
 - `owner_api_password`
 
-  Password for the non-SDO REST API calls.
+  Password for the database REST API calls.
 
   Default value: OwnerApiPass123
 

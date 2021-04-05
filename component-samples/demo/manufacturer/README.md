@@ -66,13 +66,13 @@ Some required runtime arguments
 
 - `manufacturer_api_user`
 
-  Username for the non-SDO REST API calls.
+  Username for the database REST API calls.
 
   Default value: apiUser
 
 - `manufacturer_api_password`
 
-  Password for the non-SDO REST API calls.
+  Password for the database REST API calls.
 
   Default value: MfgApiPass123
 

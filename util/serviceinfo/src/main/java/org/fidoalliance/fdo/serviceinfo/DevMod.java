@@ -4,7 +4,7 @@
 package org.fidoalliance.fdo.serviceinfo;
 
 /**
- * Constants common to the sdodev management agent and service.
+ * Constants common to the devmod management agent and service.
  */
 public final class DevMod {
 

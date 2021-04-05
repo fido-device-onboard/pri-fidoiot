@@ -156,8 +156,8 @@ public class To2StorageTest {
   String packageName = "linux64.sh";
   String filename = "sample_file";
   String url = "http://host/file.tmp";
-  String sviString = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent" +
-      ",sdo_wget:filename=filename,sdo_wget:url=url";
+  String sviString = "fdo_sys:filedesc=packageName,fdo_sys:write=packageContent" +
+      ",fdo_wget:filename=filename,fdo_wget:url=url";
 
   static BasicDataSource ds = new BasicDataSource();
 
@@ -847,8 +847,8 @@ public class To2StorageTest {
       server = Server.createTcpServer(args).start();
       OwnerDbManager dbManager = new OwnerDbManager();
       String res = dbManager.insertWgetContentHash(ds, sviString);
-      String expected = "sdo_sys:filedesc=packageName,sdo_sys:write=packageContent,"
-          + "sdo_wget:filename=filename,sdo_wget:url=url,sdo_wget:sha-384=sample_file_hash";
+      String expected = "fdo_sys:filedesc=packageName,fdo_sys:write=packageContent,"
+          + "fdo_wget:filename=filename,fdo_wget:url=url,fdo_wget:sha-384=sample_file_hash";
       assert(res.equals(expected));
 
     } catch (SQLException throwables) {

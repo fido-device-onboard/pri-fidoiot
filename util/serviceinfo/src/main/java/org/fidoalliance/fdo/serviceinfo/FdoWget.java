@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Constants common to the sdosys management agent and service.
+ * Constants common to the fdo_wget management agent and service.
  */
 public final class FdoWget {
 
