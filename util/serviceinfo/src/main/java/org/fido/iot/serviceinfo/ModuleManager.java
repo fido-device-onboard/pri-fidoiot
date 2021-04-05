@@ -1,4 +1,4 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2021 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fido.iot.serviceinfo;
@@ -17,6 +17,8 @@ import org.fido.iot.protocol.ServiceInfoEncoder;
 public class ModuleManager implements Module {
 
   public static final int DEFAULT_MTU = 1300;
+  public static final char MODULE_DELIMITER = ':';
+
   private final List<Module> moduleList;
   private Composite state;
   private boolean isDevice;
@@ -82,7 +84,7 @@ public class ModuleManager implements Module {
     state.set(Const.SECOND_KEY, isMore);
     if (kvPair.size() > 0) {
       String prefix = kvPair.getAsString(Const.FIRST_KEY);
-      int pos = prefix.lastIndexOf(':');
+      int pos = prefix.lastIndexOf(MODULE_DELIMITER);
       if (pos >= 0) {
         prefix = prefix.substring(0, pos);
       }
@@ -180,6 +182,9 @@ public class ModuleManager implements Module {
       if (len > mtu) {
         list.remove(kvPair);
         state.set(Const.FOURTH_KEY, kvPair);//set extra
+        break;
+      }
+      if (kvPair.size() == 0) {
         break;
       }
     }

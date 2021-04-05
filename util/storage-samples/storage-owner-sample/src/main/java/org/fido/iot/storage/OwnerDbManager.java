@@ -149,7 +149,7 @@ public class OwnerDbManager {
           + "RESOURCE_ID IDENTITY NOT NULL, "
           + "CONTENT BLOB NULL DEFAULT NULL,"
           + "CONTENT_TYPE_TAG CHAR(255) NOT NULL, "
-          + "RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
+          + "CONTENT_RESOURCE_TAG BIGINT NULL DEFAULT NULL, "
           + "PRIORITY INT NOT NULL DEFAULT 1, "
           + "FILE_NAME_TAG VARCHAR(1280) NULL DEFAULT NULL, "
           + "GUID_TAG CHAR(36) NULL DEFAULT NULL, "
@@ -597,7 +597,7 @@ public class OwnerDbManager {
         + "CONTENT "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+        + "(RESOURCE_ID = (SELECT CONTENT_RESOURCE_TAG WHERE RESOURCE_ID = ?))";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, resourceId);
@@ -633,7 +633,7 @@ public class OwnerDbManager {
         + "CONTENT, "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+        + "(RESOURCE_ID = (SELECT CONTENT_RESOURCE_TAG WHERE RESOURCE_ID = ?))";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -836,23 +836,13 @@ public class OwnerDbManager {
    * Add device type criteria.
    *
    * @param ds            Datasource
-   * @param criteria      DSI key(s) for identifying device type
-   * @param expectedValue expected value for DSI keys included in criteria
+   * @param map     tags of the resource
+   * @param input binary content
    */
-  public void addDeviceTypeCriteria(
-      DataSource ds, String deviceType, String criteria, String expectedValue) {
+  public void addSystemResource(
+      DataSource ds, Composite map,InputStream input) {
 
-    removeDeviceTypeCriteria(ds, deviceType);
-    String sql = "MERGE INTO DEVICE_TYPE_OWNERSVI_CRITERIA VALUES (?,?,?);";
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, deviceType);
-      pstmt.setString(2, criteria);
-      pstmt.setString(3, expectedValue);
-      pstmt.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
+
   }
 
   /**
