@@ -12,7 +12,7 @@
 
   <parent>
     <artifactId>component-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -29,36 +29,36 @@
     <commons.configuration2.version>2.7</commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-    <exec.mainClass>org.fido.iot.sample.ManufacturerApp</exec.mainClass>
+    <exec.mainClass>org.fidoalliance.fdo.sample.ManufacturerApp</exec.mainClass>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-server-dispatcher</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>storage-di-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-di-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>

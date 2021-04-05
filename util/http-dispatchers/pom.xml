@@ -12,7 +12,7 @@
 
   <parent>
     <artifactId>util</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 

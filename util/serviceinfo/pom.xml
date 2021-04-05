@@ -12,13 +12,13 @@
 
   <parent>
     <artifactId>util</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
   <name>ServiceInfo</name>
   <artifactId>serviceinfo</artifactId>
-  <groupId>org.fido.iot</groupId>
+  <groupId>org.fidoalliance.fdo</groupId>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -28,7 +28,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
       <scope>compile</scope>

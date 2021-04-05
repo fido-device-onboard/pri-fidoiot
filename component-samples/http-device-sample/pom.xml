@@ -13,12 +13,12 @@
 
   <parent>
     <artifactId>component-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
   <artifactId>device</artifactId>
-  <groupId>org.fido.iot</groupId>
+  <groupId>org.fidoalliance.fdo</groupId>
   <packaging>jar</packaging>
   <name>Java Device Sample</name>
 
@@ -42,19 +42,19 @@
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
-    <exec.mainClass>org.fido.iot.sample.Device</exec.mainClass>
+    <exec.mainClass>org.fidoalliance.fdo.sample.Device</exec.mainClass>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -93,14 +93,14 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-client-dispatcher</artifactId>
       <version>0.5-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>serviceinfo</artifactId>
       <version>0.5-SNAPSHOT</version>
       <scope>compile</scope>

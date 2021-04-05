@@ -12,7 +12,7 @@
 
   <parent>
     <artifactId>storage-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -31,13 +31,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>serviceinfo</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
@@ -68,13 +68,13 @@
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>device</artifactId>
       <version>0.5-SNAPSHOT</version>
       <scope>test</scope>

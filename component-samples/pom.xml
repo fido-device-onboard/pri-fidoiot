@@ -9,13 +9,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>fido-iot</artifactId>
-    <groupId>org.fido</groupId>
+    <artifactId>fdo</artifactId>
+    <groupId>org.fidoalliance</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
   <name>Component Service Samples</name>
-  <groupId>org.fido.iot</groupId>
+  <groupId>org.fidoalliance.fdo</groupId>
   <artifactId>component-samples</artifactId>
   <packaging>pom</packaging>
 

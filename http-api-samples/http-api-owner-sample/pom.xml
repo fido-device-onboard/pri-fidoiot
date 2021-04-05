@@ -10,7 +10,7 @@
 
   <parent>
     <artifactId>http-api-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -28,19 +28,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>storage-owner-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
@@ -111,7 +111,7 @@
           <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
           <workingDirectory>${project.build.outputDirectory}</workingDirectory>
-          <mainClass>org.fido.iot.sample.DiClientApp</mainClass>
+          <mainClass>org.fidoalliance.fdo.sample.DiClientApp</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>

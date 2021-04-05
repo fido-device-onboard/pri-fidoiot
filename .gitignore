@@ -22,3 +22,5 @@ pom.xml.versionsBackup
 .settings/
 *.swp
 target/
+*.jar
+config.properties
