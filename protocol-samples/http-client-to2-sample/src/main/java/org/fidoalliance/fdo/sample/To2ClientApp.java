@@ -212,7 +212,7 @@ public class To2ClientApp {
           ServiceInfoEncoder.encodeValue(DevMod.KEY_TMP, "/tmp"));
 
       list.add(
-          ServiceInfoEncoder.encodeValue(DevMod.KEY_DIR, "/home/fido"));
+          ServiceInfoEncoder.encodeValue(DevMod.KEY_DIR, "/home/fdo"));
 
       list.add(
           ServiceInfoEncoder.encodeValue(DevMod.KEY_PROGENV, "bin:java:py3:py2"));

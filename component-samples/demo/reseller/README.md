@@ -8,7 +8,8 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT Reseller Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
+(PRI) Reseller component sample source.
 For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
 $ cd <pri-src>/component-samples/reseller/
@@ -17,7 +18,7 @@ $ mvn clean install
 
 This will copy the required executables and libraries into \<pri-src\>/component-samples/demo/reseller/.
 
-# Configuring the FIDO IoT Reseller Sample
+# Configuring the FDO PRI Reseller Sample
 
 Some required runtime arguments
 
@@ -110,7 +111,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 ***NOTE*** The database file located at \<pri-src\>/component-samples/demo/reseller/target/data/reseller.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
-# FIDO IoT Reseller REST APIs
+# FDO PRI Reseller REST APIs
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|

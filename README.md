@@ -23,7 +23,7 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `serviceinfo`: It contains implementations for Owner and Device ServiceInfo.
 
-- `storage`: It contains SQL based storage implementations for Fido IoT Servers.
+- `storage`: It contains SQL based storage implementations for FDO PRI Servers.
 
 ## Building FDO PRI source
 

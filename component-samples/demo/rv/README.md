@@ -7,7 +7,8 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT RV Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
+(PRI) Rendezvous (RV) component sample source.
 For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
 $ cd <pri-src>/service/component-samples/rv/
@@ -16,7 +17,7 @@ $ mvn clean install
 
 This will copy the required executables and libraries into <pri-src>/demo/rv/.
 
-# Configuring the FIDO IoT RV Sample
+# Configuring the FDO PRI RV Sample
 
 Some required runtime arguments
 

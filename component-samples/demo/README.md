@@ -89,7 +89,7 @@ OnDie is a type of device that makes use of the MAROE prefix. If you need to sup
 
 OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded direct from java if the ondie_autoupdate property is set to true.
 
-NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fido-iot-src>/protocol-samples/ondiecache directory which contains these debug certificates.
+NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
 
