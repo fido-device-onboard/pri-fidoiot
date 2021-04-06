@@ -335,11 +335,11 @@ public abstract class To2ClientService extends DeviceService {
     if (getStorage().getMaxOwnerServiceInfoMtuSz() != null) {
       try {
         ownerMtu = Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz());
-        if (ownerMtu <= 0) {
+        if (ownerMtu < 0) {
           System.out.println(
               "Negative value received. Proceeding with default MTU size of 1300 bytes");
           ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
-        } else if (ownerMtu > 0 && ownerMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+        } else if (ownerMtu >= 0 && ownerMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
           System.out.println(
               "Received value less than default minimum of 256 bytes. "
                   + "Updating MTU size to default minimum");
