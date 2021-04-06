@@ -12,7 +12,7 @@
 
   <parent>
     <artifactId>http-dispatchers</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -30,7 +30,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>

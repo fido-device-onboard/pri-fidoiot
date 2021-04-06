@@ -3,7 +3,7 @@
 2. [Docker Commands](#docker-commands)
 3. [Running Demo](#running-demo)
 4. [Running Demo using Reseller](#running-demo-using-reseller)
-5. [ServiceInfo Setup](#serviceinfo-setup-between-fido-iot-http-java-device-sample-and-fido-iot-owner-sample)
+5. [ServiceInfo Setup](#serviceinfo-setup-between-fdo-pri-http-java-device-sample-and-fdo-pri-owner-sample)
 6. [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer)
 7. [Working with Keystore](#working-with-keystore)
 
@@ -85,11 +85,11 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 # Configuring OnDie (optional)
 
-OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the PRI demo components by adding/updating the following properties. The values can be specified via java -Doptions, entries in application.properties or entries the the .env files.
+OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via java -Doptions, entries in application.properties or entries the the .env files.
 
 OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded direct from java if the ondie_autoupdate property is set to true.
 
-NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fido-iot-src>/protocol-samples/ondiecache directory which contains these debug certificates.
+NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
 
@@ -102,32 +102,32 @@ Note that this requires internet access by the component. Should a component be 
 
 # Running Demo
 
-1. Start the FIDO IoT Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
+1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
-2. Complete Device Initialization (DI) by starting the FIDO IoT HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
+2. Complete Device Initialization (DI) by starting the FDO HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
 
-3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. By default, existing customer with customer Id '1', is assigned to the device. To add a new customer and assign the inserted customer to the device, please refer to [FIDO IoT Manufacturer REST APIs](manufacturer/README.md/#fido-iot-manufacturer-rest-apis) for more information about the API.
+3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. By default, existing customer with customer Id '1', is assigned to the device. To add a new customer and assign the inserted customer to the device, please refer to [PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about the API.
 
-4. Start the FIDO IoT RV Sample as per the steps outlined in [RV README](rv/README.md).
+4. Start the PRI RV Sample as per the steps outlined in [RV README](rv/README.md).
 
-5. Start the FIDO IoT Owner Sample as per the steps outlined in [Owner README](owner/README.md). Import the extended Ownership Voucher from Step#3 into the Owner database by using the API `POST /api/v1/owner/vouchers/`. Please refer to [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis) for more information about the API. Optionally, if ServiceInfo transfer is needed, please refer to [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer).
+5. Start the PRI Owner Sample as per the steps outlined in [Owner README](owner/README.md). Import the extended Ownership Voucher from Step#3 into the Owner database by using the API `POST /api/v1/owner/vouchers/`. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API. Optionally, if ServiceInfo transfer is needed, please refer to [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer).
 
-6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample again. The previously created 'credential.bin' from Step#2 will be used directly by the Device.
+6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample again. The previously created 'credential.bin' from Step#2 will be used directly by the Device.
 
-**NOTE** Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remain unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis) for more information about the API.
+**NOTE** Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remain unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API.
 
 # Running Demo using Reseller
 
-The FIDO IoT Reseller Sample can be used in different ways depending on its positioning in the Supply-Chain.
-In the following use-case (use-case: 1), the FIDO IoT Manufacturer provisions the Device using DI and sells the Device to FIDO IoT Reseller, that later sells the Device to the FIDO IoT Owner, that completes the device onboarding (TO0 and TO2):
+The FDO PRI Reseller Sample can be used in different ways depending on its positioning in the Supply-Chain.
+In the following use-case (use-case: 1), the FDO PRI Manufacturer provisions the Device using DI and sells the Device to FDO PRI Reseller, that later sells the Device to the FDO PRI Owner, that completes the device onboarding (TO0 and TO2):
 
-1. Start the FIDO IoT Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
+1. Start the FDO PRI Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
-2. Complete Device Initialization (DI) by starting the FIDO IoT HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
+2. Complete Device Initialization (DI) by starting the FDO PRI HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
 
-3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. Assign customer with customer Id '2' to the device. Please refer to [FIDO IoT Manufacturer REST APIs](manufacturer/README.md/#fido-iot-manufacturer-rest-apis) for more information about assigning customer to a device.
+3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. Assign customer with customer Id '2' to the device. Please refer to [FDO PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about assigning customer to a device.
 
-4. Start the FIDO IoT Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
+4. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
 
 5. Add the extended Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`.
 
@@ -135,15 +135,15 @@ In the following use-case (use-case: 1), the FIDO IoT Manufacturer provisions th
 
 7. Extend the Ownership Voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>` to the next owner.
 
-8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample.
+8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample.
 
-In an another use-case (use-case: 2), the FIDO IoT Manufacturer provisions the Device using DI and sells the Device to the FIDO IoT Owner, that completes the device onboarding (TO0 and TO2) by triggering the Resale protocol. The FIDO IoT Owner then uses the FIDO IoT Reseller to sell the Device to the next Owner, that again, completes the device onboarding (TO0 and TO2):
+In another use-case (use-case: 2), the FDO PRI Manufacturer provisions the Device using DI and sells the Device to the FDO PRI Owner, that completes the device onboarding (TO0 and TO2) by triggering the Resale protocol. The FDO PRI Owner then uses the FDO PRI Reseller to sell the Device to the next Owner, that again, completes the device onboarding (TO0 and TO2):
 
 1. Ensure that the Device is initialized and onboarded as per the instructions listed in [Running Demo](#running-demo) section by enabling the 'Resale' protocol.
 
 2. Get the new Ownership Voucher using the Owner API `GET /api/v1/owner/newvoucher/?id=<device_guid>`.
 
-3. Start the FIDO IoT Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FIDO IoT Reseller to use the FIDO IoT Owner's keystore. This can be done by copying the \<fido-iot-src\>/demo/owner/owner_keystore.p12 into \<fido-iot-src\>/demo/reseller/ and renaming it to reseller_keystore.p12. Additionally,  update the property 'reseller_keystore_password' in \<fido-iot-src\>/demo/reseller/reseller.env, with value of 'owner_keystore_password' in \<fido-iot-src\>/demo/owner/owner.env.
+3. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FDO PRI Reseller to use the FDO PRI Owner's keystore. This can be done by copying the owner/owner_keystore.p12 into reseller/ and renaming it to reseller_keystore.p12. Additionally,  update the property 'reseller_keystore_password' in reseller/reseller.env, with value of 'owner_keystore_password' in owner/owner.env.
 
 4. Add the new size 0 Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`
 
@@ -151,17 +151,17 @@ In an another use-case (use-case: 2), the FIDO IoT Manufacturer provisions the D
 
 6. Extend the Ownership Voucher using the reseller API `GET /api/v1/resell/vouchers/<serial_number>?id=<customer_id>`.
 
-7. Start the FIDO IoT Owner Sample as per the steps outlined in [Owner README](owner/README.md). Prior to the startup, if an instance of FIDO IoT Owner is already running on the same port, terminate the previous instance. Configure the FIDO IoT Owner to use the new Owner's key-pairs. This can be done by deleting any existing 'alias' from the \<fido-iot-src\>/demo/owner/owner_keystore.p12, and inserting the key-pairs created in Step-6. Refer to [Inserting Keys into Keystore](#inserting-keys-into-keystore) and [Removing an Existing Key-Pair from Keystore](#removing-an-existing-key-pair-from-keystore). Additionally,  update the properties 'owner_keystore' and 'owner_keystore_password' in \<fido-iot-src\>/demo/owner/owner.env, with the keystore file-system path and password, respectively.
+7. Start the FDO PRI Owner Sample as per the steps outlined in [Owner README](owner/README.md). Prior to the startup, if an instance of FDO PRI Owner is already running on the same port, terminate the previous instance. Configure the FDO PRI Owner to use the new Owner's key-pairs. This can be done by deleting any existing 'alias' from the owner/owner_keystore.p12, and inserting the key-pairs created in Step-6. Refer to [Inserting Keys into Keystore](#inserting-keys-into-keystore) and [Removing an Existing Key-Pair from Keystore](#removing-an-existing-key-pair-from-keystore). Additionally,  update the properties 'owner_keystore' and 'owner_keystore_password' in owner/owner.env, with the keystore file-system path and password, respectively.
 
-8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FIDO IoT HTTP Java Device Sample.
+8. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample.
 
-In a special case of use-case: 2, the owner generates the size 0 ownership voucher using a different public key other than the one used for onboarding (say Owner2 key). In this particular implementation, Owner2 key is same as the keys used in Reseller instance. In such a scenario, resale can be performed using the same steps as listed above, except step 5. User doesn't need to perform step 5 as ownership will already be with the reseller in which case copying owner's key in reseller keystore will not be required. Use the setupinfo API listed in [Owner README](owner/README.md#fido-iot-owner-rest-apis) for the same.
+In a special case of use-case: 2, the owner generates the size 0 ownership voucher using a different public key other than the one used for onboarding (say Owner2 key). In this particular implementation, Owner2 key is same as the keys used in the FDO PRI Reseller instance. In such a scenario, resale can be performed using the same steps as listed above, except step 5. User doesn't need to perform step 5 as ownership will already be with the reseller in which case copying owner's key in reseller keystore will not be required. Use the setupinfo API listed in [FDO PRI Owner README](owner/README.md#fdo-pri-owner-rest-apis) for the same.
 
-# ServiceInfo setup between FIDO IoT HTTP Java Device Sample and FIDO IoT Owner Sample
+# ServiceInfo setup between FDO PRI HTTP Java Device Sample and FDO PRI Owner Sample
 
-The FIDO IoT HTTP Java Device Sample currently supports `sdo_sys` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
+The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
 
-- `sdo_sys` Owner ServiceInfo module: This module supports the following 3 message names as listed below to interpret the ServiceInfo as received from the Owner. The basic functionality of this module is to support payload/script transfers and basic command execution.  A sample format looks like 'sdo_sys:filedesc=filename, sdo_sys:write=filecontent,sdo_sys:exec=command-to-execute'.
+- `fdo_sys` Owner ServiceInfo module: This module supports the following 3 message names as listed below to interpret the ServiceInfo as received from the Owner. The basic functionality of this module is to support payload/script transfers and basic command execution.  A sample format looks like 'fdo_sys:filedesc=filename, fdo_sys:write=filecontent,fdo_sys:exec=command-to-execute'.
 
     *filedesc* - The name to be given to the file once it is transferred. Upon receiving this, device creates a file with the given name and opens stream to write into it.
 
@@ -173,23 +173,23 @@ The FIDO IoT HTTP Java Device Sample currently supports `sdo_sys` module for int
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that are sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
-The FIDO IoT Owner Sample currently supports the same `sdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. Few sample ServiceInfo values, as present in \<fido-iot-src\>/demo/owner/serviceinfo/sample-values/ are populated into the database table 'OWNER_SERVICEINFO' as byte arrays. For keeping the association between the Device and the ServiceInfo values to transfer, 'GUID_OWNERSVI' database table is used. When a Device is inserted into the database table 'TO2_DEVICES', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
+The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. Few sample ServiceInfo values, as present in owner/serviceinfo/sample-values/ are populated into the database table 'OWNER_SERVICEINFO' as byte arrays. For keeping the association between the Device and the ServiceInfo values to transfer, 'GUID_OWNERSVI' database table is used. When a Device is inserted into the database table 'TO2_DEVICES', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo transfer
 
 To enable ServiceInfo transfer to a Device with a given GUID, follow the steps below:
 
-1. (Optional) Insert required ServiceInfo values into the database table 'OWNER_SERVICEINFO' using the API `POST /api/v1/owner/svivalues/?id=<serviceinfo_id>&isCborEncoded=<boolean_value>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). If the required ServiceInfo already exists in the table, go on to the next step.
+1. (Optional) Insert required ServiceInfo values into the database table 'OWNER_SERVICEINFO' using the API `POST /api/v1/owner/svivalues/?id=<serviceinfo_id>&isCborEncoded=<boolean_value>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table, go on to the next step.
 
-***NOTE*** The current implementation at FIDO IoT Owner only supports the value 'false' for the query parameter 'isCborEncoded', and the value 'true' should not be used. The implementation will be updated in the future to support both values.
+***NOTE*** The current implementation at FDO PRI Owner only supports the value 'false' for the query parameter 'isCborEncoded', and the value 'true' should not be used. The implementation will be updated in the future to support both values.
 
-2. (Mandatory) Insert required association between the Device and ServiceInfo values to transfer using the API `POST /api/v1/owner/svi/?guid=<guid>`. More information about the same is provided in section [FIDO IoT Owner REST APIs](owner/README.md/#fido-iot-owner-rest-apis). As a reference, please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv. As per the sample, that Owner will transfer the value of column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload.bin' and 'package.sh'. The device will store/save the received data in files named by the column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload_name' and 'package_name'. Additionally, the Owner transfers the command as specified in column 'CONTENT' corresponding to the specified values of column 'SVI_ID', i.e 'binsh-linux', to be executed by the Device.
+2. (Mandatory) Insert required association between the Device and ServiceInfo values to transfer using the API `POST /api/v1/owner/svi/?guid=<guid>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). As a reference, please see owner/serviceinfo/sample-svi.csv. As per the sample, that Owner will transfer the value of column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload.bin' and 'package.sh'. The device will store/save the received data in files named by the column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload_name' and 'package_name'. Additionally, the Owner transfers the command as specified in column 'CONTENT' corresponding to the specified values of column 'SVI_ID', i.e 'binsh-linux', to be executed by the Device.
 
 # Generating Key-Pair
 
 ## Generating ECDSA Key-Pair
 
-FIDO IoT spec supports the National Institute of Standards and Technology (NIST) P-256 curve and P-384 types.
+FDO PRI spec supports the National Institute of Standards and Technology (NIST) P-256 curve and P-384 types.
 
 **Step 1:** Generate the private key.
 
@@ -221,7 +221,7 @@ Alternatively, generate the self-signed certificate for the previously generated
 
 ## Generating RSA Key-Pair
 
-FIDO IoT spec supports the RSA2048
+FDO spec supports the RSA2048
 
 **Step 1:** Generate the private key.
 

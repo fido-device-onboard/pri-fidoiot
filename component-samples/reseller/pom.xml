@@ -10,7 +10,7 @@
 
   <parent>
     <artifactId>component-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -27,24 +27,24 @@
     <bcpkix.version>1.68</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-    <exec.mainClass>org.fido.iot.sample.ResellerServerApp</exec.mainClass>
+    <exec.mainClass>org.fidoalliance.fdo.sample.ResellerServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-keystore-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>

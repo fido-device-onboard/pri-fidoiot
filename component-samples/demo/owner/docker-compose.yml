@@ -5,9 +5,9 @@ version: "2.4"
 
 services:
 
-  pri-fidoiot-owner:
-    image: pri-fidoiot-owner
-    container_name: pri-fidoiot-owner
+  pri-fdo-owner:
+    image: pri-fdo-owner
+    container_name: pri-fdo-owner
     expose:
       - "8042"
     ports:

@@ -5,9 +5,9 @@ version: "2.4"
 
 services:
 
-  pri-fidoiot-reseller:
-    image: pri-fidoiot-reseller
-    container_name: pri-fidoiot-reseller
+  pri-fdo-reseller:
+    image: pri-fdo-reseller
+    container_name: pri-fdo-reseller
     expose:
       - "8070"
     ports:

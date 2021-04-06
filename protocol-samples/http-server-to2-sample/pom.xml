@@ -10,7 +10,7 @@
 
   <parent>
     <artifactId>protocol-samples</artifactId>
-    <groupId>org.fido.iot</groupId>
+    <groupId>org.fidoalliance.fdo</groupId>
     <version>0.5-SNAPSHOT</version>
   </parent>
 
@@ -24,36 +24,36 @@
     <tomcat.version>9.0.44</tomcat.version>
     <bcpkix.version>1.68</bcpkix.version>
     <dbcp2.version>2.7.0</dbcp2.version>
-    <exec.mainClass>org.fido.iot.sample.To2ServerApp</exec.mainClass>
+    <exec.mainClass>org.fidoalliance.fdo.sample.To2ServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-server-dispatcher</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>storage-owner-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.fido.iot</groupId>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-owner-sample</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>

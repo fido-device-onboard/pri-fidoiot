@@ -5,9 +5,9 @@ version: "2.4"
 
 services:
 
-  pri-fidoiot-rv:
-    image: pri-fidoiot-rv
-    container_name: pri-fidoiot-rv
+  pri-fdo-rv:
+    image: pri-fdo-rv
+    container_name: pri-fdo-rv
     expose:
       - "8040"
     ports:

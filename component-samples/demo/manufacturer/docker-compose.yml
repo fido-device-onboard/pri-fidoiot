@@ -5,9 +5,9 @@ version: "2.4"
 
 services:
 
-  pri-fidoiot-manufacturer:
-    image: pri-fidoiot-manufacturer
-    container_name: pri-fidoiot-manufacturer
+  pri-fdo-manufacturer:
+    image: pri-fdo-manufacturer
+    container_name: pri-fdo-manufacturer
     expose:
       - "8039"
     ports:

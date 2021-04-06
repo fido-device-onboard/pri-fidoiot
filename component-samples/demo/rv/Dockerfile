@@ -6,10 +6,10 @@ ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update && apt-get install -y openjdk-11-jdk haveged
 
-RUN useradd -ms /bin/bash sdouser
-USER sdouser
-WORKDIR /home/sdouser/
-RUN mkdir -p /home/sdouser/lib
+RUN useradd -ms /bin/bash fdouser
+USER fdouser
+WORKDIR /home/fdouser/
+RUN mkdir -p /home/fdouser/lib
 
 # Setup rv dependencies
 COPY ./lib ./lib/

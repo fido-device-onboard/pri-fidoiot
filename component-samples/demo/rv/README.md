@@ -7,15 +7,17 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT RV Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
+(PRI) Rendezvous (RV) component sample source.
+For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/rv/
+$ cd <pri-src>/service/component-samples/rv/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into <fido-iot-src>/demo/rv/.
+This will copy the required executables and libraries into <pri-src>/demo/rv/.
 
-# Configuring the FIDO IoT RV Sample
+# Configuring the FDO PRI RV Sample
 
 Some required runtime arguments
 
@@ -78,7 +80,7 @@ Refer to [Demo README](../README.md) for steps to configure rendezvous to suppor
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fido-iot-src>/service/component-samples/rv/src/main/java/org/fido/iot/sample/RvServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<pri-src>/service/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
@@ -95,7 +97,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 - RV provides the option to allow and deny requests based on the owner, manufacturer and reseller public keys and based on the GUID used in the Device Ownership Voucher
 header.
-- To add entries to these allowlist and denylist, update the `config.properties` file in `<fido-iot-src>/storage/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `demo/rv` and restart the docker.
+- To add entries to these allowlist and denylist, update the `config.properties` file in `<pri-src>/storage/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `<pri-src>/component-samples/demo/rv` and restart the docker.
 - Once updated, rebuild the code, rebuild RV docker image and then start the docker.
 - The hashes for the default public keys present of owner, manufacturer and reseller are already added in allowlist configuration of component sample. The table below lists them.
 
@@ -133,9 +135,9 @@ By default, the RV uses HTTP for all communications on port 8040. In addition to
 
   * Ensure that the web certificate is issued to the resolvable domain of the Rendezvous server. Refer the above section to generate the keystore.
 
-- Copy the generated Keystore/Certificate to `demo/rv/certs` folder.
+- Copy the generated Keystore/Certificate to `<pri-src>/component-samples/demo/rv/certs` folder.
 
-- Update the following environment varibles in `demo/rv/rv.env` file
+- Update the following environment varibles in `<pri-src>/component-samples/demo/rv/rv.env` file
 
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
