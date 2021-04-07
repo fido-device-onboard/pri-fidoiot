@@ -160,7 +160,7 @@ public class CryptoService {
       case Const.PK_ONDIE_ECDSA_384:
         return Const.EC_ALG_NAME;
       case Const.PK_RSA2048RESTR:
-      case Const.PK_RSA:
+      case Const.PK_RSA3072:
         return Const.RSA_ALG_NAME;
       default:
         throw new NoSuchAlgorithmException();
@@ -332,7 +332,7 @@ public class CryptoService {
             .set(Const.SG_INFO, Const.EMPTY_BYTE);
       } else if (Const.BIT_LEN_3K == bitLength) {
         return Composite.newArray()
-            .set(Const.SG_TYPE, Const.PK_RSA)
+            .set(Const.SG_TYPE, Const.PK_RSA3072)
             .set(Const.SG_INFO, Const.EMPTY_BYTE);
       }
     }
