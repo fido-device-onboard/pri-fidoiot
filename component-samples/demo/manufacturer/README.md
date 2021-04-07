@@ -10,17 +10,17 @@
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
 (PRI) Manufacturer component sample source.
-For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <pri-src>/component-samples/manufacturer/
+$ cd <fdo-pri-src>/component-samples/manufacturer/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into \<pri-src\>/component-samples/demo/manufacturer/.
+This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/manufacturer/.
 
 # Configuring the FDO PRI Manufacturer Sample
 
-Some required runtime arguments
+Manufacturer runtime arguments:
 
 - `manufacturer_di_port`
 
@@ -76,6 +76,33 @@ Some required runtime arguments
 
   Default value: MfgApiPass123
 
+- `manufacturer_protocol_scheme`
+
+  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
+
+  Default value: http
+
+- `manufacturer_https_port`
+
+  Allows enduser to select a port for accepting HTTPS requests.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: 443
+
+- `manufacturer_ssl_keystore`
+
+  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: <fdo-pri-src>/component-samples/demo/manufacturer/certs/ssl.p12
+
+- `manufacturer_ssl_keystore-password`
+
+  Provides password for the specified keystore.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default keystore password: fdo123
+
 ## Support for OnDie devices
 
 Refer to [Demo README](../README.md) for steps to configure manufacturer to support OnDie devices.
@@ -84,7 +111,7 @@ Refer to [Demo README](../README.md) for steps to configure manufacturer to supp
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<pri-src>/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/service/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <manufacturer_db_port>
@@ -97,7 +124,7 @@ webAllowOthers = true
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Manufacturer REST APIs
 
@@ -111,7 +138,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Inserting keys into Manufacturer keystore
 
-The PKCS12 keystore file \<pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
@@ -123,9 +150,9 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 
   * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
 
-- Copy the generated Keystore/Certificate to `<pri-src>/component-samples/demo/manufacturer/certs` folder.
+- Copy the generated Keystore/Certificate to `<fdo-pri-src>/component-samples/demo/manufacturer/certs` folder.
 
-- Update the following environment varibles in `<pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
+- Update the following environment varibles in `<fdo-pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
 
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
@@ -136,3 +163,14 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 
     **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
     Avoid using the default keystore available for production deployment.
+
+# Rendezvous Info
+Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `http://localhost:8040?ipaddress=127.0.0.1&ownerport=8443`
+
+This value is interpreted internally as:
+
+RvInfo for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
+
+RvInfo for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
+
+**NOTE** The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol.

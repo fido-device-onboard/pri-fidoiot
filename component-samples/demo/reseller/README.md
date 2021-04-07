@@ -10,13 +10,13 @@
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
 (PRI) Reseller component sample source.
-For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <pri-src>/component-samples/reseller/
+$ cd <fdo-pri-src>/component-samples/reseller/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into \<pri-src\>/component-samples/demo/reseller/.
+This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/reseller/.
 
 # Configuring the FDO PRI Reseller Sample
 
@@ -92,11 +92,38 @@ Some required runtime arguments
 
   Base path for jdbc `.db` file location.
 
+- `reseller_protocol_scheme`
+
+  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
+
+  Default value: http
+
+- `reseller_https_port`
+
+  Allows enduser to select a port for accepting HTTPS requests.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: 443
+
+- `reseller_ssl_keystore`
+
+  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: <fdo-pri-src>/component-samples/demo/reseller/certs/ssl.p12
+
+- `reseller_ssl_keystore_password`
+
+  Provides password for the specified keystore.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default keystore password: fdo123
+
 # Enabling Remote Access to DB
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<pri-src>/component-samples/reseller/src/main/java/org/fidoalliance/fdo/sample/ResellerServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/reseller/src/main/java/org/fidoalliance/fdo/sample/ResellerServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <reseller_db_port>
@@ -109,7 +136,7 @@ webAllowOthers = true
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<pri-src\>/component-samples/demo/reseller/target/data/reseller.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/reseller/target/data/reseller.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Reseller REST APIs
 
@@ -127,7 +154,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Inserting keys into Reseller keystore
 
-The PKCS12 keystore file \<pri-src\>/component-samples/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<pri-src\>/component-samples/demo/reseller/reseller_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
