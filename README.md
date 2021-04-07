@@ -1,4 +1,4 @@
-**NOTE**: This is a preliminary implementation of the [FIDO IoT Spec - Working Draft ](https://fidoalliance.org/specs/fidoiot/FIDO-IoT-spec-v1.0-wd-20200730.html) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
+**NOTE**: This is a preliminary implementation of the [FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
 
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
@@ -11,19 +11,19 @@
 
 ## Source Layout
 
-For the instructions in this document, `<pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 
 FDO PRI source code is organized into the following sub-folders.
 
-- `cert-utils`: It contains utilities for loading certificates and keys from PEM formatted strings.
+- `component-samples`: It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile.
 
-- `protocol`: It contains implementations related to protocol message processing.
+- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server service.
 
-- `service`: It contains implementations for FDO HTTP servers and clients.
+- `protocol-samples`: It contains client and server implementation that demonstrates the prelimnary E2E demo that educates the enduser with the protocol workflow.
 
-- `serviceinfo`: It contains implementations for Owner and Device ServiceInfo.
+- `protocol`: It contains implementations related to protocol message processing..
 
-- `storage`: It contains SQL based storage implementations for FDO PRI Servers.
+- `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - loading certificates and keys from PEM formatted strings.
 
 ## Building FDO PRI source
 
@@ -38,7 +38,7 @@ binaries.
 
 Use the following commands to build FDO PRI source.
 ```
-$ cd <pri-src>
+$ cd <fdo-pri-src>
 $ mvn clean install
 ```
 
@@ -50,7 +50,7 @@ The build creates artifacts which will be used in the rest of this guide.
 
 #### Starting the FDO PRI Rendezvous (RV) HTTP Server
 ```
-$ cd <pri-src>/protocol-samples/http-server-to0-to1-sample/
+$ cd <fdo-pri-src>/protocol-samples/http-server-to0-to1-sample/
 $ mvn exec:java
 ```
 
@@ -59,7 +59,7 @@ The H2 database will listen on TCP port 8050.
 
 #### Starting the FDO PRI Owner HTTP Server
 ```
-$ cd <pri-src>/protocol-samples/http-server-to2-sample/
+$ cd <fdo-pri-src>/protocol-samples/http-server-to2-sample/
 $ mvn exec:java
 ```
 
@@ -68,7 +68,7 @@ The H2 database will listen on TCP port 8051.
 
 #### Starting the FDO PRI Device Initialization (DI) HTTP Server
 ```
-$ cd <pri-src>/protocol-samples/http-server-di-sample/
+$ cd <fdo-pri-src>/protocol-samples/http-server-di-sample/
 $ mvn exec:java
 ```
 
@@ -80,7 +80,7 @@ You can allow remote database console connections by setting webAllowOthers=true
 
 #### Running the FDO PRI Device Initialization (DI) HTTP client
 ```
-$ cd <pri-src>/protocol-samples/http-client-di-sample
+$ cd <fdo-pri-src>/protocol-samples/http-client-di-sample
 $ mvn exec:java
 ```
 
@@ -92,7 +92,7 @@ Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
 
 #### Running the FDO PRI To0 HTTP client
 ```
-$ cd <pri-src>/protocol-samples/http-client-to0-sample
+$ cd <fdo-pri-src>/protocol-samples/http-client-to0-sample
 $ mvn exec:java
 ```
 
@@ -101,7 +101,7 @@ TO0 Client finished.
 
 #### Running the FDO PRI To1 HTTP client
 ```
-$ cd <pri-src>/protocol-samples/http-client-to1-sample
+$ cd <fdo-pri-src>/protocol-samples/http-client-to1-sample
 $ mvn exec:java
 ```
 
@@ -110,7 +110,7 @@ TO1 Client finished.
 
 ### Running the FDO PRI To2 HTTP client
 ```
-$ cd <pri-src>/protocol-samples/http-client-to2-sample
+$ cd <fdo-pri-src>/protocol-samples/http-client-to2-sample
 $ mvn exec:java
 ```
 
@@ -142,7 +142,7 @@ To log in to the database and view records use the following information:
 ```
 "User Name:" = "sa"
 "Password:" = "" (blank)
-"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
+"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fdo-pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
 ```
 The path to the DB will be printed out in following format when the DI server is starting.
 
@@ -156,11 +156,12 @@ Remote access to H2 Sample Storage DB has been disabled by default. Enabling the
 
 To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in the following files:
 
-- To enable remote access for DI server DB, update file:  `<pri-src>/protocol-samples/http-server-di-sample/src/main/java/org/fidoalliance/fdo/sample/DiApp.java` <br/>
 
-- To enable remote access for TO0-TO1 server DB, update file:  `<pri-src>/protocol-samples/http-server-to0-to1-sample/src/main/java/org/fidoalliance/fdo/sample/To0To1ServerApp.java` <br/>
+- To enable remote access for DI server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-di-sample/src/main/java/org/fidoalliance/fdo/sample/DiApp.java` <br/>
 
-- To enable remote access for TO2 server DB, update file:  `<pri-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fidoalliance/fdo/sample/To2ServerApp.java`
+- To enable remote access for TO0-TO1 server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-to0-to1-sample/src/main/java/org/fidoalliance/fdo/sample/To0To1ServerApp.java` <br/>
+
+- To enable remote access for TO2 server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fidoalliance/fdo/sample/To2ServerApp.java`
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
