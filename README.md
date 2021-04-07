@@ -142,7 +142,7 @@ To log in to the database and view records use the following information:
 ```
 "User Name:" = "sa"
 "Password:" = "" (blank)
-"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
+"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fdo-pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
 ```
 The path to the DB will be printed out in following format when the DI server is starting.
 
