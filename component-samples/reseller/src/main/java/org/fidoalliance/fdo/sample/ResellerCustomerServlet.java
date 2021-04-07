@@ -51,6 +51,10 @@ public class ResellerCustomerServlet extends HttpServlet {
     String uri = req.getRequestURI();
     String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    new ResellerDbManager().deleteKeySet(ds, serialNo);
+    int rowsAffected = new ResellerDbManager().deleteKeySet(ds, serialNo);
+    if (rowsAffected == 0) {
+      resp.setStatus(404);
+      return;
+    }
   }
 }
