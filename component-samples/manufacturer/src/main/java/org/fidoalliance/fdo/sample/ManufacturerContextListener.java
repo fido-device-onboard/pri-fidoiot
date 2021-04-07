@@ -164,12 +164,12 @@ public class ManufacturerContextListener implements ServletContextListener {
       public Certificate[] getCertChain(int publicKeyType) {
         String algName;
         switch (publicKeyType) {
-          case 1:
-          case 4:
+          case Const.PK_RSA2048RESTR:
+          case Const.PK_RSA3072:
             algName = Const.RSA_ALG_NAME;
             break;
-          case 13:
-          case 14:
+          case Const.PK_SECP256R1:
+          case Const.PK_SECP384R1:
             algName = Const.EC_ALG_NAME;
             break;
           default:
