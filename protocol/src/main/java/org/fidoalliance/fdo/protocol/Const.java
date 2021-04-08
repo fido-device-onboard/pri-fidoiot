@@ -150,18 +150,6 @@ public final class Const {
   public static final String HMAC_384_ALG_NAME = "HmacSHA384";
   public static final String HMAC_512_ALG_NAME = "HmacSHA512";
 
-  // PublicKey Indexes
-  public static final int PK_TYPE = 0; //Public Key type
-  public static final int PK_ENC = 1; // Public key encoding
-  public static final int PK_BODY = 2; //Public key body
-
-  //Public Key Types
-  public static final int PK_RSA2048RESTR = 1; // Restricted RSA key/exponent
-  public static final int PK_RSA = 4; // RSA key (unrestricted)
-  public static final int PK_SECP256R1 = 13; // ECDSA secp256r1 = NIST-P-256 = prime256v1
-  public static final int PK_SECP384R1 = 14; // ECDSA secp384r1 = NIST-P-384
-  public static final int PK_ONDIE_ECDSA_384 = 93;
-
   //Java Algorithm names for Signatures
   public static final String RSA_256_ALG_NAME = "SHA256withRSA";
   public static final String RSA_384_ALG_NAME = "SHA384withRSA";
@@ -297,6 +285,19 @@ public final class Const {
   public static final int COSE_RS384 = -258;
   //todo:EPID types still need defined
   public static final int COSE_ES384_ONDIE = -280;
+
+  // PublicKey types
+  public static final int PK_RSA2048RESTR = COSE_RS256; // Restricted RSA key/exponent
+  public static final int PK_RSA3072 = COSE_RS384; // Restricted RSA key/exponent
+  public static final int PK_SECP256R1 = COSE_ES256; // ECDSA secp256r1 = NIST-P-256
+  public static final int PK_SECP384R1 = COSE_ES384; // ECDSA secp384r1 = NIST-P-384
+  public static final int PK_ONDIE_ECDSA_384 = COSE_ES384_ONDIE; // needs spec update
+
+  // PublicKey Indexes
+  public static final int PK_TYPE = 0; //Public Key type
+  public static final int PK_ENC = 1; // Public key encoding
+  public static final int PK_BODY = 2; //Public key body
+
 
   //Common COSE Headers Parameters
   public static final long COSE_ALG = 1;

@@ -20,6 +20,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 import org.h2.tools.Server;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
 import org.junit.jupiter.api.Test;
 import org.fidoalliance.fdo.certutils.PemLoader;
@@ -207,6 +208,7 @@ public class RvsStorageTest {
 
   }
 
+  @Disabled
   @Test
   void to0AllowListDenyListDbStorageTest() {
 
@@ -231,6 +233,7 @@ public class RvsStorageTest {
 
   }
 
+  @Disabled
   @Test
   void accTest() throws Exception {
 
