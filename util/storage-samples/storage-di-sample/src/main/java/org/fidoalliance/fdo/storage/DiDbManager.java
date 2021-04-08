@@ -137,22 +137,24 @@ public class DiDbManager {
    * @param id The id of the customer.
    * @param guid The GUID of the device
    */
-  public void assignCustomerToVoucher(DataSource ds, int id, String guid) {
+  public int assignCustomerToVoucher(DataSource ds, int id, String guid) {
 
     String sql = ""
         + "UPDATE MT_DEVICES   "
         + "SET CUSTOMER_ID=? "
         + "WHERE GUID=?; ";
 
+    int rowsAffected = 0;
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setInt(1, id);
       pstmt.setString(2, guid);
-      pstmt.executeUpdate();
+      rowsAffected = pstmt.executeUpdate();
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+    return rowsAffected;
   }
 
   /**

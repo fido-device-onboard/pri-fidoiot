@@ -21,8 +21,16 @@ public class AssignCustomerServlet extends HttpServlet {
 
     String guid = req.getParameter("guid");
     String id = req.getParameter("id");
-    if (id != null && guid != null) {
-      new DiDbManager().assignCustomerToVoucher(ds, Integer.parseInt(id), guid);
+    if (id.equals("") && guid.equals("") && !id.matches("[0-9]+")) {
+      resp.setStatus(400);
+      return;
     }
+
+    int rowsAffected = new DiDbManager().assignCustomerToVoucher(ds, Integer.parseInt(id), guid);
+    if (rowsAffected == 0) {
+      resp.setStatus(400);
+      return;
+    }
+
   }
 }

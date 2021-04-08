@@ -15,6 +15,9 @@ import org.fidoalliance.fdo.storage.DiDbManager;
 
 public class RvInfoServlet extends HttpServlet {
 
+  final String validUriFormat =
+      "((http|https)://[a-zA-Z0-9.-]*:[0-9]{1,5}[?]?((?:\\w+=\\w*+)[&]?)*[\\s]?)*";
+
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
@@ -32,7 +35,12 @@ public class RvInfoServlet extends HttpServlet {
 
     String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
-    DiDbManager dbManager = new DiDbManager();
-    dbManager.addRvInfo(ds, rvInfo);
+    if (rvInfo.matches(validUriFormat)) {
+      DiDbManager dbManager = new DiDbManager();
+      dbManager.addRvInfo(ds, rvInfo);
+    } else {
+      resp.setStatus(400);
+      return;
+    }
   }
 }
