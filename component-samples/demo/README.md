@@ -89,7 +89,7 @@ OnDie is a type of device that makes use of the MAROE prefix. If you need to sup
 
 OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded direct from java if the ondie_autoupdate property is set to true.
 
-NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
+NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
 
@@ -127,7 +127,7 @@ In the following use-case (use-case: 1), the FDO PRI Manufacturer provisions the
 
 3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. Assign customer with customer Id '2' to the device. Please refer to [FDO PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about assigning customer to a device.
 
-4. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
+4. After DI and before starting Transfer Ownership Protocol 1, add the owner2 keypair in the current owner's (reseller) keystore. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
 
 5. Add the extended Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`.
 
@@ -179,11 +179,7 @@ The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Ow
 
 To enable ServiceInfo transfer to a Device with a given GUID, follow the steps below:
 
-1. (Optional) Insert required ServiceInfo values into the database table 'OWNER_SERVICEINFO' using the API `POST /api/v1/owner/svivalues/?id=<serviceinfo_id>&isCborEncoded=<boolean_value>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table, go on to the next step.
-
-***NOTE*** The current implementation at FDO PRI Owner only supports the value 'false' for the query parameter 'isCborEncoded', and the value 'true' should not be used. The implementation will be updated in the future to support both values.
-
-2. (Mandatory) Insert required association between the Device and ServiceInfo values to transfer using the API `POST /api/v1/owner/svi/?guid=<guid>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). As a reference, please see owner/serviceinfo/sample-svi.csv. As per the sample, that Owner will transfer the value of column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload.bin' and 'package.sh'. The device will store/save the received data in files named by the column 'CONTENT' corresponding to the specified 'SVI_ID': 'payload_name' and 'package_name'. Additionally, the Owner transfers the command as specified in column 'CONTENT' corresponding to the specified values of column 'SVI_ID', i.e 'binsh-linux', to be executed by the Device.
+Insert required ServiceInfo resources into the database table 'SYSTEM_MODULE_RESOURCE' using the API `PUT /api/v1/device/svi?<parameter1>=<value1>&...&<parameterN>=<valueN>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table with appropriate tags, start TO1.
 
 # Generating Key-Pair
 
@@ -257,7 +253,7 @@ Assuming that there is already an existing certificate named 'certificate.pem' a
 
 ## Exporting an Existing Certificate from Keystore
 
-Assuming that there is an existing certificate and private key stored in the keystore as a PrivateKeyEntry under the alias 'newkeypair', run the following command to extract the certificate into <ertificate.pem\>:
+Assuming that there is an existing certificate and private key stored in the keystore as a PrivateKeyEntry under the alias 'newkeypair', run the following command to extract the certificate into <certificate.pem\>:
 
 **Step 1:** Get the list of key-pairs, along with their respective aliases, from the keystore:
 
@@ -265,8 +261,7 @@ Assuming that there is an existing certificate and private key stored in the key
 
 **Step 2:** Export the certificate from the keystore using any of the aliases present in the keystore**:**
 
-`$ keytool -exportcert -alias newkeypair -file
-<certificate.pem> -rfc -keystore path/to/dest-keystore.p12`
+`$ keytool -exportcert -alias newkeypair -file <certificate.pem> -rfc -keystore path/to/dest-keystore.p12`
 
 ## Removing an Existing Key-Pair from Keystore
 

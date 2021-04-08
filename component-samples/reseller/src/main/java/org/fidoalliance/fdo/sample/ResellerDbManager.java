@@ -167,16 +167,17 @@ public class ResellerDbManager {
    * @param ds Datasource.
    * @param id Customer ID.
    */
-  public void deleteKeySet(DataSource ds, String id) {
+  public int deleteKeySet(DataSource ds, String id) {
     String sql = "DELETE FROM RT_CUSTOMERS WHERE CUSTOMER_ID = ? ";
-
+    int rowsAffected = 0;
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setInt(1, Integer.parseInt(id));
-      pstmt.executeUpdate();
+      rowsAffected = pstmt.executeUpdate();
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+    return rowsAffected;
   }
 }
