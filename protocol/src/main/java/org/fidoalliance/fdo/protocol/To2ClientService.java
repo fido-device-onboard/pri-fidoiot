@@ -339,10 +339,6 @@ public abstract class To2ClientService extends DeviceService {
           System.out.println("Received DeviceMTU size below the threshold value."
               + " Proceeding with default MTU size of 1300 bytes");
           ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
-        } else if (ownerMtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
-          System.out.println("Received DeviceMTU size above the threshold value."
-              + " Proceeding with maximum MTU size of 8192 bytes");
-          ownerMtu = Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE;
         }
       } catch (Exception e) {
         System.out.println(
