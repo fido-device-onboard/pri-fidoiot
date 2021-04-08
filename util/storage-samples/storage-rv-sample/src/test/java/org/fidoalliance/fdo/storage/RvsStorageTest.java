@@ -205,8 +205,7 @@ public class RvsStorageTest {
     }
 
   }
-
-
+  
   @Test
   void to0AllowListDenyListDbStorageTest() {
 
