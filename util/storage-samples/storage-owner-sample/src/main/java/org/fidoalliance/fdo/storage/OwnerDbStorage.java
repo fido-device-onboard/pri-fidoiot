@@ -278,6 +278,12 @@ public class OwnerDbStorage implements To2ServerStorage {
       return getCryptoService().getOwnerPublicKey(voucher);
     }
 
+    // if there was no customerId found in the DB, but no exception was thrown,
+    // error is handled the same way as exceptional exits, above.
+    if (null == certs || certs.isEmpty()) {
+      return getCryptoService().getOwnerPublicKey(voucher);
+    }
+
     int keyType =
         getCryptoService()
             .getPublicKeyType(
