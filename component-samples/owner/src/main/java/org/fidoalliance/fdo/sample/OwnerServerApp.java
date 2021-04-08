@@ -16,6 +16,8 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fidoalliance.fdo.api.OwnerCustomerServlet;
 import org.fidoalliance.fdo.api.OwnerReplacementVoucherServlet;
 import org.fidoalliance.fdo.api.OwnerSetupInfoServlet;
+import org.fidoalliance.fdo.api.OwnerSviSettingsServlet;
+import org.fidoalliance.fdo.api.OwnerSystemResourceServlet;
 import org.fidoalliance.fdo.api.OwnerVoucherServlet;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
@@ -144,6 +146,13 @@ public class OwnerServerApp {
     wrapper = tomcat.addServlet(ctx, "ownerCustomerServlet",
         new OwnerCustomerServlet());
     wrapper.addMapping("/api/v1/owner/customer/*");
+
+    wrapper = tomcat.addServlet(ctx, "SystemResource", new OwnerSystemResourceServlet());
+    wrapper.addMapping("/api/v1/device/svi");
+
+    wrapper = tomcat.addServlet(ctx, "sviSettingsServlet",
+        new OwnerSviSettingsServlet());
+    wrapper.addMapping("/api/v1/owner/svi/settings/*");
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());
     wrapper.addMapping("/console/*");
