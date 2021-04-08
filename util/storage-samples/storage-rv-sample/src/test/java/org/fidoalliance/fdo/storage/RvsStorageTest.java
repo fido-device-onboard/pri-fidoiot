@@ -4,7 +4,6 @@
 package org.fidoalliance.fdo.storage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -13,18 +12,9 @@ import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.UUID;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
-import org.fidoalliance.fdo.protocol.ondie.OnDieService;
-import org.h2.tools.Server;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
-import org.junit.jupiter.api.Test;
 import org.fidoalliance.fdo.certutils.PemLoader;
-import org.fidoalliance.fdo.protocol.RendezvousBlobDecoder;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -32,6 +22,7 @@ import org.fidoalliance.fdo.protocol.DispatchException;
 import org.fidoalliance.fdo.protocol.DispatchResult;
 import org.fidoalliance.fdo.protocol.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.MessagingService;
+import org.fidoalliance.fdo.protocol.RendezvousBlobDecoder;
 import org.fidoalliance.fdo.protocol.To0ClientService;
 import org.fidoalliance.fdo.protocol.To0ClientStorage;
 import org.fidoalliance.fdo.protocol.To0ServerService;
@@ -40,6 +31,11 @@ import org.fidoalliance.fdo.protocol.To1ClientService;
 import org.fidoalliance.fdo.protocol.To1ClientStorage;
 import org.fidoalliance.fdo.protocol.To1ServerService;
 import org.fidoalliance.fdo.protocol.To1ServerStorage;
+import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
+import org.fidoalliance.fdo.protocol.ondie.OnDieService;
+import org.h2.tools.Server;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(Alphanumeric.class)
@@ -205,7 +201,7 @@ public class RvsStorageTest {
     }
 
   }
-  
+
   @Test
   void to0AllowListDenyListDbStorageTest() {
 
