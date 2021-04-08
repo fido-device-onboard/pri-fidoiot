@@ -237,7 +237,7 @@ public class DiContextListener implements ServletContextListener {
       @Override
       public Certificate[] getCertChain(int publicKeyType) {
         String pemValue;
-        if (publicKeyType == Const.PK_RSA2048RESTR || publicKeyType == Const.PK_RSA) {
+        if (publicKeyType == Const.PK_RSA2048RESTR || publicKeyType == Const.PK_RSA3072)  {
           pemValue = mfgKeyPemRSA;
         } else if (publicKeyType == Const.PK_SECP256R1) {
           pemValue = mfgKeyPemEC256;
