@@ -26,7 +26,7 @@ public class ResellerCustomerServlet extends HttpServlet {
     String name = req.getParameter("name");
     String contentType = req.getContentType();
 
-    if ( id.equals("") || name.equals("") || !id.matches("[0-9]+")) {
+    if (id.equals("") || name.equals("") || !id.matches("[0-9]+")) {
       resp.setStatus(400);
       return;
     }
@@ -45,7 +45,7 @@ public class ResellerCustomerServlet extends HttpServlet {
       String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
       List<PublicKey> key = PemLoader.loadPublicKeys(keySet);
-      if(key.size() > 0) {
+      if (key.size() > 0) {
         new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
       } else {
         resp.setStatus(400); //Invalid PEM string
