@@ -7,17 +7,18 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT Owner Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Owner Component sample source.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/owner/
+$ cd <fdo-pri-src>/component-samples/owner/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into \<fido-iot-src\>/demo/owner/.
+This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/owner/.
 
-# Configuring the FIDO IoT Owner Sample
+# Configuring the FDO PRI Owner Sample
 
-Some required runtime arguments
+Owner runtime arguments:
 
 - `owner_to2_port`
 
@@ -102,33 +103,78 @@ Some required runtime arguments
 
 - `owner_api_user`
 
-  Username for the non-SDO REST API calls.
+  Username for the database REST API calls.
 
   Default value: apiUser
 
 - `owner_api_password`
 
-  Password for the non-SDO REST API calls.
+  Password for the database REST API calls.
 
   Default value: OwnerApiPass123
 
-- `owner_svi_values`
+- `owner_protocol_scheme`
 
-  Path to the directory that contains default sample owner ServiceInfo values. The filenames are used as identifiers in the database, while the actual file content is the requisite ServiceInfo that is transferred to the device. Only used for demo purposes and should not be modified.
+  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
 
-  Default value: ./serviceinfo/sample-values
+  Default value: https
 
-- `owner_svi_string`
+- `owner_https_port`
 
-  Path to the file that contains default sample svi string that maps ServiceInfo values to module names and messages. Only used for demo purposes and should not be modified.
+   Allows enduser to select a port for accepting HTTPS requests.
+  **NOTE** This property is not required if service is running in `http` mode.
 
-  Docker default: ./serviceinfo/sample-svi.csv
+  Default value: 443
+
+- `fido_ssl_mode`
+
+  There are 2 modes namely 'TEST' and 'PROD'. TEST mode disables SSL verification.
+
+  Default value: TEST
+
+- `owner_ssl_keystore`
+
+  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: <fdo-pri-src>/component-samples/demo/owner/certs/ssl.p12
+
+- `owner_ssl_keystore_password`
+
+  Provides password for the specified keystore.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default keystore password: fdo123
+
+- `ssl_truststore`
+
+  Provides path for SSL truststore to be used by the service.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: <fdo-pri-src>/component-samples/demo/owner/certs/truststore
+
+- `ssl_truststore_password`
+
+  Provides password for the specified truststore.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default keystore password: fdo123
+
+- `ssl_truststore_type`
+
+  Defines the type of truststore.
+  Default truststore type: PKCS12
+
+
+## Support for OnDie devices
+
+Refer to [Demo README](../README.md) for steps to configure owner to support OnDie devices.
 
 # Enabling Remote Access to DB
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fido-iot-src>/service/component-samples/owner/src/main/java/org/fido/iot/sample/OwnerServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `\<fdo-pri-src>/component-samples/owner/src/main/java/org/fidoalliance/fdo/sample/OwnerServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <owner_db_port>
@@ -141,9 +187,9 @@ webAllowOthers = true
 
 Refer to the section [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fido-iot-src\>/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
-# FIDO IoT Owner REST APIs
+# FDO PRI Owner REST APIs
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
@@ -152,19 +198,21 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `TO2_DEVICES` table. | | application/cbor | Content of Ownership Voucher in binary format | |
 | DELETE /api/v1/owner/vouchers/?id=<device_guid> | Deletes Ownership Voucher of the specified GUID from the `TO2_DEVICES` table. | Query - id: Device GUID | | | |
 | GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the new Ownership Voucher for the specified GUID to enable resale. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/svivalues/?id=\<serviceinfo_id>&isCborEncoded=<boolean_value> | Adds ServiceInfo entry to `OWNER_SERVICEINFO` table. The query parameter 'isCborEncoded' should be 'true' for CBOR encoded binary data that will never be split into smaller chunks while transferring to the device (small in length, to be used for CBOR primitives such as boolean, int, array and map), and it should be 'false' (preferably) for other binary data that could be split into smaller chunks and transferred across messages (for example binary values, string). | Query - id: ServiceInfo ID, isCborEncoded: Boolean | application/octet-stream or application/cbor | Content of Serviceinfo in binary format. | |
-| DELETE /api/v1/owner/svivalues/?id=<serviceinfo_id> | Deletes the ServiceInfo values from `OWNER_SERVICEINFO` table. | Query - id: ServiceInfo ID | | | |
-| POST /api/v1/owner/svi/?guid=<device_guid> | Adds owner ServiceInfo for the GUID in `GUID_OWNERSVI` table, that will be transferred to the device in the insertion order. The format is `Entry1,Entry2,Entry3` and so on, where each Entry contains `moduleName:messageName=serviceInfoId`. Here, the 'content' corresponding to the 'serviceInfoId' is transferred to the device. Please see \<fido-iot-src\>/demo/owner/serviceinfo/sample-svi.csv as an example for the above format, where moduleName is 'sdo_sys' and messageName is either one of 'filedesc', 'write' and 'exec'. The order of each 'Entry' is important as this order decides the sequence in which the Owner will transfer the ServiceInfo. | Query - guid: Device GUID | application/text | SVI string | |
-| DELETE /api/v1/owner/svi/?guid=<device_guid> | Deletes owner ServiceInfo for the GUID from the `GUID_OWNERSVI` table. | Query - guid: Device GUID | | | |
+| POST /api/v1/owner/svi/settings/ | Updates the various fields of `TO2_SETTINGS` table for ID=1 field.<br/> Example input looks like 'devicemtu:=2000,ownerthreshold:=8192',wgetModContentVerification:=<boolean> <br/> For field: wgetModContentVerification, acceptable input values: true or false <br/> True: To enable content verification. <br/> False: To opt out of content verification| | application/text| values based on the field(s) to be modified.| |
 | POST /api/v1/owner/setupinfo/?id=current_guid | updates `Replacement GUID` or `Replacement RVInfo` or both in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or both. <br/> To update both GUID and RV Info: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\>| | |
-| GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the replacement Ownership Voucher for the GUID if TO2 is completed and resale/non-resale was selected. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/setupinfo?id=<device_guid> | Updates the replacement RendezvousInfo and GUID for the device. The setupinfo sring format is 'guid:=<replacement_device_guid_string>,rvinfo:=<replacement_rv_info_string>'. Both 'guid' and 'rvinfo' are optional. An example setupinfo string looks like 'guid:=64612afb-4ad9-4c69-a7d1-1cb1378157ec,rvinfo:=http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040'. | Query - id: Device GUID | application/text | Setupinfo string | |
+| POST /api/v1/owner/customer/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
+| DELETE /api/v1/owner/customer/?id=<customer_id> | Deletes device entry from `OWNER_CUSTOMERS` table. | Query - id: Customer Id  | | | |
+| GET /api/v1/device/svi/?guid=<guid> | Retieves tag information about a resoruce including id. | Query - guid: Device GUID  | | | |
+| PUT /api/v1/device/svi/?id=<customer_id> | Adds a new tagged resource. | Query - id: Customer Id.  | Query - module: Module Name. <br/>  var: Message Name. <br/> filename: zero length file to be created on device with the given filename. <br/> bytes: content to be populated in file, specified using filename. <br/> guid: Tag resource using GUID. <br/> device: device type tag. <br/> priority: priority order to send messages to device. <br/> os: os name tag. <br/> version: os version tag. <br/> arch: device architecture tag. <br/> crid : content resource identifier tag. <br/> hash: storing hash value of content. **NOTE** Resource will be transferred only to devices matching the tagged architecture version type.| | |
+| POST /api/v1/device/svi/?id=<resource_id> | Updates the content of existing resource. | Query - id: Resource Id  | | | |
+| DELETE /api/v1/device/svi/?id=<resource_id> | Removes resource(s) by tag or id. | Query - id: Resource Id  | | | |
+
 
 ***NOTE*** These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
 
 # Inserting keys into Owner keystore
 
-The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fido-iot-src\>/demo/owner/owner_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
@@ -173,3 +221,32 @@ The PKCS12 keystore file \<fido-iot-src\>/demo/owner/owner_keystore.p12 contains
 # Troubleshooting
 
 As the H2 DB grows, larger heap space will be required by the application to run the service. Default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issues.
+
+# Configuring Owner for HTTPS/TLS Communication
+
+By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS request from the device.
+
+- Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Owner server.
+
+- Copy the generated Keystore/Certificate to `demo/owner/certs` folder.
+
+- Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
+
+- Update the following environment varibles in `demo/owner/owner.env` file
+
+    |  Variable              |  Value            |             Description       |
+    | -----------------------|-------------------|-------------------------------|
+    | owner_protocol_scheme  | https             | To enable HTTPS communication.|
+    | owner_https_port       | port number       | The given port will be used for HTTPS communication. |
+    | fido_ssl_mode          | TEST / PROD       | If set to `TEST`, then SSL verification is disabled. If set to `PROD`, then certificate verification is initiated. |
+    | owner_ssl_keystore     | keystore-filename | Filename of Keystore that is present in the certs folder.|
+    | owner_ssl_keystore-password| keystore-password | Password of the keystore. |
+    | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
+    | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
+    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
+    | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
+    Avoid using the default keystore available for production deployment.

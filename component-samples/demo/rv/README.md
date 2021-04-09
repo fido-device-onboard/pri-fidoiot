@@ -7,17 +7,19 @@
 
 # Getting the executable
 
-Use the following commands to build FIDO IoT RV Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
+(PRI) Rendezvous (RV) component sample source.
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fido-iot-src>/service/component-samples/rv/
+$ cd <fdo-pri-src>/service/component-samples/rv/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into <fido-iot-src>/demo/rv/.
+This will copy the required executables and libraries into <fdo-pri-src>/demo/rv/.
 
-# Configuring the FIDO IoT RV Sample
+# Configuring the FDO PRI RV Sample
 
-Some required runtime arguments
+RV runtime arguments:
 
 - `rv_port`
 
@@ -70,11 +72,42 @@ Some required runtime arguments
 
   Default value: ./target/tomcat
 
+- `rv_protocol_scheme`
+
+  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
+
+  Default value: https
+
+- `rv_https_port`
+
+  Allows enduser to select a port for accepting HTTPS requests.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: 443
+
+- `rv_ssl_keystore`
+
+  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default value: <fdo-pri-src>/component-samples/demo/rv/certs/ssl.p12
+
+- `rv_ssl_keystore_password`
+
+  Provides password for the specified keystore.
+  **NOTE** This property is not required if service is running in `http` mode.
+
+  Default keystore password: fdo123
+
+## Support for OnDie devices
+
+Refer to [Demo README](../README.md) for steps to configure rendezvous to support OnDie devices.
+
 # Enabling Remote Access to DB
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fido-iot-src>/service/component-samples/rv/src/main/java/org/fido/iot/sample/RvServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/service/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
@@ -91,7 +124,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 - RV provides the option to allow and deny requests based on the owner, manufacturer and reseller public keys and based on the GUID used in the Device Ownership Voucher
 header.
-- To add entries to these allowlist and denylist, update the `config.properties` file in `<fido-iot-src>/storage/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `demo/rv` and restart the docker.
+- To add entries to these allowlist and denylist, update the `config.properties` file in `<fdo-pri-src>/util/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `<fdo-pri-src>/component-samples/demo/rv` and restart the docker.
 - Once updated, rebuild the code, rebuild RV docker image and then start the docker.
 - The hashes for the default public keys present of owner, manufacturer and reseller are already added in allowlist configuration of component sample. The table below lists them.
 
@@ -120,3 +153,25 @@ $ cat example_allowlist_publickey.der | openssl dgst -sha256 | awk '/s/{print to
 ```
 
 ***NOTE:*** Input file cert.pem is an X509 certificate.
+
+# Configuring RV for HTTPS/TLS Communication
+
+By default, the RV uses HTTP for all communications on port 8040. In addition to that, the RV can be configured to handle HTTPS request from the owner & device on port 8443.
+
+- Generate the Keystore/Certificate for the RV. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+  * Ensure that the web certificate is issued to the resolvable domain of the Rendezvous server. Refer the above section to generate the keystore.
+
+- Copy the generated Keystore/Certificate to `<fdo-pri-src>/component-samples/demo/rv/certs` folder.
+
+- Update the following environment varibles in `<fdo-pri-src>/component-samples/demo/rv/rv.env` file
+
+    |  Variable            |  Value            |             description       |
+    | ---------------------|-------------------|-------------------------------|
+    | rv_protocol_scheme  | https             | To enable HTTPS communication.|
+    | rv_https_port       | port number       | The given port number will be used for HTTPS communication. |
+    | rv_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
+    | rv_ssl_keystore-password| keystore-password | password of the keystore. |
+
+    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of RV.
+    Avoid using the default keystore available for production deployment.
