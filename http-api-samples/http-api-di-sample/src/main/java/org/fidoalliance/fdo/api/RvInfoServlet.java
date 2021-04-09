@@ -16,7 +16,7 @@ import org.fidoalliance.fdo.storage.DiDbManager;
 public class RvInfoServlet extends HttpServlet {
 
   final String validUriFormat =
-      "((http|https)://[a-zA-Z0-9.-]*:[0-9]{1,5}[?]?((?:\\w+=\\w*+)[&]?)*[\\s]?)*";
+      "((http|https)://[a-zA-Z0-9.-]*:[0-9]{1,5}[?]?(([a-zA-Z]+=[A-z0-9.-]*)[&]?)*[\\s]?)*";
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -35,7 +35,7 @@ public class RvInfoServlet extends HttpServlet {
 
     String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
-    if (rvInfo.matches(validUriFormat)) {
+    if (rvInfo != null && rvInfo.length() != 0 && rvInfo.matches(validUriFormat)) {
       DiDbManager dbManager = new DiDbManager();
       dbManager.addRvInfo(ds, rvInfo);
     } else {
