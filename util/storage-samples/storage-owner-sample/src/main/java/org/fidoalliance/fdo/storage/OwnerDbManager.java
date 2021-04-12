@@ -627,7 +627,6 @@ public class OwnerDbManager {
       String resourceId,
       int start,
       int end) {
-    Composite state = Composite.newArray();
     String sql = "SELECT "
         + "LENGTH(CONTENT), "
         + "CONTENT, "
@@ -668,7 +667,6 @@ public class OwnerDbManager {
    * @return The value of the FILE_NAME tag.
    */
   public String getSystemResourcesFileName(DataSource ds, String resourceId) {
-    Composite state = Composite.newArray();
     String sql = "SELECT FILE_NAME_TAG "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE RESOURCE_ID = ?;";
@@ -805,8 +803,8 @@ public class OwnerDbManager {
         }
 
         // calculate SHA384 hash of the file content.
-        byte[] wgetFileContentHash =
-            (new CryptoService().hash(Const.SHA_384, sviContent)).getAsBytes(Const.HASH);
+        // byte[] wgetFileContentHash =
+        //    (new CryptoService().hash(Const.SHA_384, sviContent)).getAsBytes(Const.HASH);
 
         // Adds the hash entry to OWNER_SERVICEINFO table.
         //addServiceInfo(ds, sviId, wgetFileContentHash);

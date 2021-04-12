@@ -27,9 +27,6 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
       String requestBody = req.getReader().lines().collect(Collectors.joining());
       if (requestBody != null) {
 
-        DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-        OwnerDbManager ownerDbManager = new OwnerDbManager();
-
         String[] deviceTypeCriteria = requestBody.split(DELIMITER);
         if (deviceTypeCriteria.length != 3) {
           getServletContext().log("Invalid request has been provided.");
@@ -37,8 +34,6 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
           return;
         }
 
-        //ownerDbManager.addDeviceTypeCriteria(
-        //    ds, deviceTypeCriteria[0], deviceTypeCriteria[1], deviceTypeCriteria[2]);
       }
     } catch (Exception exp) {
       resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);

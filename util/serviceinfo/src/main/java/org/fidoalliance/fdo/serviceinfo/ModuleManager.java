@@ -144,8 +144,6 @@ public class ModuleManager implements Module {
   @Override
   public Composite nextMessage() {
 
-    Composite result = Const.EMPTY_MESSAGE;
-
     for (Module module : moduleList) {
       if (module.isMore()) {
         Composite modResult = module.nextMessage();

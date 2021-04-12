@@ -192,9 +192,4 @@ public class OwnerSysModule implements Module {
     return message;
   }
 
-  private String getVersion() {
-    return getName() + "-1";// -1 version
-  }
-
-
 }
