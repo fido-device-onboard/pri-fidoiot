@@ -788,6 +788,10 @@ public class OwnerDbManager {
           throw new RuntimeException(e);
         }
 
+        // calculate SHA384 hash of the file content.
+        // byte[] wgetFileContentHash =
+        //    (new CryptoService().hash(Const.SHA_384, sviContent)).getAsBytes(Const.HASH);
+
         // Read the file content whose hash needs to be calculated.
         sql = "SELECT CONTENT FROM OWNER_SERVICEINFO WHERE SVI_ID = ?";
         try (Connection conn = ds.getConnection();
