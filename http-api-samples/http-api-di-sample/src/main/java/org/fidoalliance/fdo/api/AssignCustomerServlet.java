@@ -40,6 +40,5 @@ public class AssignCustomerServlet extends HttpServlet {
       resp.setStatus(500);
       return;
     }
-
   }
 }
