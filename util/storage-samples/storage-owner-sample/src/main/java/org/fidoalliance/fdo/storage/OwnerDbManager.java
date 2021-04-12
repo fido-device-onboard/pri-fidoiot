@@ -627,7 +627,6 @@ public class OwnerDbManager {
       String resourceId,
       int start,
       int end) {
-
     String sql = "SELECT "
         + "LENGTH(CONTENT), "
         + "CONTENT, "
@@ -668,7 +667,6 @@ public class OwnerDbManager {
    * @return The value of the FILE_NAME tag.
    */
   public String getSystemResourcesFileName(DataSource ds, String resourceId) {
-
     String sql = "SELECT FILE_NAME_TAG "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE RESOURCE_ID = ?;";
