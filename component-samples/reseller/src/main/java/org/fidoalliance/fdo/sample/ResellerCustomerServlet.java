@@ -6,6 +6,8 @@ package org.fidoalliance.fdo.sample;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +26,7 @@ public class ResellerCustomerServlet extends HttpServlet {
     String name = req.getParameter("name");
     String contentType = req.getContentType();
 
-    if (null == id || null == name) {
+    if (id.equals("") || name.equals("") || !id.matches("[0-9]+")) {
       resp.setStatus(400);
       return;
     }
@@ -37,12 +39,22 @@ public class ResellerCustomerServlet extends HttpServlet {
       }
     }
 
-    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+    try {
+      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
 
-    String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+      String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
-    PemLoader.loadPublicKeys(keySet);
-    new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
+      List<PublicKey> key = PemLoader.loadPublicKeys(keySet);
+      if (key.size() > 0) {
+        new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
+      } else {
+        resp.setStatus(400); //Invalid PEM string
+        return;
+      }
+
+    } catch (Exception e) {
+      resp.setStatus(500);
+    }
   }
 
   @Override
