@@ -232,9 +232,7 @@ public abstract class To2ServerService extends MessagingService {
       Composite payload = Composite.newArray();
       payload.set(
           Const.FIRST_KEY,
-          (getStorage()
-              .getMaxDeviceServiceInfoMtuSz()
-              .equals(String.valueOf(Const.DEFAULT_SERVICE_INFO_MTU_SIZE))
+          (getStorage().getMaxDeviceServiceInfoMtuSz() == null
               ? null
               : Integer.parseInt(getStorage().getMaxDeviceServiceInfoMtuSz())));
 

@@ -386,7 +386,8 @@ public abstract class To2ClientService extends DeviceService {
         }
       }
     }
-    getStorage().setMaxDeviceServiceInfoMtuSz(deviceMtu);
+    getStorage()
+        .setMaxDeviceServiceInfoMtuSz(Math.max(deviceMtu, Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
 
     Composite payload = getStorage().getNextServiceInfo();
     body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
