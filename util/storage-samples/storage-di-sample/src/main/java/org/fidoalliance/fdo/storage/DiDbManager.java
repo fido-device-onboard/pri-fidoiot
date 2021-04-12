@@ -25,22 +25,6 @@ public class DiDbManager {
         Statement stmt = conn.createStatement()) {
 
       String sql = "CREATE TABLE IF NOT EXISTS "
-          + "MT_DEVICES("
-          + "GUID CHAR(36), "
-          + "SERIAL_NO VARCHAR(255) PRIMARY KEY, "
-          + "VOUCHER BLOB, "
-          + "CUSTOMER_ID INT NULL DEFAULT NULL, "
-          + "M_STRING BLOB, "
-          + "STARTED TIMESTAMP, "
-          + "COMPLETED TIMESTAMP NULL DEFAULT NULL, "
-          + "PRIMARY KEY ( SERIAL_NO), "
-          + "UNIQUE ( SERIAL_NO), "
-          + "UNIQUE ( GUID)"
-          + ");";
-
-      stmt.executeUpdate(sql);
-
-      sql = "CREATE TABLE IF NOT EXISTS "
           + "MT_SETTINGS ("
           + "ID INT NOT NULL, "
           + "CERTIFICATE_VALIDITY_DAYS INT, "
@@ -57,6 +41,23 @@ public class DiDbManager {
           + "NAME VARCHAR(255), "
           + "KEYS VARCHAR(4096), "
           + "UNIQUE (CUSTOMER_ID)"
+          + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
+          + "MT_DEVICES("
+          + "GUID CHAR(36), "
+          + "SERIAL_NO VARCHAR(255) PRIMARY KEY, "
+          + "VOUCHER BLOB, "
+          + "CUSTOMER_ID INT NULL DEFAULT NULL, "
+          + "M_STRING BLOB, "
+          + "STARTED TIMESTAMP, "
+          + "COMPLETED TIMESTAMP NULL DEFAULT NULL, "
+          + "PRIMARY KEY ( SERIAL_NO), "
+          + "FOREIGN KEY (CUSTOMER_ID) REFERENCES MT_CUSTOMERS(CUSTOMER_ID), "
+          + "UNIQUE ( SERIAL_NO), "
+          + "UNIQUE ( GUID)"
           + ");";
 
       stmt.executeUpdate(sql);
@@ -137,22 +138,26 @@ public class DiDbManager {
    * @param id The id of the customer.
    * @param guid The GUID of the device
    */
-  public void assignCustomerToVoucher(DataSource ds, int id, String guid) {
+  public int assignCustomerToVoucher(DataSource ds, int id, String guid) {
 
     String sql = ""
         + "UPDATE MT_DEVICES   "
         + "SET CUSTOMER_ID=? "
         + "WHERE GUID=?; ";
 
+    int rowsAffected = 0;
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setInt(1, id);
       pstmt.setString(2, guid);
-      pstmt.executeUpdate();
+      rowsAffected = pstmt.executeUpdate();
+      System.out.println(rowsAffected);
 
     } catch (SQLException e) {
+      System.out.println("dasd - " + rowsAffected);
       throw new RuntimeException(e);
     }
+    return rowsAffected;
   }
 
   /**
