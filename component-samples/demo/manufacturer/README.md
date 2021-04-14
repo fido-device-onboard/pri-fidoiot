@@ -6,7 +6,7 @@
 * **Haveged**.
 * **SoftHSM**.
 
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
 (PRI) Manufacturer component sample source.
@@ -85,25 +85,25 @@ Manufacturer runtime arguments:
 - `manufacturer_https_port`
 
   Allows enduser to select a port for accepting HTTPS requests.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
 
 - `manufacturer_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/manufacturer/certs/ssl.p12
 
 - `manufacturer_ssl_keystore-password`
 
   Provides password for the specified keystore.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
 
-## Support for OnDie devices
+## Support for OnDie Devices
 
 Refer to [Demo README](../README.md) for steps to configure manufacturer to support OnDie devices.
 
@@ -120,11 +120,11 @@ webAllowOthers = true
 
 **IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-# Starting the Manufacturer service
+# Starting the Manufacturer Service
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Manufacturer REST APIs
 
@@ -136,7 +136,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 | POST /api/v1/rvinfo/ | Updates RV Info in `MT_SETTINGS` table | | text/plain; charset=us-ascii | RV Info | | |
 
 
-# Inserting keys into Manufacturer keystore
+# Inserting Keys into Manufacturer Keystore
 
 The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
 
@@ -161,7 +161,7 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     | manufacturer_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
     | manufacturer_ssl_keystore-password| keystore-password | password of the keystore. |
 
-    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
+    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
@@ -173,4 +173,4 @@ RvInfo for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
 
 RvInfo for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
 
-**NOTE** The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol.
+***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol.
