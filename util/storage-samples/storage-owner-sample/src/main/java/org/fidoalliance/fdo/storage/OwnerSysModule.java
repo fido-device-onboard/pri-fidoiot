@@ -146,7 +146,7 @@ public class OwnerSysModule implements Module {
       case FdoSys.KEY_ACTIVE: {
 
         byte[] content = new OwnerDbManager().getSystemResourceContent(dataSource, resId);
-        if (content.length == 1 && content[0] == CBOR_TRUE) {
+        if (content.length == 1 && content[0] == ((byte) CBOR_TRUE)) {
           message.set(Const.SECOND_KEY, true);
         } else {
           message.set(Const.SECOND_KEY, false);
