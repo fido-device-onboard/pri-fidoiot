@@ -5,7 +5,7 @@
 * **Java 11**.
 * **Haveged**.
 
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Owner Component sample source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
@@ -63,7 +63,7 @@ Owner runtime arguments:
 
    Default value: false
 
-   **NOTE** Not recommended for use in production systems.
+   ***NOTE***: Not recommended for use in production systems.
 
 - `catalina_home`
 
@@ -122,7 +122,7 @@ Owner runtime arguments:
 - `owner_https_port`
 
    Allows enduser to select a port for accepting HTTPS requests.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
 
@@ -135,28 +135,28 @@ Owner runtime arguments:
 - `owner_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/owner/certs/ssl.p12
 
 - `owner_ssl_keystore_password`
 
   Provides password for the specified keystore.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
 
 - `ssl_truststore`
 
   Provides path for SSL truststore to be used by the service.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/owner/certs/truststore
 
 - `ssl_truststore_password`
 
   Provides password for the specified truststore.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
 
@@ -166,7 +166,7 @@ Owner runtime arguments:
   Default truststore type: PKCS12
 
 
-## Support for OnDie devices
+## Support for OnDie Devices
 
 Refer to [Demo README](../README.md) for steps to configure owner to support OnDie devices.
 
@@ -183,11 +183,11 @@ webAllowOthers = true
 
 **IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-# Starting the owner service
+# Starting the Owner Service
 
 Refer to the section [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Owner REST APIs
 
@@ -208,15 +208,15 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | DELETE /api/v1/device/svi/?id=<resource_id> | Removes resource(s) by tag or id. | Query - id: Resource Id  | | | |
 
 
-***NOTE*** These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
+***NOTE***: These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
 
-# Inserting keys into Owner keystore
+# Inserting Keys into Owner Keystore
 
 The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
-***NOTE*** A 'PKCS12' keystore is used to store the keys, instead of 'PKCS11' keystore (softHSM). This is because of use of 'BouncyCastle' as a security provider for algorithm 'RSA/NONE/OAEPWithSHA256AndMGF1Padding' to support Asymmetric key exchange, since the security provider 'SUNPKCS11' configured with softHSM, does not support the same as per the available documentation.
+***NOTE***: A 'PKCS12' keystore is used to store the keys, instead of 'PKCS11' keystore (softHSM). This is because of the use of 'BouncyCastle' as a security provider for algorithm 'RSA/NONE/OAEPWithSHA256AndMGF1Padding' to support Asymmetric key exchange, since the security provider 'SUNPKCS11' configured with softHSM, does not support the same as per the available documentation.
 
 # Troubleshooting
 
@@ -248,5 +248,5 @@ By default, the Owner uses HTTP for all communications on port 8042. In addition
     | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
     | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
 
-    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
+    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
     Avoid using the default keystore available for production deployment.
