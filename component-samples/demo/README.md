@@ -173,6 +173,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that are sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
+- Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. Device will ignore all ServiceInfo module messages if module_name:active doesn't preceed the messages of the module.
+
 The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. Few sample ServiceInfo values, as present in owner/serviceinfo/sample-values/ are populated into the database table 'OWNER_SERVICEINFO' as byte arrays. For keeping the association between the Device and the ServiceInfo values to transfer, 'GUID_OWNERSVI' database table is used. When a Device is inserted into the database table 'TO2_DEVICES', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo transfer
