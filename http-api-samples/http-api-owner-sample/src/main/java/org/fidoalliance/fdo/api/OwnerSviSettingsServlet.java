@@ -44,14 +44,13 @@ public class OwnerSviSettingsServlet extends HttpServlet {
         OwnerDbManager ownerDbManager = new OwnerDbManager();
 
         String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
-        if (to2Settings.length > 3) {
+        if (to2Settings.length > 2) {
           getServletContext().log("Invalid to2Settings request has been provided.");
           resp.setStatus(400);
           return;
         }
         int deviceMtu = 0;
         int ownerThresholdMtu = 0;
-        boolean wgetContentVerification = false;
         for (String setupInfo : to2Settings) {
           String[] setting = setupInfo.split(SETUPINFO_VALUE_DELIMETER);
           if (setting.length == 2) {
@@ -72,12 +71,6 @@ public class OwnerSviSettingsServlet extends HttpServlet {
                 }
                 getServletContext().log("Updating Owner Threshold MTU for TO2 Settings");
                 ownerDbManager.updateMtu(ds, "OWNER_MTU_THRESHOLD", ownerThresholdMtu);
-                break;
-              case SETTINGS_WGET_MODE_CONTENT_VERIFICATION:
-                wgetContentVerification = Boolean.parseBoolean(setting[1]);
-                getServletContext()
-                    .log("Updating content verification preference for owner wget SVI module");
-                ownerDbManager.updateWgetVerificationPreference(ds, wgetContentVerification);
                 break;
               default:
                 break;
