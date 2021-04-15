@@ -5,7 +5,7 @@
 * **Java 11**.
 * **Haveged**.
 
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) HTTP Device Component sample source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
@@ -16,7 +16,7 @@ $ mvn clean install
 
 This will copy the required executables and libraries into <fdo-pri-src>/component-samples/demo/device/.
 
-### Configuring the device service
+### Configuring the Device Service
 
 Device runtime arguments:
 
@@ -51,7 +51,7 @@ Device runtime arguments:
 
   Default is true.
 
-# Starting the Device service
+# Starting the Device Service
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/device
@@ -75,7 +75,7 @@ The device will be onboarded.
 
 The rendezvous and owner servers must be available during this step.
 
-# Configuring Device for HTTPS/TLS communication
+# Configuring Device for HTTPS/TLS Communication
 
 - Copy the truststore containing all the required certificates to `demo/device` folder.
 

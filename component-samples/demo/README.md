@@ -15,7 +15,7 @@
 `Docker engine (minimum version 18.09)` <br/>
 `Docker-compose (minimum version 1.21.2)`<br/>
 
-# Docker commands
+# Docker Commands
 
 ## Start Docker
 * Use the following command to start the docker container.
@@ -53,7 +53,7 @@ OR
 $ sudo docker rmi <image-id>
 ```
 
-* Use the following command to delete all the docker artifacts. (Note: docker containers must be stopped before deleting them)
+* Use the following command to delete all the docker artifacts. (**Note:** Docker containers must be stopped before deleting them)
 ```
 $ sudo docker system prune -a
 ```
@@ -83,13 +83,13 @@ http_proxy_port: 900
 
 If no proxy needs to be specified, do not add these properties to your _JAVA_OPTIONS.
 
-# Configuring OnDie (optional)
+# Configuring OnDie (Optional)
 
-OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via java -Doptions, entries in application.properties or entries the the .env files.
+OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the the .env files.
 
 OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded direct from java if the ondie_autoupdate property is set to true.
 
-NOTE: if you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
+***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
 
@@ -114,7 +114,7 @@ Note that this requires internet access by the component. Should a component be 
 
 6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample again. The previously created 'credential.bin' from Step#2 will be used directly by the Device.
 
-**NOTE** Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remain unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API.
+***NOTE***: Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remains unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API.
 
 # Running Demo using Reseller
 
@@ -143,7 +143,7 @@ In another use-case (use-case: 2), the FDO PRI Manufacturer provisions the Devic
 
 2. Get the new Ownership Voucher using the Owner API `GET /api/v1/owner/newvoucher/?id=<device_guid>`.
 
-3. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FDO PRI Reseller to use the FDO PRI Owner's keystore. This can be done by copying the owner/owner_keystore.p12 into reseller/ and renaming it to reseller_keystore.p12. Additionally,  update the property 'reseller_keystore_password' in reseller/reseller.env, with value of 'owner_keystore_password' in owner/owner.env.
+3. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FDO PRI Reseller to use the FDO PRI Owner's keystore. This can be done by copying the owner/owner_keystore.p12 into reseller/ and renaming it to reseller_keystore.p12. Additionally, update the property 'reseller_keystore_password' in reseller/reseller.env, with value of 'owner_keystore_password' in owner/owner.env.
 
 4. Add the new size 0 Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`
 
@@ -169,7 +169,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *exec* - The command that will be executed at the device. Device executes the command as received.
 
-***NOTE*** The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
+***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that are sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
@@ -177,7 +177,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. Few sample ServiceInfo values, as present in owner/serviceinfo/sample-values/ are populated into the database table 'OWNER_SERVICEINFO' as byte arrays. For keeping the association between the Device and the ServiceInfo values to transfer, 'GUID_OWNERSVI' database table is used. When a Device is inserted into the database table 'TO2_DEVICES', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
-# Enabling ServiceInfo transfer
+# Enabling ServiceInfo Transfer
 
 To enable ServiceInfo transfer to a Device with a given GUID, follow the steps below:
 
@@ -251,7 +251,7 @@ Assuming that there is already an existing certificate named 'certificate.pem' a
 
 `$ keytool -importkeystore -destkeystore path/to/dest-keystore.p12 -srckeystore src-keystore.p12 -srcstoretype PKCS12 -alias newkeypair`
 
-***NOTE*** The password entered in Step 1 to generate the src-keystore.p12 must be the same as that of dest-keystore.p12, that is, the password of the newly created keystore must match the existing keystore where it will be imported to.
+***NOTE***: The password entered in Step 1 to generate the src-keystore.p12 must be the same as that of dest-keystore.p12, that is, the password of the newly created keystore must match the existing keystore where it will be imported to.
 
 ## Exporting an Existing Certificate from Keystore
 

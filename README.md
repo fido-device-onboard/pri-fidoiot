@@ -1,4 +1,4 @@
-**NOTE**: This is a preliminary implementation of the [FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
+***NOTE***: This is a preliminary implementation of the [FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
 
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
@@ -25,7 +25,7 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - loading certificates and keys from PEM formatted strings.
 
-## Building FDO PRI source
+## Building FDO PRI Source
 
 FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
 [Apache Maven* software](http://maven.apache.org). The instructions which follow describe a simple
@@ -78,7 +78,7 @@ You can allow remote database console connections by setting webAllowOthers=true
 
 ### Running FDO PRI HTTP Clients
 
-#### Running the FDO PRI Device Initialization (DI) HTTP client
+#### Running the FDO PRI Device Initialization (DI) HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-di-sample
 $ mvn exec:java
@@ -90,16 +90,16 @@ DI Client finished.
 
 Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
 
-#### Running the FDO PRI To0 HTTP client
+#### Running the FDO PRI To0 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to0-sample
 $ mvn exec:java
 ```
 
-To0 Response Wait: 3600
+TO0 Response Wait: 3600
 TO0 Client finished.
 
-#### Running the FDO PRI To1 HTTP client
+#### Running the FDO PRI To1 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to1-sample
 $ mvn exec:java
@@ -108,7 +108,7 @@ $ mvn exec:java
 signed RV Blob: 84a10126...
 TO1 Client finished.
 
-### Running the FDO PRI To2 HTTP client
+### Running the FDO PRI To2 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to2-sample
 $ mvn exec:java
@@ -116,7 +116,7 @@ $ mvn exec:java
 
 TO2 Client finished.
 
-***NOTE***: During the execution of the Protcol Samples using the command 'mvn exec:java', following warning messages may be displayed on the console. These warning messages are a result of the version discrepency of Guice with maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
+***NOTE***: During the execution of the Protocol Samples using the command 'mvn exec:java', the following warning messages may be displayed on the console. These warning messages are a result of the version discrepency of Guice with Maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
 ```
 WARNING: An illegal reflective access operation has occurred
 WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/usr/share/maven/lib/guice.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
@@ -125,7 +125,7 @@ WARNING: Use --illegal-access=warn to enable warnings of further illegal reflect
 WARNING: All illegal access operations will be denied in a future release
 ```
 
-## Ownership Voucher creation
+## Ownership Voucher Creation
 
 The DI server will listen for messages at http://localhost:8039/fdo/100/msg/<msgid>.
 The server also includes a SQL database that runs on port 8049. The database console
@@ -191,13 +191,13 @@ To enable Rendezvous Bypass
 
 EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intended to support onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device. Test mode is enabled by default for protocol-sample in components.
 
-**NOTE** Not recommended for use in production systems.
+***NOTE***: Not recommended for use in production systems.
 
 # Using Component Samples
 
 Refer to [Demo README](demo/README.md) for steps to run component sample demo.
 
-# Support for OnDie devices
+# Support for OnDie Devices
 
 Refer to [Demo README](demo/README.md) for steps to configure component-samples to support OnDie devices.
 
