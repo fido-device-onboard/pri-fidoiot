@@ -153,6 +153,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
     int rowsAffected = new ResellerDbManager().deleteVoucher(ds, serialNo);
     if (rowsAffected == 0) {
+      System.out.println("Unable to find voucher for serial no: " + serialNo);
       resp.setStatus(404);
       return;
     }
