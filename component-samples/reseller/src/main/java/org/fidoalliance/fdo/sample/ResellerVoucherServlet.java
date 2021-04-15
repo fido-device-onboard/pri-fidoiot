@@ -151,6 +151,11 @@ public class ResellerVoucherServlet extends HttpServlet {
     String uri = req.getRequestURI();
     String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    new ResellerDbManager().deleteVoucher(ds, serialNo);
+    int rowsAffected = new ResellerDbManager().deleteVoucher(ds, serialNo);
+    if (rowsAffected == 0) {
+      System.out.println("Unable to find voucher for serial no: " + serialNo);
+      resp.setStatus(404);
+      return;
+    }
   }
 }

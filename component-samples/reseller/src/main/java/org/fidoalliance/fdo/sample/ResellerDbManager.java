@@ -148,17 +148,19 @@ public class ResellerDbManager {
    * @param ds       A Datasource.
    * @param serialNo The device serialNo.
    */
-  public void deleteVoucher(DataSource ds, String serialNo) {
+  public int deleteVoucher(DataSource ds, String serialNo) {
     String sql = "DELETE FROM RT_DEVICES WHERE SERIAL_NO = ? ";
 
+    int rowsAffected = 0;
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, serialNo);
-      pstmt.executeUpdate();
+      rowsAffected = pstmt.executeUpdate();
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+    return rowsAffected;
   }
 
   /**
