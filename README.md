@@ -90,7 +90,7 @@ DI Client finished.
 
 Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
 
-#### Running the FDO PRI To0 HTTP Client
+#### Running the FDO PRI TO0 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to0-sample
 $ mvn exec:java
@@ -99,7 +99,7 @@ $ mvn exec:java
 TO0 Response Wait: 3600
 TO0 Client finished.
 
-#### Running the FDO PRI To1 HTTP Client
+#### Running the FDO PRI TO1 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to1-sample
 $ mvn exec:java
@@ -108,7 +108,7 @@ $ mvn exec:java
 signed RV Blob: 84a10126...
 TO1 Client finished.
 
-### Running the FDO PRI To2 HTTP Client
+### Running the FDO PRI TO2 HTTP Client
 ```
 $ cd <fdo-pri-src>/protocol-samples/http-client-to2-sample
 $ mvn exec:java
