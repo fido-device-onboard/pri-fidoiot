@@ -19,18 +19,16 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server service.
 
-- `protocol-samples`: It contains client and server implementation that demonstrates the prelimnary E2E demo that educates the enduser with the protocol workflow.
+- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end user with the protocol workflow.
 
-- `protocol`: It contains implementations related to protocol message processing..
+- `protocol`: It contains implementations related to protocol message processing.
 
-- `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - loading certificates and keys from PEM formatted strings.
+- `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
 
 ## Building FDO PRI Source
 
 FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
-[Apache Maven* software](http://maven.apache.org). The instructions which follow describe a simple
-build and assume familiarity with
-[the Maven build lifecycle](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html).
+[Apache Maven* software](http://maven.apache.org).
 
 Following ports are used for unit-tests and sample code - 8039, 8040, 8042, 8043, 8049, 8050, and 8051.
 Ensure that these ports are not used by other applications while building and executing the
@@ -83,9 +81,12 @@ You can allow remote database console connections by setting webAllowOthers=true
 $ cd <fdo-pri-src>/protocol-samples/http-client-di-sample
 $ mvn exec:java
 ```
+Expect the following line on successful DI completion.
 
 SerialNo: d35a096f
+
 Device Credentials: 87f5..
+
 DI Client finished.
 
 Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
@@ -95,8 +96,10 @@ Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
 $ cd <fdo-pri-src>/protocol-samples/http-client-to0-sample
 $ mvn exec:java
 ```
+Expect the following message on successful TO0 completion.
 
 TO0 Response Wait: 3600
+
 TO0 Client finished.
 
 #### Running the FDO PRI TO1 HTTP Client
@@ -116,7 +119,7 @@ $ mvn exec:java
 
 TO2 Client finished.
 
-***NOTE***: During the execution of the Protocol Samples using the command 'mvn exec:java', the following warning messages may be displayed on the console. These warning messages are a result of the version discrepency of Guice with Maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
+***NOTE***: During the execution of the Protocol Samples using the command 'mvn exec:java', the following warning messages may be displayed on the console. These warning messages are a result of the version discrepancy of Guice with Maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
 ```
 WARNING: An illegal reflective access operation has occurred
 WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/usr/share/maven/lib/guice.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
@@ -134,6 +137,7 @@ UI will be available at http://localhost:8039/console.
 Extended Ownership Vouchers can be obtained from the following url:
 
 http://localhost:8039/api/v1/vouchers/<serial_no>
+
 ***NOTE***: Default serial number is '0'. To get the serial_no corresponding to the GUID, look up the `SERIAL_NO` field of MT_DEVICES table in the DI database.
 
 The hex value of the extended Ownership Voucher can be obtained by running the API above. The value will be populated on DI server console.
@@ -144,7 +148,7 @@ To log in to the database and view records use the following information:
 "Password:" = "" (blank)
 "JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fdo-pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
 ```
-The path to the DB will be printed out in following format when the DI server is starting.
+The path to the DB will be printed out in the following format when the DI server is starting.
 
 `jdbc:h2:tcp:...`
 
@@ -161,7 +165,7 @@ To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` pro
 
 - To enable remote access for TO0-TO1 server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-to0-to1-sample/src/main/java/org/fidoalliance/fdo/sample/To0To1ServerApp.java` <br/>
 
-- To enable remote access for TO2 server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fidoalliance/fdo/sample/To2ServerApp.java`
+- To enable remote access for TO2 server DB, update file: `<fdo-pri-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fidoalliance/fdo/sample/To2ServerApp.java`
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
@@ -175,13 +179,13 @@ webAllowOthers = true
 FDO includes a Rendezvous Bypass mechanism that is useful for IOT deployments that are not
 dependent on a particular network structure or ownership.
 
-In such cases, a FDO device may elect to bypass the FDO Rendezvous Server mechanism and use
+In such cases, an FDO device may elect to bypass the FDO Rendezvous Server mechanism and use
 the local mechanism instead. Since the TO2 provides full authentication and authorization of the
 Device to the Owner, there is no change in the security posture of FDO.
 
 To enable Rendezvous Bypass
 
-- Update the RVInfo blob with `rvbypass` flag  and owner address using the API `POST /api/v1/rvinfo` with
+- Update the RVInfo blob with `rvbypass` flag and owner address using the API `POST /api/v1/rvinfo` with
   `http://<owner-ip:port>?rvbypass=&ipaddress=<owner-ip>&ownerport=<port>` as body.
 
 - Setting the `rvbypass` flag in RVblob, causes the TO1 protocol to be skipped, and a TO2 connection
@@ -195,11 +199,11 @@ EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intend
 
 # Using Component Samples
 
-Refer to [Demo README](demo/README.md) for steps to run component sample demo.
+Refer to [Demo README](component-samples/demo/README.md) for steps to run component sample demo.
 
 # Support for OnDie Devices
 
-Refer to [Demo README](demo/README.md) for steps to configure component-samples to support OnDie devices.
+Refer to [Demo README](component-samples/demo/README.md) for steps to configure component-samples to support OnDie devices.
 
 Support for OnDie devices is built into the protocol-samples and no configuration is required. The OnDie certs and CRLs are preloaded into the
 protocol-samples/onDieCache directory. Should these need to be refreshed (in case of devices released after the FDO PRI release) then the script in
