@@ -75,14 +75,12 @@ public class Device {
 
     DeviceDevMod devMod = new DeviceDevMod();
     devMod.addModuleName(FdoSys.NAME);
-    //devMod.AddModuleName(FdoWget.NAME);
 
     modules = new ModuleManager();
     modules.setDeviceMode(true);
 
     modules.addModule(devMod);
     modules.addModule(new DeviceSysModule());
-    //modules.AddModule(new DeviceWgetModule());
 
   }
 

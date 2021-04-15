@@ -80,13 +80,25 @@ public class DeviceSysModule implements Module {
         isActive = kvPair.getAsBoolean(Const.SECOND_KEY);
         break;
       case FdoSys.KEY_FILEDESC:
-        createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
+        if (isActive) {
+          createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
+        } else {
+          System.out.println("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
+        }
         break;
       case FdoSys.KEY_WRITE:
-        writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
+        if (isActive) {
+          writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
+        } else {
+          System.out.println("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
+        }
         break;
       case FdoSys.KEY_EXEC:
-        exec(kvPair.getAsComposite(Const.SECOND_KEY));
+        if (isActive) {
+          exec(kvPair.getAsComposite(Const.SECOND_KEY));
+        } else {
+          System.out.println("fdo_sys module not active. Ignoring fdo_sys:exec.");
+        }
         break;
       default:
         break;
