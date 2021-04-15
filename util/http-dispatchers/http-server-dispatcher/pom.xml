@@ -22,8 +22,8 @@
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
-    <commons-codec.version>1.14</commons-codec.version>
-    <tomcat.version>9.0.44</tomcat.version>
+    <commons-codec.version>1.15</commons-codec.version>
+    <tomcat.version>9.0.45</tomcat.version>
     <bcprov.version>1.68</bcprov.version>
     <bcpkix.version>1.68</bcpkix.version>
   </properties>

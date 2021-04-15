@@ -20,12 +20,12 @@
 
   <properties>
     <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
-    <commons-codec.version>1.14</commons-codec.version>
+    <commons-codec.version>1.15</commons-codec.version>
     <commons.configuration2.version>2.7</commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
-    <tomcat.version>9.0.44</tomcat.version>
+    <tomcat.version>9.0.45</tomcat.version>
     <bcpkix.version>1.68</bcpkix.version>
-    <dbcp2.version>2.7.0</dbcp2.version>
+    <dbcp2.version>2.8.0</dbcp2.version>
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <exec.mainClass>org.fidoalliance.fdo.sample.ResellerServerApp</exec.mainClass>
   </properties>
