@@ -204,7 +204,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       applyValues(req, pstmt);
-      try (ResultSet rs = pstmt.executeQuery(sql)) {
+      try (ResultSet rs = pstmt.executeQuery()) {
         resp.setContentType("text/plain");
         try (PrintWriter writer = new PrintWriter(resp.getOutputStream())) {
           int count = 0;
