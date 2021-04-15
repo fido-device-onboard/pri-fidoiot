@@ -148,7 +148,7 @@ public class OwnerDbStorage implements To2ServerStorage {
 
   @Override
   public Composite getVoucher() {
-    return voucher;
+    return voucher.clone(); // don't return references to our internal data
   }
 
   @Override
