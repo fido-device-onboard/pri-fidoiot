@@ -29,9 +29,7 @@ Device runtime arguments:
 - `fidoalliance.fdo.pem.dev`
 
   The location of the PEM file containing the device keys (private and public).
-  If not set, a hardcoded key is used - see the Java source for details.
-
-  There is no default configured. Provide value `./device.pem` to use the existing default EC-256 key-pair.
+  If not set, file `./device.pem` is used by default.
 
 - `fidoalliance.fdo.device.service.info.mtu`
 
