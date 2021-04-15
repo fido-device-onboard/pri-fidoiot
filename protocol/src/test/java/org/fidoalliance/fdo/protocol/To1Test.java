@@ -7,6 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
@@ -141,6 +148,14 @@ public class To1Test extends BaseTemplate {
 
       public OnDieService getOnDieService() {
         return onDieService;
+      }
+
+      @Override
+      public String getExpiryTimeStamp() {
+        Calendar date = Calendar.getInstance();
+        long t = date.getTimeInMillis();
+        Date afterAddingTenMins = new Date(t + (10 * 60000));
+        return (new SimpleDateFormat("yyyy-MM-DD HH:mm:ss.SSS").format(afterAddingTenMins));
       }
 
       @Override
