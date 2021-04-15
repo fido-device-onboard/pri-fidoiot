@@ -19,7 +19,7 @@ public class OwnerSysModule implements Module {
   private Composite state;
   private final DataSource dataSource;
   private static final int MAX_READ = 1277;
-  private static final int CBOR_TRUE = 0xF5;
+  private static final byte CBOR_TRUE = (byte) 0xF5;
 
 
   /**

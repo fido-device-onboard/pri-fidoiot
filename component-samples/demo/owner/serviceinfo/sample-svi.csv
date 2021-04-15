@@ -1,1 +1,0 @@
-fdo_sys:filedesc=payload_name,fdo_sys:write=payload.bin,fdo_sys:filedesc=package_name,fdo_sys:write=package.sh,fdo_sys:exec=binsh-linux64,fdo_wget:filename=sample_file,fdo_wget:url=url
