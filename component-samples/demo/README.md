@@ -9,11 +9,21 @@
 
 # System Requirements
 
-* Operating system: Ubuntu 20.04.
+* Operating System: Ubuntu 20.04.
 
-*  Linux packages:<br/>
-`Docker engine (minimum version 18.09)` <br/>
-`Docker-compose (minimum version 1.21.2)`<br/>
+* Linux packages:
+
+  - Docker engine (minimum version 18.09)
+
+  - Docker-compose (minimum version 1.21.2)
+
+  - Haveged
+
+  - Java 11
+
+  - Maven (minimum 3.6.3)
+
+  - SoftHSM
 
 # Docker Commands
 

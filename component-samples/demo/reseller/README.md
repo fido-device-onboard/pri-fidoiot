@@ -1,11 +1,3 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-* **SoftHSM**.
-
 # Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation

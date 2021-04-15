@@ -1,10 +1,3 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-
 # Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
@@ -81,6 +74,7 @@ RV runtime arguments:
 - `rv_https_port`
 
   Allows enduser to select a port for accepting HTTPS requests.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
@@ -88,6 +82,7 @@ RV runtime arguments:
 - `rv_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/rv/certs/ssl.p12
@@ -95,6 +90,7 @@ RV runtime arguments:
 - `rv_ssl_keystore_password`
 
   Provides password for the specified keystore.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
@@ -140,7 +136,7 @@ header.
   | 834F83875910C8507CE935BE2F947DCF854E6554C3ACB79893ACF91220EA5D8B | Owner ECDSA 384 |
   | 91984D7EE0BC1F153900401E6E0D0DC4F6F8472709AA1DAA9256429046C2E367 | Owner RSA 2048 |
 
-- To add entries to allowlist and denylist for public key, public key hash need to be calculated. Refer [Generating Public Key Hash](#calculate-sha256-hash-of-a-public-key) for the steps to generate public key hash from public key.
+- To add entries to allowlist and denylist for public key, public key hash needs to be calculated. Refer [Generating Public Key Hash](#calculate-sha256-hash-of-a-public-key) for the steps to generate public key hash from public key.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 

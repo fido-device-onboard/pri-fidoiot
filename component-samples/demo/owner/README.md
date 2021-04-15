@@ -1,10 +1,3 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-
 # Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Owner Component sample source.
