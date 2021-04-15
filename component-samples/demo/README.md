@@ -85,18 +85,18 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 # Configuring OnDie (Optional)
 
-OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the the .env files.
+OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the .env files.
 
-OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded direct from java if the ondie_autoupdate property is set to true.
+OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded directly from java if the ondie_autoupdate property is set to true.
 
-***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
+***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases, it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
 
 `ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certs and CRLs are downloaded from the cloud at start up into the directory specified by ondie_cache.
 Note that this requires internet access by the component. Should a component be run in on-prem mode then this setting should be set to "false". In such cases, the artifacts can be preloaded by running the script in component-sample/scripts/onDieScript.py when access is available or from another machine with access and then copied into the ondie_cache directory.
 
-`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL containing of the zip file that contains the OnDie certs and CRLs.
+`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certs and CRLs.
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
@@ -143,7 +143,7 @@ In another use-case (use-case: 2), the FDO PRI Manufacturer provisions the Devic
 
 2. Get the new Ownership Voucher using the Owner API `GET /api/v1/owner/newvoucher/?id=<device_guid>`.
 
-3. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FDO PRI Reseller to use the FDO PRI Owner's keystore. This can be done by copying the owner/owner_keystore.p12 into reseller/ and renaming it to reseller_keystore.p12. Additionally, update the property 'reseller_keystore_password' in reseller/reseller.env, with value of 'owner_keystore_password' in owner/owner.env.
+3. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md). Prior to the startup, configure the FDO PRI Reseller to use the FDO PRI Owner's keystore. This can be done by copying the owner/owner_keystore.p12 into reseller/ and renaming it to reseller_keystore.p12. Additionally, update the property 'reseller_keystore_password' in reseller/reseller.env, with the value of 'owner_keystore_password' in owner/owner.env.
 
 4. Add the new size 0 Ownership Voucher to the reseller database table `RT_DEVICES` using reseller API `POST /api/v1/resell/vouchers/<serial_number>`
 
@@ -165,13 +165,13 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *filedesc* - The name to be given to the file once it is transferred. Upon receiving this, device creates a file with the given name and opens stream to write into it.
 
-    *write* - The payload/content (script, binaries, and others) that is sent to the device. Upon receiving this, device writes the content into the open stream as given by the preceeding 'filedesc' message.
+    *write* - The payload/content (script, binaries, and others) that is sent to the device. Upon receiving this, device writes the content into the open stream as given by the preceding 'filedesc' message.
 
     *exec* - The command that will be executed at the device. Device executes the command as received.
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
-- `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that are sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
+- `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
 - Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. The device will ignore all ServiceInfo module messages if module_name:active doesn't precede the messages of the module.
 
