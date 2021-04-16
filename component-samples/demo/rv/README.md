@@ -4,7 +4,7 @@ Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference
 (PRI) Rendezvous (RV) component sample source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fdo-pri-src>/service/component-samples/rv/
+$ cd <fdo-pri-src>/component-samples/rv/
 $ mvn clean install
 ```
 
@@ -103,7 +103,7 @@ Refer to [Demo README](../README.md) for steps to configure rendezvous to suppor
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/service/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
