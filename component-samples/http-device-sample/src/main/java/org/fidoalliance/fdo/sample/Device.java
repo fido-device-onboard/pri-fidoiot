@@ -4,6 +4,9 @@
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -203,6 +206,11 @@ public class Device {
       protected MessagingService getMessagingService(Composite request) {
         return service;
       }
+
+      @Override
+      protected void failed(Exception cause) {
+        fail(cause);
+      }
     };
 
     String url = System.getProperties().getProperty(PROPERTY_DI_URL, "http://localhost:8039/");
@@ -232,6 +240,8 @@ public class Device {
     AtomicReference<Composite> signedBlob = new AtomicReference<>();
     AtomicReference<Composite> wrappedCreds = new AtomicReference<>(credentials);
     AtomicBoolean isTo2Done = new AtomicBoolean(false);
+
+    Throwable lastFailure = null;
 
     rvBypass = isRvBypassSet(rvi);
     if (!rvBypass) {
@@ -288,6 +298,11 @@ public class Device {
         @Override
         protected MessagingService getMessagingService(Composite request) {
           return to1Service;
+        }
+
+        @Override
+        protected void failed(Exception cause) {
+          fail(cause);
         }
       };
 
@@ -456,10 +471,16 @@ public class Device {
       protected MessagingService getMessagingService(Composite request) {
         return to2Service;
       }
+
+      @Override
+      protected void failed(Exception cause) {
+        fail(cause);
+      }
     };
 
     for (String url : to2Urls) {
       if (isTo2Done.get()) {
+        lastFailure = null;
         break;
       }
 
@@ -469,8 +490,33 @@ public class Device {
         WebClient client = new WebClient(url, dr, to2Dispatcher);
         client.run();
       } catch (RuntimeException e) {
-        logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
+        if (isCausedBy(e, SocketException.class)) {
+          logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
+        } else {
+          lastFailure = e;
+          try (StringWriter s = new StringWriter(); PrintWriter w = new PrintWriter(s)) {
+            e.printStackTrace(w);
+            logger.error("Unable to onboard from owner at "
+                    + url + ". " + e.getMessage() + "\n" + s);
+          } catch (IOException e2) {
+            e.printStackTrace();
+          }
+        }
       }
+    }
+
+    if (null != lastFailure) {
+      fail(lastFailure);
+    }
+  }
+
+  boolean isCausedBy(Throwable e, Class<? extends Throwable> t) {
+    if (t.isAssignableFrom(e.getClass())) {
+      return true;
+    } else if (null != e.getCause()) {
+      return isCausedBy(e.getCause(), t);
+    } else {
+      return false;
     }
   }
 
@@ -484,6 +530,14 @@ public class Device {
       }
     } catch (IOException e) {
       doDeviceInit();
+    }
+  }
+
+  void fail(Throwable cause) {
+    if (cause instanceof RuntimeException) {
+      throw (RuntimeException)cause;
+    } else {
+      throw new RuntimeException(cause);
     }
   }
 }
