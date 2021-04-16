@@ -30,4 +30,6 @@ public interface To1ServerStorage extends StorageEvents {
   Composite getRedirectBlob();
 
   OnDieService getOnDieService();
+
+  public String getExpiryTimeStamp();
 }

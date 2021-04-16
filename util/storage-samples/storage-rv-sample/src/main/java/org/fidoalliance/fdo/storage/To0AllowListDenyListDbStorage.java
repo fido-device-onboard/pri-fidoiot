@@ -113,7 +113,8 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
       pstmt.setInt(5, Long.valueOf(requestedWait).intValue());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(6, created);
-      Timestamp expiresAt = new Timestamp(Calendar.getInstance().getTimeInMillis() + requestedWait);
+      Timestamp expiresAt = new Timestamp(
+          Calendar.getInstance().getTimeInMillis() + requestedWait * 1000);
       pstmt.setTimestamp(7, expiresAt);
 
       pstmt.executeUpdate();

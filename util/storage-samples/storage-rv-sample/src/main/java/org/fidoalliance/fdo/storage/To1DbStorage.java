@@ -110,6 +110,26 @@ public class To1DbStorage implements To1ServerStorage {
   }
 
   @Override
+  public String getExpiryTimeStamp() {
+    String sql = "SELECT EXPIRES_AT FROM RV_REDIRECTS WHERE GUID = ?";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, getGuid().toString());
+
+      try (ResultSet rs = pstmt.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        }
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    throw new ResourceNotFoundException(getGuid().toString());
+  }
+
+  @Override
   public void starting(Composite request, Composite reply) {
 
   }

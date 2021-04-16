@@ -4,7 +4,9 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.security.PublicKey;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -25,6 +27,14 @@ public abstract class To1ServerService extends MessagingService {
 
       getStorage().setGuid(guid);
 
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+      Date expiryTimeStamp = sdf.parse(getStorage().getExpiryTimeStamp());
+      Date currentTimeStamp = sdf.parse(
+          new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
+      if (currentTimeStamp.compareTo(expiryTimeStamp) > 0) {
+        throw new RuntimeException("Rv WaitSeconds expired. Perform To0 again");
+      }
+
       byte[] nonceTo1Proof = getCryptoService().getRandomBytes(Const.NONCE16_SIZE);
       getStorage().setNonceTo1Proof(nonceTo1Proof);
       Composite sigA = body.getAsComposite(Const.SECOND_KEY);
@@ -41,7 +51,7 @@ public abstract class To1ServerService extends MessagingService {
 
     } catch (Exception e) {
       getStorage().failed(request, reply);
-      throw e;
+      throw new RuntimeException(e);
     }
   }
 
