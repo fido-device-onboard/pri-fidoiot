@@ -27,10 +27,10 @@ public abstract class To1ServerService extends MessagingService {
 
       getStorage().setGuid(guid);
 
-      Date expiryTimeStamp = new SimpleDateFormat("yyyy-MM-DD HH:mm:ss.SSS")
-          .parse(getStorage().getExpiryTimeStamp());
-      Date currentTimeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS")
-          .parse(new SimpleDateFormat("dd.MM.yyyy.HH.mm.ss.SSS").format(new Date()));
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+      Date expiryTimeStamp = sdf.parse(getStorage().getExpiryTimeStamp());
+      Date currentTimeStamp = sdf.parse(
+          new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
       if (currentTimeStamp.compareTo(expiryTimeStamp) > 0) {
         throw new RuntimeException("Rv WaitSeconds expired. Perform To0 again");
       }
