@@ -130,7 +130,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Inserting Keys into Manufacturer Keystore
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore). To insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. Refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert/replace a PrivateKeyEntry of any particular algorithm in \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
