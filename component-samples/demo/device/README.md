@@ -46,7 +46,7 @@ Device runtime arguments:
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/device
-$ mvn -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
+$ java -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> -jar device.jar
 ```
 
 The `device-PEM-file` must contain the following PEM-encoded data:
@@ -59,7 +59,7 @@ Removing this file will make the device re-initialize the next time it runs.
 The initialization (manufacturer) server must be available during this step.
 
 ```
-$ mvn -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
+$ java -Dfidoalliance.fdo.pem.dev=<device-PEM-file> -jar device.jar
 ```
 
 The device will be onboarded.
@@ -74,7 +74,7 @@ The rendezvous and owner servers must be available during this step.
 
   * `TEST` mode where certificate verification is skipped. Useful for https development or testing.
 ```
-    java -D<other-flags> -Dfido_ssl_mode=TEST device.jar
+    java -D<other-flags> -Dfido_ssl_mode=TEST -jar device.jar
   ```
 Make sure to add the `-Dfido_ssl_mode=TEST`.
 
