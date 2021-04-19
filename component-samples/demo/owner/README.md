@@ -161,7 +161,7 @@ Owner runtime arguments:
 
 ## Support for OnDie Devices
 
-Refer to [Demo README](../README.md) for steps to configure owner to support OnDie devices.
+Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure owner to support OnDie devices.
 
 # Enabling Remote Access to DB
 
@@ -227,7 +227,7 @@ By default, the Owner uses HTTP for all communications on port 8042. In addition
 
 - Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
 
-- Update the following environment varibles in `demo/owner/owner.env` file
+- Update the following environment variables in `demo/owner/owner.env` file
 
     |  Variable              |  Value            |             Description       |
     | -----------------------|-------------------|-------------------------------|
