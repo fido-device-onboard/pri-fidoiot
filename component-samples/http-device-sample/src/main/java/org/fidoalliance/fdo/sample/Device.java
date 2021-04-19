@@ -495,11 +495,11 @@ public class Device {
         } else {
           lastFailure = e;
           try (StringWriter s = new StringWriter(); PrintWriter w = new PrintWriter(s)) {
-            e.printStackTrace(w);
+            logger.info(w);
             logger.error("Unable to onboard from owner at "
                     + url + ". " + e.getMessage() + "\n" + s);
           } catch (IOException e2) {
-            e.printStackTrace();
+            logger.info(e2.getMessage());
           }
         }
       }
