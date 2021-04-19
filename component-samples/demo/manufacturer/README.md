@@ -97,13 +97,13 @@ Manufacturer runtime arguments:
 
 ## Support for OnDie Devices
 
-Refer to [Demo README](../README.md) for steps to configure manufacturer to support OnDie devices.
+Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure manufacturer to support OnDie devices.
 
 # Enabling Remote Access to DB
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/service/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <manufacturer_db_port>

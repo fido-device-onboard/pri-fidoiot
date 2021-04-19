@@ -97,16 +97,16 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the .env files.
 
-OnDie requires several certs and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded directly from java if the ondie_autoupdate property is set to true.
+OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded directly from java if the ondie_autoupdate property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
 
 ***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases, it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
-`ondie_cache`: (required if supporting OnDie, optional otherwise) specifies the path to the directory containing the OnDie cert and CRLs.
+`ondie_cache`: (required if supporting OnDie, optional otherwise) Specifies the path to the directory containing the OnDie certificates and CRLs.
 
-`ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certs and CRLs are downloaded from the cloud at start up into the directory specified by ondie_cache.
+`ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certificates and CRLs are downloaded from the cloud at start up into the directory specified by ondie_cache.
 Note that this requires internet access by the component. Should a component be run in on-prem mode then this setting should be set to "false". In such cases, the artifacts can be preloaded by running the script in component-sample/scripts/onDieScript.py when access is available or from another machine with access and then copied into the ondie_cache directory.
 
-`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certs and CRLs.
+`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certificates and CRLs.
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
