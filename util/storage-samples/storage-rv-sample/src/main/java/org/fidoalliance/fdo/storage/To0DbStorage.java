@@ -79,7 +79,8 @@ public class To0DbStorage implements To0ServerStorage {
       pstmt.setInt(5, Long.valueOf(requestedWait).intValue());
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(6, created);
-      Timestamp expiresAt = new Timestamp(Calendar.getInstance().getTimeInMillis() + requestedWait);
+      Timestamp expiresAt = new Timestamp(
+          Calendar.getInstance().getTimeInMillis() + requestedWait * 1000);
       pstmt.setTimestamp(7, expiresAt);
 
       pstmt.executeUpdate();

@@ -32,8 +32,8 @@
 
     <bcpkix.version>1.68</bcpkix.version>
     <bcprov.version>1.68</bcprov.version>
-    <junit-jupiter.version>5.7.0-M1</junit-jupiter.version>
-    <log4j.version>2.13.3</log4j.version>
+    <junit-jupiter.version>5.7.1</junit-jupiter.version>
+    <log4j.version>2.14.1</log4j.version>
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
