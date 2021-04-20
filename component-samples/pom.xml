@@ -11,7 +11,7 @@
   <parent>
     <artifactId>fdo</artifactId>
     <groupId>org.fidoalliance</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
 
   <name>Component Service Samples</name>

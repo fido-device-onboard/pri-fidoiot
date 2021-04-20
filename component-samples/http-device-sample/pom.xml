@@ -14,7 +14,7 @@
   <parent>
     <artifactId>component-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
 
   <artifactId>device</artifactId>
@@ -95,14 +95,14 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>serviceinfo</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

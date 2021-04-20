@@ -13,7 +13,7 @@
   <parent>
     <artifactId>util</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
 
   <name>ServiceInfo</name>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
