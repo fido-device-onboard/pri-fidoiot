@@ -139,6 +139,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
     String guid = req.getParameter(GUID_TAG);
     if (guid != null) {
+      whereString.append(WHERE_AND);
       whereString.append("GUID_TAG = ?");
     }
     String device = req.getParameter(DEVICE_TAG);
