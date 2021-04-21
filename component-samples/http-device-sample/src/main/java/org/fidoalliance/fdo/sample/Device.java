@@ -494,19 +494,14 @@ public class Device {
           logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
         } else {
           lastFailure = e;
-          try (StringWriter s = new StringWriter(); PrintWriter w = new PrintWriter(s)) {
-            logger.info(w);
-            logger.error("Unable to onboard from owner at "
-                    + url + ". " + e.getMessage() + "\n" + s);
-          } catch (IOException e2) {
-            logger.info(e2.getMessage());
-          }
+          logger.error("Unable to onboard from owner at "
+              + url + ". " + e.getMessage());
         }
       }
     }
 
     if (null != lastFailure) {
-      fail(lastFailure);
+      logger.error("Device Onboarding Failed. Exiting application.");
     }
   }
 
