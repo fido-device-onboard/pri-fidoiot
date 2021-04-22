@@ -24,7 +24,7 @@ def artifact_copy(source_pathname, destdir):
     print(source_pathname)
     filename = os.path.basename(source_pathname)
     fi = open(source_pathname, "+rb")
-    fo = open(os.path.join(destdir, filename + ".new"), "+wb")
+    fo = open(os.path.join(destdir, filename), "+wb")
     fo.write(fi.read())
     fi.close
     fo.close
