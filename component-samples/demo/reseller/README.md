@@ -1,12 +1,4 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-* **SoftHSM**.
-
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
 (PRI) Reseller component sample source.
@@ -101,21 +93,21 @@ Some required runtime arguments
 - `reseller_https_port`
 
   Allows enduser to select a port for accepting HTTPS requests.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
 
 - `reseller_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/reseller/certs/ssl.p12
 
 - `reseller_ssl_keystore_password`
 
   Provides password for the specified keystore.
-  **NOTE** This property is not required if service is running in `http` mode.
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
 
@@ -132,11 +124,11 @@ webAllowOthers = true
 
 **IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-# Starting the Reseller service
+# Starting the Reseller Service
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
-***NOTE*** The database file located at \<fdo-pri-src\>/component-samples/demo/reseller/target/data/reseller.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/reseller/target/data/reseller.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Reseller REST APIs
 
@@ -150,9 +142,9 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 | POST /api/v1/resell/keys/?alias=<keystore_alias> | Adds new Reseller keys to the keystore with the given alias | Query - alias: Alias to be added in keystore | | PEM formatted certificate and private key | |
 | DELETE /api/v1/resell/keys/?alias=<keystore_alias> | Deletes the keys corresponding to the input alias from keystore. | Query - alias: Alias to be removed from keystore | | | |
 
-***NOTE*** These REST APIs use Digest authentication. `reseller_api_user` and `reseller_api_password` properties specify the credentials to be used while making the REST calls.
+***NOTE***: These REST APIs use Digest authentication. `reseller_api_user` and `reseller_api_password` properties specify the credentials to be used while making the REST calls.
 
-# Inserting keys into Reseller keystore
+# Inserting Keys into Reseller Keystore
 
 The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12.
 
@@ -177,5 +169,5 @@ By default, the Reseller uses HTTP for all communications on port 8070. In addit
     | reseller_ssl_keystore     | keystore-filename | filename of Keystore that is present in the `reseller/certs` folder.|
     | reseller_ssl_keystore_password| keystore-password | password of the keystore. |
 
-    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of Reseller.
+    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Reseller.
     Avoid using the default keystore available for production deployment.

@@ -1,11 +1,4 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) HTTP Device Component sample source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
@@ -16,7 +9,7 @@ $ mvn clean install
 
 This will copy the required executables and libraries into <fdo-pri-src>/component-samples/demo/device/.
 
-### Configuring the device service
+### Configuring the Device Service
 
 Device runtime arguments:
 
@@ -36,9 +29,7 @@ Device runtime arguments:
 - `fidoalliance.fdo.pem.dev`
 
   The location of the PEM file containing the device keys (private and public).
-  If not set, a hardcoded key is used - see the Java source for details.
-
-  There is no default configured. Provide value `./device.pem` to use the existing default EC-256 key-pair.
+  If not set, file `./device.pem` is used by default.
 
 - `fidoalliance.fdo.device.service.info.mtu`
 
@@ -51,11 +42,11 @@ Device runtime arguments:
 
   Default is true.
 
-# Starting the Device service
+# Starting the Device Service
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/device
-$ mvn -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
+$ java -Dfidoalliance.fdo.url.di=<di-server-URL> -Dfidoalliance.fdo.pem.dev=<device-PEM-file> -jar device.jar
 ```
 
 The `device-PEM-file` must contain the following PEM-encoded data:
@@ -68,14 +59,14 @@ Removing this file will make the device re-initialize the next time it runs.
 The initialization (manufacturer) server must be available during this step.
 
 ```
-$ mvn -Dfidoalliance.fdo.pem.dev=<device-PEM-file> exec:java
+$ java -Dfidoalliance.fdo.pem.dev=<device-PEM-file> -jar device.jar
 ```
 
 The device will be onboarded.
 
 The rendezvous and owner servers must be available during this step.
 
-# Configuring Device for HTTPS/TLS communication
+# Configuring Device for HTTPS/TLS Communication
 
 - Copy the truststore containing all the required certificates to `demo/device` folder.
 
@@ -83,7 +74,7 @@ The rendezvous and owner servers must be available during this step.
 
   * `TEST` mode where certificate verification is skipped. Useful for https development or testing.
 ```
-    java -D<other-flags> -Dfido_ssl_mode=TEST device.jar
+    java -D<other-flags> -Dfido_ssl_mode=TEST -jar device.jar
   ```
 Make sure to add the `-Dfido_ssl_mode=TEST`.
 
