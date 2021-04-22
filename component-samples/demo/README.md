@@ -110,7 +110,7 @@ Note that this requires internet access by the component. Should a component be 
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
-To enable OnDie support in FDO PRI Manufacturer or FDO PRI Owner, update manufacturer.env or owner.env respectively as below.
+To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, update manufacturer.env and owner.env respectively as below.
 
 ```
 ondie_cache=file:///home/manufacturer/ # file:///home/owner for FDO PRI Owner
