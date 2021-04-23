@@ -500,7 +500,7 @@ public class Device {
       }
     }
 
-    if (null != lastFailure) {
+    if (!isTo2Done.get() && null != lastFailure) {
       logger.error("Device Onboarding Failed. Exiting application.");
     }
   }
