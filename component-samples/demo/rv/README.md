@@ -1,17 +1,10 @@
-# System Requirements:
-
-* **Ubuntu 20.04**.
-* **Maven**.
-* **Java 11**.
-* **Haveged**.
-
-# Getting the executable
+# Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
 (PRI) Rendezvous (RV) component sample source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fdo-pri-src>/service/component-samples/rv/
+$ cd <fdo-pri-src>/component-samples/rv/
 $ mvn clean install
 ```
 
@@ -64,7 +57,7 @@ RV runtime arguments:
 
    Default value: false
 
-   **NOTE** Not recommended for use in production systems.
+   ***NOTE***: Not recommended for use in production systems.
 
 - `catalina_home`
 
@@ -81,25 +74,28 @@ RV runtime arguments:
 - `rv_https_port`
 
   Allows enduser to select a port for accepting HTTPS requests.
-  **NOTE** This property is not required if service is running in `http` mode.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
 
 - `rv_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  **NOTE** This property is not required if service is running in `http` mode.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: <fdo-pri-src>/component-samples/demo/rv/certs/ssl.p12
 
 - `rv_ssl_keystore_password`
 
   Provides password for the specified keystore.
-  **NOTE** This property is not required if service is running in `http` mode.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default keystore password: fdo123
 
-## Support for OnDie devices
+## Support for OnDie Devices
 
 Refer to [Demo README](../README.md) for steps to configure rendezvous to support OnDie devices.
 
@@ -107,7 +103,7 @@ Refer to [Demo README](../README.md) for steps to configure rendezvous to suppor
 
 Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/service/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
+To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
 
 ```
 db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
@@ -116,7 +112,7 @@ webAllowOthers = true
 
 **IMPORTANT: Not recommended to enable this setting especially on production systems.**
 
-# Starting the rv service
+# Starting the RV Service
 
 Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
@@ -140,11 +136,11 @@ header.
   | 834F83875910C8507CE935BE2F947DCF854E6554C3ACB79893ACF91220EA5D8B | Owner ECDSA 384 |
   | 91984D7EE0BC1F153900401E6E0D0DC4F6F8472709AA1DAA9256429046C2E367 | Owner RSA 2048 |
 
-- To add entries to allowlist and denylist for public key, public key hash need to be calculated. Refer [Generating Public Key Hash](#calculate-sha256-hash-of-a-public-key) for the steps to generate public key hash from public key.
+- To add entries to allowlist and denylist for public key, public key hash needs to be calculated. Refer [Generating Public Key Hash](#calculate-sha256-hash-of-a-public-key) for the steps to generate public key hash from public key.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
-# Calculate SHA256 hash of a public key
+# Calculate SHA256 Hash of a Public Key
 
 ```
 $ openssl x509 -in cert.pem -pubkey -noout | openssl enc -base64 -d > example_allowlist_publickey.der
@@ -152,7 +148,7 @@ $ openssl x509 -in cert.pem -pubkey -noout | openssl enc -base64 -d > example_al
 $ cat example_allowlist_publickey.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'
 ```
 
-***NOTE:*** Input file cert.pem is an X509 certificate.
+***NOTE***: Input file cert.pem is an X509 certificate.
 
 # Configuring RV for HTTPS/TLS Communication
 
@@ -166,12 +162,12 @@ By default, the RV uses HTTP for all communications on port 8040. In addition to
 
 - Update the following environment varibles in `<fdo-pri-src>/component-samples/demo/rv/rv.env` file
 
-    |  Variable            |  Value            |             description       |
+    |  Variable            |  Value            |             Description       |
     | ---------------------|-------------------|-------------------------------|
     | rv_protocol_scheme  | https             | To enable HTTPS communication.|
     | rv_https_port       | port number       | The given port number will be used for HTTPS communication. |
     | rv_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
     | rv_ssl_keystore-password| keystore-password | password of the keystore. |
 
-    **NOTE:** Appropriate security measures with respect to key-store management should be considered while performing production deployment of RV.
+    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of RV.
     Avoid using the default keystore available for production deployment.
