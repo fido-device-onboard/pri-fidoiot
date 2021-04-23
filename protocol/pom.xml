@@ -13,7 +13,7 @@
   <parent>
     <artifactId>fdo</artifactId>
     <groupId>org.fidoalliance</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
 
   <name>Protocol Core</name>
@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
       <scope>test</scope>
     </dependency>
 

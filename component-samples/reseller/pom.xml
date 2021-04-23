@@ -11,7 +11,7 @@
   <parent>
     <artifactId>component-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
 
   <name>HTTP Reseller Sample</name>
@@ -34,19 +34,19 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-keystore-sample</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
     </dependency>
 
     <dependency>

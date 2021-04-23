@@ -10,7 +10,7 @@
 
   <artifactId>fdo</artifactId>
   <groupId>org.fidoalliance</groupId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5</version>
   <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
