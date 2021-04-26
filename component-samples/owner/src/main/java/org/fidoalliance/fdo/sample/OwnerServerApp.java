@@ -167,6 +167,7 @@ public class OwnerServerApp {
     constraint.addAuthRole(OwnerAppSettings.AUTH_ROLE);
     SecurityCollection collection = new SecurityCollection();
     collection.addPattern("/api/v1/owner/*");
+    collection.addPattern("/api/v1/device/*");
     constraint.addCollection(collection);
     ctx.addConstraint(constraint);
     tomcat.addRole(OwnerConfigLoader.loadConfig(OwnerAppSettings.API_USER),
