@@ -22,7 +22,7 @@ public class OwnerSysModule implements Module {
   // can handle this size of data in the SI.
   // Future enhancement: adjust this value based on the MTU size
   // requested by the device.
-  private static final int MAX_READ = 1000;
+  private static final int MAX_READ = 900;
   private static final byte CBOR_TRUE = (byte) 0xF5;
 
 
