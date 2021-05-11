@@ -11,7 +11,7 @@
   <parent>
     <artifactId>http-api-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>0.5</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
 
   <name>Http Owner API</name>
@@ -30,19 +30,19 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>0.5</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>0.5</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>storage-owner-sample</artifactId>
-      <version>0.5</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
