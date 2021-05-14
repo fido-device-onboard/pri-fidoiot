@@ -1394,7 +1394,7 @@ public class CryptoService {
   // See NIST SP 800-108, FDO spec section 3.6.4
   // Where possible, variable names are chosen to match those documents.
   protected byte[] kdf(
-      int size,      // the number of bytes to derive (L)
+      int size,      // the number of bits to derive (L)
       String prfId,  // the JCE ID of the PRF to use
       KeyExchangeResult kxResult) // the sharedSecret and contextRandom
       throws
@@ -1405,10 +1405,10 @@ public class CryptoService {
     Mac prf = Mac.getInstance(prfId);
     prf.init(new SecretKeySpec(kxResult.shSe, prfId));
 
-    final int h = prf.getMacLength(); // (h) the length (in bits) of the output of the PRF
+    final int h = prf.getMacLength() * Byte.SIZE; // (h) the length (in bits) of the PRF output
     final int l = size;  // (L) the length (in bits) of the derived keying material
     // (n) the number of iterations of the PRF needed to generate L bits of
-    // keying material.  We count in bytes, but the result is the same.
+    // keying material.
     final int n = Double.valueOf(Math.ceil((double)l / (double)h)).intValue();
 
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -1759,7 +1759,7 @@ public class CryptoService {
 
     final byte[] keyMaterial;
     try {
-      keyMaterial = kdf(sekSize + svkSize, prfId, kxResult);
+      keyMaterial = kdf((sekSize + svkSize) * Byte.SIZE, prfId, kxResult);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
