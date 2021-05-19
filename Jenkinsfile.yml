@@ -22,24 +22,24 @@ node('ubuntu18.04-OnDemand'){
     {
 
       // Checking out the smoke test code
-      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'sdo-test']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard-ci/sdo-test']]])
+      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'test-fidoiot']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard/test-fidoiot']]])
 
       // Creating the required directories
       sh '''
-        mkdir -p sdo-test/binaries
-        mkdir -p sdo-test/binaries/pri-fidoiot
+        mkdir -p test-fidoiot/binaries
+        mkdir -p test-fidoiot/binaries/pri-fidoiot
       '''
 
       // Extract and copy the demo.tar content to the location
       sh '''
-        cp -r component-samples/demo/* sdo-test/binaries/pri-fidoiot
+        cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
       '''
 
       // Setting the TEST_DIR and executing smoke test
       sh'''
-        cd sdo-test
+        cd test-fidoiot
         export TEST_DIR=`pwd`
-        mvn clean verify -Dgroups=fido_smoketest
+        mvn clean test -Dgroups=fdo_pri_smoketest
       '''
     }
   }
@@ -48,12 +48,12 @@ node('ubuntu18.04-OnDemand'){
     // Remove the files
     print "Removing the files"
     sh'''
-      rm -f sdo-test/credential.bin
-      rm -f sdo-test/ext_voucher
-      rm -f sdo-test/guid
-      rm -f sdo-test/linux64.sh
-      rm -f sdo-test/payload.bin
-      rm -f sdo-test/result.txt
+      rm -f test-fidoiot/credential.bin
+      rm -f test-fidoiot/ext_voucher
+      rm -f test-fidoiot/guid
+      rm -f test-fidoiot/linux64.sh
+      rm -f test-fidoiot/payload.bin
+      rm -f test-fidoiot/result.txt
     '''
 
     print "Pruning docker containers"
