@@ -69,7 +69,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
-import org.bouncycastle.crypto.params.CCMParameters;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
@@ -1610,13 +1610,11 @@ public class CryptoService {
     final int macSize = 128; // All CCM cipher modes use this size
 
     BlockCipher engine = new AESEngine();
-    CCMParameters params = new CCMParameters(new KeyParameter(sek), macSize, iv, null);
-
+    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
     CCMBlockCipher cipher = new CCMBlockCipher(engine);
     cipher.init(forEncryption, params);
     byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
     int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-    cipher.processAADBytes(aad, 0, aad.length);
     try {
       cipher.doFinal(outputText, outputLen);
     } catch (InvalidCipherTextException e) {
