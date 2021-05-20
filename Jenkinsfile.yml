@@ -35,6 +35,12 @@ node('ubuntu18.04-OnDemand'){
         cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
       '''
 
+      // Updating the TO0 scheduling time interval
+      sh '''
+        cd test-fidoiot/binaries/pri-fidoiot/owner
+        sed -i 's/300/30/g' owner.env
+      '''
+
       // Setting the TEST_DIR and executing smoke test
       sh'''
         cd test-fidoiot
