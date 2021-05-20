@@ -1672,14 +1672,29 @@ public class CryptoService {
 
         AlgorithmParameterSpec cipherParams;
         if (isGcmCipher(cipherName)) { // GCM ciphers use GCMParameterSpec
+
+          // According to NIST SP800.38D section 5.2.1.2, the tag length can
+          // only be 96, 104, 112, 120, or 128 bits.
+          if (!Arrays.asList(96, 104, 112, 120, 128).contains(Const.GCM_TAG_LENGTH)) {
+            throw new IllegalArgumentException("illegal GCM tag length");
+          }
           cipherParams = new GCMParameterSpec(Const.GCM_TAG_LENGTH, iv);
+
         } else {
           cipherParams = new IvParameterSpec(iv);
         }
 
         final Cipher cipher = getCipherInstance(cipherName);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, cipherParams);
+
+        // Since AAD can be no more than 2^64 - 1 bits and a Java array can be
+        // no longer than 2^31 - 1 elements, there's no need to length check
+        // the AAD.
         cipher.updateAAD(aad, 0, aad.length);
+
+        // Since GCM plaintext can be no more than 2^39 - 256 bits and a Java
+        // array can be no longer than 2^31 - 1 elements, there's no need
+        // to length check the payload.
         ciphered = cipher.doFinal(payload);
 
       }
