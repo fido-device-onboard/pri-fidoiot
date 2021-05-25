@@ -113,7 +113,7 @@ Note that this requires internet access by the component. Should a component be 
 To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, update manufacturer.env and owner.env respectively as below.
 
 ```
-ondie_cache=file:///home/manufacturer/ # file:///home/owner for FDO PRI Owner
+ondie_cache=file:///home/manufacturer/<ondie-folder>/ # file:///home/owner/<ondie-folder>/ for FDO PRI Owner
 ondie_autoupdate=true
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false

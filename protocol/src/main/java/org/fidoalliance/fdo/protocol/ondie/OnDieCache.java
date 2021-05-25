@@ -86,6 +86,12 @@ public class OnDieCache {
         // update local cache
         copyFromUrlSources();
       }
+
+      if (Files.exists(Paths.get(cache.getAbsolutePath(), cacheUpdatedTouchFile))) {
+        //if touch file is present; then rename all .new files and remove touch file
+        updateCacheFiles(cache);
+      }
+
       loadCacheMap();
     }
     initialized = true;
@@ -113,7 +119,7 @@ public class OnDieCache {
         if (zipEntry.getName().startsWith("content/OnDieCA")
             && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
           Path p = Paths.get(zipEntry.getName());
-          File newFile = new File(cacheDir.resolve(p.getFileName().toString()));
+          File newFile = new File(cacheDir.getPath() + p.getFileName().toString());
           FileOutputStream fos = new FileOutputStream(newFile);
           byte[] buffer = new byte[1024];
           int len;
@@ -159,19 +165,24 @@ public class OnDieCache {
       // check for the "files updated" touch file
       if (Files.exists(Paths.get(cache.getAbsolutePath(), cacheUpdatedTouchFile))) {
         // rename all .new files and remove touch file
-        FilenameFilter filter = (dir, name) -> name.endsWith(".new");
-        File[] files = new File(cache.getAbsolutePath()).listFiles(filter);
-        for (File file : files) {
-          File targetFile = new File(file.getAbsolutePath().replaceAll(".new", ""));
-          targetFile.delete();
-          file.renameTo(targetFile);
-          file.delete();
-        }
-        Files.delete(Paths.get(cacheDir.resolve(cacheUpdatedTouchFile)));
+        updateCacheFiles(cache);
         return true;
       }
     }
     return false;
+  }
+
+  private void updateCacheFiles(File cache) throws IOException {
+    // rename all .new files and remove touch file
+    FilenameFilter filter = (dir, name) -> name.endsWith(".new");
+    File[] files = new File(cache.getAbsolutePath()).listFiles(filter);
+    for (File file : files) {
+      File targetFile = new File(file.getAbsolutePath().replaceAll(".new", ""));
+      targetFile.delete();
+      file.renameTo(targetFile);
+      file.delete();
+    }
+    Files.delete(Paths.get(cacheDir.resolve(cacheUpdatedTouchFile)));
   }
 
 
