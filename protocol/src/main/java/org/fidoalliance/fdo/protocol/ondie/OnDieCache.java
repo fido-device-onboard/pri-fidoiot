@@ -76,7 +76,12 @@ public class OnDieCache {
     if (cacheDir != null) {
       File cache = new File(cacheDir);
       if (!cache.exists()) {
-        throw new IOException("OnDieCertCache: cache directory does not exist: " + cacheDir);
+        if (autoUpdate) {
+          //create cache directory, if the directory does not exist & autoupdate is set to true.
+          cache.mkdir();
+        } else {
+          throw new IOException("OnDieCertCache: cache directory does not exist: " + cacheDir);
+        }
       }
       if (!cache.isDirectory()) {
         throw new IOException("OnDieCertCache: cache directory must be a directory: " + cacheDir);
