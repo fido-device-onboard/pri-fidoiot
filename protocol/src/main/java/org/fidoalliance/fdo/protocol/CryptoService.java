@@ -1642,6 +1642,8 @@ public class CryptoService {
       final byte[] iv;
       if (isCtrCipher(cipherName)) {
         iv = state.getAsBytes(Const.THIRD_KEY);
+      } else if (isGcmCipher(cipherName)) { // GCM uses a 12-byte IV
+        iv = getRandomBytes(12);
       } else if (isCcmCipher(cipherName)) { // CCM modes use a 7-byte nonce
         iv = getRandomBytes(7);
       } else { // all other ciphers use a random IV, AES only uses 16 bytes despite key length
