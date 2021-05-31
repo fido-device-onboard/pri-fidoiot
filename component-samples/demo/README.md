@@ -118,6 +118,7 @@ Finally, the `ondie_cache` directory needs to be copied into the docker containe
 ```
 COPY ./ondie_cache ./ondie_cache/
 ```
+*For Owner component add `--chown=owner` along with the `COPY` command. Eg: `COPY --chown=owner ./ondie_cache ./ondie_cache/`
 
 `ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certificates and CRLs.
 
