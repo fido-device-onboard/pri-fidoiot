@@ -104,7 +104,21 @@ OnDie requires several certificates and CRLs. These artifacts can be downloaded 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) Specifies the path to the directory containing the OnDie certificates and CRLs.
 
 `ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certificates and CRLs are downloaded from the cloud at start up into the directory specified by ondie_cache.
-Note that this requires internet access by the component. Should a component be run in on-prem mode then this setting should be set to "false". In such cases, the artifacts can be preloaded by running the script in component-sample/scripts/onDieScript.py when access is available or from another machine with access and then copied into the ondie_cache directory.
+Note that this requires internet access by the component.
+
+***NOTE***: If the component is executed in on-prem mode then `ondie_autoupdate` should be set to "false". In such cases, the artifacts can be preloaded by running the script in component-samples/scripts/onDieCache.py.
+Ensure `ondie_cache` directory is present before executing the script.
+
+```
+python3 component-samples/scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
+```
+*Requires internet access for the component.
+
+Finally, the `ondie_cache` directory needs to be copied into the docker container, add the following line to `Dockerfile` of Manufacturer and Owner.
+```
+COPY ./ondie_cache ./ondie_cache/
+```
+*For Owner component, add `--chown=owner` along with the `COPY` command. Eg: `COPY --chown=owner ./ondie_cache ./ondie_cache/`
 
 `ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certificates and CRLs.
 
@@ -113,7 +127,7 @@ Note that this requires internet access by the component. Should a component be 
 To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, update manufacturer.env and owner.env respectively as below.
 
 ```
-ondie_cache=file:///home/manufacturer/ # file:///home/owner for FDO PRI Owner
+ondie_cache=file:///home/manufacturer/ondie_cache/ # file:///home/owner/ondie_cache/ for FDO PRI Owner
 ondie_autoupdate=true
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false

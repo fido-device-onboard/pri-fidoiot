@@ -69,7 +69,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
-import org.bouncycastle.crypto.params.CCMParameters;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
@@ -1394,7 +1394,7 @@ public class CryptoService {
   // See NIST SP 800-108, FDO spec section 3.6.4
   // Where possible, variable names are chosen to match those documents.
   protected byte[] kdf(
-      int size,      // the number of bytes to derive (L)
+      int size,      // the number of bits to derive (L)
       String prfId,  // the JCE ID of the PRF to use
       KeyExchangeResult kxResult) // the sharedSecret and contextRandom
       throws
@@ -1405,10 +1405,10 @@ public class CryptoService {
     Mac prf = Mac.getInstance(prfId);
     prf.init(new SecretKeySpec(kxResult.shSe, prfId));
 
-    final int h = prf.getMacLength(); // (h) the length (in bits) of the output of the PRF
+    final int h = prf.getMacLength() * Byte.SIZE; // (h) the length (in bits) of the PRF output
     final int l = size;  // (L) the length (in bits) of the derived keying material
     // (n) the number of iterations of the PRF needed to generate L bits of
-    // keying material.  We count in bytes, but the result is the same.
+    // keying material.
     final int n = Double.valueOf(Math.ceil((double)l / (double)h)).intValue();
 
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -1610,13 +1610,11 @@ public class CryptoService {
     final int macSize = 128; // All CCM cipher modes use this size
 
     BlockCipher engine = new AESEngine();
-    CCMParameters params = new CCMParameters(new KeyParameter(sek), macSize, iv, null);
-
+    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
     CCMBlockCipher cipher = new CCMBlockCipher(engine);
     cipher.init(forEncryption, params);
     byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
     int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-    cipher.processAADBytes(aad, 0, aad.length);
     try {
       cipher.doFinal(outputText, outputLen);
     } catch (InvalidCipherTextException e) {
@@ -1644,6 +1642,8 @@ public class CryptoService {
       final byte[] iv;
       if (isCtrCipher(cipherName)) {
         iv = state.getAsBytes(Const.THIRD_KEY);
+      } else if (isGcmCipher(cipherName)) { // GCM uses a 12-byte IV
+        iv = getRandomBytes(12);
       } else if (isCcmCipher(cipherName)) { // CCM modes use a 7-byte nonce
         iv = getRandomBytes(7);
       } else { // all other ciphers use a random IV, AES only uses 16 bytes despite key length
@@ -1674,14 +1674,29 @@ public class CryptoService {
 
         AlgorithmParameterSpec cipherParams;
         if (isGcmCipher(cipherName)) { // GCM ciphers use GCMParameterSpec
+
+          // According to NIST SP800.38D section 5.2.1.2, the tag length can
+          // only be 96, 104, 112, 120, or 128 bits.
+          if (!Arrays.asList(96, 104, 112, 120, 128).contains(Const.GCM_TAG_LENGTH)) {
+            throw new IllegalArgumentException("illegal GCM tag length");
+          }
           cipherParams = new GCMParameterSpec(Const.GCM_TAG_LENGTH, iv);
+
         } else {
           cipherParams = new IvParameterSpec(iv);
         }
 
         final Cipher cipher = getCipherInstance(cipherName);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, cipherParams);
+
+        // Since AAD can be no more than 2^64 - 1 bits and a Java array can be
+        // no longer than 2^31 - 1 elements, there's no need to length check
+        // the AAD.
         cipher.updateAAD(aad, 0, aad.length);
+
+        // Since GCM plaintext can be no more than 2^39 - 256 bits and a Java
+        // array can be no longer than 2^31 - 1 elements, there's no need
+        // to length check the payload.
         ciphered = cipher.doFinal(payload);
 
       }
@@ -1759,7 +1774,7 @@ public class CryptoService {
 
     final byte[] keyMaterial;
     try {
-      keyMaterial = kdf(sekSize + svkSize, prfId, kxResult);
+      keyMaterial = kdf((sekSize + svkSize) * Byte.SIZE, prfId, kxResult);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
