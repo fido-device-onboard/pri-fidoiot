@@ -22,44 +22,27 @@
   <packaging>jar</packaging>
   <name>Java Device Sample</name>
 
-  <!--
-  to update all library and plugin versions to latest releases, use
-
-  mvn versions:update-properties
-  -->
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <bcpkix.version>1.68</bcpkix.version>
-    <bcprov.version>1.68</bcprov.version>
-    <junit-jupiter.version>5.7.1</junit-jupiter.version>
+    <!-- Dependency Version -->
+    <bcpkix.version>1.69</bcpkix.version>
+    <bcprov.version>1.69</bcprov.version>
+    <junit-jupiter.version>5.8.0-M1</junit-jupiter.version>
     <log4j.version>2.14.1</log4j.version>
 
+    <!-- Maven -->
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <!-- Entry point -->
     <exec.mainClass>org.fidoalliance.fdo.sample.Device</exec.mainClass>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>cert-utils</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
@@ -92,17 +75,32 @@
       <version>${bcprov.version}</version>
       <scope>compile</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>cert-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>serviceinfo</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

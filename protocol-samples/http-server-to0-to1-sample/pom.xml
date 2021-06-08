@@ -21,39 +21,22 @@
   <packaging>jar</packaging>
 
   <properties>
-    <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
+    <!-- Dependency Version -->
+    <bcpkix.version>1.69</bcpkix.version>
     <commons-codec.version>1.15</commons-codec.version>
-    <tomcat.version>9.0.45</tomcat.version>
-    <bcpkix.version>1.68</bcpkix.version>
     <dbcp2.version>2.8.0</dbcp2.version>
+    <h2.version>1.4.200</h2.version>
+    <tomcat.version>9.0.46</tomcat.version>
+
+    <!-- Maven -->
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+
+    <!-- Entry point -->
     <exec.mainClass>org.fidoalliance.fdo.sample.To0To1ServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>cert-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>protocol</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-server-dispatcher</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>storage-rv-sample</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
@@ -63,7 +46,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.200</version>
+      <version>${h2.version}</version>
     </dependency>
 
     <dependency>
@@ -83,13 +66,37 @@
       <artifactId>tomcat-embed-core</artifactId>
       <version>${tomcat.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>cert-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>http-server-dispatcher</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>storage-rv-sample</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>${maven-dependency-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -108,7 +115,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>${exec-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -117,9 +124,9 @@
           </execution>
         </executions>
         <configuration>
-           <executable>java</executable>
+          <executable>java</executable>
           <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>target/classes</workingDirectory>
+          <workingDirectory>target/classes</workingDirectory>
         </configuration>
       </plugin>
     </plugins>
