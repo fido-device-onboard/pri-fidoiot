@@ -309,10 +309,13 @@ public class OwnerDbManager {
         + "ID,"
         + "DEVICE_SERVICE_INFO_MTU_SIZE, "
         + "OWNER_MTU_THRESHOLD ) "
-        + "VALUES (1,1300,8192);";
+        + "VALUES (?,?,?);";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setInt(1, 1);
+      pstmt.setInt(2, Const.SERVICE_INFO_MTU_MIN_SIZE);
+      pstmt.setInt(3, Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -330,11 +333,20 @@ public class OwnerDbManager {
 
     String sql = "UPDATE TO2_SETTINGS" + " SET " + field + " = ?" + " WHERE ID = 1;";
 
-    if (mtu > 0 && mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
-      System.out.println(
-          "Received value less than default minimum of 256 bytes. "
-              + "Updating MTU size to default minimum");
-      mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+    if (field.equals("DEVICE_SERVICE_INFO_MTU_SIZE")) {
+      if (mtu > 0 && mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+        System.out.println("Received value less than default minimum. "
+                + "Updating MTU size to default minimum of "
+                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+      }
+      // check max limit as well
+      if (mtu > 0 && mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
+        System.out.println("MTU size greater than maximum allowed. "
+                 +  "Updating MTU size to maximum limit of "
+                 +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
+        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+      }
     }
 
     try (Connection conn = ds.getConnection();
