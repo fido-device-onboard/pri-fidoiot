@@ -12,27 +12,23 @@ public class RendezvousInfoDecoderTest {
   void getHttpDirectivesTest() throws Exception {
 
     // localhost dnsname or localhost IP address can be replaced by any other IP
-    String directive  = "http://localhost:8040?ipaddress=127.0.0.1&ownerport=8443";
+    String directive  = "81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb";
 
-    Composite rvi = RendezvousInfoDecoder.decode(directive);
-    List<String> ownerDir = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_OWNER_ONLY);
-    assertTrue(ownerDir.get(0).endsWith(":8443"));
-
-    Composite devRVI = RendezvousInfoDecoder.decode(directive);
-    List<String> devDir =  RendezvousInfoDecoder.getHttpDirectives(devRVI, Const.RV_DEV_ONLY);
+    Composite devRvi = Composite.fromObject(directive);
+    List<String> devDir =  RendezvousInfoDecoder.getHttpDirectives(devRvi, Const.RV_DEV_ONLY);
     assertTrue(devDir.get(0).endsWith(":8040"));
 
   }
 
   @Test
-  void invalidDecodeTest() {
+  void invalidRvInfoTest() {
 
-    String invalidDirective  = "tcp://invalid:8040?devonly&rvbypass&owneronly&delaysec=10&"
-        + "wifipw=amedium=1&wifissid=dsa&userinput=ac&invalid";
+    String invalidRvInfo  = "81868205696c6f63616c686f73748203191f68820c018202447f00000182041920fb";
 
-    assertThrows(org.fidoalliance.fdo.protocol.DispatchException.class ,
-        ()-> { Composite rvi = RendezvousInfoDecoder.decode(invalidDirective); });
+    Composite invalidRvi = Composite.fromObject(invalidRvInfo);
 
+    assertThrows(java.lang.IllegalArgumentException.class ,
+        ()-> { List<String> directives = RendezvousInfoDecoder.getHttpDirectives(invalidRvi,Const.RV_DEV_ONLY); });
   }
 
 }

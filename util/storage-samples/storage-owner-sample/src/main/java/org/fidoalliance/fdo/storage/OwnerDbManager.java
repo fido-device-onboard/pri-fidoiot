@@ -243,7 +243,7 @@ public class OwnerDbManager {
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setBytes(1, RendezvousInfoDecoder.decode(replacementRvInfo).toBytes());
+      pstmt.setBytes(1, Composite.fromObject(replacementRvInfo).toBytes());
       pstmt.setString(2, currentGuid.toString());
       pstmt.executeUpdate();
     } catch (SQLException e) {
