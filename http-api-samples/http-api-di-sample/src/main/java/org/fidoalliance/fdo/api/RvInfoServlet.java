@@ -5,18 +5,19 @@ package org.fidoalliance.fdo.api;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
+import org.fidoalliance.fdo.protocol.RendezvousInfoDecoder;
 import org.fidoalliance.fdo.storage.DiDbManager;
 
 public class RvInfoServlet extends HttpServlet {
-
-  final String validUriFormat =
-      "((http|https)://[a-zA-Z0-9.-]*:[0-9]{1,5}[?]?(([a-zA-Z]+=[A-z0-9.-]*)[&]?)*[\\s]?)*";
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -35,10 +36,20 @@ public class RvInfoServlet extends HttpServlet {
 
     String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
-    if (rvInfo != null && rvInfo.length() != 0 && rvInfo.matches(validUriFormat)) {
-      DiDbManager dbManager = new DiDbManager();
-      dbManager.addRvInfo(ds, rvInfo);
-    } else {
+    try {
+      List<String> directives = RendezvousInfoDecoder
+              .getHttpDirectives(Composite.fromObject(rvInfo),Const.RV_DEV_ONLY);
+      if (directives.size() > 0) {
+        DiDbManager dbManager = new DiDbManager();
+        dbManager.addRvInfo(ds, rvInfo);
+      } else {
+        //If we are unable to resolve even one directive, then we return 400 BAD_REQUEST.
+        System.out.println("Received invalid RVInfo");
+        resp.setStatus(400);
+        return;
+      }
+    } catch (Exception e) {
+      System.out.println("Received invalid RVInfo");
       resp.setStatus(400);
       return;
     }
