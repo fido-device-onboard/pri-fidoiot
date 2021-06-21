@@ -17,8 +17,10 @@ import org.fidoalliance.fdo.certutils.PemLoader;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-public class To2AsymkexTest extends BaseTemplate {
+public class To2KeyExchangeTest extends BaseTemplate {
 
   private String serverToken = guid.toString();
   private String clientToken;
@@ -90,8 +92,7 @@ public class To2AsymkexTest extends BaseTemplate {
     devKeyPem   = rsaKeyPem;
   }
 
-  @Override
-  protected void setup() throws Exception {
+  protected void setup(String kexName) throws Exception {
 
     clientToken = null;
     storedNonceTo2ProveDv = null;
@@ -129,7 +130,7 @@ public class To2AsymkexTest extends BaseTemplate {
 
       @Override
       public String getKexSuiteName() {
-        return Const.ASYMKEX2048_ALG_NAME;
+        return kexName;
       }
 
       @Override
@@ -431,12 +432,17 @@ public class To2AsymkexTest extends BaseTemplate {
     };
   }
 
-  @Test
-  void Test() throws Exception {
-    setup();
+  @ParameterizedTest
+  @ValueSource(strings = {
+      Const.ASYMKEX2048_ALG_NAME,
+      Const.ASYMKEX3072_ALG_NAME,
+      DiffieHellman.DH14_ALG_NAME,
+      DiffieHellman.DH15_ALG_NAME,
+  })
+  void Test(String kexName) throws Exception {
+    setup(kexName);
     runClient(clientService.getHelloMessage());
     assertTrue(fromDeviceInfo != null);
     assertTrue(fromOwnerInfo != null);
   }
-
 }

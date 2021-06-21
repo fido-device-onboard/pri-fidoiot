@@ -65,6 +65,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -74,6 +75,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
+import org.fidoalliance.fdo.protocol.DiffieHellman.KeyExchange;
 import org.fidoalliance.fdo.protocol.epid.EpidMaterialService;
 import org.fidoalliance.fdo.protocol.epid.EpidSignatureVerifier;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
@@ -1206,6 +1208,26 @@ public class CryptoService {
       case Const.ASYMKEX2048_ALG_NAME:
       case Const.ASYMKEX3072_ALG_NAME:
         return getAsymkexSharedSecret(message, ownState, decryptionKey);
+      case DiffieHellman.DH14_ALG_NAME:
+      case DiffieHellman.DH15_ALG_NAME:
+        // All owner states have our message as element 0 (FIRST_KEY) and the algorithm name
+        // in element 1 (SECOND_KEY).
+        //
+        // Restore our keyExchange from the KE state,
+        // which is element 2 (THIRD_KEY) in the owner state.
+        DiffieHellman.KeyExchange ke = new KeyExchange(ownState.getAsComposite(Const.THIRD_KEY));
+        try {
+          return new KeyExchangeResult(
+              ke.computeSharedSecret(new BigInteger(1, message)).toByteArray(), new byte[0]);
+        } finally {
+          try {
+            ke.destroy();
+          } catch (DestroyFailedException e) {
+            // this should never happen
+            assert false;
+            throw new RuntimeException(e);
+          }
+        }
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(alg));
     }
@@ -1234,6 +1256,23 @@ public class CryptoService {
       case Const.ASYMKEX3072_ALG_NAME:
         return getAsymkexMessage(
             Const.ASYMKEX3072_ALG_NAME, Const.ASYMKEX3072_RANDOM_SIZE, party, ownerKey);
+      case DiffieHellman.DH14_ALG_NAME:
+      case DiffieHellman.DH15_ALG_NAME:
+        DiffieHellman.KeyExchange ke = DiffieHellman.buildKeyExchange(kexSuiteName);
+        try {
+          return Composite.newArray()
+              .set(Const.FIRST_KEY, ke.getMessage().toByteArray())
+              .set(Const.SECOND_KEY, kexSuiteName)
+              .set(Const.THIRD_KEY, ke.getState());
+        } finally {
+          try {
+            ke.destroy();
+          } catch (DestroyFailedException e) {
+            // this should never happen
+            assert false;
+            throw new RuntimeException(e);
+          }
+        }
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(kexSuiteName));
     }
