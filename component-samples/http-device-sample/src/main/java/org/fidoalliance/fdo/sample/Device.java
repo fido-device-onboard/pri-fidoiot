@@ -17,8 +17,6 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -42,6 +40,8 @@ import org.fidoalliance.fdo.protocol.To2ClientService;
 import org.fidoalliance.fdo.protocol.To2ClientStorage;
 import org.fidoalliance.fdo.serviceinfo.FdoSys;
 import org.fidoalliance.fdo.serviceinfo.ModuleManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Device {
 
@@ -56,7 +56,7 @@ public class Device {
 
   private static boolean rvBypass;
 
-  private static final Logger logger = LogManager.getLogger();
+  private static final Logger logger = LoggerFactory.getLogger(Device.class);
 
   final CryptoService myCryptoService;
   final KeyPair myKeys;
