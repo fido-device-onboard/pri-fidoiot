@@ -21,13 +21,6 @@
   <groupId>org.fidoalliance.fdo</groupId>
   <packaging>jar</packaging>
 
-  <properties>
-    <!-- Dependencies -->
-    <commons-codec.version>1.15</commons-codec.version>
-    <bcprov.version>1.69</bcprov.version>
-    <bcpkix.version>1.69</bcpkix.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

@@ -20,15 +20,6 @@
   <artifactId>http-client-dispatcher</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <!-- Dependency Version -->
-    <tomcat.version>9.0.46</tomcat.version>
-    <bcpkix.version>1.69</bcpkix.version>
-
-    <!-- Maven -->
-    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
