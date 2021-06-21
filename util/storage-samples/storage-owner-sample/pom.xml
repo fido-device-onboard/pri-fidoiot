@@ -49,25 +49,25 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>serviceinfo</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>device</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

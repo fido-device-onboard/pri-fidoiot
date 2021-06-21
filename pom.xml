@@ -20,6 +20,9 @@
   mvn versions:update-properties
   -->
   <properties>
+    <!-- FDO Dependency Version -->
+    <fdo.version>1.0-SNAPSHOT</fdo.version>
+
     <!-- Dependency Version -->
     <bcpkix.version>1.69</bcpkix.version>
     <bcprov.version>1.69</bcprov.version>
@@ -52,20 +55,6 @@
     <!-- Project Configurations -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project-demo-directory>../../component-samples/demo</project-demo-directory>
-    <!--
-    <junit-jupiter.version>5.7.1</junit-jupiter.version>
-    <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
-    <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
-    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-    <maven-surefire-report-plugin.version>3.0.0-M5</maven-surefire-report-plugin.version>
-      <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
-    -->
   </properties>
 
   <modules>

@@ -58,25 +58,25 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-client-dispatcher</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>storage-owner-sample</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
   </dependencies>
 

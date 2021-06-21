@@ -78,7 +78,7 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
   </dependencies>
 </project>

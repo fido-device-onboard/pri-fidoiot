@@ -68,19 +68,19 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-keystore-sample</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
     </dependency>
   </dependencies>
 
@@ -112,7 +112,7 @@
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
                   <artifactId>${project.artifactId}</artifactId>
-                  <version>${project.version}</version>
+                  <version>${fdo.version}</version>
                   <type>${project.packaging}</type>
                   <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
                   <destFileName>${project.artifactId}.${project.packaging}</destFileName>

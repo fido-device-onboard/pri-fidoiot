@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>cert-utils</artifactId>
-      <version>${project.version}</version>
+      <version>${fdo.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
