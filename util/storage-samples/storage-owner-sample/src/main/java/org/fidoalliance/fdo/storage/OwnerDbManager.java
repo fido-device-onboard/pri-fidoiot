@@ -334,14 +334,17 @@ public class OwnerDbManager {
     String sql = "UPDATE TO2_SETTINGS" + " SET " + field + " = ?" + " WHERE ID = 1;";
 
     if (field.equals("DEVICE_SERVICE_INFO_MTU_SIZE")) {
-      if (mtu > 0 && mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+      if (mtu < 0) {
+        System.out.println("Received value must be > 0. "
+                + "Updating MTU size to default minimum of "
+                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+      } else if (mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
         System.out.println("Received value less than default minimum. "
                 + "Updating MTU size to default minimum of "
                 + Const.SERVICE_INFO_MTU_MIN_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
-      }
-      // check max limit as well
-      if (mtu > 0 && mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
+      } else if (mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
         System.out.println("MTU size greater than maximum allowed. "
                  +  "Updating MTU size to maximum limit of "
                  +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
