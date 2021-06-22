@@ -378,7 +378,7 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new RuntimeException(e);
     }
 
-    // Restricting minimum threshold to 1300 bytes
+    // Restricting minimum threshold to maximum permitted
     return Math.max(Const.DEFAULT_SERVICE_INFO_MTU_SIZE, ownerMtuThreshold);
   }
 
