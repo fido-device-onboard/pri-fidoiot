@@ -157,12 +157,32 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `http://localhost:8040?ipaddress=127.0.0.1&ownerport=8443`
+Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb` which points to localhost over port 8443 for Owner during TO0 and localhost over port 8040 for device during TO1.
+
+## Generating CBOR RvInfo
+
+As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
+
+```
+[[[RVDns,"localhost"],
+  [RVDevPort,8040],
+  [RVProt, 1],
+  [RVIPAddress, h’7F000001'],     //Represents 127.0.0.1
+  [RVOwnerPort,8443]]]
+```
+
+and the equivalent CBOR representation is:
+
+```
+[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
+```
+
+You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).
 
 This value is interpreted internally as:
 
-RvInfo for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
+Directives for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
 
-RvInfo for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
+Directives for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
 
-***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol.
+***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol. [Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about RendezvousInfo.
