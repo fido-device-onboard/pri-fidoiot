@@ -203,4 +203,87 @@ public class RendezvousInfoDecoder {
     return list;
 
   }
+
+  public static boolean sanityCheck(Composite rvi) {
+    try {
+      for (int i = 0; i < rvi.size(); i++) {
+        Composite directive = rvi.getAsComposite(i);
+        for (int index = 0; index < directive.size(); index++) {
+          List<Object> item = (List<Object>) directive.get(index);
+          long rvVariable = (long) item.get(0);
+          if (rvVariable < Const.RV_DEV_ONLY || rvVariable > Const.RV_EXTRV) {
+            //Out of range rvVariable. Valid range is between 0-15.
+            System.out.println("Invalid RvVariable provided.");
+            return false;
+          } else if (rvVariable == Const.RV_DEV_ONLY || rvVariable ==Const.RV_OWNER_ONLY
+                  || rvVariable == Const.RV_BYPASS) {
+            // For these 3 RV Variables, ensure that only one item is present.
+            if(item.size() > 1) {
+              return false;
+            }
+          } else if (rvVariable == Const.RV_IP_ADDRESS) {
+            //Ensure that proper ip address is resolved.
+            queryIpAddressValue(directive);
+          } else if (rvVariable == Const.RV_DEV_PORT) {
+            Integer devport = queryIntValue(directive, Const.RV_DEV_PORT);
+            //Ensure that devport is in the valid range of (0,65535).
+            if (devport < 0 || devport > 65535) {
+              System.out.println("Invalid devport.");
+              return false;
+            }
+          } else if (rvVariable == Const.RV_OWNER_PORT) {
+            Integer ownerport = queryIntValue(directive, Const.RV_OWNER_PORT);
+            //Ensure that ownerport is in the valid range of (0,65535).
+            if (ownerport < 0 || ownerport > 65535) {
+              System.out.println("Invalid Ownerport.");
+              return false;
+            }
+          } else if (rvVariable == Const.RV_SV_CERT_HASH) {
+            //TODO: Decode and check the structure of Hash.
+          } else if (rvVariable == Const.RV_CLT_CERT_HASH) {
+            //TODO: Decode and check the structure of Hash.
+          } else if (rvVariable == Const.RV_USER_INPUT) {
+            //Ensure that user input is a boolean value.
+            getBoolean((String) item.get(1));
+          } else if (rvVariable == Const.RV_WIFI_SSID) {
+             queryStringValue(directive,Const.RV_WIFI_SSID);
+          } else if (rvVariable == Const.RV_WIFI_PW) {
+            queryStringValue(directive,Const.RV_WIFI_PW);
+          } else if (rvVariable == Const.RV_MEDIUM) {
+            Integer medium = queryIntValue(directive, Const.RV_DEV_PORT);
+            //Ensure that medium is in the valid range of (0,21).
+            if (medium < Const.RV_MED_ETH0 || medium > Const.RV_MED_WIFI_ALL) {
+              System.out.println("Invalid medium used.");
+              return false;
+            }
+          } else if (rvVariable == Const.RV_PROTOCOL) {
+            int value = queryIntValue(directive, Const.RV_PROTOCOL);
+            //Ensure that protocol value is in the valid range of (0,6).
+            if (value < Const.RV_PROT_REST || value > Const.RV_PROT_COAP_UDP) {
+              System.out.println("Invalid Protocol used.");
+              return false;
+            }
+          } else if (rvVariable == Const.RV_DELAY_SEC) {
+            int value= queryIntValue(directive, Const.RV_DELAY_SEC);
+            //Ensuring that RV_DELAY_SEC is not a negative value.
+            if (value < 0) {
+              return false;
+            }
+          }
+        }
+      }
+    } catch (InvalidIpAddressException e) {
+      System.out.println("Invalid IP address provided.");
+      return false;
+    } catch(MessageBodyException e) {
+      System.out.println("Invalid WiFi SSID/ WiFi PW provided.");
+      return false;
+    } catch(DispatchException e) {
+      System.out.println("Invalid user inpur provided.");
+    } catch (Exception e) {
+      return false;
+    }
+
+    return true;
+  }
 }

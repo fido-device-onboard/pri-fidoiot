@@ -1,10 +1,9 @@
 package org.fidoalliance.fdo.protocol;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RendezvousInfoDecoderTest {
 
@@ -31,5 +30,57 @@ public class RendezvousInfoDecoderTest {
         ()-> { List<String> directives = RendezvousInfoDecoder.getHttpDirectives(invalidRvi,Const.RV_DEV_ONLY); });
   }
 
+  @Test
+  void sanityCheckTest() {
+    String directive  = "81858205696C6F63616C686F73748203191F68820C018202447F00000182041920FB";
+    Composite rvi = Composite.fromObject(directive);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertTrue(check);
+  }
+
+  @Test
+  void mulitpleRvSanityTest() {
+    String directive  = "82858205696C6F63616C686F73748203191F68820C018202447F00000182041920FB8582" +
+            "056B72766C6F63616C686F73748203191F68820C018202440A14010182041920FB";
+    Composite rvi = Composite.fromObject(directive);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertTrue(check);
+  }
+
+  @Test
+  void invalidRvVariableSanityTest() {
+    //contains rvVariable beyond the acceptable range
+    String invalidRVvariable = "81858205696C6F63616C686F73748203191F6882181B018202447F00000182041920FB";
+    Composite rvi = Composite.fromObject(invalidRVvariable);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertFalse(check);
+  }
+
+  @Test
+  void invalidIpAddressSanityTest() {
+    //contains invalid ip address.
+    String invalidRVvariable = "81858205696C6F63616C686F73748203191F68820C018202457F0000FFFF82041920FB";
+    Composite rvi = Composite.fromObject(invalidRVvariable);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertFalse(check);
+  }
+
+  @Test
+  void invalidPortSanityTest() {
+    //contains invalid port number.
+    String invalidRVvariable = "81858205696C6F63616C686F73748203191F68820C018202447F0000FF82041A0001420B";
+    Composite rvi = Composite.fromObject(invalidRVvariable);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertFalse(check);
+  }
+
+  @Test
+  void invalidProtocolSanityTest() {
+    //contains invalid port number.
+    String invalidRVvariable = "81858205696C6F63616C686F73748203191F68820C0C8202447F00000182041920FB";
+    Composite rvi = Composite.fromObject(invalidRVvariable);
+    Boolean check = RendezvousInfoDecoder.sanityCheck(rvi);
+    assertFalse(check);
+  }
 }
 

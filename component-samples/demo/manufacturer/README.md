@@ -159,6 +159,29 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 # Rendezvous Info
 Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb` which points to localhost over port 8443 for Owner during TO0 and localhost over port 8040 for device during TO1.
 
+The diagnostic representation of the default RvInfo:
+```
+81                             # array(1)
+   85                          # array(5)
+      82                       # array(2)
+         05                    # unsigned(5)
+         69                    # text(9)
+            6C6F63616C686F7374 # "localhost"
+      82                       # array(2)
+         03                    # unsigned(3)
+         19 1F68               # unsigned(8040)
+      82                       # array(2)
+         0C                    # unsigned(12)
+         01                    # unsigned(1)
+      82                       # array(2)
+         02                    # unsigned(2)
+         44                    # bytes(4)
+            7F000001           # "\x7F\x00\x00\x01"
+      82                       # array(2)
+         04                    # unsigned(4)
+         19 20FB               # unsigned(8443)
+```
+
 ## Generating CBOR RvInfo
 
 As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
@@ -175,6 +198,14 @@ and the equivalent CBOR representation is:
 
 ```
 [[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
+```
+
+**NOTE:** h'7F00001' is the hexadecimal representation of the ip address and it is interpreted as
+```
+7F -> 127
+00 -> 0
+00 -> 0
+01 -> 1     ; 127.0.0.1
 ```
 
 You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).

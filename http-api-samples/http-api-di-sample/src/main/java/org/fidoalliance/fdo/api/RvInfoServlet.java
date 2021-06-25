@@ -37,9 +37,10 @@ public class RvInfoServlet extends HttpServlet {
     String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
 
     try {
+      Composite rvi = Composite.fromObject(rvInfo);
       List<String> directives = RendezvousInfoDecoder
-              .getHttpDirectives(Composite.fromObject(rvInfo),Const.RV_DEV_ONLY);
-      if (directives.size() > 0) {
+              .getHttpDirectives(rvi,Const.RV_DEV_ONLY);
+      if (directives.size() > 0 && RendezvousInfoDecoder.sanityCheck(rvi)) {
         DiDbManager dbManager = new DiDbManager();
         dbManager.addRvInfo(ds, rvInfo);
       } else {
