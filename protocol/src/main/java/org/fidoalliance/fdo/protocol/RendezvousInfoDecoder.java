@@ -204,6 +204,12 @@ public class RendezvousInfoDecoder {
 
   }
 
+  /**
+   * Performs sanity checks on the CBOR RvInfo.
+   *
+   * @param rvi Composite object of the CBOR RvInfo
+   * @return whether CBOR RvInfo passes the sanity checks.
+   */
   public static boolean sanityCheck(Composite rvi) {
     try {
       for (int i = 0; i < rvi.size(); i++) {
@@ -215,10 +221,10 @@ public class RendezvousInfoDecoder {
             //Out of range rvVariable. Valid range is between 0-15.
             System.out.println("Invalid RvVariable provided.");
             return false;
-          } else if (rvVariable == Const.RV_DEV_ONLY || rvVariable ==Const.RV_OWNER_ONLY
+          } else if (rvVariable == Const.RV_DEV_ONLY || rvVariable == Const.RV_OWNER_ONLY
                   || rvVariable == Const.RV_BYPASS) {
             // For these 3 RV Variables, ensure that only one item is present.
-            if(item.size() > 1) {
+            if (item.size() > 1) {
               return false;
             }
           } else if (rvVariable == Const.RV_IP_ADDRESS) {
@@ -246,7 +252,7 @@ public class RendezvousInfoDecoder {
             //Ensure that user input is a boolean value.
             getBoolean((String) item.get(1));
           } else if (rvVariable == Const.RV_WIFI_SSID) {
-             queryStringValue(directive,Const.RV_WIFI_SSID);
+            queryStringValue(directive,Const.RV_WIFI_SSID);
           } else if (rvVariable == Const.RV_WIFI_PW) {
             queryStringValue(directive,Const.RV_WIFI_PW);
           } else if (rvVariable == Const.RV_MEDIUM) {
@@ -264,7 +270,7 @@ public class RendezvousInfoDecoder {
               return false;
             }
           } else if (rvVariable == Const.RV_DELAY_SEC) {
-            int value= queryIntValue(directive, Const.RV_DELAY_SEC);
+            int value = queryIntValue(directive, Const.RV_DELAY_SEC);
             //Ensuring that RV_DELAY_SEC is not a negative value.
             if (value < 0) {
               return false;
@@ -275,10 +281,10 @@ public class RendezvousInfoDecoder {
     } catch (InvalidIpAddressException e) {
       System.out.println("Invalid IP address provided.");
       return false;
-    } catch(MessageBodyException e) {
+    } catch (MessageBodyException e) {
       System.out.println("Invalid WiFi SSID/ WiFi PW provided.");
       return false;
-    } catch(DispatchException e) {
+    } catch (DispatchException e) {
       System.out.println("Invalid user inpur provided.");
     } catch (Exception e) {
       return false;
