@@ -62,6 +62,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -176,7 +177,7 @@ public class CryptoService {
    * @param algName The HMAC Algorithm.
    * @return The key based on the secret and HMAC algorithm.
    */
-  protected Key getHmacKey(byte[] secret, String algName) {
+  protected SecretKey getHmacKey(byte[] secret, String algName) {
     return new SecretKeySpec(secret, algName);
   }
 
@@ -941,9 +942,19 @@ public class CryptoService {
       final String algName = getHashAlgorithm(hashType);
       final Mac mac = getMacInstance(algName);
 
-      final Key secretKey = getHmacKey(secret, algName);
-      mac.init(secretKey);
-      final byte[] macData = mac.doFinal(data);
+      final byte[] macData;
+      final SecretKey secretKey = getHmacKey(secret, algName);
+      try {
+        mac.init(secretKey);
+        macData = mac.doFinal(data);
+      } finally {
+        try {
+          secretKey.destroy();
+        } catch (DestroyFailedException e) {
+          // many key implementations don't support destruction correctly - this exception
+          // is expected and can be ignored.
+        }
+      }
 
       return Composite.newArray()
           .set(Const.HASH_TYPE, hashType)
