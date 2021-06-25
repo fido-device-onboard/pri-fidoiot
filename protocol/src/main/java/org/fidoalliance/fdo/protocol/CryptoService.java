@@ -1154,38 +1154,56 @@ public class CryptoService {
       final byte[] encoded = ownState.getAsBytes(Const.FOURTH_KEY);
       final PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(encoded);
       final KeyFactory factory = getKeyFactoryInstance(Const.EC_ALG_NAME);
-      final ECPrivateKey ownKey = (ECPrivateKey) factory.generatePrivate(privateSpec);
-
-      final ECPoint w = new ECPoint(new BigInteger(1, theirX), new BigInteger(1, theirY));
-      final ECPublicKeySpec publicSpec = new ECPublicKeySpec(w, ownKey.getParams());
-
-      final PublicKey theirKey = factory.generatePublic(publicSpec);
-
       final KeyAgreement keyAgreement = getKeyAgreementInstance(Const.ECDH_ALG_NAME);
-      keyAgreement.init(ownKey);
-      keyAgreement.doPhase(theirKey, true);
-      final byte[] sharedSecret = keyAgreement.generateSecret();
+      final ECPrivateKey ownKey = (ECPrivateKey) factory.generatePrivate(privateSpec);
+      final byte[] sharedSecret;
+      try {
 
-      final Composite ownMessage = decodeEcdhMessage(ownState.getAsBytes(Const.FIRST_KEY));
-      final byte[] ownRandom = ownMessage.getAsBytes(Const.THIRD_KEY);
-      final ByteBuffer buffer = ByteBuffer
-          .allocate(sharedSecret.length + ownRandom.length + theirRandom.length);
-      buffer.put(sharedSecret);
-      final String party = ownState.getAsString(Const.FIFTH_KEY);
-      if (party.equals(Const.KEY_EXCHANGE_A)) {
-        //A is owner
-        buffer.put(theirRandom);
-        buffer.put(ownRandom);
-      } else if (party.equals(Const.KEY_EXCHANGE_B)) {
-        //B is device
-        buffer.put(ownRandom);
-        buffer.put(theirRandom);
-      } else {
-        throw new IllegalArgumentException();
+        final ECPoint w = new ECPoint(new BigInteger(1, theirX), new BigInteger(1, theirY));
+        final ECPublicKeySpec publicSpec = new ECPublicKeySpec(w, ownKey.getParams());
+
+        final PublicKey theirKey = factory.generatePublic(publicSpec);
+
+        keyAgreement.init(ownKey);
+        keyAgreement.doPhase(theirKey, true);
+        sharedSecret = keyAgreement.generateSecret();
+
+      } finally {
+        try {
+          ownKey.destroy();
+        } catch (DestroyFailedException e) {
+          // many key implementations don't support destruction correctly - this exception
+          // is expected and can be ignored.
+        }
       }
 
-      buffer.flip();
-      return new KeyExchangeResult(Composite.unwrap(buffer), new byte[0]);
+      try {
+
+        final Composite ownMessage = decodeEcdhMessage(ownState.getAsBytes(Const.FIRST_KEY));
+        final byte[] ownRandom = ownMessage.getAsBytes(Const.THIRD_KEY);
+        final ByteBuffer buffer = ByteBuffer
+            .allocate(sharedSecret.length + ownRandom.length + theirRandom.length);
+        buffer.put(sharedSecret);
+
+        final String party = ownState.getAsString(Const.FIFTH_KEY);
+        if (party.equals(Const.KEY_EXCHANGE_A)) {
+          //A is owner
+          buffer.put(theirRandom);
+          buffer.put(ownRandom);
+        } else if (party.equals(Const.KEY_EXCHANGE_B)) {
+          //B is device
+          buffer.put(ownRandom);
+          buffer.put(theirRandom);
+        } else {
+          throw new IllegalArgumentException();
+        }
+
+        buffer.flip();
+        return new KeyExchangeResult(Composite.unwrap(buffer), new byte[0]);
+
+      } finally {
+        Arrays.fill(sharedSecret, (byte)0);
+      }
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
       throw new CryptoServiceException(e);
     }
