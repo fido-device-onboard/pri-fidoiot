@@ -157,9 +157,42 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb` which points to localhost over port 8443 for Owner during TO0 and localhost over port 8040 for device during TO1.
+Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]` which points to localhost over the port 8443 for Owner during TO0 and localhost over the port 8040 for device during TO1
+and the equivalent bytes representation is `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
 
-The diagnostic representation of the default RvInfo:
+## Generating CBOR RVInfo
+
+As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
+
+```
+[[[RVDns,"localhost"],
+  [RVDevPort,8040],
+  [RVProt, 1],
+  [RVIPAddress, h’7F000001'],     //Represents 127.0.0.1
+  [RVOwnerPort,8443]]]
+```
+and the equivalent diagnostic representation is:
+
+```
+[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
+```
+**NOTE:** In the spec, RVDns is represented as 5, RVDevPort as 3, RVProt as 12, RVIPAddress as 2 and RVOwnerPort as 4.
+[Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about the RV variable representations.
+
+**NOTE:** h'7F00001' is the hexadecimal representation of the ip address and it is interpreted as
+```
+7F -> 127
+00 -> 0
+00 -> 0
+01 -> 1     ; 127.0.0.1
+```
+
+You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).
+
+On visiting CBOR playground, you will be presented with two text areas (Diagnostic and Bytes). Enter the diagnostic
+representation `[[[5, "localhost"],[3,8040], .. ]` on the Diagnostic text area and click `→`. The bytes representation will be generated on the 'Bytes' textarea.
+
+Sample bytes representation of the default RvInfo:
 ```
 81                             # array(1)
    85                          # array(5)
@@ -182,35 +215,12 @@ The diagnostic representation of the default RvInfo:
          19 20FB               # unsigned(8443)
 ```
 
-## Generating CBOR RvInfo
+From the above representation, you have to strip the whitespaces and comments(Starting with #) to the format `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`.
 
-As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
+You can also make use of the `get-cbor-bytes.sh` script available in `component-samples/scripts` to generate the bytes
+representation from the diagnostic representation.
 
-```
-[[[RVDns,"localhost"],
-  [RVDevPort,8040],
-  [RVProt, 1],
-  [RVIPAddress, h’7F000001'],     //Represents 127.0.0.1
-  [RVOwnerPort,8443]]]
-```
-
-and the equivalent CBOR representation is:
-
-```
-[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
-```
-
-**NOTE:** h'7F00001' is the hexadecimal representation of the ip address and it is interpreted as
-```
-7F -> 127
-00 -> 0
-00 -> 0
-01 -> 1     ; 127.0.0.1
-```
-
-You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).
-
-This value is interpreted internally as:
+This bytes value is interpreted internally as:
 
 Directives for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
 
