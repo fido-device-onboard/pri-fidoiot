@@ -16,7 +16,9 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +47,7 @@ public class DeviceSysModule implements Module {
 
   private Path currentFile;
   private boolean isActive;
+  private Queue<Composite> replys = new LinkedList<>();
 
   @Override
   public String getName() {
@@ -83,6 +86,7 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
         } else {
+          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
         }
         break;
@@ -90,6 +94,7 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
         } else {
+          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
         }
         break;
@@ -97,6 +102,7 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           exec(kvPair.getAsComposite(Const.SECOND_KEY));
         } else {
+          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:exec.");
         }
         break;
@@ -107,7 +113,8 @@ public class DeviceSysModule implements Module {
 
   @Override
   public boolean isMore() {
-    return false;
+
+    return replys.size() > 0;
   }
 
   @Override
@@ -117,7 +124,14 @@ public class DeviceSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
-    return null;
+    return replys.remove();
+  }
+
+  private void replyInactive() {
+    Composite message = Composite.newArray();
+    message.set(Const.FIRST_KEY, FdoSys.KEY_ACTIVE);
+    message.set(Const.SECOND_KEY, false);
+    replys.add(message);
   }
 
   private void setPath(Path path) {

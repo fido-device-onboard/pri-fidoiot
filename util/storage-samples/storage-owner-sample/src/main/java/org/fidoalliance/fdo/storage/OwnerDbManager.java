@@ -542,7 +542,9 @@ public class OwnerDbManager {
         + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
         + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active') "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:ismore' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:isdone') "
         + "ORDER BY PRIORITY ASC";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
