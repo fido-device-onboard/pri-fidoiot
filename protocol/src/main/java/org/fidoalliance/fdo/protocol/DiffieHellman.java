@@ -5,7 +5,7 @@ import java.security.SecureRandom;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
-public class DiffieHellman {
+public final class DiffieHellman {
 
   public static final String DH14_ALG_NAME = "DHKEXid14";
   public static final int DH14_RANDOM_SIZE_IN_BITS = 256;
@@ -67,7 +67,7 @@ public class DiffieHellman {
     }
   }
 
-  public static class KeyExchange implements Destroyable {
+  public static final class KeyExchange implements Destroyable {
 
     private final BigInteger myP;
     private final BigInteger myG;

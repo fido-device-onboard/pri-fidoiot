@@ -11,7 +11,7 @@ import java.security.interfaces.ECKey;
 /**
  * Extends Ownership vouchers.
  */
-public class VoucherExtensionService {
+public final class VoucherExtensionService {
 
   private final Composite voucher;
   private final CryptoService cryptoService;

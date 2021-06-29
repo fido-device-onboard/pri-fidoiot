@@ -15,7 +15,7 @@ import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.InvalidMessageException;
 
-public class EpidMaterialService {
+public final class EpidMaterialService {
 
   private byte[] getSigrl(Composite sigInfo, String epidVersion) throws IOException {
     byte[] sigrlResponse = getEpidVerificationServiceResource(sigInfo, Const.SIGRL, epidVersion);
