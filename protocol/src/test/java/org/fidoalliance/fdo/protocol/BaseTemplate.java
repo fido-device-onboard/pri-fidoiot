@@ -23,7 +23,7 @@ public class BaseTemplate {
       "This is a SHA256 key for hmac al".getBytes(StandardCharsets.US_ASCII);
 
   protected static final String RV_INFO =
-      "http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040";
+      "81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb";
 
   protected static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
 
@@ -122,7 +122,7 @@ public class BaseTemplate {
     Composite hash = cryptoService.hash(Const.SHA_256, chain.toBytes());
 
     //build info rendezvous
-    Composite rv = RendezvousInfoDecoder.decode(RV_INFO);
+    Composite rv = Composite.fromObject(RV_INFO);
 
     header.set(Const.OVH_VERSION, Const.PROTOCOL_VERSION_100);
     header.set(Const.OVH_GUID, guid);
