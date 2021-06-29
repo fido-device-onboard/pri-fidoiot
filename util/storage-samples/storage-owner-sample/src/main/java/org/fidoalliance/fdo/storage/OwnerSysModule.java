@@ -18,13 +18,8 @@ public class OwnerSysModule implements Module {
 
   private Composite state;
   private final DataSource dataSource;
-  // MAX_READ is set to this value to ensure all known devices
-  // can handle this size of data in the SI.
-  // Future enhancement: adjust this value based on the MTU size
-  // requested by the device.
-  private static final int MAX_READ = 1000;
   private static final byte CBOR_TRUE = (byte) 0xF5;
-
+  private int maxMtu = 0;
 
   /**
    * Constructs the OwnerSysModule.
@@ -50,6 +45,7 @@ public class OwnerSysModule implements Module {
 
   @Override
   public void setMtu(int maxMtu) {
+    this.maxMtu = maxMtu;
   }
 
 
@@ -168,11 +164,14 @@ public class OwnerSysModule implements Module {
         break;
       case FdoSys.KEY_WRITE: {
         int start = resource.getAsNumber(Const.THIRD_KEY).intValue();
+        // Adjust the chunk size based on the mtu size.
+        // Account for the extra size due to key exchange encryption,
+        // key size and other cbor bytes by adjusting downward by 100.
         byte[] data =
             new OwnerDbManager().getSystemResourceContentWithRange(dataSource,
-                resId, start, start + MAX_READ);
+                resId, start, start + maxMtu - 100);
         message.set(Const.SECOND_KEY, data);
-        if (data.length < MAX_READ) {
+        if (data.length < maxMtu - 100) {
           incrementIndex();
         } else {
           resource.set(Const.THIRD_KEY, start + data.length);

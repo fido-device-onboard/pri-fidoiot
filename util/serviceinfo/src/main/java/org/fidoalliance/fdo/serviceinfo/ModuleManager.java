@@ -66,6 +66,7 @@ public class ModuleManager implements Module {
     Composite modStates = state.getAsComposite(Const.THIRD_KEY);
     for (int i = 0; i < modStates.size(); i++) {
       moduleList.get(i).setState(modStates.getAsComposite(i));
+      moduleList.get(i).setMtu(state.getAsNumber(Const.FIRST_KEY).intValue());
     }
   }
 
