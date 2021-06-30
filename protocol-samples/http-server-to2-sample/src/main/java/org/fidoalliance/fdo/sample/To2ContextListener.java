@@ -197,6 +197,8 @@ public class To2ContextListener implements ServletContextListener {
     // Setting epid test mode enables epid signatures from debug and test
     // devices to pass validation. In production, this should never be used.
     cs.setEpidTestMode();
+    logger.warn("*** WARNING ***");
+    logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
@@ -259,21 +261,23 @@ public class To2ContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          sc.log("Failed to write data: " + e.getMessage());
+          logger.warn("Failed to write data: " + e.getMessage());
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);

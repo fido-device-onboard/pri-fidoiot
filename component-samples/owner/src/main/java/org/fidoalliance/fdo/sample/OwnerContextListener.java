@@ -23,6 +23,7 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -81,6 +82,8 @@ public class OwnerContextListener implements ServletContextListener {
       + "FwIDAQAB\n"
       + "-----END PUBLIC KEY-----";
 
+  private static final LoggerService logger = new LoggerService(OwnerContextListener.class);
+
   private KeyResolver resolver;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
   private ExecutorService to0ExecutorService = Executors.newCachedThreadPool();
@@ -95,7 +98,7 @@ public class OwnerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(OwnerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(OwnerAppSettings.DB_PWD));
 
-    sc.log(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -105,13 +108,14 @@ public class OwnerContextListener implements ServletContextListener {
     String epidTestMode = sc.getInitParameter(OwnerAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
       cs.setEpidTestMode();
-      sc.log("EPID Test mode enabled.");
+      logger.warn("*** WARNING ***");
+      logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
     String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
     if (null != epidUrl) {
       EpidUtils.setEpidOnlineUrl(epidUrl);
     } else {
-      sc.log("EPID URL not set. Default URL will be used: "
+      logger.info("EPID URL not set. Default URL will be used: "
           + EpidUtils.getEpidOnlineUrl().toString());
     }
 
@@ -161,21 +165,23 @@ public class OwnerContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          sc.log("Failed to write data: " + e.getMessage());
+          logger.warn("Failed to write data: " + e.getMessage());
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
@@ -194,13 +200,13 @@ public class OwnerContextListener implements ServletContextListener {
           try {
             OwnerDbTo0Util to0Util = new OwnerDbTo0Util();
             List<UUID> uuids = to0Util.fetchDevicesForTo0(ds);
-            sc.log("Scheduling UUIDs for TO0: " + uuids.toString());
+            logger.info("Scheduling UUIDs for TO0: " + uuids.toString());
             for (UUID guid : uuids) {
               CompletableFuture.runAsync(() -> scheduleTo0(sc, ds, guid, to0Util),
                   to0ExecutorService);
             }
           } catch (Exception e) {
-            sc.log(e.getMessage());
+            logger.warn(e.getMessage());
           }
         }
       }, 5, Integer.parseInt(
@@ -242,7 +248,7 @@ public class OwnerContextListener implements ServletContextListener {
       to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();
     } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
-      sc.log("Error during TO0 for GUID: " + guid.toString());
+      logger.error("Error during TO0 for GUID: " + guid.toString());
       throw new RuntimeException(e);
     }
   }

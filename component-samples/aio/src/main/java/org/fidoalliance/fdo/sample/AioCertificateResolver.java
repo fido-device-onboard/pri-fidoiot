@@ -15,6 +15,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -29,6 +31,7 @@ public class AioCertificateResolver implements CertificateResolver {
   private final String mfgKeystorePath;
   private final String mfgKeyStorePin;
   private final CryptoService cs;
+  private static final LoggerService logger = new LoggerService(AioCertificateResolver.class);
 
   /**
    * Constructs an instance of a AioCertificateResolver.
@@ -80,7 +83,7 @@ public class AioCertificateResolver implements CertificateResolver {
         }
       } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
           | CertificateEncodingException e) {
-        System.out.println("Unable to retrieve Private Key. " + e.getMessage());
+        logger.warn("Unable to retrieve Private Key. " + e.getMessage());
       }
     }
     throw new RuntimeException();

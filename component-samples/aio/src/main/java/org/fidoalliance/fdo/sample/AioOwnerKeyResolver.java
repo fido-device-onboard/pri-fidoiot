@@ -16,6 +16,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.KeyResolver;
 
 public class AioOwnerKeyResolver implements KeyResolver {
@@ -24,6 +26,8 @@ public class AioOwnerKeyResolver implements KeyResolver {
   private final String ownerKeystorePath;
   private final String ownerKeyStoreType;
   private final String ownerKeyStorePin;
+
+  private static final LoggerService logger = new LoggerService(AioOwnerKeyResolver.class);
 
   /**
    * Constructor.
@@ -53,7 +57,7 @@ public class AioOwnerKeyResolver implements KeyResolver {
           }
         }
       } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
     return null;
@@ -74,8 +78,8 @@ public class AioOwnerKeyResolver implements KeyResolver {
             ownerKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      System.out.println("Keystore not configured.");
-      System.out.println(e.getMessage());
+      logger.error("Keystore not configured.");
+      logger.error(e.getMessage());
     }
   }
 

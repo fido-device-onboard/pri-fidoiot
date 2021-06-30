@@ -80,21 +80,23 @@ public class To0To1ContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          sc.log("Failed to write data: " + e.getMessage());
+          logger.warn("Failed to write data: " + e.getMessage());
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);

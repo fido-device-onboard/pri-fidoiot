@@ -12,12 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.RendezvousInfoDecoder;
 import org.fidoalliance.fdo.storage.DiDbManager;
 
 public class RvInfoServlet extends HttpServlet {
+
+  private static final LoggerService logger = new LoggerService(RvInfoServlet.class);
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -45,12 +48,12 @@ public class RvInfoServlet extends HttpServlet {
         dbManager.addRvInfo(ds, rvInfo);
       } else {
         //If we are unable to resolve even one directive, then we return 400 BAD_REQUEST.
-        System.out.println("Received invalid RVInfo");
+        logger.error("Received invalid RVInfo");
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
     } catch (Exception e) {
-      System.out.println("Received invalid RVInfo");
+      logger.error("Received invalid RVInfo");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }

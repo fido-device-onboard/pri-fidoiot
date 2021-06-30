@@ -23,6 +23,7 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -63,6 +64,7 @@ public class AioContextListener implements ServletContextListener {
   private CertificateResolver certResolver;
   private String newDevicePath;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+  private static final LoggerService logger = new LoggerService(AioContextListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -74,7 +76,7 @@ public class AioContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(AioAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(AioAppSettings.DB_PWD));
 
-    sc.log(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -84,13 +86,14 @@ public class AioContextListener implements ServletContextListener {
     String epidTestMode = sc.getInitParameter(AioAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
       cs.setEpidTestMode();
-      sc.log("EPID Test mode enabled.");
+      logger.warn("*** WARNING ***");
+      logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
     String epidUrl = sc.getInitParameter(AioAppSettings.EPID_URL);
     if (null != epidUrl) {
       EpidUtils.setEpidOnlineUrl(epidUrl);
     } else {
-      sc.log("EPID URL not set. Default URL will be used: "
+      logger.info("EPID URL not set. Default URL will be used: "
           + EpidUtils.getEpidOnlineUrl().toString());
     }
 
@@ -192,7 +195,8 @@ public class AioContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
@@ -206,7 +210,8 @@ public class AioContextListener implements ServletContextListener {
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.info("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
@@ -215,10 +220,8 @@ public class AioContextListener implements ServletContextListener {
         try (PrintWriter pw = new PrintWriter(writer)) {
           writer.write(e.getMessage());
           writer.write("\n");
-          e.printStackTrace(pw);
-
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
 
@@ -246,7 +249,7 @@ public class AioContextListener implements ServletContextListener {
           new AioDbManager().removeSessions(ds);
 
         } catch (Exception e) {
-          sc.log(e.getMessage());
+          logger.warn(e.getMessage());
         }
       }
     }, 5, Integer.parseInt(
