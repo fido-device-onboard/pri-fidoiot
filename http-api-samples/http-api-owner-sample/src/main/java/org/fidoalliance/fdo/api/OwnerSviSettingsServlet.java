@@ -27,7 +27,7 @@ public class OwnerSviSettingsServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/text") != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -46,7 +46,7 @@ public class OwnerSviSettingsServlet extends HttpServlet {
         String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
         if (to2Settings.length > 2) {
           getServletContext().log("Invalid to2Settings request has been provided.");
-          resp.setStatus(400);
+          resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
           return;
         }
         int deviceMtu = 0;
@@ -77,14 +77,14 @@ public class OwnerSviSettingsServlet extends HttpServlet {
             }
           } else {
             getServletContext().log("Invalid settings request has been provided.");
-            resp.setStatus(400);
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
           }
         }
       }
     } catch (Exception exp) {
       getServletContext().log("Error occurred while updating TO2 settings " + exp.getMessage());
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

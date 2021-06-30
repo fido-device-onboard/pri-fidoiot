@@ -27,7 +27,7 @@ public class RvInfoServlet extends HttpServlet {
 
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
-        resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+        resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
     }
@@ -46,12 +46,12 @@ public class RvInfoServlet extends HttpServlet {
       } else {
         //If we are unable to resolve even one directive, then we return 400 BAD_REQUEST.
         System.out.println("Received invalid RVInfo");
-        resp.setStatus(400);
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
     } catch (Exception e) {
       System.out.println("Received invalid RVInfo");
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
   }

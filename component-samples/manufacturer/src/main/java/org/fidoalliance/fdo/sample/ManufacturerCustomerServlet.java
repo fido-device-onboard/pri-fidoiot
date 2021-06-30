@@ -28,14 +28,14 @@ public class ManufacturerCustomerServlet extends HttpServlet {
     String contentType = req.getContentType();
 
     if (null == id || null == name || id.equals("") || name.equals("") || !id.matches("[0-9]+")) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
     //accept no content type or text/plain us-ascii pem
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
-        resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+        resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
     }
@@ -50,12 +50,12 @@ public class ManufacturerCustomerServlet extends HttpServlet {
         DiDbManager dbManager = new DiDbManager();
         dbManager.addCustomer(ds, Integer.parseInt(id), name, keySet);
       } else {
-        resp.setStatus(400);
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
 
     } catch (Exception e) {
-      resp.setStatus(500);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }
