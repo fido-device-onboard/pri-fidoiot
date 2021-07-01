@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -63,7 +66,6 @@ public class AioContextListener implements ServletContextListener {
   private CertificateResolver certResolver;
   private String newDevicePath;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-  private ExecutorService to0ExecutorService = Executors.newCachedThreadPool();
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -141,7 +143,6 @@ public class AioContextListener implements ServletContextListener {
     );
 
     newDevicePath = sc.getInitParameter(AioAppSettings.DB_NEW_DEVICE_SQL);
-    //waitSeconds = Integer.parseInt(sc.getInitParameter(AioAppSettings.TO0_MAX_WS));
 
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
@@ -252,7 +253,7 @@ public class AioContextListener implements ServletContextListener {
         }
       }
     }, 5, Integer.parseInt(
-        sc.getInitParameter(AioAppSettings.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
+        sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
 
   }
 
@@ -449,18 +450,4 @@ public class AioContextListener implements ServletContextListener {
     return singedBlob.toBytes();
   }
 
-
-  private void scheduleTo0(ServletContext sc, DataSource ds, UUID guid, OwnerDbTo0Util to0Util) {
-    /*try {
-      OwnerTo0Client to0Client = new OwnerTo0Client(new CryptoService(), ds,
-          new OwnerKeyResolver(sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE),
-              sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE_PWD)),
-          guid, to0Util);
-      to0Client.setRvBlob(sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
-      to0Client.run();
-    } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
-      sc.log("Error during TO0 for GUID: " + guid.toString());
-      throw new RuntimeException(e);
-    }*/
-  }
 }

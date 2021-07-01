@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.FileInputStream;
@@ -9,16 +12,12 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.protocol.Const;
 
 /**
  * Allows download of files using curl or wget.
  */
 public class AioFileDownloadServlet extends HttpServlet {
-
-  // common http setting
-  public static final int HTTP_OK = 200;
-  public static final int HTTP_NOT_FOUND = 404;
-  public static final int HTTP_SERVER_ERROR = 500;
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -39,6 +38,11 @@ public class AioFileDownloadServlet extends HttpServlet {
 
     final int pos = req.getRequestURI().lastIndexOf('/');
     final String fileName = req.getRequestURI().substring(pos + 1);
+    if (fileName.startsWith(".") || fileName.indexOf('\\') > 0) {
+      res.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      asyncCtx.complete();
+      return;
+    }
     final String path = getInitParameter(AioAppSettings.DOWNLOADS_PATH);
 
     String filePath = Path.of(path, fileName).toString();
@@ -50,11 +54,11 @@ public class AioFileDownloadServlet extends HttpServlet {
       }
       outStream.flush();
     } catch (FileNotFoundException e) {
-      res.setStatus(HTTP_NOT_FOUND);
+      res.setStatus(Const.HTTP_NOT_FOUND);
     } catch (IOException e) {
-      res.setStatus(HTTP_SERVER_ERROR);
+      res.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
-    res.setStatus(HTTP_OK);
+    res.setStatus(Const.HTTP_OK);
     asyncCtx.complete();
   }
 }

@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.BufferedOutputStream;
@@ -13,20 +16,14 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.protocol.Const;
 
 public class AioFileUploadServlet extends HttpServlet {
-
-  // common http setting
-  public static final int HTTP_OK = 200;
-  public static final int HTTP_NOT_FOUND = 404;
-  public static final int HTTP_SERVER_ERROR = 500;
-  public static final int HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
-
 
   @Override
   protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
     if (req.getContentType().compareToIgnoreCase("application/octet-stream") != 0) {
-      resp.setStatus(HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -39,16 +36,20 @@ public class AioFileUploadServlet extends HttpServlet {
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
     final int pos = req.getRequestURI().lastIndexOf('/');
     final String fileName = req.getRequestURI().substring(pos + 1);
+    if (fileName.startsWith(".") || fileName.indexOf('\\') > 0) {
+      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      return;
+    }
     final String path = getInitParameter(AioAppSettings.DOWNLOADS_PATH);
 
     try {
       Files.delete(Path.of(path, fileName));
     } catch (FileNotFoundException e) {
-      resp.setStatus(HTTP_NOT_FOUND);
+      resp.setStatus(Const.HTTP_NOT_FOUND);
     } catch (IOException e) {
-      resp.setStatus(HTTP_SERVER_ERROR);
+      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
-    resp.setStatus(HTTP_OK);
+    resp.setStatus(Const.HTTP_OK);
   }
 
   private void putAsync(AsyncContext asyncCtx) {
@@ -58,6 +59,11 @@ public class AioFileUploadServlet extends HttpServlet {
 
     final int pos = req.getRequestURI().lastIndexOf('/');
     final String fileName = req.getRequestURI().substring(pos + 1);
+    if (fileName.startsWith(".") || fileName.indexOf('\\') > 0) {
+      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      asyncCtx.complete();
+      return;
+    }
     final String path = getInitParameter(AioAppSettings.DOWNLOADS_PATH);
 
     final String filePath = Path.of(path, fileName).toString();
@@ -72,12 +78,11 @@ public class AioFileUploadServlet extends HttpServlet {
       }
       outStream.flush();
     } catch (FileNotFoundException e) {
-      resp.setStatus(HTTP_NOT_FOUND);
+      resp.setStatus(Const.HTTP_NOT_FOUND);
     } catch (IOException e) {
-      resp.setStatus(HTTP_SERVER_ERROR);
+      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
     }
-    resp.setStatus(HTTP_OK);
+    resp.setStatus(Const.HTTP_OK);
     asyncCtx.complete();
   }
-
 }

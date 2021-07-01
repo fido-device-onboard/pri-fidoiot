@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 public class AioAppSettings {
@@ -27,6 +30,7 @@ public class AioAppSettings {
   public static final String DB_ALLOW_OTHERS = "aio_database_allow_others";
   public static final String DB_INIT_SQL = "aio_database_init_sql";
   public static final String DB_NEW_DEVICE_SQL = "aio_database_new_device_sql";
+  public static final String DB_SESSION_CHECK_INTERVAL = "aio_session_check_interval";
 
   // tomcat's catalaina.home
   public static final String SERVER_PATH = "catalina_home";
@@ -46,10 +50,6 @@ public class AioAppSettings {
   public static final String MANUFACTURER_KEYSTORE = "manufacturer_keystore";
   public static final String MANUFACTURER_KEYSTORE_TYPE = "manufacturer_keystore_type";
   public static final String MANUFACTURER_KEYSTORE_PWD = "manufacturer_keystore_password";
-
-  public static final String TO0_SCHEDULING_ENABLED = "aio_to0_scheduling_enabled";
-  public static final String TO0_SCHEDULING_INTREVAL = "aio_to0_scheduling_interval";
-  public static final String TO0_MAX_WS = "aio_to0_max_ws";
 
   //web server api authentication
   public static final String AUTH_METHOD = "DIGEST";

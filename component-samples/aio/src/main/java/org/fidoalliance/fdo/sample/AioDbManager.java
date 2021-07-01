@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -17,6 +20,8 @@ import javax.sql.DataSource;
  * AIO Database Manager.
  */
 public class AioDbManager {
+
+  private static final int DEFAULT_WAIT_SECONDS = 315400000;
 
   /**
    * Creates SQL tables for AIO.
@@ -45,6 +50,7 @@ public class AioDbManager {
 
   /**
    * loads the RvBlob String.
+   *
    * @param ds A SQL datasource
    * @return The string encoded redirect blob.
    */
@@ -96,7 +102,7 @@ public class AioDbManager {
       pstmt.setBytes(2, signedBlob);
       pstmt.setString(3, fingerPrint);
       pstmt.setBytes(4, deviceX509);
-      pstmt.setInt(5, 315400000);
+      pstmt.setInt(5, DEFAULT_WAIT_SECONDS);
 
       Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
       pstmt.setTimestamp(6, created);
@@ -158,6 +164,7 @@ public class AioDbManager {
 
   /**
    * Remove expired sessions.
+   *
    * @param ds A SQL Datasource
    */
   public void removeSessions(DataSource ds) {
@@ -165,7 +172,6 @@ public class AioDbManager {
         Statement stmt = conn.createStatement()) {
       String sql = "DELETE FROM TO0_SESSIONS WHERE  CREATED < NOW() - INTERVAL 60 SECOND";
       stmt.executeUpdate(sql);
-
 
       sql = "DELETE FROM TO2_SESSIONS WHERE  CREATED < NOW() - INTERVAL '60' SECOND";
       stmt.executeUpdate(sql);

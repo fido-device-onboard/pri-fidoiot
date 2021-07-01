@@ -5,14 +5,14 @@
 
 
 //set owner tranfer customer keys
-INSERT INTO MT_CUSTOMERS (CUSTOMER_ID,NAME ,KEYS) VALUES (1,'owner',FILE_READ('./owner_customer1.pem',NULL) );
+INSERT INTO MT_CUSTOMERS (CUSTOMER_ID,NAME ,KEYS) VALUES (1,'owner',FILE_READ('./resources/owner_customer1.pem',NULL) );
 
 //set the autoenroll customer id to match a MT_CUSTOMER
 //comment out below line if want to explicity require customer to be set through Api or db call
 UPDATE MT_SETTINGS SET AUTO_ASSIGN_CUSTOMER_ID = 1 WHERE ID = 1;
 
 //set owner to2 replacement keys
-INSERT INTO OWNER_CUSTOMERS (CUSTOMER_ID,NAME ,KEYS) VALUES (1,'owner',FILE_READ('./owner_customer1.pem',NULL) );
+INSERT INTO OWNER_CUSTOMERS (CUSTOMER_ID,NAME ,KEYS) VALUES (1,'owner',FILE_READ('./resources/owner_customer1.pem',NULL) );
 
 
 

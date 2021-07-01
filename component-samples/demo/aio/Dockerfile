@@ -13,12 +13,20 @@ RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm soft
 #COPY pkcs11.cfg /etc/softhsm/
 
 RUN mkdir -p /home/aio/lib
+RUN mkdir -p /home/aio/certs
+RUN mkdir -p /home/aio/resources
+RUN mkdir -p /home/aio/downloads
+RUN mkdir -p /home/onDieCache
+
 WORKDIR /home/aio/
 
 # Setup aio dependencies
 RUN mkdir -p /home/aio/onDieCache
 COPY ./lib ./lib/
 COPY ./certs ./certs
+COPY ./downloads ./downloads
+COPY ./resources ./resources
+COPY ./onDieCache ./onDieCache
 COPY aio.jar .
 COPY manufacturer_keystore.p12 .
 COPY owner_keystore.p12 .

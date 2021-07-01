@@ -1,3 +1,6 @@
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.nio.file.Path;
@@ -30,7 +33,7 @@ public class AioServerApp {
   private static final int AIO_PORT = null != AioConfigLoader
       .loadConfig(AioAppSettings.AIO_PORT)
       ? Integer.parseInt(AioConfigLoader.loadConfig(AioAppSettings.AIO_PORT))
-      : 8042;
+      : 8080;
 
   private static final int AIO_HTTPS_PORT =
       null != AioConfigLoader.loadConfig(AioAppSettings.AIO_HTTPS_PORT)
@@ -74,6 +77,8 @@ public class AioServerApp {
         AioConfigLoader.loadConfig(AioAppSettings.DB_INIT_SQL));
     ctx.addParameter(AioAppSettings.DB_NEW_DEVICE_SQL,
         AioConfigLoader.loadConfig(AioAppSettings.DB_NEW_DEVICE_SQL));
+    ctx.addParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL,
+        AioConfigLoader.loadConfig(AioAppSettings.DB_SESSION_CHECK_INTERVAL));
 
     // hard-coded H2 config
     // To enable remote connections to the DB set
@@ -82,10 +87,6 @@ public class AioServerApp {
     // Not recommended to use especially on production system
     ctx.addParameter("db.tcpServer", "-tcp -ifNotExists -tcpPort "
         + AioConfigLoader.loadConfig(AioAppSettings.DB_PORT));
-
-
-
-
 
     try {
       ctx.addParameter(AioAppSettings.ONDIE_CACHEDIR,
@@ -127,17 +128,6 @@ public class AioServerApp {
     ctx.addParameter(AioAppSettings.MANUFACTURER_KEYSTORE_TYPE,
         AioConfigLoader.loadConfig(AioAppSettings.MANUFACTURER_KEYSTORE_TYPE));
 
-    ctx.addParameter(AioAppSettings.TO0_SCHEDULING_ENABLED,
-        AioConfigLoader.loadConfig(AioAppSettings.TO0_SCHEDULING_ENABLED));
-    ctx.addParameter(AioAppSettings.TO0_SCHEDULING_INTREVAL,
-        AioConfigLoader.loadConfig(AioAppSettings.TO0_SCHEDULING_INTREVAL));
-    ctx.addParameter(AioAppSettings.TO0_MAX_WS,
-        AioConfigLoader.loadConfig(AioAppSettings.TO0_MAX_WS));
-
-
-
-
-
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(AioContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
@@ -159,6 +149,7 @@ public class AioServerApp {
 
     wrapper.addMapping(getMessagePath(Const.DI_APP_START));
     wrapper.addMapping(getMessagePath(Const.DI_SET_HMAC));
+    wrapper.addMapping(getMessagePath(Const.ERROR));
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "voucherServlet",
@@ -219,7 +210,6 @@ public class AioServerApp {
         AioConfigLoader.loadConfig(AioAppSettings.DB_ALLOW_OTHERS));
     //wrapper.addInitParameter("trace", "");
     wrapper.setLoadOnStartup(3);
-
 
     //setup digest auth
     LoginConfig config = new LoginConfig();

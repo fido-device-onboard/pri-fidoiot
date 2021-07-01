@@ -131,14 +131,13 @@
       <artifactId>tomcat-embed-core</artifactId>
       <version>${tomcat.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>http-api-di-sample</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
-
 
   </dependencies>
 
@@ -230,12 +229,6 @@
               <directory>${project-demo-directory}/${project.artifactId}/lib</directory>
               <includes>
                 <include>**</include>
-              </includes>
-            </fileset>
-            <fileset>
-              <directory>${project-demo-directory}/${project.artifactId}</directory>
-              <includes>
-                <include>owner.jar</include>
               </includes>
             </fileset>
           </filesets>
