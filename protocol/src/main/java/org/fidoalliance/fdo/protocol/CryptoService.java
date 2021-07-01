@@ -86,7 +86,7 @@ import org.fidoalliance.fdo.protocol.ondie.OnDieService;
  *
  * <p>Performs cryptographic operations a formats cryptographic data</p>
  */
-public class CryptoService {
+public final class CryptoService {
 
   static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
   private SecureRandom secureRandom;
