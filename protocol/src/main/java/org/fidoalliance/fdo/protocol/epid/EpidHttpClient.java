@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class EpidHttpClient {
+public final class EpidHttpClient {
 
   private static ExecutorService executor = Executors.newCachedThreadPool(r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);

@@ -71,7 +71,8 @@ public class DiDbManager {
                 + "ID,"
                 + "CERTIFICATE_VALIDITY_DAYS,"
                 + "RENDEZVOUS_INFO) "
-                + "VALUES (1,'3650','http://localhost:8040?ipaddress=127.0.0.1&ownerport=8443');";
+                + "VALUES (1,'3650',"
+                + "'81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb');";
             stmt.executeUpdate(sql);
           }
 

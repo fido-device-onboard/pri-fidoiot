@@ -286,6 +286,7 @@ public class To2ContextListener implements ServletContextListener {
     keyBuilder.append(ownerPublicKeyPemEC384);
     keyBuilder.append(ownerPublicKeysPemRsa);
     manager.addCustomer(ds,1,"default",keyBuilder.toString());
+    manager.loadTo2Settings(ds);
 
     // if the optional "voucher" file is present then use
     // it. If not, then fall back to the hardcoded value.

@@ -233,6 +233,7 @@ public final class Const {
   public static final int RV_PROTOCOL = 12;
   public static final int RV_DELAY_SEC = 13;
   public static final int RV_BYPASS = 14;
+  public static final int RV_EXTRV = 15;
 
   //RVProtocolValue
   public static final int RV_PROT_REST = 0;
