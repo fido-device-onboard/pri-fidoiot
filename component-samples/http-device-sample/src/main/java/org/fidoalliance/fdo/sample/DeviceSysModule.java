@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.serviceinfo.FdoSys;
@@ -42,7 +43,7 @@ public class DeviceSysModule implements Module {
   private ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
   private Duration execTimeout = Duration.ofHours(2);
   private Predicate<Integer> exitValueTest = val -> (0 == val);
-
+  private static final LoggerService logger = new LoggerService(DeviceSysModule.class);
   private Path currentFile;
   private boolean isActive;
 
@@ -83,21 +84,21 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
         } else {
-          System.out.println("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
         }
         break;
       case FdoSys.KEY_WRITE:
         if (isActive) {
           writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
         } else {
-          System.out.println("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
         }
         break;
       case FdoSys.KEY_EXEC:
         if (isActive) {
           exec(kvPair.getAsComposite(Const.SECOND_KEY));
         } else {
-          System.out.println("fdo_sys module not active. Ignoring fdo_sys:exec.");
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
         }
         break;
       default:
@@ -143,7 +144,7 @@ public class DeviceSysModule implements Module {
       FileAttribute<?> fileAttribute = PosixFilePermissions.asFileAttribute(filePermissions);
 
       try (FileChannel channel = FileChannel.open(path, openOptions, fileAttribute)) {
-        System.out.println(LOG_INFO_FILE_CREATED);
+        logger.info(LOG_INFO_FILE_CREATED);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

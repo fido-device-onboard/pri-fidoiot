@@ -19,6 +19,7 @@ import org.fidoalliance.fdo.api.OwnerSetupInfoServlet;
 import org.fidoalliance.fdo.api.OwnerSviSettingsServlet;
 import org.fidoalliance.fdo.api.OwnerSystemResourceServlet;
 import org.fidoalliance.fdo.api.OwnerVoucherServlet;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;

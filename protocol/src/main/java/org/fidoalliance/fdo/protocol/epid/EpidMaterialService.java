@@ -11,11 +11,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.InvalidMessageException;
 
 public class EpidMaterialService {
+
+  private static final LoggerService logger = new LoggerService(EpidMaterialService.class);
 
   private byte[] getSigrl(Composite sigInfo, String epidVersion) throws IOException {
     byte[] sigrlResponse = getEpidVerificationServiceResource(sigInfo, Const.SIGRL, epidVersion);
@@ -55,7 +58,7 @@ public class EpidMaterialService {
               .toString();
       return EpidHttpClient.doGet(url);
     } catch (URISyntaxException | IOException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -84,7 +87,7 @@ public class EpidMaterialService {
         try {
           certBytes = getGroupCertSigma10(sigA);
         } catch (RuntimeException ex) {
-          System.out.println("Runtime Exception in getSigInfo");
+          logger.error("Runtime Exception in getSigInfo");
           // intentional fall through
           // some EPID 1.1 groups have a cert 0 and others don't
         }
@@ -97,7 +100,7 @@ public class EpidMaterialService {
         try {
           certBytes = getGroupCertSigma11(sigA);
         } catch (RuntimeException ex) {
-          System.out.println("Runtime Exception in getSigInfo");
+          logger.error("Runtime Exception in getSigInfo");
           // intentional fall through
         }
         sigInfoBytes.write(getLengthBytes(certBytes.length));
@@ -110,7 +113,7 @@ public class EpidMaterialService {
           sigRlBytes = getSigrl(sigA,
                   Const.EPID_PROTOCOL_VERSION_V2 + Const.URL_PATH_SEPARATOR +  Const.EPID_11);
         } catch (RuntimeException ex) {
-          System.out.println("Runtime Exception in getSigInfo");
+          logger.error("Runtime Exception in getSigInfo");
           // intentional fall through
         }
         sigInfoBytes.write(getLengthBytes(sigRlBytes.length));
