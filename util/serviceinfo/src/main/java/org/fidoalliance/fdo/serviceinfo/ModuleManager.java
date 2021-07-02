@@ -82,7 +82,7 @@ public class ModuleManager implements Module {
 
   @Override
   public void setServiceInfo(Composite kvPair, boolean isMore) {
-    state.set(Const.SECOND_KEY, isMore);
+    state.set(Const.SECOND_KEY, isMore); //last is more
     if (kvPair.size() > 0) {
       String prefix = kvPair.getAsString(Const.FIRST_KEY);
       int pos = prefix.lastIndexOf(MODULE_DELIMITER);

@@ -110,6 +110,8 @@ public class OwnerDevMod implements Module {
       covertModuleList();
       new OwnerDbManager().addDeviceInfo(dataSource, state);
     }
+
+
   }
 
 

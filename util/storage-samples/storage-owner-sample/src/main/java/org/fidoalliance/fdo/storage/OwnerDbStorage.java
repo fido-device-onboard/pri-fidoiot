@@ -434,7 +434,6 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public void setServiceInfo(Composite info, boolean isMore) {
     modules.setServiceInfo(info, isMore);
-
   }
 
   @Override

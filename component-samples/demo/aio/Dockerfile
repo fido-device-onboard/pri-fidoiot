@@ -30,7 +30,6 @@ COPY ./onDieCache ./onDieCache
 COPY aio.jar .
 COPY manufacturer_keystore.p12 .
 COPY owner_keystore.p12 .
-COPY owner_customer1.pem .
 COPY init.sql .
 COPY new-device.sql .
 COPY aio-entrypoint.sh .

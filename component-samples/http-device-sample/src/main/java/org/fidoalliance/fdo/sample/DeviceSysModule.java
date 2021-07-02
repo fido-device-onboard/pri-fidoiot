@@ -26,6 +26,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
+import org.fidoalliance.fdo.protocol.ServiceInfoEncoder;
+import org.fidoalliance.fdo.serviceinfo.DevMod;
 import org.fidoalliance.fdo.serviceinfo.FdoSys;
 import org.fidoalliance.fdo.serviceinfo.Module;
 
@@ -47,7 +49,8 @@ public class DeviceSysModule implements Module {
 
   private Path currentFile;
   private boolean isActive;
-  private Queue<Composite> replys = new LinkedList<>();
+  private final List<Composite> replyList = new ArrayList<>();
+  private int listIndex = 0;
 
   @Override
   public String getName() {
@@ -114,7 +117,7 @@ public class DeviceSysModule implements Module {
   @Override
   public boolean isMore() {
 
-    return replys.size() > 0;
+    return listIndex < replyList.size();
   }
 
   @Override
@@ -124,14 +127,20 @@ public class DeviceSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
-    return replys.remove();
+    if (replyList.size() > 0) {
+      System.out.println("fdo_sys reply serviceinfo");
+    }
+    return replyList.get(listIndex++);
   }
 
   private void replyInactive() {
-    Composite message = Composite.newArray();
-    message.set(Const.FIRST_KEY, FdoSys.KEY_ACTIVE);
-    message.set(Const.SECOND_KEY, false);
-    replys.add(message);
+
+    if (replyList.size() == 0) {
+      replyList.add(
+          ServiceInfoEncoder.encodeValue(FdoSys.KEY_ACTIVE, false));
+    }
+
+
   }
 
   private void setPath(Path path) {

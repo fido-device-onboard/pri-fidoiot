@@ -71,7 +71,18 @@ public class OwnerSysModule implements Module {
     Object value = kvPair.get(Const.SECOND_KEY);
 
     switch (key) {
-
+      case FdoSys.KEY_ACTIVE:
+        if (value instanceof Boolean) {
+          if (!((Boolean)value)) {
+            //deactivate my removing resource list
+            state.set(Const.SECOND_KEY, 0);
+            state.set(Const.THIRD_KEY, Composite.newArray());//resource list
+          }
+        } else {
+          throw new RuntimeException(new InvalidMessageException());
+        }
+        break;
+      case FdoSys.KEY_KEEP_ALIVE:
       case FdoSys.KEY_RET_CODE:
       default:
         break;
@@ -176,6 +187,7 @@ public class OwnerSysModule implements Module {
             state.set(Const.FIFTH_KEY, false); //ismore
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
           }
+          incrementIndex();
           break;
         case FdoSys.KEY_IS_MORE:
           if (getBooleanContent(resId)) {
