@@ -34,6 +34,7 @@
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <maven-surefire-report-plugin.version>3.0.0-M4</maven-surefire-report-plugin.version>
     <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
+    <pgpverify-plugin.version>1.14.0</pgpverify-plugin.version>
     <project-demo-directory>../../component-samples/demo</project-demo-directory>
   </properties>
 
@@ -112,6 +113,12 @@
           <artifactId>maven-war-plugin</artifactId>
           <version>${maven-war-plugin.version}</version>
         </plugin>
+
+        <plugin>
+          <groupId>org.simplify4u.plugins</groupId>
+          <artifactId>pgpverify-maven-plugin</artifactId>
+          <version>${pgpverify-plugin.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -157,6 +164,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.simplify4u.plugins</groupId>
+        <artifactId>pgpverify-maven-plugin</artifactId>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>check</goal>
+                </goals>
+            </execution>
+         </executions>
       </plugin>
     </plugins>
   </build>
