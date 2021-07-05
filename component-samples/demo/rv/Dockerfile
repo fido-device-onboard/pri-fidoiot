@@ -14,6 +14,7 @@ RUN mkdir -p /home/fdouser/lib
 # Setup rv dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
+COPY log4j2.xml .
 COPY config.properties .
 COPY rv.jar .
 COPY rv-entrypoint.sh .

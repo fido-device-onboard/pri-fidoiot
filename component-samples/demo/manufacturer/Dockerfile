@@ -16,6 +16,7 @@ WORKDIR /home/manufacturer/
 # Setup manufacturer dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
+COPY log4j2.xml .
 COPY manufacturer.jar .
 COPY manufacturer_keystore.p12 .
 COPY manufacturer-entrypoint.sh .
