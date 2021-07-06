@@ -73,7 +73,7 @@ public class OwnerSysModule implements Module {
     switch (key) {
       case FdoSys.KEY_ACTIVE:
         if (value instanceof Boolean) {
-          if (!((Boolean)value)) {
+          if (!((Boolean) value)) {
             //deactivate my removing resource list
             state.set(Const.SECOND_KEY, 0);
             state.set(Const.THIRD_KEY, Composite.newArray());//resource list
@@ -181,6 +181,7 @@ public class OwnerSysModule implements Module {
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
             resList.clear();
           }
+          break;
         case FdoSys.KEY_FILEDESC:
         case FdoSys.KEY_WRITE:
         case FdoSys.KEY_EXEC:
