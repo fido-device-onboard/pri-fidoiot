@@ -46,7 +46,7 @@ ARGS+=" -Dfidoalliance.fdo.device.cred.reuse=true"
 # AES-CCM-64-128-128
 # AES-CCM-64-128-256
 #
-ARGS+=" -Dfidoalliance.fdo.cipher=AES128/CTR/HMAC-SHA256"
+ARGS+=" -Dfidoalliance.fdo.cipher=AES256GCM"
 
 # Execute the JAR file
 java $ARGS -jar device.jar
