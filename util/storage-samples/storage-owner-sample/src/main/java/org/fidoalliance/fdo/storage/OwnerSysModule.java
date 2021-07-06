@@ -176,6 +176,11 @@ public class OwnerSysModule implements Module {
       String contentType = resource.getAsString(Const.SECOND_KEY);
       switch (contentType) {
         case FdoSys.KEY_ACTIVE:
+          if (!getBooleanContent(resId)) {
+            state.set(Const.FIFTH_KEY, false); //ismore
+            state.set(Const.SIXTH_KEY, true);//isdone - device not active
+            resList.clear();
+          }
         case FdoSys.KEY_FILEDESC:
         case FdoSys.KEY_WRITE:
         case FdoSys.KEY_EXEC:
