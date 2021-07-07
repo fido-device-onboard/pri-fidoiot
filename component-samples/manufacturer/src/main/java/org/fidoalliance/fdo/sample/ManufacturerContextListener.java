@@ -194,14 +194,16 @@ public class ManufacturerContextListener implements ServletContextListener {
     DiDbManager manager = new DiDbManager();
     manager.createTables(ds);
     try {
-      final String ownerKeysPem = Files.readString(Paths.get(sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
+      final String ownerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 1, "owner", ownerKeysPem);
       manager.setAutoEnroll(ds, 1);
     } catch (IOException e) {
       System.out.println("No default keys found for Owner");
     }
     try {
-      final String resellerKeysPem = Files.readString(Paths.get(sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
+      final String resellerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
     } catch (IOException e) {
       System.out.println("No default keys found for Reseller");
