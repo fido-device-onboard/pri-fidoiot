@@ -44,9 +44,10 @@ public class OwnerSysModule implements Module {
     state.set(Const.FIRST_KEY, guid.toString());//GUID
     state.set(Const.SECOND_KEY, -1);//current resource index-1
     state.set(Const.THIRD_KEY, Composite.newArray());//resource list
-    state.set(Const.FOURTH_KEY, false); //active
-    state.set(Const.FIFTH_KEY, false);//is more
-    state.set(Const.SIXTH_KEY, false);//done
+    state.set(Const.FOURTH_KEY, false); // is active flag
+    state.set(Const.FIFTH_KEY, false);//is more flag
+    state.set(Const.SIXTH_KEY, false);//is done flag
+    state.set(Const.SEVENTH_KEY,false); // has message to send
   }
 
   @Override
@@ -81,6 +82,7 @@ public class OwnerSysModule implements Module {
         } else {
           throw new RuntimeException(new InvalidMessageException());
         }
+
         break;
       case FdoSys.KEY_KEEP_ALIVE:
       case FdoSys.KEY_RET_CODE:
@@ -111,14 +113,10 @@ public class OwnerSysModule implements Module {
         resIndex = 0;
         state.set(Const.SECOND_KEY, resIndex);
 
-      } else {
-        state.set(Const.FIFTH_KEY, false); //ismore
-        state.set(Const.SIXTH_KEY, true);//isdone - device not active
       }
-
     }
     checkMessage();
-    return state.getAsBoolean(Const.FIFTH_KEY); //isMore
+    return state.getAsBoolean(Const.SEVENTH_KEY); //hasMessage
 
   }
 
@@ -181,18 +179,21 @@ public class OwnerSysModule implements Module {
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
             resList.clear();
           }
+          state.set(Const.SEVENTH_KEY,true); //has message to send
           break;
         case FdoSys.KEY_FILEDESC:
         case FdoSys.KEY_WRITE:
         case FdoSys.KEY_EXEC:
-          state.set(Const.FIFTH_KEY, true); //ismore
+          state.set(Const.FIFTH_KEY, false); //ismore
           state.set(Const.SIXTH_KEY, false);//isdone - device not active
+          state.set(Const.SEVENTH_KEY,true); //has message to send
           break;
         case FdoSys.KEY_IS_DONE:
           if (getBooleanContent(resId)) {
             state.set(Const.FIFTH_KEY, false); //ismore
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
           }
+          state.set(Const.SEVENTH_KEY,false); //has message to send
           incrementIndex();
           break;
         case FdoSys.KEY_IS_MORE:
@@ -202,6 +203,7 @@ public class OwnerSysModule implements Module {
           } else {
             state.set(Const.FIFTH_KEY, false); //ismore
           }
+          state.set(Const.SEVENTH_KEY,false); //has message to send
           incrementIndex();
           break;
         default:
@@ -211,6 +213,7 @@ public class OwnerSysModule implements Module {
     } else {
       state.set(Const.FIFTH_KEY, false); //ismore
       state.set(Const.SIXTH_KEY, true);//isdone - device not active
+      state.set(Const.SEVENTH_KEY,false); //has message to send
     }
 
   }
