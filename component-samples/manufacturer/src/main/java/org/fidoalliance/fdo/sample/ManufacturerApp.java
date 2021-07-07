@@ -96,6 +96,20 @@ public class ManufacturerApp {
     ctx.addParameter("trace", "");
 
     try {
+      ctx.addParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.OWNER_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Owner public keys are optional. If config can't be loaded,default to no config.
+    }
+
+    try {
+      ctx.addParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH,
+              ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Reseller public keys are optional. If config can't be loaded,default to no config.
+    }
+
+    try {
       ctx.addParameter(ManufacturerAppSettings.ONDIE_CACHEDIR,
               ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.ONDIE_CACHEDIR));
       ctx.addParameter(ManufacturerAppSettings.ONDIE_AUTOUPDATE,

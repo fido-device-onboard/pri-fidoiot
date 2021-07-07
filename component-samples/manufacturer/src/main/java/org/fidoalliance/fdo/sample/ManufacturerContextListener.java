@@ -189,21 +189,24 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
     sc.setAttribute("resolver", keyResolver);
 
-    final String ownerKeysPem;
-    final String resellerKeysPem;
+    //create tables
+    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
+    DiDbManager manager = new DiDbManager();
+    manager.createTables(ds);
     try {
-      ownerKeysPem = Files.readString(Paths.get("owner.pem"));
-      resellerKeysPem = Files.readString(Paths.get("reseller.pem"));
-      //create tables
-      DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
-      DiDbManager manager = new DiDbManager();
-      manager.createTables(ds);
+      final String ownerKeysPem = Files.readString(Paths.get(sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 1, "owner", ownerKeysPem);
-      manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
       manager.setAutoEnroll(ds, 1);
     } catch (IOException e) {
-      System.out.println("No default public keys found for Owner and Reseller.");
+      System.out.println("No default keys found for Owner");
     }
+    try {
+      final String resellerKeysPem = Files.readString(Paths.get(sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
+      manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
+    } catch (IOException e) {
+      System.out.println("No default keys found for Reseller");
+    }
+
   }
 
   @Override
