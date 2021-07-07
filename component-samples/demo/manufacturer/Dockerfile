@@ -17,7 +17,7 @@ WORKDIR /home/manufacturer/
 COPY ./lib ./lib/
 COPY ./certs ./certs/
 COPY manufacturer.jar .
-COPY manufacturer_keystore.p12 owner.pem* reseller.pem* .
+COPY manufacturer_keystore.p12 owner_pub_keys.pem* reseller_pub_keys.pem* ./
 COPY manufacturer-entrypoint.sh .
 CMD ["chmod", "+x", "manufacturer-entrypoint.sh"]
 

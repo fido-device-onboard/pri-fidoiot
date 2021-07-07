@@ -198,15 +198,17 @@ public class ManufacturerContextListener implements ServletContextListener {
               sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 1, "owner", ownerKeysPem);
       manager.setAutoEnroll(ds, 1);
+      System.out.println("Registered public keys for customer 'owner'");
     } catch (IOException e) {
-      System.out.println("No default keys found for Owner");
+      System.out.println("No default public keys found for customer 'owner'");
     }
     try {
       final String resellerKeysPem = Files.readString(Paths.get(
               sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
+      System.out.println("Registered public keys for customer 'reseller'");
     } catch (IOException e) {
-      System.out.println("No default keys found for Reseller");
+      System.out.println("No default public keys found for customer 'reseller'");
     }
 
   }
