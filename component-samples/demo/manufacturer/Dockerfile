@@ -16,10 +16,8 @@ WORKDIR /home/manufacturer/
 # Setup manufacturer dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
-COPY owner.pem .
-COPY reseller.pem .
 COPY manufacturer.jar .
-COPY manufacturer_keystore.p12 .
+COPY manufacturer_keystore.p12 owner.pem* reseller.pem* .
 COPY manufacturer-entrypoint.sh .
 CMD ["chmod", "+x", "manufacturer-entrypoint.sh"]
 
