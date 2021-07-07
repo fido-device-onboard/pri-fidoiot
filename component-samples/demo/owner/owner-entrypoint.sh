@@ -6,7 +6,7 @@
 # Sample script that starts the Owner service.
 
 # LOG4J2 configuration file
-LOG_CONFIG="-Dlog4j.configurationFile=log4j2.xml"
+LOG_CONFIG="-Dlog4j.configurationFile=${log4j_configuration_file}"
 
 # Start the owner service
 # Configure heap size based on your requirement.
