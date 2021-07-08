@@ -15,7 +15,7 @@ import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 
 
-public class EpidSignatureVerifier {
+public final class EpidSignatureVerifier {
 
   public enum Result {
     VERIFIED,

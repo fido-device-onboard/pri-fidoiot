@@ -16,7 +16,7 @@ import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.InvalidMessageException;
 
-public class EpidMaterialService {
+public final class EpidMaterialService {
 
   private static final LoggerService logger = new LoggerService(EpidMaterialService.class);
 

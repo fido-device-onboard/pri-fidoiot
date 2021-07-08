@@ -16,7 +16,9 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,8 @@ import java.util.function.Predicate;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
+import org.fidoalliance.fdo.protocol.ServiceInfoEncoder;
+import org.fidoalliance.fdo.serviceinfo.DevMod;
 import org.fidoalliance.fdo.serviceinfo.FdoSys;
 import org.fidoalliance.fdo.serviceinfo.Module;
 
@@ -46,6 +50,7 @@ public class DeviceSysModule implements Module {
   private static final LoggerService logger = new LoggerService(DeviceSysModule.class);
   private Path currentFile;
   private boolean isActive;
+  private int listIndex = 0;
 
   @Override
   public String getName() {
@@ -106,8 +111,12 @@ public class DeviceSysModule implements Module {
     }
   }
 
-  @Override
   public boolean isMore() {
+    return false;
+  }
+
+  @Override
+  public boolean hasMore() {
     return false;
   }
 
@@ -118,7 +127,7 @@ public class DeviceSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
-    return null;
+    return Composite.newArray();
   }
 
   private void setPath(Path path) {

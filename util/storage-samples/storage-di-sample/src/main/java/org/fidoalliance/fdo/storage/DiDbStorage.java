@@ -183,7 +183,7 @@ public class DiDbStorage implements DiServerStorage {
     }
 
     String modelNo = mstr.getAsString(Const.THIRD_KEY);
-    Composite rvInfo = RendezvousInfoDecoder.decode(settings.getAsString(Const.SECOND_KEY));
+    Composite rvInfo = Composite.fromObject(settings.getAsString(Const.SECOND_KEY));
 
     header.set(Const.OVH_VERSION, Const.PROTOCOL_VERSION_100);
     header.set(Const.OVH_GUID, guid);

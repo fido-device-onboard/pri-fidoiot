@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 
-public class EpidHttpClient {
+public final class EpidHttpClient {
 
   private static ExecutorService executor = Executors.newCachedThreadPool(r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);

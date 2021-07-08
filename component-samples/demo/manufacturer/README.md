@@ -157,12 +157,73 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. Default RvInfo value is: `http://localhost:8040?ipaddress=127.0.0.1&ownerport=8443`
+Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]` which points to localhost over the port 8443 for Owner during TO0 and localhost over the port 8040 for device during TO1
+and the equivalent bytes representation is `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
 
-This value is interpreted internally as:
+## Generating CBOR RVInfo
 
-RvInfo for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
+As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
 
-RvInfo for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
+```
+[[[RVDns,"localhost"],
+  [RVDevPort,8040],
+  [RVProt, 1],
+  [RVIPAddress, h’7F000001'],     //Represents 127.0.0.1
+  [RVOwnerPort,8443]]]
+```
+and the equivalent diagnostic representation is:
 
-***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol.
+```
+[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
+```
+**NOTE:** In the spec, RVDns is represented as 5, RVDevPort as 3, RVProt as 12, RVIPAddress as 2 and RVOwnerPort as 4.
+[Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about the RV variable representations.
+
+**NOTE:** h'7F00001' is the hexadecimal representation of the ip address and it is interpreted as
+```
+7F -> 127
+00 -> 0
+00 -> 0
+01 -> 1     ; 127.0.0.1
+```
+
+You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).
+
+On visiting CBOR playground, you will be presented with two text areas (Diagnostic and Bytes). Enter the diagnostic
+representation `[[[5, "localhost"],[3,8040], .. ]` on the Diagnostic text area and click `→`. The bytes representation will be generated on the 'Bytes' textarea.
+
+Sample bytes representation of the default RvInfo:
+```
+81                             # array(1)
+   85                          # array(5)
+      82                       # array(2)
+         05                    # unsigned(5)
+         69                    # text(9)
+            6C6F63616C686F7374 # "localhost"
+      82                       # array(2)
+         03                    # unsigned(3)
+         19 1F68               # unsigned(8040)
+      82                       # array(2)
+         0C                    # unsigned(12)
+         01                    # unsigned(1)
+      82                       # array(2)
+         02                    # unsigned(2)
+         44                    # bytes(4)
+            7F000001           # "\x7F\x00\x00\x01"
+      82                       # array(2)
+         04                    # unsigned(4)
+         19 20FB               # unsigned(8443)
+```
+
+From the above representation, you have to strip the whitespaces and comments(Starting with #) to the format `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`.
+
+You can also make use of the `get-cbor-bytes.sh` script available in `component-samples/scripts` to generate the bytes
+representation from the diagnostic representation.
+
+This bytes value is interpreted internally as:
+
+Directives for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
+
+Directives for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
+
+***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol. [Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about RendezvousInfo.
