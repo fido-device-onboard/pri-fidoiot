@@ -16,17 +16,16 @@ RUN mkdir -p /home/aio/lib
 RUN mkdir -p /home/aio/certs
 RUN mkdir -p /home/aio/resources
 RUN mkdir -p /home/aio/downloads
-RUN mkdir -p /home/onDieCache
+RUN mkdir -p /home/aio/ondie_cache
 
 WORKDIR /home/aio/
 
 # Setup aio dependencies
-RUN mkdir -p /home/aio/onDieCache
 COPY ./lib ./lib/
 COPY ./certs ./certs
 COPY ./downloads ./downloads
 COPY ./resources ./resources
-COPY ./onDieCache ./onDieCache
+COPY ./ondie_cache ./ondie_cache
 COPY aio.jar .
 COPY manufacturer_keystore.p12 .
 COPY owner_keystore.p12 .
