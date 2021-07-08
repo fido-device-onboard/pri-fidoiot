@@ -85,6 +85,27 @@ usage()
         NOTE: Order of arguments passing shouldn't change"
 }
 
+# Redirects the manufacturer, owner, reseller and tls passwords in pri_keys.pass file
+# Arguments passed to this function are 1) PRI component 2) Password
+pass_redirect()
+{
+	if [[ -f $CERTS_PATH/pri_keys.pass ]] && [[ `grep -rn "${1} key password is " $CERTS_PATH/pri_keys.pass` ]]; then
+		sed -i "s/${1} key password is .*/${1} key password is '${2}'/g" $CERTS_PATH/pri_keys.pass
+	else
+		echo "${1} key password is '${2}'" | tee -a $CERTS_PATH/pri_keys.pass > /dev/null
+	fi
+}
+
+# Updating all env files with the new credentials
+# Arguments to this functions are 1) Statement or Word to update 2) Password to replace
+pass_update_env_files()
+{
+	for i in `find ${COMP_PATH} -name "*.env"`
+	do
+		sed -i -e s%"${1}.*"%"${1}${2}"%g $i
+	done
+}
+
 # Generation of keystore with rsa, ec256 and ec384 keys as shown below
 #   ---------------------------------------------------------------------------
 #   Private key    -> Public Key    -> Certificate -> P12 Key   -> P12 Keystore
@@ -138,11 +159,7 @@ keystore_gen()
         cat $CERTS_PATH/${1}_rsa2048_public.key | tee -a $CERTS_PATH/${1}_pub_keys.pem > /dev/null
 
 	# Redirecting password into one file
-	if [[ -f $CERTS_PATH/pri_keys.pass ]] && [[ `grep -rn "${1} key password is " $CERTS_PATH/pri_keys.pass` ]]; then
-		sed -i "s/${1} key password is .*/${1} key password is '${PASS_KEY}'/g" $CERTS_PATH/pri_keys.pass
-	else
-		echo "${1} key password is '${PASS_KEY}'" | tee -a $CERTS_PATH/pri_keys.pass > /dev/null
-	fi
+	pass_redirect ${1} ${PASS_KEY}
 }
 
 # Generation of all hashes using the certificates of rsa, ec256, and ec384
@@ -196,6 +213,7 @@ tls_keystore()
            echo '[san]'; \
            echo 'subjectAltName=DNS:localhost,IP.1:127.0.0.1,IP.2:'${SYS_IP}) > /dev/null 2>&1
         export SSL_PASS=`openssl rand --base64 8 | tr -dc 0-9A-Za-z`
+	pass_redirect "tls" ${SSL_PASS}
         openssl pkcs12 -export -in $CERTS_PATH/tls.crt -inkey $CERTS_PATH/tls.key -out $CERTS_PATH/ssl.p12 \
                 -password pass:${SSL_PASS}
         keytool -import -alias fdo -file $CERTS_PATH/tls.crt -storetype PKCS12 -keystore $CERTS_PATH/truststore \
@@ -203,20 +221,15 @@ tls_keystore()
         echo "Creation of SSL keystore & Truststore completes successfully"
 
         # Copying the ssl keystore and truststores to the destination paths
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/manufacturer/certs/ssl.p12
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/rv/certs/ssl.p12
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/owner/certs/ssl.p12
+	for file in `find $COMP_PATH -path $CERTS_PATH -prune -false -o -name 'ssl.p12'`
+		do cp $CERTS_PATH/ssl.p12 $file; done
+	for file in `find $COMP_PATH -path $CERTS_PATH -prune -false -o -name 'truststore'`
+		do cp $CERTS_PATH/truststore $file; done
         cp $CERTS_PATH/ssl.p12 $COMP_PATH/reseller/certs/reseller_tls_keystore.p12
-        cp $CERTS_PATH/truststore $COMP_PATH/device/truststore
-        cp $CERTS_PATH/truststore $COMP_PATH/owner/certs/truststore
 
-        # Update the ssl and keystore passwords in all component environment files
-        for((i=0; $i<`grep -rn "ssl_keystore-password=" $COMP_PATH | wc -l`;i++))
-        do
-                EXTRACT_ENV=`grep -rn "ssl_keystore-password=" $COMP_PATH | head -$((i+1)) | tail -1`
-                readarray -d ":" -t strarr <<< "$EXTRACT_ENV"
-                sed -i -e s%"ssl_keystore-password=.*"%"ssl_keystore-password=${SSL_PASS}"%g ${strarr[0]}
-        done
+        # Update the ssl truststore and keystore passwords in all component environment files
+	pass_update_env_files "ssl_keystore-password=" ${SSL_PASS}
+	pass_update_env_files "ssl_truststore_password=" ${SSL_PASS}
 }
 
 # Calling the keystore_gen and hash_gen functions to generate keystores and hashes
@@ -236,7 +249,7 @@ component_keys()
         cp $CERTS_PATH/${1}_keystore.p12 $COMP_PATH/${1}/${1}_keystore.p12
 
         # Updating the password in the component environment file
-        sed -i -e s%"keystore_password=.*"%"keystore_password=${PASS_KEY}"%g $COMP_PATH/${1}/${1}.env
+	pass_update_env_files "${1}_keystore_password=" ${PASS_KEY}
 
         # Cleaning the un-necessary files
         for i in $CERTS_PATH/${1}*; do if ! [[ $i =~ "keys" ]]; then rm -rf $i; fi; done
