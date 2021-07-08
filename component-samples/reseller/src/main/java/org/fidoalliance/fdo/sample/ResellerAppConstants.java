@@ -31,4 +31,6 @@ public class ResellerAppConstants {
   public static final String RESELLER_PROTOCOL_SCHEME = "reseller_protocol_scheme";
 
   public static final String USER_DIR = "user.dir";
+
+  public static final String OWNER_PUB_KEY_PATH = "owner_pub_key_path";
 }

@@ -81,6 +81,13 @@ public class ResellerServerApp {
     ctx.addParameter(ResellerAppConstants.KEYSTORE_PWD,
         ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
 
+    try {
+      ctx.addParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH,
+              ResellerConfigLoader.loadConfig(ResellerAppConstants.OWNER_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Owner public keys are optional. If config can't be loaded,default to no config.
+    }
+
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(ResellerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());

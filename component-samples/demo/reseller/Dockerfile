@@ -17,7 +17,7 @@ WORKDIR /home/reseller/
 COPY ./lib ./lib/
 COPY ./certs ./certs
 COPY reseller.jar .
-COPY reseller_keystore.p12 .
+COPY reseller_keystore.p12 owner_pub_keys.pem* .
 COPY reseller-entrypoint.sh .
 CMD ["chmod", "+x", "reseller-entrypoint.sh"]
 
