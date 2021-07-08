@@ -29,6 +29,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.DispatchResult;
@@ -48,6 +49,7 @@ public class WebClient implements Runnable {
   private DispatchResult helloMessage;
   private ExecutorService executor;
   private final Duration httpClientTimeout = Duration.ofSeconds(15);
+  private static final LoggerService logger = new LoggerService(WebClient.class);
 
   /**
    * Constructs a WebClient instance.
@@ -143,7 +145,7 @@ public class WebClient implements Runnable {
       }
 
     } catch (Exception e) {
-      System.out.println("Error occurred while creating ssl context. " + e.getMessage());
+      logger.error("Error occurred while creating ssl context. " + e.getMessage());
       return null;
     }
   }

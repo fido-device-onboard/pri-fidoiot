@@ -9,11 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * Device initialization Database manager.
  */
 public class DiDbManager {
+
+  private static final LoggerService logger = new LoggerService(DiDbManager.class);
 
   /**
    * Create DI Tables.
@@ -152,10 +155,10 @@ public class DiDbManager {
       pstmt.setInt(1, id);
       pstmt.setString(2, guid);
       rowsAffected = pstmt.executeUpdate();
-      System.out.println(rowsAffected);
+      logger.info(rowsAffected);
 
     } catch (SQLException e) {
-      System.out.println("dasd - " + rowsAffected);
+      logger.error("Unable to update customer for guid: " + guid);
       throw new RuntimeException(e);
     }
     return rowsAffected;

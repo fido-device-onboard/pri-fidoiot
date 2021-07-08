@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 public final class EpidHttpClient {
 
@@ -27,6 +28,7 @@ public final class EpidHttpClient {
     return t;
   });
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
+  private static LoggerService logger = new LoggerService(EpidHttpClient.class);
 
   /**
    * Perform HTTP GET operation.
@@ -52,7 +54,7 @@ public final class EpidHttpClient {
         throw new IOException("HTTP GET failed with: " + httpResponse.statusCode());
       }
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -80,7 +82,7 @@ public final class EpidHttpClient {
       return httpResponse.statusCode();
 
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

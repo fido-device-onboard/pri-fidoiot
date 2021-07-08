@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.DispatchResult;
@@ -24,6 +25,7 @@ public class ProtocolHandler implements Runnable {
 
   private MessageDispatcher dispatcher;
   private AsyncContext asyncCtx;
+  private static final LoggerService logger = new LoggerService(ProtocolHandler.class);
 
   /**
    * Constructs ProtocolHandler instance.
@@ -41,7 +43,7 @@ public class ProtocolHandler implements Runnable {
       OutputStream out = response.getOutputStream();
       try (PrintStream s = new PrintStream(out, true, StandardCharsets.US_ASCII.name())) {
         response.setContentType("text/plain; charset=us-ascii");
-        System.out.println("Failed to write data: " + e.getMessage());
+        logger.error("Failed to write data: " + e.getMessage());
       }
     } catch (UnsupportedEncodingException uee) {
       //nothing we can due since we are already processing an Exception
