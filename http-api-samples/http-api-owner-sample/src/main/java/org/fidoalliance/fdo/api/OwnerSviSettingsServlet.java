@@ -64,14 +64,12 @@ public class OwnerSviSettingsServlet extends HttpServlet {
                 ownerThresholdMtu = Integer.parseInt(setting[1]);
                 if (ownerThresholdMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
                   getServletContext()
-                          .log(
-                                  "Received value below the minimum MTU size. "
+                          .log("Received value below the minimum MTU size. "
                               + "Updating Owner Threshold to minimum MTU size of 256 bytes");
                   ownerThresholdMtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
                 } else if (ownerThresholdMtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
                   getServletContext()
-                          .log(
-                                  "Received value above the maximum MTU size. "
+                          .log("Received value above the maximum MTU size. "
                               + "Updating Owner Threshold to default MTU size of 8192 bytes");
                   ownerThresholdMtu = Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE;
                 }
