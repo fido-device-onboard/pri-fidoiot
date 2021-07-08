@@ -336,18 +336,18 @@ public class OwnerDbManager {
     if (field.equals("DEVICE_SERVICE_INFO_MTU_SIZE")) {
       if (mtu < 0) {
         System.out.println("Received value must be > 0. "
-                + "Updating MTU size to default minimum of "
-                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+            + "Updating MTU size to default minimum of "
+            + Const.SERVICE_INFO_MTU_MIN_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       } else if (mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
         System.out.println("Received value less than default minimum. "
-                + "Updating MTU size to default minimum of "
-                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+            + "Updating MTU size to default minimum of "
+            + Const.SERVICE_INFO_MTU_MIN_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       } else if (mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
         System.out.println("MTU size greater than maximum allowed. "
-                 +  "Updating MTU size to maximum limit of "
-                 +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
+            + "Updating MTU size to maximum limit of "
+            + Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       }
     }

@@ -21,7 +21,6 @@ public class OwnerSysModule implements Module {
   private final DataSource dataSource;
   private static final byte CBOR_TRUE = (byte) 0xF5;
   private static final byte CBOR_FALSE = (byte) 0xF4;
-
   private int maxMtu = 0;
 
   /**
@@ -47,7 +46,7 @@ public class OwnerSysModule implements Module {
     state.set(Const.FOURTH_KEY, false); // is active flag
     state.set(Const.FIFTH_KEY, false);//is more flag
     state.set(Const.SIXTH_KEY, false);//is done flag
-    state.set(Const.SEVENTH_KEY,false); // has message to send
+    state.set(Const.SEVENTH_KEY, false); // has message to send
   }
 
   @Override
@@ -93,6 +92,11 @@ public class OwnerSysModule implements Module {
 
   @Override
   public boolean isMore() {
+    return state.getAsBoolean(Const.FIFTH_KEY);
+  }
+
+  @Override
+  public boolean hasMore() {
 
     String guid = state.getAsString(Const.FIRST_KEY);
     int resIndex = state.getAsNumber(Const.SECOND_KEY).intValue();
@@ -179,21 +183,21 @@ public class OwnerSysModule implements Module {
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
             resList.clear();
           }
-          state.set(Const.SEVENTH_KEY,true); //has message to send
+          state.set(Const.SEVENTH_KEY, true); //has message to send
           break;
         case FdoSys.KEY_FILEDESC:
         case FdoSys.KEY_WRITE:
         case FdoSys.KEY_EXEC:
           state.set(Const.FIFTH_KEY, false); //ismore
           state.set(Const.SIXTH_KEY, false);//isdone - device not active
-          state.set(Const.SEVENTH_KEY,true); //has message to send
+          state.set(Const.SEVENTH_KEY, true); //has message to send
           break;
         case FdoSys.KEY_IS_DONE:
           if (getBooleanContent(resId)) {
             state.set(Const.FIFTH_KEY, false); //ismore
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
           }
-          state.set(Const.SEVENTH_KEY,false); //has message to send
+          state.set(Const.SEVENTH_KEY, false); //has message to send
           incrementIndex();
           break;
         case FdoSys.KEY_IS_MORE:
@@ -203,7 +207,7 @@ public class OwnerSysModule implements Module {
           } else {
             state.set(Const.FIFTH_KEY, false); //ismore
           }
-          state.set(Const.SEVENTH_KEY,false); //has message to send
+          state.set(Const.SEVENTH_KEY, false); //has message to send
           incrementIndex();
           break;
         default:
@@ -211,9 +215,9 @@ public class OwnerSysModule implements Module {
       }
 
     } else {
-      state.set(Const.FIFTH_KEY, false); //ismore
+      state.set(Const.FIFTH_KEY, false); //ismore false
       state.set(Const.SIXTH_KEY, true);//isdone - device not active
-      state.set(Const.SEVENTH_KEY,false); //has message to send
+      state.set(Const.SEVENTH_KEY, false); //has message to send
     }
 
   }

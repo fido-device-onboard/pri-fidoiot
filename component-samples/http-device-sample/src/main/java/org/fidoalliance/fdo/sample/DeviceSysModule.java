@@ -49,7 +49,6 @@ public class DeviceSysModule implements Module {
 
   private Path currentFile;
   private boolean isActive;
-  private final List<Composite> replyList = new ArrayList<>();
   private int listIndex = 0;
 
   @Override
@@ -89,7 +88,6 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
         } else {
-          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
         }
         break;
@@ -97,7 +95,6 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
         } else {
-          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
         }
         break;
@@ -105,7 +102,6 @@ public class DeviceSysModule implements Module {
         if (isActive) {
           exec(kvPair.getAsComposite(Const.SECOND_KEY));
         } else {
-          replyInactive();
           System.out.println("fdo_sys module not active. Ignoring fdo_sys:exec.");
         }
         break;
@@ -114,10 +110,13 @@ public class DeviceSysModule implements Module {
     }
   }
 
-  @Override
   public boolean isMore() {
+    return false;
+  }
 
-    return listIndex < replyList.size();
+  @Override
+  public boolean hasMore() {
+    return false;
   }
 
   @Override
@@ -127,20 +126,7 @@ public class DeviceSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
-    if (replyList.size() > 0) {
-      System.out.println("fdo_sys reply serviceinfo");
-    }
-    return replyList.get(listIndex++);
-  }
-
-  private void replyInactive() {
-
-    if (replyList.size() == 0) {
-      replyList.add(
-          ServiceInfoEncoder.encodeValue(FdoSys.KEY_ACTIVE, false));
-    }
-
-
+    return Composite.newArray();
   }
 
   private void setPath(Path path) {

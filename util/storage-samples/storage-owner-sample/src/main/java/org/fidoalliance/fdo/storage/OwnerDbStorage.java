@@ -29,6 +29,7 @@ import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
 import org.fidoalliance.fdo.protocol.To2ServerStorage;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
+import org.fidoalliance.fdo.serviceinfo.Module;
 import org.fidoalliance.fdo.serviceinfo.ModuleManager;
 
 public class OwnerDbStorage implements To2ServerStorage {
@@ -45,9 +46,8 @@ public class OwnerDbStorage implements To2ServerStorage {
   private String sessionId;
   private byte[] replacementHmac;
   private Composite sigInfoA;
-  int ownerServiceInfoMtuSize = 0;
-  String deviceServiceInfoMtuSize = String.valueOf(0);
-  ModuleManager modules;
+  private String deviceServiceInfoMtuSize = String.valueOf(0);
+  private final ModuleManager modules;
 
 
   /**
@@ -68,6 +68,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     modules = new ModuleManager();
     modules.addModule(new OwnerDevMod(ds));
     modules.addModule(new OwnerSysModule(ds));
+    modules.addModule(new OwnerTestModule(ds));
   }
 
   @Override
@@ -300,7 +301,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     return getCryptoService().encode(ownerPub,
-            (keyType == Const.PK_RSA2048RESTR)
+        (keyType == Const.PK_RSA2048RESTR)
             ? Const.PK_ENC_CRYPTO : getCryptoService().getCompatibleEncoding(ownerPub));
   }
 

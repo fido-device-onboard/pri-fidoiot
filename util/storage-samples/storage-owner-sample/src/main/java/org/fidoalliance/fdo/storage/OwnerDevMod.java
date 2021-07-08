@@ -114,6 +114,10 @@ public class OwnerDevMod implements Module {
 
   }
 
+  @Override
+  public boolean hasMore() {
+    return false;
+  }
 
   @Override
   public boolean isMore() {
