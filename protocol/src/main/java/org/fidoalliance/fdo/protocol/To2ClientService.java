@@ -423,8 +423,9 @@ public abstract class To2ClientService extends DeviceService {
     Composite payload = getStorage().getNextServiceInfo();
 
     boolean isMore2 = payload.getAsBoolean(Const.FIRST_KEY);
+    int sviCount = payload.getAsComposite(Const.SECOND_KEY).size();
 
-    if (isDone && isMore == false && isMore2 == false) {
+    if (isDone && isMore == false && isMore2 == false && sviCount == 0) {
       //change message to done
       payload = Composite.newArray()
           .set(Const.FIRST_KEY, this.nonceTo2ProveDv);

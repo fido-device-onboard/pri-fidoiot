@@ -55,11 +55,12 @@ public interface Module {
   void setServiceInfo(Composite kvPair, boolean isMore);
 
   /**
-   * Checks if the module has a serviceinfo message to send.
+   * Checks if the module has more serviceinfo message to send.
    *
    * @return True if the module has a message to send, otherwise false.
    */
   boolean isMore();
+
 
   /**
    * Checks if the module is done sending serviceinfo.
@@ -67,6 +68,13 @@ public interface Module {
    * @return True if the module is done, otherwise false.
    */
   boolean isDone();
+
+  /**
+   * Checks if the module has as message to send.
+   *
+   * @return True if the module has a message to send, otherwise false.
+   */
+  boolean hasMore();
 
   /**
    * Gets the next message name value key pair.

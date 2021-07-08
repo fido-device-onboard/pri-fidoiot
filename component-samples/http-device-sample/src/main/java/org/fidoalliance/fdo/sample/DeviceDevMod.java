@@ -117,9 +117,16 @@ public class DeviceDevMod implements Module {
   }
 
   @Override
+  public boolean hasMore() {
+    return listIndex < devInfoList.size();
+  }
+
+
+  @Override
   public boolean isDone() {
     return false;
   }
+
 
   @Override
   public Composite nextMessage() {

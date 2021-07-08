@@ -41,6 +41,9 @@ public abstract class MessageDispatcher implements Closeable {
   protected void dispatching(Composite request) {
   }
 
+  protected void dispatched(Composite request, Composite reply) {
+  }
+
   protected void replied(Composite reply) {
   }
 
@@ -159,6 +162,7 @@ public abstract class MessageDispatcher implements Closeable {
         MessagingService service = getMessagingService(errorRequest);
 
         service.dispatch(request, reply);
+        dispatched(request,Const.EMPTY_MESSAGE);
 
         return new DispatchResult(Const.EMPTY_MESSAGE, true);
       }
@@ -166,6 +170,7 @@ public abstract class MessageDispatcher implements Closeable {
       MessagingService service = getMessagingService(request);
 
       boolean isDone = service.dispatch(request, reply);
+      dispatched(request,reply);
 
       DispatchResult dr = new DispatchResult(reply, isDone);
       replied(reply);

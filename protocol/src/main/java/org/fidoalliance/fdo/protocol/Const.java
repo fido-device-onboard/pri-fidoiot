@@ -369,6 +369,7 @@ public final class Const {
   public static final int HTTP_INTERNAL_SERVER_ERROR = 500;
   public static final int HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
   public static final int HTTP_LENGTH_REQUIRED = 411;
+  public static final int HTTP_NOT_FOUND = 404;
   public static final int HTTP_OK = 200;
   public static final String HTTP_BEARER = "Bearer";
   public static final String HTTP_AUTHORIZATION = "Authorization";
