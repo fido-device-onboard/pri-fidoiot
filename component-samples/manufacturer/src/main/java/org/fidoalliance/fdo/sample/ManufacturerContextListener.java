@@ -25,6 +25,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -46,6 +47,7 @@ public class ManufacturerContextListener implements ServletContextListener {
 
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
+  private static LoggerService logger = new LoggerService(ManufacturerContextListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -57,7 +59,7 @@ public class ManufacturerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(ManufacturerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(ManufacturerAppSettings.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -120,7 +122,7 @@ public class ManufacturerContextListener implements ServletContextListener {
             }
           } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
               | CertificateEncodingException e) {
-            System.out.println("Unable to retrieve Private Key. " + e.getMessage());
+            logger.error("Unable to retrieve Private Key. " + e.getMessage());
           }
         }
         throw new RuntimeException();
@@ -154,7 +156,7 @@ public class ManufacturerContextListener implements ServletContextListener {
               }
             }
           } catch (KeyStoreException e) {
-            System.out.println("Unable to retrieve Certificate chain. " + e.getMessage());
+            logger.error("Unable to retrieve Certificate chain. " + e.getMessage());
           }
         }
         throw new RuntimeException();
@@ -247,7 +249,7 @@ public class ManufacturerContextListener implements ServletContextListener {
         mfgKeyStore.load(null, mfgKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      System.out.println("Error in loading keystore. " + e.getMessage());
+      logger.error("Error in loading keystore. " + e.getMessage());
     }
   }
 }

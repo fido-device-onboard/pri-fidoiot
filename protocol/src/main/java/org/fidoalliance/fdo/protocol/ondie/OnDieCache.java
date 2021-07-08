@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 
 public class OnDieCache {
@@ -38,6 +39,8 @@ public class OnDieCache {
   private HashMap<String, byte[]> cacheMap = new HashMap<String, byte[]>();
 
   private final String cacheUpdatedTouchFile = "cache_updated";
+
+  private static final LoggerService logger = new LoggerService(OnDieCache.class);
 
   /**
    * Constructor.
@@ -120,7 +123,7 @@ public class OnDieCache {
       ZipInputStream zipInput = new ZipInputStream(zipFileInput);
       ZipEntry zipEntry = zipInput.getNextEntry();
       while (zipEntry != null) {
-        System.out.println(zipEntry.getName());
+        logger.info(zipEntry.getName());
         if (zipEntry.getName().startsWith("content/OnDieCA")
             && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
           Path p = Paths.get(zipEntry.getName());

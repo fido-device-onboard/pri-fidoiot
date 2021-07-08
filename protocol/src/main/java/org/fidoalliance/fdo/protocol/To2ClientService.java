@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.UUID;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * To2 Client message processing service.
@@ -36,6 +37,8 @@ public abstract class To2ClientService extends DeviceService {
   protected Enumeration<Composite> dviEnumerator;
 
   protected abstract To2ClientStorage getStorage();
+
+  protected static final LoggerService logger = new LoggerService(To2ClientService.class);
 
   public void setRvBypass(boolean rvBypass) {
     this.rvBypass = rvBypass;
@@ -311,7 +314,7 @@ public abstract class To2ClientService extends DeviceService {
     }
 
     if (!getStorage().isDeviceCredReuseSupported() && isReuse) {
-      System.out.println("Credential reuse rejected by device. Device onboarding failed.");
+      logger.error("Credential reuse rejected by device. Device onboarding failed.");
       throw new RuntimeException(
           new CredReuseRejectedException(new UnsupportedOperationException()));
     }
@@ -336,12 +339,12 @@ public abstract class To2ClientService extends DeviceService {
       try {
         ownerMtu = Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz());
         if (ownerMtu < Const.DEFAULT_SERVICE_INFO_MTU_SIZE) {
-          System.out.println("Received DeviceMTU size below the threshold value."
+          logger.warn("Received DeviceMTU size below the threshold value."
               + " Proceeding with default MTU size of 1300 bytes");
           ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
         }
       } catch (Exception e) {
-        System.out.println(
+        logger.warn(
             "Out of Bound value received."
                 + e.getMessage()
                 + " Proceeding with default MTU size of 1300 bytes");
@@ -423,8 +426,9 @@ public abstract class To2ClientService extends DeviceService {
     Composite payload = getStorage().getNextServiceInfo();
 
     boolean isMore2 = payload.getAsBoolean(Const.FIRST_KEY);
+    int sviCount = payload.getAsComposite(Const.SECOND_KEY).size();
 
-    if (isDone && isMore == false && isMore2 == false) {
+    if (isDone && isMore == false && isMore2 == false && sviCount == 0) {
       //change message to done
       payload = Composite.newArray()
           .set(Const.FIRST_KEY, this.nonceTo2ProveDv);

@@ -34,6 +34,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -56,6 +57,7 @@ public class DiDbStorage implements DiServerStorage {
   private final CertificateResolver resolver;
   private final OnDieService onDieService;
   private Composite voucher;
+  private static final LoggerService logger = new LoggerService(DiDbStorage.class);
 
   /**
    * Constructs a DiDbStorage instance.
@@ -251,7 +253,7 @@ public class DiDbStorage implements DiServerStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    System.out.println("Voucher stored with GUID: " + guid.toString());
+    logger.info("Voucher stored with GUID: " + guid.toString());
   }
 
   @Override

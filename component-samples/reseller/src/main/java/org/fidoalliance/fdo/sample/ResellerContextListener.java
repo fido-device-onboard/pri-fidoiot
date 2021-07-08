@@ -17,10 +17,13 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CryptoService;
 import org.fidoalliance.fdo.protocol.KeyStoreResolver;
 
 public class ResellerContextListener implements ServletContextListener {
+
+  private final LoggerService logger = new LoggerService(ResellerContextListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -32,7 +35,7 @@ public class ResellerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(ResellerAppConstants.DB_USER));
     ds.setPassword(sc.getInitParameter(ResellerAppConstants.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

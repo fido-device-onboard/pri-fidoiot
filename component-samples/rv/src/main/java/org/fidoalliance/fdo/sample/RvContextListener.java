@@ -10,6 +10,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -30,6 +31,8 @@ import org.fidoalliance.fdo.storage.To1DbStorage;
 /** Rendezvous servlet Context Listener. */
 public class RvContextListener implements ServletContextListener {
 
+  private static final LoggerService logger = new LoggerService(RvContextListener.class);
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     BasicDataSource ds = new BasicDataSource();
@@ -40,7 +43,7 @@ public class RvContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(RvAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(RvAppSettings.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

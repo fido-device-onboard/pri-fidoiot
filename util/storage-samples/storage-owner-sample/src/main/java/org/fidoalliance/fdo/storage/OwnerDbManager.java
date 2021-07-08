@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.RendezvousInfoDecoder;
@@ -25,6 +26,8 @@ import org.fidoalliance.fdo.serviceinfo.DevMod;
  * Owner Database Manager.
  */
 public class OwnerDbManager {
+
+  private static final LoggerService logger = new LoggerService(OwnerDbManager.class);
 
   /**
    * Creates owner tables.
@@ -335,19 +338,19 @@ public class OwnerDbManager {
 
     if (field.equals("DEVICE_SERVICE_INFO_MTU_SIZE")) {
       if (mtu < 0) {
-        System.out.println("Received value must be > 0. "
-                + "Updating MTU size to default minimum of "
-                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+        logger.info("Received value must be > 0. "
+            + "Updating MTU size to default minimum of "
+            + Const.SERVICE_INFO_MTU_MIN_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       } else if (mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
-        System.out.println("Received value less than default minimum. "
-                + "Updating MTU size to default minimum of "
-                + Const.SERVICE_INFO_MTU_MIN_SIZE);
+        logger.info("Received value less than default minimum. "
+            + "Updating MTU size to default minimum of "
+            + Const.SERVICE_INFO_MTU_MIN_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       } else if (mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
-        System.out.println("MTU size greater than maximum allowed. "
-                 +  "Updating MTU size to maximum limit of "
-                 +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
+        logger.info("MTU size greater than maximum allowed. "
+            +  "Updating MTU size to maximum limit of "
+            +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
         mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
       }
     }
@@ -557,7 +560,9 @@ public class OwnerDbManager {
         + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
         + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active') "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:ismore' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:isdone') "
         + "ORDER BY PRIORITY ASC";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {

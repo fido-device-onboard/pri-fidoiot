@@ -3,6 +3,9 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
+# LOG4J2 configuration file
+LOG_CONFIG="-Dlog4j.configurationFile=${log4j_configuration_file}"
+
 # Sample script that configures the softHSM and inserts the reseller keys
 
 # Initialize softHSM token with SO PIN and User pin.
@@ -15,4 +18,4 @@ keytool -importkeystore -deststorepass $reseller_keystore_password -destkeystore
 rm -f reseller_keystore.p12
 
 # Start the owner service
-exec java -jar reseller.jar
+exec java ${LOG_CONFIG} -jar reseller.jar
