@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -36,6 +37,8 @@ import org.fidoalliance.fdo.storage.OwnerDbStorage;
  * TO2 Servlet Context Listener.
  */
 public class To2ContextListener implements ServletContextListener {
+
+  private static final LoggerService logger = new LoggerService(To2ContextListener.class);
 
   private static String ownerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIB9DCCAZmgAwIBAgIJANpFH5JBylZhMAoGCCqGSM49BAMCMGoxJjAkBgNVBAMM\n"
@@ -184,7 +187,7 @@ public class To2ContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter("db.user"));
     ds.setPassword(sc.getInitParameter("db.password"));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

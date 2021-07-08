@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -27,6 +28,7 @@ import org.fidoalliance.fdo.protocol.To0ClientStorage;
 
 public class To0ClientApp {
 
+  private static final LoggerService logger = new LoggerService(To0ClientApp.class);
   private static final int REQUEST_WS = 3600;
   private static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
 
@@ -182,7 +184,7 @@ public class To0ClientApp {
     @Override
     public void setResponseWait(long wait) {
       responseWait = wait;
-      System.out.println("To0 Response Wait: " + Long.toString(wait));
+      logger.info("To0 Response Wait: " + Long.toString(wait));
     }
 
     @Override
@@ -261,7 +263,7 @@ public class To0ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -278,7 +280,7 @@ public class To0ClientApp {
     Composite ovh = clientStorage.getVoucher().getAsComposite(Const.OV_HEADER);
 
     UUID guid = ovh.getAsUuid(Const.OVH_GUID);
-    System.out.println("TO0 with guid " + guid.toString());
+    logger.info("TO0 with guid " + guid.toString());
 
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
@@ -301,7 +303,7 @@ public class To0ClientApp {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -315,7 +317,7 @@ public class To0ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To0ClientApp().run(args);
-    System.out.println("TO0 Client finished.");
+    logger.info("TO0 Client finished.");
     return;
   }
 }

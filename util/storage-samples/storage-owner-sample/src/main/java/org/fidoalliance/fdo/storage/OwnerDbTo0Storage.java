@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.UUID;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.KeyResolver;
@@ -25,6 +26,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
   private Composite voucher;
   private UUID guid;
   private String clientToken;
+  private static final LoggerService logger = new LoggerService(OwnerDbTo0Storage.class);
 
   // default TO0 waitseconds
   public static final int TO0_REQUEST_WS = 3600;
@@ -80,7 +82,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
         }
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
     }
     // return default value
     return TO0_REQUEST_WS;
@@ -101,7 +103,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    System.out.println("To0 Response Wait for " + guid.toString() + " : " + Long.toString(wait));
+    logger.info("To0 Response Wait for " + guid.toString() + " : " + Long.toString(wait));
   }
 
   @Override
@@ -149,7 +151,7 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
   @Override
   public void completed(Composite request, Composite reply) {
     // log first since TO0 is done. Update DB later.
-    System.out.println("TO0 Client finished for GUID " + guid.toString());
+    logger.info("TO0 Client finished for GUID " + guid.toString());
     String sql = "UPDATE TO2_DEVICES SET TO0_COMPLETED = ? WHERE GUID = ?";
 
     try (Connection conn = dataSource.getConnection();
@@ -168,6 +170,6 @@ public class OwnerDbTo0Storage implements To0ClientStorage {
 
   @Override
   public void failed(Composite request, Composite reply) {
-    System.out.println("TO0 Client failed for GUID " + guid.toString());
+    logger.error("TO0 Client failed for GUID " + guid.toString());
   }
 }
