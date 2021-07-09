@@ -12,6 +12,7 @@ import javax.security.auth.message.AuthException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -25,6 +26,7 @@ import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 public class TestListener implements ServletContextListener {
 
   public static final String BEARER_TOKEN = "1234567890abcef";
+  private static final LoggerService logger = new LoggerService(TestListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -130,7 +132,7 @@ public class TestListener implements ServletContextListener {
       try {
         ((Closeable) obj).close();
       } catch (IOException e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
   }

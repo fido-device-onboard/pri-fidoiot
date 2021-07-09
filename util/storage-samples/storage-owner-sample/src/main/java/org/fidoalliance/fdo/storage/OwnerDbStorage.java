@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -37,6 +38,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final KeyResolver keyResolver;
+  private final LoggerService logger;
   private OnDieService onDieService;
   private Composite ownerState;
   private String cipherName;
@@ -65,6 +67,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     dataSource = ds;
     this.keyResolver = keyResolver;
     onDieService = ods;
+    logger = new LoggerService(OwnerDbStorage.class);
     modules = new ModuleManager();
     modules.addModule(new OwnerDevMod(ds));
     modules.addModule(new OwnerSysModule(ds));
@@ -326,7 +329,7 @@ public class OwnerDbStorage implements To2ServerStorage {
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
           if (rs.getInt(1) < 0) {
-            System.out.println("Negative value received. MTU size will default to 1300 bytes");
+            logger.info("Negative value received. MTU size will default to 1300 bytes");
           }
           deviceServiceInfoMtuSize = (rs.getInt(1) > 0 ? String.valueOf(rs.getInt(1)) : null);
         }

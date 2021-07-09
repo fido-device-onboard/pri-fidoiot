@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -29,6 +30,8 @@ import org.fidoalliance.fdo.protocol.VoucherExtensionService;
  * The Reseller voucher servlet.
  */
 public class ResellerVoucherServlet extends HttpServlet {
+
+  private static final LoggerService logger = new LoggerService(ResellerVoucherServlet.class);
 
   protected Composite queryVoucher(DataSource dataSource, String serialNo) {
 
@@ -104,7 +107,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     }
     // we didn't find an owner entry in database as per the current owner's key-type.
     if (null == nextOwner) {
-      System.out.println("Customer entry missing for " + serialNo);
+      logger.error("Customer entry missing for " + serialNo);
       resp.setStatus(500);
       return;
     }
@@ -114,7 +117,7 @@ public class ResellerVoucherServlet extends HttpServlet {
       if (signer.get() != null) {
         vse.add(signer.get(), nextOwner);
       } else {
-        System.out.println("Reseller is not the current owner for " + serialNo);
+        logger.error("Reseller is not the current owner for " + serialNo);
         resp.setStatus(500);
         return;
       }
@@ -153,7 +156,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
     int rowsAffected = new ResellerDbManager().deleteVoucher(ds, serialNo);
     if (rowsAffected == 0) {
-      System.out.println("Unable to find voucher for serial no: " + serialNo);
+      logger.error("Unable to find voucher for serial no: " + serialNo);
       resp.setStatus(404);
       return;
     }

@@ -14,6 +14,7 @@ import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.fidoalliance.fdo.api.KeyStoreServlet;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
 
@@ -35,6 +36,8 @@ public class ResellerServerApp {
       null != ResellerConfigLoader.loadConfig(ResellerAppConstants.RESELLER_PROTOCOL_SCHEME)
           ? ResellerConfigLoader.loadConfig(ResellerAppConstants.RESELLER_PROTOCOL_SCHEME) : "http";
 
+  private static final LoggerService logger = new LoggerService(ResellerServerApp.class);
+
   /**
    * Application main.
    *
@@ -45,7 +48,7 @@ public class ResellerServerApp {
     Tomcat tomcat = new Tomcat();
 
 
-    System.out.println(System.getProperty("user.dir"));
+    logger.info(System.getProperty("user.dir"));
     // set the path of tomcat
     System.setProperty(CATALINA_HOME,
         Path.of(ResellerConfigLoader.loadConfig(ResellerAppConstants.SERVER_PATH)).toAbsolutePath()
@@ -80,6 +83,13 @@ public class ResellerServerApp {
 
     ctx.addParameter(ResellerAppConstants.KEYSTORE_PWD,
         ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
+
+    try {
+      ctx.addParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH,
+              ResellerConfigLoader.loadConfig(ResellerAppConstants.OWNER_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Owner public keys are optional. If config can't be loaded,default to no config.
+    }
 
     ctx.addApplicationListener(DbStarter.class.getName());
     ctx.addApplicationListener(ResellerContextListener.class.getName());

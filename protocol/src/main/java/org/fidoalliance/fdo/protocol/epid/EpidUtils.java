@@ -5,12 +5,14 @@ package org.fidoalliance.fdo.protocol.epid;
 
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 
 public class EpidUtils {
 
   private static String epidOnlineUrlString = "https://verify.epid-sbx.trustedservices.intel.com/";
   private static URI epidOnlineUrl = URI.create(epidOnlineUrlString);
+  private static final LoggerService logger = new LoggerService(EpidUtils.class);
 
   /**
    * Returns EPID group id length.
@@ -38,7 +40,7 @@ public class EpidUtils {
       throw new IllegalArgumentException();
     }
     epidOnlineUrl = URI.create(url);
-    System.out.println("EPID Online URL: " + epidOnlineUrl.toString());
+    logger.info("EPID Online URL: " + epidOnlineUrl.toString());
   }
 
   /**

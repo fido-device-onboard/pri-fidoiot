@@ -17,6 +17,7 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -35,6 +36,8 @@ import org.fidoalliance.fdo.storage.DiDbStorage;
  * Device Initialization servlet Context Listener.
  */
 public class DiContextListener implements ServletContextListener {
+
+  private static final LoggerService logger = new LoggerService(DiContextListener.class);
 
   private static final String mfgKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
@@ -175,7 +178,7 @@ public class DiContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter("db.user"));
     ds.setPassword(sc.getInitParameter("db.password"));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -228,7 +231,7 @@ public class DiContextListener implements ServletContextListener {
             }
           }
         } catch (CertificateEncodingException ex) {
-          System.out.println("Unable to retrieve Private Key. " + ex.getMessage());
+          logger.error("Unable to retrieve Private Key. " + ex.getMessage());
           return null;
         }
         return null;

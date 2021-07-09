@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -26,6 +27,7 @@ import org.fidoalliance.fdo.serviceinfo.FdoSys;
 
 public class To2ClientApp {
 
+  private static final LoggerService logger = new LoggerService(To2ClientApp.class);
   private static final int RV_PORT = 8040;
   private static final String HOST_NAME = "localhost";
   private static final String PROTOCOL_NAME = "http://";
@@ -85,7 +87,7 @@ public class To2ClientApp {
         // break here since no exception is thrown, so TO2 is successful.
         break;
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -246,19 +248,19 @@ public class To2ClientApp {
 
       String name = info.getAsString(Const.FIRST_KEY);
       Object value = info.get(Const.SECOND_KEY);
-      System.out.print(name);
-      System.out.print("=");
+      logger.info(name);
+      logger.info("=");
       if (value instanceof String
           || value instanceof Boolean
           || value instanceof Number) {
-        System.out.print(value.toString());
+        logger.info(value.toString());
       } else if (value instanceof byte[]) {
-        System.out.print(Composite.toString((byte[]) value));
+        logger.info(Composite.toString((byte[]) value));
       } else if (value instanceof Map || value instanceof List) {
         Composite composite = info.getAsComposite(Const.SECOND_KEY);
-        System.out.print(composite.toString());
+        logger.info(composite.toString());
       }
-      System.out.println();
+      logger.info("");
     }
 
     @Override
@@ -306,7 +308,7 @@ public class To2ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -319,7 +321,7 @@ public class To2ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To2ClientApp().run(args);
-    System.out.println("TO2 Client finished.");
+    logger.info("TO2 Client finished.");
     return;
   }
 }
