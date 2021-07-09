@@ -23,7 +23,7 @@ public class AioFileUploadServlet extends HttpServlet {
   @Override
   protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
     if (req.getContentType().compareToIgnoreCase("application/octet-stream") != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -37,7 +37,7 @@ public class AioFileUploadServlet extends HttpServlet {
     final int pos = req.getRequestURI().lastIndexOf('/');
     final String fileName = req.getRequestURI().substring(pos + 1);
     if (fileName.startsWith(".") || fileName.indexOf('\\') > 0) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
     final String path = getInitParameter(AioAppSettings.DOWNLOADS_PATH);
@@ -45,11 +45,11 @@ public class AioFileUploadServlet extends HttpServlet {
     try {
       Files.delete(Path.of(path, fileName));
     } catch (FileNotFoundException e) {
-      resp.setStatus(Const.HTTP_NOT_FOUND);
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } catch (IOException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-    resp.setStatus(Const.HTTP_OK);
+    resp.setStatus(HttpServletResponse.SC_OK);
   }
 
   private void putAsync(AsyncContext asyncCtx) {
@@ -60,7 +60,7 @@ public class AioFileUploadServlet extends HttpServlet {
     final int pos = req.getRequestURI().lastIndexOf('/');
     final String fileName = req.getRequestURI().substring(pos + 1);
     if (fileName.startsWith(".") || fileName.indexOf('\\') > 0) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       asyncCtx.complete();
       return;
     }
@@ -78,11 +78,11 @@ public class AioFileUploadServlet extends HttpServlet {
       }
       outStream.flush();
     } catch (FileNotFoundException e) {
-      resp.setStatus(Const.HTTP_NOT_FOUND);
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } catch (IOException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-    resp.setStatus(Const.HTTP_OK);
+    resp.setStatus(HttpServletResponse.SC_OK);
     asyncCtx.complete();
   }
 }
