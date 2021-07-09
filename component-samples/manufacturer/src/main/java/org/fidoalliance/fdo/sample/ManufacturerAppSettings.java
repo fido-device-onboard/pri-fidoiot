@@ -44,4 +44,8 @@ public class ManufacturerAppSettings {
   public static final String ONDIE_AUTOUPDATE = "ondie_autoupdate";
   public static final String ONDIE_SOURCE_URLS = "ondie_zip_artifact";
   public static final String ONDIE_CHECK_REVOCATIONS = "ondie_check_revocations";
+
+  // Owner & Reseller key files
+  public static final String OWNER_PUB_KEY_PATH = "owner_pub_key_path";
+  public static final String RESELLER_PUB_KEY_PATH = "reseller_pub_key_path";
 }
