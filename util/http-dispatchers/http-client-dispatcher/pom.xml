@@ -58,6 +58,12 @@
       <artifactId>tomcat-embed-core</artifactId>
       <version>${tomcat.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

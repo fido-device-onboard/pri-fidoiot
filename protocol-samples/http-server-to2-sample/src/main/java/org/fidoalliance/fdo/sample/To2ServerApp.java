@@ -13,6 +13,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.fidoalliance.fdo.api.OwnerSviSettingsServlet;
 import org.fidoalliance.fdo.api.OwnerSystemResourceServlet;
 import org.fidoalliance.fdo.api.OwnerVoucherServlet;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -33,7 +34,7 @@ public class To2ServerApp {
       "target", "data", "ops").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
       "target", "tomcat").toString();
-
+  private static final LoggerService logger = new LoggerService(To2ServerApp.class);
 
   private static String getMessagePath(int msgId) {
     return WEB_PATH + "/" + Integer.toString(msgId);
@@ -76,7 +77,7 @@ public class To2ServerApp {
     // OnDie cert cache is included with the protocol samples.
     Path odcPath = Paths.get(System.getProperty("user.dir"), "../", "onDieCache");
 
-    System.out.println("Working Directory = " + odcPath.toString());
+    logger.info("Working Directory = " + odcPath.toString());
     ctx.addParameter("ods.cacheDir", odcPath.toUri().toString());
     ctx.addParameter("ods.autoUpdate", "false");
     ctx.addParameter("ods.zipArtifactUrl", "");

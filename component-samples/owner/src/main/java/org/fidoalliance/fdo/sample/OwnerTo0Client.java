@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -33,6 +34,7 @@ public class OwnerTo0Client {
   private To0ClientService clientService;
   private UUID guid;
   private String rvBlob;
+  private static LoggerService logger;
 
   /**
    * Constructor.
@@ -44,6 +46,7 @@ public class OwnerTo0Client {
     this.keyResolver = keyResolver;
     this.guid = guid;
     this.to0Util = to0Util;
+    this.logger = new LoggerService(OwnerTo0Client.class);
   }
 
   public void setRvBlob(String rvBlob) {
@@ -92,7 +95,7 @@ public class OwnerTo0Client {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -101,7 +104,7 @@ public class OwnerTo0Client {
    * Initiates TO0 for a device.
    */
   public void run() throws NoSuchAlgorithmException, IOException, InterruptedException {
-    System.out.println("TO0 Client started for GUID " + guid.toString());
+    logger.info("TO0 Client started for GUID " + guid.toString());
     MessageDispatcher dispatcher = createDispatcher();
 
     DispatchResult dr = clientService().getHelloMessage();
@@ -112,7 +115,7 @@ public class OwnerTo0Client {
     List<String> paths = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_OWNER_ONLY);
 
     if (paths.size() == 0) {
-      System.out.println("No Directives found. Invalid RVInfo Blob in " + guid.toString());
+      logger.error("No Directives found. Invalid RVInfo Blob in " + guid.toString());
       throw new IOException("TO0 failed for " + guid.toString() + ".");
     }
 
@@ -126,9 +129,9 @@ public class OwnerTo0Client {
           break;
         }
       } catch (RuntimeException e) {
-        System.out.println("Unable to connect with RV at " + path + ". " + e.getMessage());
+        logger.error("Unable to connect with RV at " + path + ". " + e.getMessage());
       } catch (Exception e) {
-        System.out.println("TO0 failed for " + guid.toString() + "." + e.getMessage());
+        logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
         throw e;
       }
     }

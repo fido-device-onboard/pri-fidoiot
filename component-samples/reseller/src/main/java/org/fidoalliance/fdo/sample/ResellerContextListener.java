@@ -4,6 +4,8 @@
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -15,29 +17,13 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CryptoService;
 import org.fidoalliance.fdo.protocol.KeyStoreResolver;
 
 public class ResellerContextListener implements ServletContextListener {
 
-  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
-      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
-      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
-      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
-      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
-      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
-      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
-      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
-      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
-      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
-      + "AwIDAQAB\n"
-      + "-----END PUBLIC KEY-----";
+  private final LoggerService logger = new LoggerService(ResellerContextListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -49,7 +35,7 @@ public class ResellerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(ResellerAppConstants.DB_USER));
     ds.setPassword(sc.getInitParameter(ResellerAppConstants.DB_PWD));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -83,7 +69,14 @@ public class ResellerContextListener implements ServletContextListener {
 
     ResellerDbManager dbManager = new ResellerDbManager();
     dbManager.createTables(ds);
-    dbManager.defineKeySet(ds, ownerKeysPem, "owner", 1);
+    try {
+      final String ownerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH)));
+      dbManager.defineKeySet(ds, ownerKeysPem, "owner", 1);
+      System.out.println("Registered public keys for customer 'owner'");
+    } catch (IOException e) {
+      System.out.println("No default public keys found for customer 'owner'");
+    }
   }
 
 }

@@ -10,6 +10,7 @@ import org.apache.commons.configuration2.SystemConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * Utility class to load properties/configuration from system, environment and configuration file.
@@ -20,6 +21,7 @@ public class ManufacturerConfigLoader {
   private static EnvironmentConfiguration environmentConfiguration;
   private static SystemConfiguration systemConfiguration;
   private static FileBasedConfiguration fileBasedConfiguration;
+  private static LoggerService logger;
 
   static {
     environmentConfiguration = new EnvironmentConfiguration();
@@ -27,6 +29,7 @@ public class ManufacturerConfigLoader {
     FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
         new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
             .configure(new Parameters().properties().setFileName(configurationFile));
+    logger = new LoggerService(ManufacturerConfigLoader.class);
     try {
       fileBasedConfiguration = builder.getConfiguration();
       // configuration will be null if the configurationFile doesn't exist.
@@ -35,7 +38,7 @@ public class ManufacturerConfigLoader {
         throw new ConfigurationException();
       }
     } catch (ConfigurationException e) {
-      System.out.println("The Manufacturer application might not be using config file");
+      logger.warn("The Manufacturer application might not be using config file");
       // ignore the error since the application might not be using config file.
       // log when logging is enabled in the application.
     }
@@ -55,7 +58,7 @@ public class ManufacturerConfigLoader {
     } else if (fileBasedConfiguration.containsKey(property)) {
       return fileBasedConfiguration.getString(property);
     }
-    System.out.println("Could not load property: " + property);
+    logger.warn("Could not load property: " + property);
     return null;
   }
 }
