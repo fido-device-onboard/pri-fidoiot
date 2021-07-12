@@ -9,10 +9,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import java.nio.file.Path;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
@@ -79,7 +80,7 @@ public class ServletTest {
 
     HttpResponse<byte[]> hr = hc.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
 
-    assertTrue(hr.statusCode() == Const.HTTP_OK);
+    assertTrue(hr.statusCode() == HttpServletResponse.SC_OK);
     Composite reply = Composite.fromObject(hr.body());
     byte[] nonceTo0Sign = reply.getAsBytes(Const.FIRST_KEY);
 

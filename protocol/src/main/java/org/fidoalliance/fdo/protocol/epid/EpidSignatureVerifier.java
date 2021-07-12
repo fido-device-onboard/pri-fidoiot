@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.protocol.epid;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -13,7 +14,6 @@ import java.util.Base64;
 
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
-
 
 public final class EpidSignatureVerifier {
 
@@ -24,6 +24,9 @@ public final class EpidSignatureVerifier {
     OUTDATED_SIGRL,
     UNKNOWN_ERROR
   }
+
+  // This is not defined in HttpUrlConnection
+  public static final int HTTP_EXPECTATION_FAILED = 417;
 
   /**
    * Verifies EPID signature. Returns result of verification via enum Result.
@@ -56,13 +59,13 @@ public final class EpidSignatureVerifier {
 
       int response = EpidHttpClient.doPost(url, msg);
       switch (response) {
-        case 200:
+        case HttpURLConnection.HTTP_OK:
           return Result.VERIFIED;
-        case 400:
+        case HttpURLConnection.HTTP_BAD_REQUEST:
           return Result.MALFORMED_REQUEST;
-        case 403:
+        case HttpURLConnection.HTTP_FORBIDDEN:
           return Result.INVALID_SIGNATURE;
-        case 417:
+        case HTTP_EXPECTATION_FAILED:
           return Result.OUTDATED_SIGRL;
         default:
           return Result.UNKNOWN_ERROR;

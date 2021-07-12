@@ -25,11 +25,6 @@ import org.fidoalliance.fdo.serviceinfo.ModuleManager;
 
 public class OwnerSystemResourceServlet extends HttpServlet {
 
-
-  public static final int UNSUPPORTED_MEDIA = 415;
-  public static final int NOT_FOUND = 404;
-  public static final int BAD_REQUEST = 400;
-
   public static final String BYTES_TAG = "bytes";
   public static final String ID_TAG = "id";
   public static final String CRID_TAG = "crid";
@@ -265,12 +260,12 @@ public class OwnerSystemResourceServlet extends HttpServlet {
           }
 
           if (count == 0) {
-            resp.setStatus(NOT_FOUND); //not found
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND); //not found
           }
         }
       }
     } catch (SQLException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -295,12 +290,12 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         applyValues(req, pstmt2);
         int count2 = pstmt2.executeUpdate();
         if (count1 == 0 && count2 == 0) {
-          resp.setStatus(NOT_FOUND);
+          resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
       }
 
     } catch (SQLException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -308,7 +303,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/octet-stream") != 0) {
-      resp.setStatus(UNSUPPORTED_MEDIA); //unsupported meida
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE); //unsupported meida
       return;
     }
 
@@ -331,7 +326,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
 
     if (contentType == null) {
-      resp.setStatus(BAD_REQUEST); //bad request
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); //bad request
       return;
     }
 
@@ -428,7 +423,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
 
       pstmt.executeUpdate();
     } catch (SQLException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -463,11 +458,11 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       int count = pstmt.executeUpdate();
 
       if (count == 0) {
-        resp.setStatus(NOT_FOUND);
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       }
 
     } catch (SQLException e) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
   }
