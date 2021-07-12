@@ -26,6 +26,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -56,7 +57,7 @@ public class Device {
 
   private static boolean rvBypass;
 
-  private static final Logger logger = LogManager.getLogger();
+  private static final LoggerService logger = new LoggerService(Device.class);
 
   final CryptoService myCryptoService;
   final KeyPair myKeys;

@@ -84,6 +84,12 @@
       <artifactId>http-api-di-sample</artifactId>
       <version>${fdo.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

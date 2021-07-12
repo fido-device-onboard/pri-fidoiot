@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.epid;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -17,8 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
-public class EpidHttpClient {
+public final class EpidHttpClient {
 
   private static ExecutorService executor = Executors.newCachedThreadPool(r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -26,6 +28,7 @@ public class EpidHttpClient {
     return t;
   });
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
+  private static LoggerService logger = new LoggerService(EpidHttpClient.class);
 
   /**
    * Perform HTTP GET operation.
@@ -45,13 +48,13 @@ public class EpidHttpClient {
               executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
       final HttpResponse<byte[]> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
-      if (httpResponse.statusCode() == 200) {
+      if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
         return null != httpResponse.body() ? httpResponse.body() : new byte[0];
       } else {
         throw new IOException("HTTP GET failed with: " + httpResponse.statusCode());
       }
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -79,7 +82,7 @@ public class EpidHttpClient {
       return httpResponse.statusCode();
 
     } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      System.out.println(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

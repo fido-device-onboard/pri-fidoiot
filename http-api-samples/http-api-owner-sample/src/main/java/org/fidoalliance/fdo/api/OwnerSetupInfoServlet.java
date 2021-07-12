@@ -27,14 +27,14 @@ public class OwnerSetupInfoServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/text") != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
     String guid = req.getParameter("id");
     if (guid == null) {
       getServletContext().log("No current GUID has been provided to update.");
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
     UUID currentGuid = null;
@@ -42,7 +42,7 @@ public class OwnerSetupInfoServlet extends HttpServlet {
       currentGuid = UUID.fromString(guid);
     } catch (IllegalArgumentException e) {
       getServletContext().log("Invalid current GUID has been provided to update.");
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
@@ -57,7 +57,7 @@ public class OwnerSetupInfoServlet extends HttpServlet {
         String[] setupInfos = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
         if (setupInfos.length > 3) {
           getServletContext().log("Invalid setupinfo request has been provided.");
-          resp.setStatus(400);
+          resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
           return;
         }
         UUID replacementGuid = null;
@@ -92,14 +92,14 @@ public class OwnerSetupInfoServlet extends HttpServlet {
             }
           } else {
             getServletContext().log("Invalid setupinfo request has been provided.");
-            resp.setStatus(400);
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
           }
         }
       }
     } catch (Exception exp) {
       getServletContext().log("Error occurred while updating setupinfo. " + exp.getMessage());
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

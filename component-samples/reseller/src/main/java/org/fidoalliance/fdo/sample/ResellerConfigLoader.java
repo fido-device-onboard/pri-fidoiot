@@ -11,6 +11,7 @@ import org.apache.commons.configuration2.SystemConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * Utility class to load properties/configuration from system, environment and configuration file.
@@ -22,6 +23,7 @@ public class ResellerConfigLoader {
   private static SystemConfiguration systemConfiguration = new SystemConfiguration();
   private static FileBasedConfiguration fileBasedConfiguration = null;
   private static PropertiesConfiguration defaultConfiguration = null;
+  private static final LoggerService logger = new LoggerService(ResellerConfigLoader.class);
 
   /**
    * Load the given configuration value.
@@ -38,7 +40,7 @@ public class ResellerConfigLoader {
       try {
         fileBasedConfiguration = builder.getConfiguration();
       } catch (ConfigurationException e) {
-        System.out.println("Application might not be using config file");
+        logger.warn("Application might not be using config file");
         // ignore the error since the application might not be using config file.
         // log when logging is enabled in the application.
       }

@@ -21,6 +21,7 @@
 
   <modules>
     <module>cert-utils</module>
+    <module>logging-utils</module>
     <module>http-dispatchers</module>
     <module>serviceinfo</module>
     <module>storage-samples</module>

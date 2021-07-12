@@ -10,6 +10,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -31,6 +32,8 @@ import org.fidoalliance.fdo.storage.To1DbStorage;
  */
 public class To0To1ContextListener implements ServletContextListener {
 
+  private static final LoggerService logger = new LoggerService(To0To1ContextListener.class);
+
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     BasicDataSource ds = new BasicDataSource();
@@ -41,7 +44,7 @@ public class To0To1ContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter("db.user"));
     ds.setPassword(sc.getInitParameter("db.password"));
 
-    System.out.println(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);

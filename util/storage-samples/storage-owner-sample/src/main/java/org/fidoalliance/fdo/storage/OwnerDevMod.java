@@ -110,8 +110,14 @@ public class OwnerDevMod implements Module {
       covertModuleList();
       new OwnerDbManager().addDeviceInfo(dataSource, state);
     }
+
+
   }
 
+  @Override
+  public boolean hasMore() {
+    return false;
+  }
 
   @Override
   public boolean isMore() {

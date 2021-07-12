@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.DispatchResult;
@@ -24,6 +25,7 @@ public class ProtocolHandler implements Runnable {
 
   private MessageDispatcher dispatcher;
   private AsyncContext asyncCtx;
+  private static final LoggerService logger = new LoggerService(ProtocolHandler.class);
 
   /**
    * Constructs ProtocolHandler instance.
@@ -41,7 +43,7 @@ public class ProtocolHandler implements Runnable {
       OutputStream out = response.getOutputStream();
       try (PrintStream s = new PrintStream(out, true, StandardCharsets.US_ASCII.name())) {
         response.setContentType("text/plain; charset=us-ascii");
-        System.out.println("Failed to write data: " + e.getMessage());
+        logger.error("Failed to write data: " + e.getMessage());
       }
     } catch (UnsupportedEncodingException uee) {
       //nothing we can due since we are already processing an Exception
@@ -90,12 +92,12 @@ public class ProtocolHandler implements Runnable {
 
     if (request.getContentType() == null
         || request.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
-      response.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
     if (request.getContentLength() < 0) {
-      response.setStatus(Const.HTTP_LENGTH_REQUIRED);
+      response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
       return;
     }
 
@@ -105,7 +107,7 @@ public class ProtocolHandler implements Runnable {
       Composite reply = result.getReply();
       int replyId = reply.getAsNumber(Const.SM_MSG_ID).intValue();
       if (replyId == Const.ERROR) {
-        response.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       } else {
         response.setHeader(Const.HTTP_MESSAGE_TYPE,
             Integer.toUnsignedString(
@@ -128,7 +130,7 @@ public class ProtocolHandler implements Runnable {
       response.setContentLength(body.length);
       response.getOutputStream().write(body);
     } catch (IOException e) {
-      response.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       writeException(response, e);
     } finally {
       asyncCtx.complete();

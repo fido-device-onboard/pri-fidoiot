@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 
 
@@ -65,6 +66,7 @@ public class OnDieService {
 
   private static byte[] rootCaBytes;
   private static byte[] rootDebugCaBytes;
+  private static final LoggerService logger = new LoggerService(OnDieService.class);
 
   /**
    * Constructor.
@@ -227,7 +229,7 @@ public class OnDieService {
               String name = generalName.toString();
               byte[] crlBytes = onDieCache.getCertOrCrl(name.substring(name.indexOf("http")));
               if (crlBytes == null) {
-                System.out.println("CRL: " + generalName.getName().toString()
+                logger.info("CRL: " + generalName.getName().toString()
                         + " not found in cache for cert: "
                         + x509cert.getIssuerX500Principal().getName());
                 return false;

@@ -21,6 +21,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 import org.h2.tools.Server;
@@ -46,6 +47,7 @@ public class DiStorageTest {
   private static final String DB_PASSWORD = "";
   private static final Path BASE_PATH = Path
       .of(System.getProperty("user.dir"), "target", "data", "mfg");
+  private static final LoggerService logger = new LoggerService(DiStorageTest.class);
 
   private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
       + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
@@ -263,7 +265,7 @@ public class DiStorageTest {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println(request.toString());
+        logger.info(request.toString());
       }
 
       @Override

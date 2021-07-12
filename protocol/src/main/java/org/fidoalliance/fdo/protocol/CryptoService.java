@@ -62,9 +62,11 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -74,6 +76,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
+import org.fidoalliance.fdo.protocol.DiffieHellman.KeyExchange;
 import org.fidoalliance.fdo.protocol.epid.EpidMaterialService;
 import org.fidoalliance.fdo.protocol.epid.EpidSignatureVerifier;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
@@ -83,7 +86,7 @@ import org.fidoalliance.fdo.protocol.ondie.OnDieService;
  *
  * <p>Performs cryptographic operations a formats cryptographic data</p>
  */
-public class CryptoService {
+public final class CryptoService {
 
   static final BouncyCastleProvider BCPROV = new BouncyCastleProvider();
   private SecureRandom secureRandom;
@@ -174,7 +177,7 @@ public class CryptoService {
    * @param algName The HMAC Algorithm.
    * @return The key based on the secret and HMAC algorithm.
    */
-  protected Key getHmacKey(byte[] secret, String algName) {
+  protected SecretKey getHmacKey(byte[] secret, String algName) {
     return new SecretKeySpec(secret, algName);
   }
 
@@ -939,9 +942,19 @@ public class CryptoService {
       final String algName = getHashAlgorithm(hashType);
       final Mac mac = getMacInstance(algName);
 
-      final Key secretKey = getHmacKey(secret, algName);
-      mac.init(secretKey);
-      final byte[] macData = mac.doFinal(data);
+      final byte[] macData;
+      final SecretKey secretKey = getHmacKey(secret, algName);
+      try {
+        mac.init(secretKey);
+        macData = mac.doFinal(data);
+      } finally {
+        try {
+          secretKey.destroy();
+        } catch (DestroyFailedException e) {
+          // many key implementations don't support destruction correctly - this exception
+          // is expected and can be ignored.
+        }
+      }
 
       return Composite.newArray()
           .set(Const.HASH_TYPE, hashType)
@@ -1152,38 +1165,56 @@ public class CryptoService {
       final byte[] encoded = ownState.getAsBytes(Const.FOURTH_KEY);
       final PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(encoded);
       final KeyFactory factory = getKeyFactoryInstance(Const.EC_ALG_NAME);
-      final ECPrivateKey ownKey = (ECPrivateKey) factory.generatePrivate(privateSpec);
-
-      final ECPoint w = new ECPoint(new BigInteger(1, theirX), new BigInteger(1, theirY));
-      final ECPublicKeySpec publicSpec = new ECPublicKeySpec(w, ownKey.getParams());
-
-      final PublicKey theirKey = factory.generatePublic(publicSpec);
-
       final KeyAgreement keyAgreement = getKeyAgreementInstance(Const.ECDH_ALG_NAME);
-      keyAgreement.init(ownKey);
-      keyAgreement.doPhase(theirKey, true);
-      final byte[] sharedSecret = keyAgreement.generateSecret();
+      final ECPrivateKey ownKey = (ECPrivateKey) factory.generatePrivate(privateSpec);
+      final byte[] sharedSecret;
+      try {
 
-      final Composite ownMessage = decodeEcdhMessage(ownState.getAsBytes(Const.FIRST_KEY));
-      final byte[] ownRandom = ownMessage.getAsBytes(Const.THIRD_KEY);
-      final ByteBuffer buffer = ByteBuffer
-          .allocate(sharedSecret.length + ownRandom.length + theirRandom.length);
-      buffer.put(sharedSecret);
-      final String party = ownState.getAsString(Const.FIFTH_KEY);
-      if (party.equals(Const.KEY_EXCHANGE_A)) {
-        //A is owner
-        buffer.put(theirRandom);
-        buffer.put(ownRandom);
-      } else if (party.equals(Const.KEY_EXCHANGE_B)) {
-        //B is device
-        buffer.put(ownRandom);
-        buffer.put(theirRandom);
-      } else {
-        throw new IllegalArgumentException();
+        final ECPoint w = new ECPoint(new BigInteger(1, theirX), new BigInteger(1, theirY));
+        final ECPublicKeySpec publicSpec = new ECPublicKeySpec(w, ownKey.getParams());
+
+        final PublicKey theirKey = factory.generatePublic(publicSpec);
+
+        keyAgreement.init(ownKey);
+        keyAgreement.doPhase(theirKey, true);
+        sharedSecret = keyAgreement.generateSecret();
+
+      } finally {
+        try {
+          ownKey.destroy();
+        } catch (DestroyFailedException e) {
+          // many key implementations don't support destruction correctly - this exception
+          // is expected and can be ignored.
+        }
       }
 
-      buffer.flip();
-      return new KeyExchangeResult(Composite.unwrap(buffer), new byte[0]);
+      try {
+
+        final Composite ownMessage = decodeEcdhMessage(ownState.getAsBytes(Const.FIRST_KEY));
+        final byte[] ownRandom = ownMessage.getAsBytes(Const.THIRD_KEY);
+        final ByteBuffer buffer = ByteBuffer
+            .allocate(sharedSecret.length + ownRandom.length + theirRandom.length);
+        buffer.put(sharedSecret);
+
+        final String party = ownState.getAsString(Const.FIFTH_KEY);
+        if (party.equals(Const.KEY_EXCHANGE_A)) {
+          //A is owner
+          buffer.put(theirRandom);
+          buffer.put(ownRandom);
+        } else if (party.equals(Const.KEY_EXCHANGE_B)) {
+          //B is device
+          buffer.put(ownRandom);
+          buffer.put(theirRandom);
+        } else {
+          throw new IllegalArgumentException();
+        }
+
+        buffer.flip();
+        return new KeyExchangeResult(Composite.unwrap(buffer), new byte[0]);
+
+      } finally {
+        Arrays.fill(sharedSecret, (byte)0);
+      }
     } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
       throw new CryptoServiceException(e);
     }
@@ -1206,6 +1237,26 @@ public class CryptoService {
       case Const.ASYMKEX2048_ALG_NAME:
       case Const.ASYMKEX3072_ALG_NAME:
         return getAsymkexSharedSecret(message, ownState, decryptionKey);
+      case DiffieHellman.DH14_ALG_NAME:
+      case DiffieHellman.DH15_ALG_NAME:
+        // All owner states have our message as element 0 (FIRST_KEY) and the algorithm name
+        // in element 1 (SECOND_KEY).
+        //
+        // Restore our keyExchange from the KE state,
+        // which is element 2 (THIRD_KEY) in the owner state.
+        DiffieHellman.KeyExchange ke = new KeyExchange(ownState.getAsComposite(Const.THIRD_KEY));
+        try {
+          return new KeyExchangeResult(
+              ke.computeSharedSecret(new BigInteger(1, message)).toByteArray(), new byte[0]);
+        } finally {
+          try {
+            ke.destroy();
+          } catch (DestroyFailedException e) {
+            // this should never happen
+            assert false;
+            throw new RuntimeException(e);
+          }
+        }
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(alg));
     }
@@ -1234,6 +1285,23 @@ public class CryptoService {
       case Const.ASYMKEX3072_ALG_NAME:
         return getAsymkexMessage(
             Const.ASYMKEX3072_ALG_NAME, Const.ASYMKEX3072_RANDOM_SIZE, party, ownerKey);
+      case DiffieHellman.DH14_ALG_NAME:
+      case DiffieHellman.DH15_ALG_NAME:
+        DiffieHellman.KeyExchange ke = DiffieHellman.buildKeyExchange(kexSuiteName);
+        try {
+          return Composite.newArray()
+              .set(Const.FIRST_KEY, ke.getMessage().toByteArray())
+              .set(Const.SECOND_KEY, kexSuiteName)
+              .set(Const.THIRD_KEY, ke.getState());
+        } finally {
+          try {
+            ke.destroy();
+          } catch (DestroyFailedException e) {
+            // this should never happen
+            assert false;
+            throw new RuntimeException(e);
+          }
+        }
       default:
         throw new CryptoServiceException(new NoSuchAlgorithmException(kexSuiteName));
     }

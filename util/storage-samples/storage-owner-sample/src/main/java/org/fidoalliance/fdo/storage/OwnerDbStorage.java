@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -29,6 +30,7 @@ import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
 import org.fidoalliance.fdo.protocol.To2ServerStorage;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
+import org.fidoalliance.fdo.serviceinfo.Module;
 import org.fidoalliance.fdo.serviceinfo.ModuleManager;
 
 public class OwnerDbStorage implements To2ServerStorage {
@@ -36,6 +38,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   private final CryptoService cryptoService;
   private final DataSource dataSource;
   private final KeyResolver keyResolver;
+  private final LoggerService logger;
   private OnDieService onDieService;
   private Composite ownerState;
   private String cipherName;
@@ -45,9 +48,8 @@ public class OwnerDbStorage implements To2ServerStorage {
   private String sessionId;
   private byte[] replacementHmac;
   private Composite sigInfoA;
-  int ownerServiceInfoMtuSize = 0;
-  String deviceServiceInfoMtuSize = String.valueOf(0);
-  ModuleManager modules;
+  private String deviceServiceInfoMtuSize = String.valueOf(0);
+  private final ModuleManager modules;
 
 
   /**
@@ -65,9 +67,11 @@ public class OwnerDbStorage implements To2ServerStorage {
     dataSource = ds;
     this.keyResolver = keyResolver;
     onDieService = ods;
+    logger = new LoggerService(OwnerDbStorage.class);
     modules = new ModuleManager();
     modules.addModule(new OwnerDevMod(ds));
     modules.addModule(new OwnerSysModule(ds));
+    modules.addModule(new OwnerTestModule(ds));
   }
 
   @Override
@@ -300,7 +304,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     return getCryptoService().encode(ownerPub,
-            (keyType == Const.PK_RSA2048RESTR)
+        (keyType == Const.PK_RSA2048RESTR)
             ? Const.PK_ENC_CRYPTO : getCryptoService().getCompatibleEncoding(ownerPub));
   }
 
@@ -325,7 +329,7 @@ public class OwnerDbStorage implements To2ServerStorage {
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
           if (rs.getInt(1) < 0) {
-            System.out.println("Negative value received. MTU size will default to 1300 bytes");
+            logger.info("Negative value received. MTU size will default to 1300 bytes");
           }
           deviceServiceInfoMtuSize = (rs.getInt(1) > 0 ? String.valueOf(rs.getInt(1)) : null);
         }
@@ -378,7 +382,7 @@ public class OwnerDbStorage implements To2ServerStorage {
       throw new RuntimeException(e);
     }
 
-    // Restricting minimum threshold to 1300 bytes
+    // Restricting minimum threshold to maximum permitted
     return Math.max(Const.DEFAULT_SERVICE_INFO_MTU_SIZE, ownerMtuThreshold);
   }
 
@@ -434,7 +438,6 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public void setServiceInfo(Composite info, boolean isMore) {
     modules.setServiceInfo(info, isMore);
-
   }
 
   @Override

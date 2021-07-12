@@ -58,5 +58,11 @@
       <artifactId>protocol</artifactId>
       <version>${fdo.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
   </dependencies>
 </project>
