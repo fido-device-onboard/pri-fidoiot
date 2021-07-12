@@ -10,14 +10,14 @@
 #
 # List of output files:
 #    PRI FIDOIOT component output files. xxx -> [manufacturer, owner, reseller]
-#	/path/to/root/of/pri/binaries/creds/xxx_keys.hash    -> Hash file
-#	/path/to/root/of/pri/binaries/creds/xxx_keystore.p12 -> Keystore file
-#	/path/to/root/of/pri/binaries/creds/xxx_pub_keys.pem -> Public Keys file
-#	/path/to/root/of/pri/binaries/creds/pri_keys.pass    -> Passwords of each component
-#    TLS truststore and keystore output files. xxx -> [crt: certificate, key: private key]
-#	/path/to/root/of/pri/binaries/creds/ssl.p12	-> SSL Keystore
-#	/path/to/root/of/pri/binaries/creds/tls.xxx	-> TLS certificate and key
-#	/path/to/root/of/pri/binaries/creds/truststore	-> Truststore
+#	/path/to/root/of/pri/binaries/creds/xxx_pub_keys.pem  -> Public Keys file
+#	/path/to/root/of/pri/binaries/creds/xxx_pub_keys.hash -> Hash file
+#	/path/to/root/of/pri/binaries/creds/xxx_keystore.p12  -> Keystore file
+#	/path/to/root/of/pri/binaries/creds/xxx_keystore.pass -> Keystore password file
+#    TLS truststore and keystore output files.
+#	/path/to/root/of/pri/binaries/creds/ssl.p12    -> SSL Keystore
+#	/path/to/root/of/pri/binaries/creds/ssl.pass   -> SSL Keystore password file
+#	/path/to/root/of/pri/binaries/creds/truststore -> Truststore
 #    PRI Device pem output files. xxx -> [256, 384]
 #	/path/to/root/of/pri/binaries/creds/device_ecxxx_cert.pem    -> Device certificate
 #	/path/to/root/of/pri/binaries/creds/device_ecxxx_private.key -> Device private key
@@ -55,6 +55,7 @@
 #    5) RV-ByPass testcase
 #    6) Multiple RV-Info testcase
 #    7) MTU testcase
+#    8) Basic e2e testcase with HTTPS
 
 shopt -s extglob
 set -e
@@ -83,6 +84,16 @@ usage()
                 -d => To create device pem files
                 -h => Prints help message\n
         NOTE: Order of arguments passing shouldn't change"
+}
+
+# Updating all env files with the new credentials
+# Arguments to this functions are 1) Statement or Word to update 2) Password to replace
+pass_update_env_files()
+{
+	for i in `find ${COMP_PATH} -name "*.env"`
+	do
+		sed -i -e s%"${1}.*"%"${1}${2}"%g $i
+	done
 }
 
 # Generation of keystore with rsa, ec256 and ec384 keys as shown below
@@ -138,11 +149,7 @@ keystore_gen()
         cat $CERTS_PATH/${1}_rsa2048_public.key | tee -a $CERTS_PATH/${1}_pub_keys.pem > /dev/null
 
 	# Redirecting password into one file
-	if [[ -f $CERTS_PATH/pri_keys.pass ]] && [[ `grep -rn "${1} key password is " $CERTS_PATH/pri_keys.pass` ]]; then
-		sed -i "s/${1} key password is .*/${1} key password is '${PASS_KEY}'/g" $CERTS_PATH/pri_keys.pass
-	else
-		echo "${1} key password is '${PASS_KEY}'" | tee -a $CERTS_PATH/pri_keys.pass > /dev/null
-	fi
+	echo "${PASS_KEY}" > $CERTS_PATH/${1}_keystore.pass
 }
 
 # Generation of all hashes using the certificates of rsa, ec256, and ec384
@@ -162,11 +169,9 @@ hash_gen()
         export EC384_HASH=`cat $CERTS_PATH/${1}_ec384.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'`
 
         # Redirect the Hashes to one file
-        echo "${1} keystore hashes of ec256, ec384 and rsa2048 are as following:" | \
-                tee -a $CERTS_PATH/${1}_keys.hash > /dev/null
-        echo $EC256_HASH | tee -a $CERTS_PATH/${1}_keys.hash > /dev/null
-        echo $EC384_HASH | tee -a $CERTS_PATH/${1}_keys.hash > /dev/null
-        echo $RSA2048_HASH | tee -a $CERTS_PATH/${1}_keys.hash > /dev/null
+	echo $EC256_HASH | tee $CERTS_PATH/${1}_pub_keys.hash > /dev/null
+	echo $EC384_HASH | tee -a $CERTS_PATH/${1}_pub_keys.hash > /dev/null
+	echo $RSA2048_HASH | tee -a $CERTS_PATH/${1}_pub_keys.hash > /dev/null
 }
 
 # Generation of TLS keystore and truststore for signing purpose
@@ -200,23 +205,19 @@ tls_keystore()
                 -password pass:${SSL_PASS}
         keytool -import -alias fdo -file $CERTS_PATH/tls.crt -storetype PKCS12 -keystore $CERTS_PATH/truststore \
                 -storepass ${SSL_PASS} -noprompt > /dev/null 2>&1
+	echo "${SSL_PASS}" > $CERTS_PATH/ssl.pass; rm -rf $CERTS_PATH/tls.???
         echo "Creation of SSL keystore & Truststore completes successfully"
 
         # Copying the ssl keystore and truststores to the destination paths
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/manufacturer/certs/ssl.p12
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/rv/certs/ssl.p12
-        cp $CERTS_PATH/ssl.p12 $COMP_PATH/owner/certs/ssl.p12
+	for file in `find ${COMP_PATH} -name "ssl.p12"`
+		do if ! [[ "$file" =~ "creds" ]]; then cp $CERTS_PATH/ssl.p12 ${file}; fi; done
+	for file in `find ${COMP_PATH} -name "truststore"`
+		do if ! [[ "$file" =~ "creds" ]]; then cp $CERTS_PATH/truststore ${file}; fi; done
         cp $CERTS_PATH/ssl.p12 $COMP_PATH/reseller/certs/reseller_tls_keystore.p12
-        cp $CERTS_PATH/truststore $COMP_PATH/device/truststore
-        cp $CERTS_PATH/truststore $COMP_PATH/owner/certs/truststore
 
-        # Update the ssl and keystore passwords in all component environment files
-        for((i=0; $i<`grep -rn "ssl_keystore-password=" $COMP_PATH | wc -l`;i++))
-        do
-                EXTRACT_ENV=`grep -rn "ssl_keystore-password=" $COMP_PATH | head -$((i+1)) | tail -1`
-                readarray -d ":" -t strarr <<< "$EXTRACT_ENV"
-                sed -i -e s%"ssl_keystore-password=.*"%"ssl_keystore-password=${SSL_PASS}"%g ${strarr[0]}
-        done
+        # Update the ssl truststore and keystore passwords in all component environment files
+	pass_update_env_files "ssl_keystore-password=" ${SSL_PASS}
+	pass_update_env_files "ssl_truststore_password=" ${SSL_PASS}
 }
 
 # Calling the keystore_gen and hash_gen functions to generate keystores and hashes
@@ -236,7 +237,7 @@ component_keys()
         cp $CERTS_PATH/${1}_keystore.p12 $COMP_PATH/${1}/${1}_keystore.p12
 
         # Updating the password in the component environment file
-        sed -i -e s%"keystore_password=.*"%"keystore_password=${PASS_KEY}"%g $COMP_PATH/${1}/${1}.env
+	pass_update_env_files "${1}_keystore_password=" ${PASS_KEY}
 
         # Cleaning the un-necessary files
         for i in $CERTS_PATH/${1}*; do if ! [[ $i =~ "keys" ]]; then rm -rf $i; fi; done
@@ -251,7 +252,7 @@ component_keys()
 update_rv_hashes()
 {
         # Capturing all component keystore hashes into one environmental variable HASHES
-        for i in $CERTS_PATH/*.hash; do if [[ $i =~ ".hash" ]]; then sed -n '2,4'p $i | tee -a $CERTS_PATH/all_hashes.txt > /dev/null; fi; done
+        for i in $CERTS_PATH/*.hash; do if [[ $i =~ ".hash" ]]; then sed -n '1,3'p $i | tee -a $CERTS_PATH/all_hashes.txt > /dev/null; fi; done
         sed -i "1,$((`cat $CERTS_PATH/all_hashes.txt | wc -l`-1))s/$/,\\\\/g" $CERTS_PATH/all_hashes.txt
         HASHES=`cat $CERTS_PATH/all_hashes.txt`; rm -rf $CERTS_PATH/all_hashes.txt;
 
