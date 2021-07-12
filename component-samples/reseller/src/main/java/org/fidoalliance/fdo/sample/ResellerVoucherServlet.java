@@ -75,7 +75,7 @@ public class ResellerVoucherServlet extends HttpServlet {
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
-      resp.setStatus(401);
+      resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
 
@@ -108,7 +108,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     // we didn't find an owner entry in database as per the current owner's key-type.
     if (null == nextOwner) {
       logger.error("Customer entry missing for " + serialNo);
-      resp.setStatus(500);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
 
@@ -118,7 +118,7 @@ public class ResellerVoucherServlet extends HttpServlet {
         vse.add(signer.get(), nextOwner);
       } else {
         logger.error("Reseller is not the current owner for " + serialNo);
-        resp.setStatus(500);
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return;
       }
     }
@@ -136,7 +136,7 @@ public class ResellerVoucherServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -157,7 +157,7 @@ public class ResellerVoucherServlet extends HttpServlet {
     int rowsAffected = new ResellerDbManager().deleteVoucher(ds, serialNo);
     if (rowsAffected == 0) {
       logger.error("Unable to find voucher for serial no: " + serialNo);
-      resp.setStatus(404);
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
   }

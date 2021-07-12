@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.net.HttpURLConnection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -75,6 +76,6 @@ public class DispatchException extends RuntimeException {
   }
 
   protected int getErrorCode() {
-    return Const.INTERNAL_SERVER_ERROR;
+    return HttpURLConnection.HTTP_INTERNAL_ERROR;
   }
 }

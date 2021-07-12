@@ -19,7 +19,7 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/text") != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -30,13 +30,13 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
         String[] deviceTypeCriteria = requestBody.split(DELIMITER);
         if (deviceTypeCriteria.length != 3) {
           getServletContext().log("Invalid request has been provided.");
-          resp.setStatus(400);
+          resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
           return;
         }
 
       }
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -46,7 +46,7 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
 
     String deviceType = req.getParameter("devicetype");
     if (deviceType == null) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
@@ -54,7 +54,7 @@ public class OwnerDeviceTypeCriteriaServlet extends HttpServlet {
       //DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       //new OwnerDbManager().removeDeviceTypeCriteria(ds, deviceType);
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

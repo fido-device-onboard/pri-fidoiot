@@ -68,7 +68,7 @@ public class DiApiServlet extends HttpServlet {
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
-      resp.setStatus(401);
+      resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
 

@@ -28,6 +28,7 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -227,7 +228,7 @@ public class WebClient implements Runnable {
       HttpResponse<byte[]> hr = httpClient
           .send(reqBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
 
-      if (hr.statusCode() == Const.HTTP_OK) {
+      if (hr.statusCode() == HttpServletResponse.SC_OK) {
 
         Composite authInfo = Composite.newMap();
         Optional<String> msgType = hr.headers().firstValue(Const.HTTP_MESSAGE_TYPE);
