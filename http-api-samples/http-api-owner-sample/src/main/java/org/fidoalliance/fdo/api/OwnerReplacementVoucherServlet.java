@@ -78,11 +78,11 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
           resp.getOutputStream().write(result);
         } else {
           getServletContext().log("No replacement voucher found for " + id);
-          resp.setStatus(401);
+          resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
       }
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

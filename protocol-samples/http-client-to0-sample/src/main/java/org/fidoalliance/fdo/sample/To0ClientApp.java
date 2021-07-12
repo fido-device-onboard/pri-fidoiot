@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -27,33 +28,34 @@ import org.fidoalliance.fdo.protocol.To0ClientStorage;
 
 public class To0ClientApp {
 
+  private static final LoggerService logger = new LoggerService(To0ClientApp.class);
   private static final int REQUEST_WS = 3600;
   private static final String RV_BLOB = "http://localhost:8042?ipaddress=127.0.0.1";
 
   private static final String sampleVoucher = ""
-      + "84861864502e1418ebc81049c4a0db91c4d0a5830681858205696c6f63616c686f73748203191f68820c01820"
-      + "2447f0000018204191f686b4a61766120446576696365830d0258402c02709032b3fc1696ab55b1ecf8e44795"
-      + "b92cb21b6a681265e54d525c8533fb74b0c0310166ef11b0f32aef76e135f86acdd65633267de932b31df43e5"
-      + "0c6258208582058a5f4bb1bd3c6290583dc39c20e16f8c19a7b925463d05bb7d5de5bf459a31f82055820e140"
-      + "70d100267848d5ff7427704e2d2e3b8263b10f125509423c72da4abcc1f4825901003081fd3081a5a00302010"
-      + "20206017843a76c3c300a06082a8648ce3d040302300d310b300906035504030c024341301e170d3231303331"
-      + "383034343534385a170d3331303331363034343534385a30003059301306072a8648ce3d020106082a8648ce3"
-      + "d03010703420004a582f072ec6a4746d8e7c974558a6c4ec694ce91420a978dddb995d201e9e712c7330bc115"
-      + "1c8eb656313745dac7c7040ec7ef22e549621632b5b3863e467c98300a06082a8648ce3d04030203470030440"
-      + "2204808c99ad7bd4fb6972dffd61166ba03b1c24cff152709251d931c39862a8f340220398819cbcf17f16e3c"
-      + "19a7dcbe8624760c6227f06c17214c96b0ebd23de579cc590126308201223081c9a003020102020900a4d303a"
+      + "84861864506d955aaa8fb142c18e1123465357a41c81858205696c6f63616c686f73748203191f68820c01820"
+      + "2447f00000182041920fb6a44656d6f44657669636583260258402c02709032b3fc1696ab55b1ecf8e44795b9"
+      + "2cb21b6a681265e54d525c8533fb74b0c0310166ef11b0f32aef76e135f86acdd65633267de932b31df43e50c"
+      + "625822f582014b0124efcc8f680510cef6ca46ca606e8cd25db2efb3c411027c5d420fbf0178205582000afa5"
+      + "540fd852f51988fcdcd692f969d0b98ec84159ccb55a664e9f92cdc8c0825901013081fe3081a5a0030201020"
+      + "206017a2eee1388300a06082a8648ce3d040302300d310b300906035504030c024341301e170d323130363231"
+      + "3134313633325a170d3331303631393134313633325a30003059301306072a8648ce3d020106082a8648ce3d0"
+      + "3010703420004a582f072ec6a4746d8e7c974558a6c4ec694ce91420a978dddb995d201e9e712c7330bc1151c"
+      + "8eb656313745dac7c7040ec7ef22e549621632b5b3863e467c98300a06082a8648ce3d0403020348003045022"
+      + "100a38106af6c5db7e03b3ca20f51518c2abfd19aa0338becc6e818c8a8df64d43e02204d795e4ca260700329"
+      + "0a075ca3a0ce8440af57cec5ee62d7658d70caada08b4c590126308201223081c9a003020102020900a4d303a"
       + "e980f53f1300a06082a8648ce3d040302300d310b300906035504030c0243413020170d313930343234313434"
       + "3634375a180f32303534303431353134343634375a300d310b300906035504030c0243413059301306072a864"
       + "8ce3d020106082a8648ce3d030107034200042c02709032b3fc1696ab55b1ecf8e44795b92cb21b6a681265e5"
       + "4d525c8533fb74b0c0310166ef11b0f32aef76e135f86acdd65633267de932b31df43e50c625a310300e300c0"
       + "603551d13040530030101ff300a06082a8648ce3d0403020348003045022100a5419b823613d24eb701e440b4"
       + "f3368be5675ba72461a272bc52eeb96c3e414002204e70d27b631cb6efc26aa0c027e1e53eaef1ec507420368"
-      + "3d1ecbb9de129c692818443a10126a0588e838208582016b3ef18f959e89360f263ab240aa6130bce3efc9ab5"
-      + "71e01b062285b2793887820858209503b41243919ac3dced6dfef9e45e2e44d0dc116df3ec2f9e322621c924d"
-      + "2fd830d025840595504d86d062f2f2c72600ec90ca1701885fdf4947778bf3a0ed70d286225bd88b1b099491a"
-      + "add5e935e486de088e73ec11de6b61991a068aeb77320f5e60345847304502207e994ed408aec12bb892ad738"
-      + "11e81f7a181a7b32e5823c564f36280793e3c1a022100bf193f7ffe4cd2ac8b7046cbe32a81de286b8f667a8c"
-      + "96e045396ffca26c6c23";
+      + "3d1ecbb9de129c692818443a10126a0588e83822f58205e7a79dec7414967ea9c4aa7d764975c49884924c7d9"
+      + "cf45c5e78c5d01e675bc822f58206cca5ffeed27c1184948b7ff14e7d999bf473f602aa262ca9835df0299835"
+      + "6df8326025840595504d86d062f2f2c72600ec90ca1701885fdf4947778bf3a0ed70d286225bd88b1b099491a"
+      + "add5e935e486de088e73ec11de6b61991a068aeb77320f5e60345847304502202f8e35ae53757805722916667"
+      + "80b78af8a3fc8755ec651b1967bf14d70cd52a8022100e5fb4d5c6815b151fea21fef96b9293cbb07514e249d"
+      + "40479367408bce8cebde";
 
 
   private static String sampleOwnerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
@@ -182,7 +184,7 @@ public class To0ClientApp {
     @Override
     public void setResponseWait(long wait) {
       responseWait = wait;
-      System.out.println("To0 Response Wait: " + Long.toString(wait));
+      logger.info("To0 Response Wait: " + Long.toString(wait));
     }
 
     @Override
@@ -261,7 +263,7 @@ public class To0ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -278,7 +280,7 @@ public class To0ClientApp {
     Composite ovh = clientStorage.getVoucher().getAsComposite(Const.OV_HEADER);
 
     UUID guid = ovh.getAsUuid(Const.OVH_GUID);
-    System.out.println("TO0 with guid " + guid.toString());
+    logger.info("TO0 with guid " + guid.toString());
 
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
@@ -301,7 +303,7 @@ public class To0ClientApp {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -315,7 +317,7 @@ public class To0ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To0ClientApp().run(args);
-    System.out.println("TO0 Client finished.");
+    logger.info("TO0 Client finished.");
     return;
   }
 }

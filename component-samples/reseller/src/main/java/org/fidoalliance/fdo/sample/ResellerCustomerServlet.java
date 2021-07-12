@@ -27,14 +27,14 @@ public class ResellerCustomerServlet extends HttpServlet {
     String contentType = req.getContentType();
 
     if (id.equals("") || name.equals("") || !id.matches("[0-9]+")) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
     //accept no content type or text/plain us-ascii pem
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
-        resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+        resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
     }
@@ -48,12 +48,12 @@ public class ResellerCustomerServlet extends HttpServlet {
       if (key.size() > 0) {
         new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
       } else {
-        resp.setStatus(400); //Invalid PEM string
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); //Invalid PEM string
         return;
       }
 
     } catch (Exception e) {
-      resp.setStatus(500);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -65,7 +65,7 @@ public class ResellerCustomerServlet extends HttpServlet {
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
     int rowsAffected = new ResellerDbManager().deleteKeySet(ds, serialNo);
     if (rowsAffected == 0) {
-      resp.setStatus(404);
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
   }

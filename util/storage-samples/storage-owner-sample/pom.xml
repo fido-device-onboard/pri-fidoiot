@@ -70,5 +70,11 @@
       <version>${fdo.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
   </dependencies>
 </project>

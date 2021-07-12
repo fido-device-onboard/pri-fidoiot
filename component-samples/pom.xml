@@ -24,6 +24,7 @@
     <module>owner</module>
     <module>rv</module>
     <module>reseller</module>
+    <module>aio</module>
     <module>http-device-sample</module>
   </modules>
 

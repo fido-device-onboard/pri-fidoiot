@@ -12,6 +12,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.UUID;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 
@@ -104,6 +105,8 @@ public class BaseTemplate {
   protected Composite deviceCreds;
   protected Composite to01Payload;
 
+  protected static final LoggerService logger = new LoggerService(BaseTemplate.class);
+
   protected Composite createTestVoucher() {
     Composite voucher = Composite.newArray();
     Composite header = Composite.newArray();
@@ -147,7 +150,7 @@ public class BaseTemplate {
 
   protected void printError(Composite msg) {
     Composite error = msg.getAsComposite(Const.SM_BODY);
-    System.out.println(error.getAsString(Const.EM_ERROR_STR));
+    logger.error(error.getAsString(Const.EM_ERROR_STR));
   }
 
   protected void setup() throws Exception {
@@ -183,7 +186,7 @@ public class BaseTemplate {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println("dispatching: " + request.toString());
+        logger.info("dispatching: " + request.toString());
         ;
       }
 
@@ -203,7 +206,7 @@ public class BaseTemplate {
 
       @Override
       protected void dispatching(Composite request) {
-        System.out.println("dispatching: " + request.toString());
+        logger.info("dispatching: " + request.toString());
       }
 
       @Override
@@ -271,6 +274,6 @@ public class BaseTemplate {
       dr = clientDispatcher.dispatch(dr.getReply());
     }
 
-    System.out.println("Client protocol finished.");
+    logger.info("Client protocol finished.");
   }
 }

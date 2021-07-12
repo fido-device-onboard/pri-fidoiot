@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -40,6 +41,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(Alphanumeric.class)
 public class RvsStorageTest {
+
+  private static final LoggerService logger = new LoggerService(RvsStorageTest.class);
 
   private static final String DB_HOST = "localhost";
   private static final String DB_PORT = "8043";
@@ -291,7 +294,7 @@ public class RvsStorageTest {
 
       @Override
       public void setResponseWait(long wait) {
-        System.out.println("To0 Wait: " + wait + " seconds");
+        logger.info("To0 Wait: " + wait + " seconds");
       }
 
       @Override
@@ -356,7 +359,7 @@ public class RvsStorageTest {
 
       @Override
       public void storeSignedBlob(Composite signedBlob) {
-        System.out.println("To1d" + signedBlob.toString());
+        logger.info("To1d" + signedBlob.toString());
       }
     };
 

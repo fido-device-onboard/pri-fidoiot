@@ -82,6 +82,13 @@
       <artifactId>http-api-keystore-sample</artifactId>
       <version>${fdo.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>${fdo.version}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>

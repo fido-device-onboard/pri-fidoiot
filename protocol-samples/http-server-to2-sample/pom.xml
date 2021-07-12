@@ -82,6 +82,12 @@
       <artifactId>http-api-owner-sample</artifactId>
       <version>${fdo.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>logging-utils</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

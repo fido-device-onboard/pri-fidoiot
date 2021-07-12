@@ -16,6 +16,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fidoalliance.fdo.api.AssignCustomerServlet;
 import org.fidoalliance.fdo.api.DiApiServlet;
 import org.fidoalliance.fdo.api.RvInfoServlet;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -36,6 +37,7 @@ public class DiApp {
       "target", "data", "mfg").toString();
   private static final String SERVER_PATH = Path.of(System.getProperty("user.dir"),
       "target", "tomcat").toString();
+  private static final LoggerService logger = new LoggerService(DiApp.class);
 
   private static String getMessagePath(int msgId) {
     return WEB_PATH + "/" + Integer.toString(msgId);
@@ -49,14 +51,14 @@ public class DiApp {
   public static void main(String[] args) {
     Security.addProvider(new BouncyCastleProvider());
 
-    System.out.println(System.getProperty("java.home"));
+    logger.info(System.getProperty("java.home"));
     try {
       Provider[] providers = Security.getProviders();
       for (int i = 0; i < providers.length; i++) {
-        System.out.println(providers[i]);
+        logger.info(providers[i]);
       }
     } catch (Exception e) {
-      System.out.println(e);
+      logger.error(e);
     }
 
     Tomcat tomcat = new Tomcat();

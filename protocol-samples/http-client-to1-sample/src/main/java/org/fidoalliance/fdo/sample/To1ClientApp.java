@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -18,6 +19,8 @@ import org.fidoalliance.fdo.protocol.To1ClientService;
 import org.fidoalliance.fdo.protocol.To1ClientStorage;
 
 public class To1ClientApp {
+
+  private static final LoggerService logger = new LoggerService(To1ClientApp.class);
 
   private static final String devKeyPem = "-----BEGIN CERTIFICATE-----\n"
       + "MIIBdjCCAR0CCQCNo1W35xxR9TAKBggqhkjOPQQDAjANMQswCQYDVQQDDAJDQTAg\n"
@@ -39,10 +42,10 @@ public class To1ClientApp {
       + "-----END EC PRIVATE KEY-----";
 
   private static final String deviceCreds = ""
-      + "87f5186458401124dc2801de1a8d31978c0efc205871469cbe851eb226838219ffa66f0c1ffc3550bdfdb50fe"
-      + "b58b8573b062769b85a08ae9cb18bcf1e5d5721f0e73c8ba9a36b4a61766120446576696365502e1418ebc810"
-      + "49c4a0db91c4d0a5830681858205696c6f63616c686f73748203191f68820c018202447f0000018204191f688"
-      + "2085820ed185035537d763a654abff5221057d87d67db967c9a32eff4951c87b97870a8";
+      + "87f51864582054686973206973206120534841323536206b657920666f7220686d616320616c6a44656d6f446"
+      + "576696365506d955aaa8fb142c18e1123465357a41c81858205696c6f63616c686f73748203191f68820c0182"
+      + "02447f00000182041920fb822f58209172fd0feaa577bb039d321d9011fe4f10959becbf5adab1d4cbcbb6fce"
+      + "67877";
 
   final CryptoService cryptoService = new CryptoService();
   Composite signedTo1Blob;
@@ -70,7 +73,7 @@ public class To1ClientApp {
           break;
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     }
 
@@ -140,7 +143,7 @@ public class To1ClientApp {
     @Override
     public void storeSignedBlob(Composite signedBlob) {
       signedTo1Blob = signedBlob;
-      System.out.println("signed RV Blob: " + signedBlob.toString());
+      logger.info("signed RV Blob: " + signedBlob.toString());
     }
   };
 
@@ -168,7 +171,7 @@ public class To1ClientApp {
 
       @Override
       protected void failed(Exception e) {
-        System.out.println(e.getMessage());
+        logger.error(e.getMessage());
       }
     };
   }
@@ -181,7 +184,7 @@ public class To1ClientApp {
   public static void main(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
     new To1ClientApp().run(args);
-    System.out.println("TO1 Client finished.");
+    logger.info("TO1 Client finished.");
     return;
   }
 }
