@@ -31,7 +31,7 @@ public class KeyStoreServlet extends HttpServlet {
       throws ServletException, IOException {
     String alias = req.getParameter("alias");
     if (null == alias) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
@@ -61,7 +61,7 @@ public class KeyStoreServlet extends HttpServlet {
     List<Certificate> certs = PemLoader.loadCerts(pemString);
 
     if (certs.size() == 0) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 

@@ -92,12 +92,12 @@ public class ProtocolHandler implements Runnable {
 
     if (request.getContentType() == null
         || request.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
-      response.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
     if (request.getContentLength() < 0) {
-      response.setStatus(Const.HTTP_LENGTH_REQUIRED);
+      response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
       return;
     }
 
@@ -107,7 +107,7 @@ public class ProtocolHandler implements Runnable {
       Composite reply = result.getReply();
       int replyId = reply.getAsNumber(Const.SM_MSG_ID).intValue();
       if (replyId == Const.ERROR) {
-        response.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       } else {
         response.setHeader(Const.HTTP_MESSAGE_TYPE,
             Integer.toUnsignedString(
@@ -130,7 +130,7 @@ public class ProtocolHandler implements Runnable {
       response.setContentLength(body.length);
       response.getOutputStream().write(body);
     } catch (IOException e) {
-      response.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       writeException(response, e);
     } finally {
       asyncCtx.complete();

@@ -82,7 +82,7 @@ public class OwnerVoucherServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
-      resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+      resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
@@ -101,7 +101,7 @@ public class OwnerVoucherServlet extends HttpServlet {
       resp.setContentLength(guidBytes.length);
       resp.getOutputStream().write(guidBytes);
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -112,7 +112,7 @@ public class OwnerVoucherServlet extends HttpServlet {
 
     String id = req.getParameter("id");
     if (id == null) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
@@ -123,7 +123,7 @@ public class OwnerVoucherServlet extends HttpServlet {
       new OwnerDbManager().removeVoucher(ds, guid);
 
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -143,14 +143,14 @@ public class OwnerVoucherServlet extends HttpServlet {
           resp.setContentLength(result.length);
           resp.getOutputStream().write(result);
         } else {
-          resp.setStatus(401);
+          resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
       } else {
         resp.setContentType("text/plain; charset=UTF-8");
         getVouchers(ds, resp.getOutputStream());
       }
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }

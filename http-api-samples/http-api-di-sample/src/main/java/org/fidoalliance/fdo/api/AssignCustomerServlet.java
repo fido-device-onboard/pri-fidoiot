@@ -24,20 +24,20 @@ public class AssignCustomerServlet extends HttpServlet {
       String guid = req.getParameter("guid");
       String id = req.getParameter("id");
       if (id.equals("") && guid.equals("") && !id.matches("[0-9]+")) {
-        resp.setStatus(400);
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
 
       int rowsAffected = new DiDbManager().assignCustomerToVoucher(ds, Integer.parseInt(id), guid);
       if (rowsAffected == 0) {
-        resp.setStatus(400);
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
     } catch (RuntimeException e) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     } catch (Exception e) {
-      resp.setStatus(500);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
   }

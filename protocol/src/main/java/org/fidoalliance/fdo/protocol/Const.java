@@ -68,7 +68,6 @@ public final class Const {
   public static final int MESSAGE_BODY_ERROR = 100;
   public static final int INVALID_MESSAGE_ERROR = 101;
   public static final int CRED_REUSE_ERROR = 102;
-  public static final int INTERNAL_SERVER_ERROR = 500;
 
   public static final String ERROR_CAUSE = " caused by ";
   public static final int ERROR_MAX_LENGTH = 512;
@@ -366,11 +365,6 @@ public final class Const {
   public static final String DISPATCHER_ATTRIBUTE = "ProtocolDispatcher";
 
   //HTTP constants
-  public static final int HTTP_INTERNAL_SERVER_ERROR = 500;
-  public static final int HTTP_UNSUPPORTED_MEDIA_TYPE = 415;
-  public static final int HTTP_LENGTH_REQUIRED = 411;
-  public static final int HTTP_NOT_FOUND = 404;
-  public static final int HTTP_OK = 200;
   public static final String HTTP_BEARER = "Bearer";
   public static final String HTTP_AUTHORIZATION = "Authorization";
   public static final String HTTP_APPLICATION_CBOR = "application/cbor";

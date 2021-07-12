@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.epid;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -47,7 +48,7 @@ public final class EpidHttpClient {
               executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
       final HttpResponse<byte[]> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
-      if (httpResponse.statusCode() == 200) {
+      if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
         return null != httpResponse.body() ? httpResponse.body() : new byte[0];
       } else {
         throw new IOException("HTTP GET failed with: " + httpResponse.statusCode());

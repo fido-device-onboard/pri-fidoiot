@@ -25,14 +25,14 @@ public class OwnerCustomerServlet extends HttpServlet {
     String contentType = req.getContentType();
 
     if (null == id || null == name) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
     //accept no content type or text/plain us-ascii pem
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
-        resp.setStatus(Const.HTTP_UNSUPPORTED_MEDIA_TYPE);
+        resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
     }
@@ -45,7 +45,7 @@ public class OwnerCustomerServlet extends HttpServlet {
       OwnerDbManager ownerDbManager = new OwnerDbManager();
       ownerDbManager.addCustomer(ds, Integer.parseInt(id), name, keySet);
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -55,7 +55,7 @@ public class OwnerCustomerServlet extends HttpServlet {
 
     String customerId = req.getParameter("id");
     if (customerId == null) {
-      resp.setStatus(400);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
@@ -63,7 +63,7 @@ public class OwnerCustomerServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       new OwnerDbManager().removeCustomer(ds, customerId);
     } catch (Exception exp) {
-      resp.setStatus(Const.HTTP_INTERNAL_SERVER_ERROR);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 }
