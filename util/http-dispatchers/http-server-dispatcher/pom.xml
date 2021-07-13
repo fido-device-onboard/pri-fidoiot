@@ -20,21 +20,7 @@
   <artifactId>http-server-dispatcher</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
-    <commons-codec.version>1.15</commons-codec.version>
-    <tomcat.version>9.0.45</tomcat.version>
-    <bcprov.version>1.68</bcprov.version>
-    <bcpkix.version>1.68</bcpkix.version>
-  </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>protocol</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -44,7 +30,7 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version>
+      <version>${javax.servlet-api.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -91,8 +77,14 @@
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>logging-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${fdo.version}</version>
     </dependency>
   </dependencies>
 </project>

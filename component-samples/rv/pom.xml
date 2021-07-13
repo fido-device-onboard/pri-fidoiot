@@ -21,42 +21,10 @@
   <packaging>jar</packaging>
 
   <properties>
-    <jakson.dataformat.cbor.version>2.11.0</jakson.dataformat.cbor.version>
-    <commons-codec.version>1.15</commons-codec.version>
-    <tomcat.version>9.0.45</tomcat.version>
-    <bcpkix.version>1.68</bcpkix.version>
-    <dbcp2.version>2.8.0</dbcp2.version>
-    <commons.beanutils.version>1.9.4</commons.beanutils.version>
-    <commons.configuration2.version>2.7</commons.configuration2.version>
-    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <exec.mainClass>org.fidoalliance.fdo.sample.RvServerApp</exec.mainClass>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>cert-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>protocol</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-server-dispatcher</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>storage-rv-sample</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-dbcp2</artifactId>
@@ -66,19 +34,19 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-configuration2</artifactId>
-      <version>${commons.configuration2.version}</version>
+      <version>${commons-configuration2.version}</version>
     </dependency>
 
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
-      <version>${commons.beanutils.version}</version>
+      <version>${commons-beanutils.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.200</version>
+      <version>${h2.version}</version>
     </dependency>
 
     <dependency>
@@ -101,8 +69,32 @@
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>cert-utils</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>http-server-dispatcher</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
+      <artifactId>storage-rv-sample</artifactId>
+      <version>${fdo.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>logging-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${fdo.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -111,7 +103,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>${maven-dependency-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -135,7 +127,7 @@
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
                   <artifactId>${project.artifactId}</artifactId>
-                  <version>${project.version}</version>
+                  <version>${fdo.version}</version>
                   <type>${project.packaging}</type>
                   <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
                   <destFileName>${project.artifactId}.${project.packaging}</destFileName>
@@ -148,7 +140,7 @@
 
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${maven-resources-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-lib</id>
@@ -171,7 +163,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>${exec-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>

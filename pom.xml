@@ -20,23 +20,42 @@
   mvn versions:update-properties
   -->
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- FDO Dependency Version -->
+    <fdo.version>1.0-SNAPSHOT</fdo.version>
+
+    <!-- Dependency Version -->
+    <bcpkix.version>1.69</bcpkix.version>
+    <bcprov.version>1.69</bcprov.version>
+    <commons-beanutils.version>1.9.4</commons-beanutils.version>
+    <commons-codec.version>1.15</commons-codec.version>
+    <commons-configuration2.version>2.7</commons-configuration2.version>
+    <dbcp2.version>2.8.0</dbcp2.version>
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <h2.version>1.4.200</h2.version>
+    <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
     <junit-jupiter.version>5.7.1</junit-jupiter.version>
+    <junit-jupiter.version>5.8.0-M1</junit-jupiter.version>
     <log4j.version>2.14.1</log4j.version>
     <slf4j.version>1.7.30</slf4j.version>
-    <slf4j-api.version>1.7.30</slf4j-api.version>
+    <tomcat.version>9.0.46</tomcat.version>
+
+    <!-- Maven Version -->
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-    <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version>
-    <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
-    <maven-surefire-report-plugin.version>3.0.0-M4</maven-surefire-report-plugin.version>
-    <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+    <maven-surefire-report-plugin.version>3.0.0-M5</maven-surefire-report-plugin.version>
+    <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
     <pgpverify-plugin.version>1.14.0</pgpverify-plugin.version>
+
+    <!-- Project Configurations -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project-demo-directory>../../component-samples/demo</project-demo-directory>
   </properties>
 
@@ -50,12 +69,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j-api.version}</version>
-      </dependency>
-
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
