@@ -172,13 +172,13 @@ public class ManufacturerContextListener implements ServletContextListener {
       @Override
       protected void replied(Composite reply) {
         String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
-        logger.info("msg/" + msgId + ": " + reply.toString());
+        logger.debug("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
         String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
-        logger.info("msg/" + msgId + ": " + request.toString());
+        logger.debug("msg/" + msgId + ": " + request.toString());
       }
 
       @Override

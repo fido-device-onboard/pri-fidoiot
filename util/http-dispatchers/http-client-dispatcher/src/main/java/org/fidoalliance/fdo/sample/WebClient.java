@@ -223,7 +223,7 @@ public class WebClient implements Runnable {
       }
 
       String msgId = message.getAsNumber(Const.SM_MSG_ID).toString();
-      logger.info("msg/" + msgId + ": " + message.toString());
+      logger.debug("msg/" + msgId + ": " + message.toString());
 
       byte[] body = message.getAsComposite(Const.SM_BODY).toBytes();
       reqBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body));
@@ -255,7 +255,7 @@ public class WebClient implements Runnable {
             .set(Const.SM_BODY, Composite.fromObject(hr.body()));
 
         msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
-        logger.info("msg/" + msgId + ": " + reply.toString());
+        logger.debug("msg/" + msgId + ": " + reply.toString());
 
         return new DispatchResult(reply, false);
       }
