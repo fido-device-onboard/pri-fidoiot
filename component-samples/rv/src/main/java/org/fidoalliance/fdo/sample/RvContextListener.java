@@ -107,13 +107,14 @@ public class RvContextListener implements ServletContextListener {
         };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
 
+    final String configFilePath = "config.properties";
     // create tables
     RvsDbManager manager = new RvsDbManager();
     manager.createTables(ds);
     manager.createAllowListDenyListTables(ds);
-    manager.importAllowListKeyHash(ds);
-    manager.importDenyListKeyHash(ds);
-    manager.importGuidFromDenyList(ds);
+    manager.importAllowListKeyHash(ds, configFilePath);
+    manager.importDenyListKeyHash(ds, configFilePath);
+    manager.importGuidFromDenyList(ds, configFilePath);
   }
 
   @Override

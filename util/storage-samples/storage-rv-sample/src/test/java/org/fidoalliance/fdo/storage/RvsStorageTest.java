@@ -186,13 +186,13 @@ public class RvsStorageTest {
 
       server = Server.createTcpServer(args).start();
 
+      final String configFilePath = "src/main/resources/config.properties";
       RvsDbManager rvsDbManager = new RvsDbManager();
-
       assertDoesNotThrow( ()-> {
             rvsDbManager.createAllowListDenyListTables(ds);
-            rvsDbManager.importGuidFromDenyList(ds);
-            rvsDbManager.importAllowListKeyHash(ds);
-            rvsDbManager.importDenyListKeyHash(ds);
+            rvsDbManager.importGuidFromDenyList(ds, configFilePath);
+            rvsDbManager.importAllowListKeyHash(ds, configFilePath);
+            rvsDbManager.importDenyListKeyHash(ds, configFilePath);
           });
 
     } catch (SQLException throwables) {
