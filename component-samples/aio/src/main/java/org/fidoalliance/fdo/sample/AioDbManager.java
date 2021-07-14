@@ -200,7 +200,6 @@ public class AioDbManager {
 
   /**
    * Get information about all devices in the database that completed DI.
-   *
    * This method is used in AioInfoServlet.
    */
   public String getDevicesInfo(DataSource ds) throws SQLException {
@@ -231,7 +230,6 @@ public class AioDbManager {
 
   /**
    * Get information about devices those were registered within a given period of time.
-   *
    * This method is used in AioInfoServlet.
    */
   public String  getDevicesInfoWithTime(DataSource ds, int seconds) throws SQLException {

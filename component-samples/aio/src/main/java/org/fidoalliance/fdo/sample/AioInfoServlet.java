@@ -3,9 +3,12 @@
 
 package org.fidoalliance.fdo.sample;
 
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.fidoalliance.fdo.loggingutils.LoggerService;
-
+import java.io.PrintWriter;
+import java.net.URI;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -13,12 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
-import java.io.*;
-import java.net.URI;
-import java.nio.file.Path;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * AioInfoServlet serves Device information that completed DI.
