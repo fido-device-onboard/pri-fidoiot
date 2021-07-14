@@ -179,6 +179,10 @@ public class AioServerApp {
     wrapper.addMapping("/api/v1/vouchers/*");
     wrapper.setAsyncSupported(true);
 
+    wrapper = tomcat.addServlet(ctx, "AioInfoServlet", new AioInfoServlet());
+    wrapper.addMapping("/api/v1/deviceinfo/*");
+    wrapper.setAsyncSupported(true);
+
     wrapper = tomcat.addServlet(ctx, "AssignCustomerApi", new AssignCustomerServlet());
     wrapper.addMapping("/api/v1/assign/*");
     wrapper.setAsyncSupported(true);

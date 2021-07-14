@@ -15,6 +15,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import javax.sql.DataSource;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * AIO Database Manager.
@@ -194,6 +196,73 @@ public class AioDbManager {
       throw new RuntimeException(e);
     }
     return result;
+  }
+
+  /**
+   * Get information about all devices in the database that completed DI.
+   *
+   * This method is used in AioInfoServlet.
+   */
+  public String getDevicesInfo(DataSource ds) throws SQLException {
+
+    JSONArray list = new JSONArray();
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("SELECT GUID, SERIAL_NO, COMPLETED ");
+      builder.append("FROM MT_DEVICES");
+
+      try (ResultSet rs = stmt.executeQuery(builder.toString())) {
+        while (rs.next()) {
+          JSONObject obj = new JSONObject();
+          final String guid = rs.getString("GUID");
+          final String serialNumber = rs.getString("SERIAL_NO");
+          Timestamp timestamp = rs.getTimestamp("COMPLETED");
+          obj.put("serial_no", serialNumber);
+          obj.put("timestamp", timestamp.toString());
+          obj.put("uuid", guid);
+          list.put(obj);
+        }
+      }
+    }
+
+    return list.toString();
+  }
+
+  /**
+   * Get information about devices those were registered within a given period of time.
+   *
+   * This method is used in AioInfoServlet.
+   */
+  public String  getDevicesInfoWithTime(DataSource ds, int seconds) throws SQLException {
+
+    JSONArray list = new JSONArray();
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("SELECT GUID, SERIAL_NO, COMPLETED ");
+      builder.append("FROM MT_DEVICES");
+
+      try (ResultSet rs = stmt.executeQuery(builder.toString())) {
+        while (rs.next()) {
+
+          final String guid = rs.getString("GUID");
+          final String serialNumber = rs.getString("SERIAL_NO");
+          Timestamp timestamp = rs.getTimestamp("COMPLETED");
+          Timestamp cur = new Timestamp(System.currentTimeMillis());
+          long diff = cur.getTime() - timestamp.getTime();
+          long diffSeconds = diff / 1000;
+          if (diffSeconds < seconds) {
+            JSONObject obj = new JSONObject();
+            obj.put("serial_no", serialNumber);
+            obj.put("timestamp", timestamp.toString());
+            obj.put("uuid", guid);
+            list.put(obj);
+          }
+        }
+      }
+    }
+    return list.toString();
   }
 
 }
