@@ -3,6 +3,9 @@
 
 package org.fidoalliance.fdo.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -194,6 +197,73 @@ public class AioDbManager {
       throw new RuntimeException(e);
     }
     return result;
+  }
+
+  /**
+   * Get information about all devices in the database that completed DI.
+   * This method is used in AioInfoServlet.
+   */
+  public String getDevicesInfo(DataSource ds) throws SQLException {
+
+    ObjectMapper mapper = new ObjectMapper();
+    ArrayNode rootNode = mapper.createArrayNode();
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("SELECT GUID, SERIAL_NO, COMPLETED ");
+      builder.append("FROM MT_DEVICES");
+
+      try (ResultSet rs = stmt.executeQuery(builder.toString())) {
+        while (rs.next()) {
+          ObjectNode obj = mapper.createObjectNode();
+          final String guid = rs.getString("GUID");
+          final String serialNumber = rs.getString("SERIAL_NO");
+          Timestamp timestamp = rs.getTimestamp("COMPLETED");
+          obj.put("serial_no", serialNumber);
+          obj.put("timestamp", timestamp.toString());
+          obj.put("uuid", guid);
+          rootNode.add(obj);
+        }
+      }
+    }
+
+    return rootNode.toString();
+  }
+
+  /**
+   * Get information about devices those were registered within a given period of time.
+   * This method is used in AioInfoServlet.
+   */
+  public String  getDevicesInfoWithTime(DataSource ds, int seconds) throws SQLException {
+
+    ObjectMapper mapper = new ObjectMapper();
+    ArrayNode rootNode = mapper.createArrayNode();
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("SELECT GUID, SERIAL_NO, COMPLETED ");
+      builder.append("FROM MT_DEVICES");
+
+      try (ResultSet rs = stmt.executeQuery(builder.toString())) {
+        while (rs.next()) {
+
+          final String guid = rs.getString("GUID");
+          final String serialNumber = rs.getString("SERIAL_NO");
+          Timestamp timestamp = rs.getTimestamp("COMPLETED");
+          Timestamp cur = new Timestamp(System.currentTimeMillis());
+          long diff = cur.getTime() - timestamp.getTime();
+          long diffSeconds = diff / 1000;
+          if (diffSeconds < seconds) {
+            ObjectNode obj = mapper.createObjectNode();
+            obj.put("serial_no", serialNumber);
+            obj.put("timestamp", timestamp.toString());
+            obj.put("uuid", guid);
+            rootNode.add(obj);
+          }
+        }
+      }
+    }
+    return rootNode.toString();
   }
 
 }
