@@ -73,9 +73,9 @@ public class ResellerContextListener implements ServletContextListener {
       final String ownerKeysPem = Files.readString(Paths.get(
               sc.getInitParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH)));
       dbManager.defineKeySet(ds, ownerKeysPem, "owner", 1);
-      System.out.println("Registered public keys for customer 'owner'");
+      logger.info("Registered public keys for customer 'owner'");
     } catch (IOException e) {
-      System.out.println("No default public keys found for customer 'owner'");
+      logger.info("No default public keys found for customer 'owner'");
     }
   }
 
