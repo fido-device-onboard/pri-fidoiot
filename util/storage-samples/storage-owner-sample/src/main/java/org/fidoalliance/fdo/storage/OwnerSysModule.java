@@ -92,7 +92,8 @@ public class OwnerSysModule implements Module {
 
   @Override
   public boolean isMore() {
-    return state.getAsBoolean(Const.FIFTH_KEY);
+    return state.getAsBoolean(Const.FIFTH_KEY)
+        || state.getAsBoolean(Const.SEVENTH_KEY);
   }
 
   @Override
@@ -181,7 +182,10 @@ public class OwnerSysModule implements Module {
           if (!getBooleanContent(resId)) {
             state.set(Const.FIFTH_KEY, false); //ismore
             state.set(Const.SIXTH_KEY, true);//isdone - device not active
+            // remove everything and add the same resource back,
+            // since this specific resource still needs to be sent back to the device
             resList.clear();
+            resList.set(resIndex, resource);
           }
           state.set(Const.SEVENTH_KEY, true); //has message to send
           break;

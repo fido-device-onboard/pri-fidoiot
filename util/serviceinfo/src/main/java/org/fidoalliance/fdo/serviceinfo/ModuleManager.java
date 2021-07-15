@@ -229,6 +229,9 @@ public class ModuleManager implements Module {
 
     while (hasMore()) {
       Composite kvPair = nextMessage();
+      if (kvPair.size() == 0) {
+        break;
+      }
       list.add(kvPair);
 
       Composite calcSvi = ServiceInfoEncoder.encodeOwnerServiceInfo(
@@ -237,9 +240,6 @@ public class ModuleManager implements Module {
       if (len > mtu) {
         list.remove(kvPair);
         state.set(Const.FOURTH_KEY, kvPair);//set extra
-        break;
-      }
-      if (kvPair.size() == 0) {
         break;
       }
     }
