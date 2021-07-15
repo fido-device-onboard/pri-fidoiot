@@ -33,6 +33,8 @@ node('ubuntu18.04-OnDemand'){
       // Extract and copy the demo.tar content to the location
       sh '''
         cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
+        cd test-fidoiot/binaries/pri-fidoiot
+        cp -r default-creds/* .
       '''
 
       // Updating the TO0 scheduling time interval
