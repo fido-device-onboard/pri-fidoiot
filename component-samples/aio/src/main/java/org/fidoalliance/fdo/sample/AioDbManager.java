@@ -3,6 +3,9 @@
 
 package org.fidoalliance.fdo.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,8 +18,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import javax.sql.DataSource;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * AIO Database Manager.
@@ -204,7 +205,8 @@ public class AioDbManager {
    */
   public String getDevicesInfo(DataSource ds) throws SQLException {
 
-    JSONArray list = new JSONArray();
+    ObjectMapper mapper = new ObjectMapper();
+    ArrayNode rootNode = mapper.createArrayNode();
     try (Connection conn = ds.getConnection();
          Statement stmt = conn.createStatement()) {
       StringBuilder builder = new StringBuilder();
@@ -213,19 +215,19 @@ public class AioDbManager {
 
       try (ResultSet rs = stmt.executeQuery(builder.toString())) {
         while (rs.next()) {
-          JSONObject obj = new JSONObject();
+          ObjectNode obj = mapper.createObjectNode();
           final String guid = rs.getString("GUID");
           final String serialNumber = rs.getString("SERIAL_NO");
           Timestamp timestamp = rs.getTimestamp("COMPLETED");
           obj.put("serial_no", serialNumber);
           obj.put("timestamp", timestamp.toString());
           obj.put("uuid", guid);
-          list.put(obj);
+          rootNode.add(obj);
         }
       }
     }
 
-    return list.toString();
+    return rootNode.toString();
   }
 
   /**
@@ -234,7 +236,8 @@ public class AioDbManager {
    */
   public String  getDevicesInfoWithTime(DataSource ds, int seconds) throws SQLException {
 
-    JSONArray list = new JSONArray();
+    ObjectMapper mapper = new ObjectMapper();
+    ArrayNode rootNode = mapper.createArrayNode();
     try (Connection conn = ds.getConnection();
          Statement stmt = conn.createStatement()) {
       StringBuilder builder = new StringBuilder();
@@ -251,16 +254,16 @@ public class AioDbManager {
           long diff = cur.getTime() - timestamp.getTime();
           long diffSeconds = diff / 1000;
           if (diffSeconds < seconds) {
-            JSONObject obj = new JSONObject();
+            ObjectNode obj = mapper.createObjectNode();
             obj.put("serial_no", serialNumber);
             obj.put("timestamp", timestamp.toString());
             obj.put("uuid", guid);
-            list.put(obj);
+            rootNode.add(obj);
           }
         }
       }
     }
-    return list.toString();
+    return rootNode.toString();
   }
 
 }
