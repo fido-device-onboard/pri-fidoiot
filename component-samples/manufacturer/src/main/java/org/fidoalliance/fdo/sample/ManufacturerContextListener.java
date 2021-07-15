@@ -171,21 +171,23 @@ public class ManufacturerContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.debug("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.debug("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          sc.log(e.getMessage());
+          logger.warn(e.getMessage());
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
@@ -200,17 +202,17 @@ public class ManufacturerContextListener implements ServletContextListener {
               sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 1, "owner", ownerKeysPem);
       manager.setAutoEnroll(ds, 1);
-      System.out.println("Registered public keys for customer 'owner'");
+      logger.info("Registered public keys for customer 'owner'");
     } catch (IOException e) {
-      System.out.println("No default public keys found for customer 'owner'");
+      logger.info("No default public keys found for customer 'owner'");
     }
     try {
       final String resellerKeysPem = Files.readString(Paths.get(
               sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
       manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
-      System.out.println("Registered public keys for customer 'reseller'");
+      logger.info("Registered public keys for customer 'reseller'");
     } catch (IOException e) {
-      System.out.println("No default public keys found for customer 'reseller'");
+      logger.info("No default public keys found for customer 'reseller'");
     }
 
   }
