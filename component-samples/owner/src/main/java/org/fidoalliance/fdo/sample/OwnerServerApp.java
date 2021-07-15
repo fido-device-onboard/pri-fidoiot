@@ -120,6 +120,19 @@ public class OwnerServerApp {
     ctx.addParameter(OwnerAppSettings.SAMPLE_VALUES_PATH,
         OwnerConfigLoader.loadConfig(OwnerAppSettings.SAMPLE_VALUES_PATH));
     ctx.addApplicationListener(DbStarter.class.getName());
+    try {
+      ctx.addParameter(OwnerAppSettings.OWNER_PUB_KEY_PATH,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Owner public keys are optional. If config can't be loaded,default to no config.
+    }
+
+    try {
+      ctx.addParameter(OwnerAppSettings.OWNER2_PUB_KEY_PATH,
+              OwnerConfigLoader.loadConfig(OwnerAppSettings.OWNER2_PUB_KEY_PATH));
+    } catch (Exception ex) {
+      // Default Owner2 public keys are optional. If config can't be loaded,default to no config.
+    }
     ctx.addApplicationListener(OwnerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
 
