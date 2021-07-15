@@ -186,7 +186,7 @@ public class RvsStorageTest {
 
       server = Server.createTcpServer(args).start();
 
-      final String configFilePath = "src/main/resources/config.properties";
+      final String configFilePath = "src/test/resources/config.properties";
       RvsDbManager rvsDbManager = new RvsDbManager();
       assertDoesNotThrow( ()-> {
             rvsDbManager.createAllowListDenyListTables(ds);
