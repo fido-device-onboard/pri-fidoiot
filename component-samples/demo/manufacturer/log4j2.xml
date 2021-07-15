@@ -1,12 +1,21 @@
-<Configuration status="info">
+<Configuration status="debug">
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <RollingFile name="FILE" fileName="log" append="true" bufferedIO="true" immediateFlush="true">
+            <filePattern>log-%i</filePattern>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
-        <Root level="info">
-            <AppenderRef ref="CONSOLE"/>
+        <Root level="debug">
+            <AppenderRef ref="CONSOLE" level="debug"/>
+            <AppenderRef ref="FILE" level="debug"/>
         </Root>
     </Loggers>
 </Configuration>
