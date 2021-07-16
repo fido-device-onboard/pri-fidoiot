@@ -65,4 +65,7 @@ public class OwnerAppSettings {
   public static final String ONDIE_AUTOUPDATE = "ondie_autoupdate";
   public static final String ONDIE_ZIP_ARTIFACT = "ondie_zip_artifact";
   public static final String ONDIE_CHECK_REVOCATIONS = "ondie_check_revocations";
+
+  public static final String OWNER_PUB_KEY_PATH = "owner_pub_key_path";
+  public static final String OWNER2_PUB_KEY_PATH = "owner2_pub_key_path";
 }
