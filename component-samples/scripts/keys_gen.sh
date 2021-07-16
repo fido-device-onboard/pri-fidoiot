@@ -15,12 +15,10 @@
 # /path/to/root/of/pri/binaries/creds/xxx_pub_keys.pem  -> Public Keys file
 # /path/to/root/of/pri/binaries/creds/xxx_pub_keys.hash -> Hash file
 # /path/to/root/of/pri/binaries/creds/xxx_keystore.p12  -> Keystore file
-# /path/to/root/of/pri/binaries/creds/xxx_keystore.pass -> Keystore password file
 #
 # TLS truststore and keystore output files.
 #
 # /path/to/root/of/pri/binaries/creds/ssl.p12    -> SSL Keystore
-# /path/to/root/of/pri/binaries/creds/ssl.pass   -> SSL Keystore password file
 # /path/to/root/of/pri/binaries/creds/truststore -> Truststore
 #
 # PRI Device pem output files. xxx -> [256, 384]
@@ -67,7 +65,7 @@ set -e
 
 # Environmental variables
 components=("manufacturer" "owner" "reseller")
-COMP_PATH=$1
+COMP_PATH=$(realpath $1)
 CREDS_PATH=$COMP_PATH/creds
 CERTS_PATH=$CREDS_PATH/tmp
 
@@ -112,56 +110,146 @@ pass_update_env_files()
 # ---------------------------------------------------------------------------
 # Merging the above generated public keys into one file with respective to single pri component
 # Redirecting the randomly generated password into /path/to/root/of/pri/binaries/creds/pri_keys.pass
+
+# Generate hash of public key (takes certificate as input)
+# Certificate -> Encrypted .der file -> Hash
+# Redirect hashes to the corresponding output file
+generate_hash()
+{
+  # Arg1: Certificate file
+  certfile=$1
+
+  # Arg2: Output hash file
+  hashfile=$2
+
+  # Generate public key hash
+  openssl x509 -in $certfile -pubkey -noout | openssl enc -base64 -d > public.der
+  cat public.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}' > $hashfile
+ 
+  rm -f public.der
+}
+
+# Generate RSA keypair
+generate_keypair_rsa()
+{
+  # Arg1: Curve name
+  keylen=$1
+
+  # Arg2: Keystore password
+  pass=$2
+
+  # Generate RSA2048 Keys and include them in the keystore
+  openssl genrsa -F4 -out private.key ${keylen} > /dev/null 2>&1
+
+  openssl rsa -in private.key -outform PEM -pubout \
+    -out public.key > /dev/null 2>&1
+
+  openssl req -x509 -key private.key -out cert.pem -days 3650 -batch
+
+  openssl pkcs12 -export -in cert.pem -inkey private.key -name rsa${keylen} \
+    -out rsa${keylen}.p12 -password pass:${pass}
+
+  # Generate public key hash
+  generate_hash cert.pem rsa${keylen}_public.hash
+
+  cp public.key $CERTS_PATH/rsa${keylen}_public.key
+}
+
+# Generate EC keypair
+generate_keypair_ec()
+{
+  # Arg1: Curve name
+  keylen=$1
+
+  # Arg2: Keystore password
+  pass=$2
+
+  if [ $keylen == "256" ]; then
+    curve=prime256v1
+  else
+    curve=secp384r1
+  fi
+
+  # Remove temporary files form last call
+  rm -f private.key public.key cert.pem ec${keylen}.p12
+
+  # Keys Generations
+  openssl ecparam -name $curve -genkey -noout -out private.key > /dev/null 2>&1
+
+  openssl ec -in private.key -pubout -out public.key > /dev/null 2>&1
+
+  openssl req -x509 -key private.key -out cert.pem -days 3650 -batch
+
+  openssl pkcs12 -export -in cert.pem -inkey private.key -name ec${keylen} \
+    -out ec${keylen}.p12 -password pass:${pass}
+
+  # Generate public key hash
+  generate_hash cert.pem ec${keylen}_public.hash
+
+  cp public.key ec${keylen}_public.key
+}
+
+# Import one keystore into another keystore
+import_keystore()
+{
+  # Arg1: Destination keystore
+  dest=$1
+
+  # Arg2: Source keystore
+  src=$2
+
+  # Arg3: Keystore password (both src and dest keystore have same passwrod)
+  pass=$3
+
+  keytool -importkeystore -srckeystore $CERTS_PATH/${src} -srcstorepass ${pass} \
+    -destkeystore $CERTS_PATH/${dest} -deststorepass ${pass} \
+    -deststoretype pkcs12 -noprompt > /dev/null 2>&1
+}
+
 keystore_gen()
 {
   PASS_KEY=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+
+  rm -f keystore.p12 ec256.p12 ec384.p12 rsa2048.p12
+  rm -f pub_keys.pem
+
   # RSA2048 Keys Generations
-  openssl genrsa -F4 -out $CERTS_PATH/${1}_rsa2048_private.key 2048 > /dev/null 2>&1
-  openssl rsa -in $CERTS_PATH/${1}_rsa2048_private.key -outform PEM -pubout -out $CERTS_PATH/${1}_rsa2048_public.key > /dev/null 2>&1
-  openssl req -x509 -key $CERTS_PATH/${1}_rsa2048_private.key -out $CERTS_PATH/${1}_rsa2048_cert.pem -days 3650 -batch
-
-  # EC256 Keys Generations
-  openssl ecparam -name prime256v1 -genkey -noout -out $CERTS_PATH/${1}_ec256_private.key > /dev/null 2>&1
-  openssl ec -in $CERTS_PATH/${1}_ec256_private.key -pubout -out $CERTS_PATH/${1}_ec256_public.key > /dev/null 2>&1
-  openssl req -x509 -key $CERTS_PATH/${1}_ec256_private.key -out $CERTS_PATH/${1}_ec256_cert.pem -days 3650 -batch
-
-  # EC384 Keys Generations
-  openssl ecparam -name secp384r1 -genkey -noout -out $CERTS_PATH/${1}_ec384_private.key > /dev/null 2>&1
-  openssl ec -in $CERTS_PATH/${1}_ec384_private.key -pubout -out $CERTS_PATH/${1}_ec384_public.key > /dev/null 2>&1
-  openssl req -x509 -key $CERTS_PATH/${1}_ec384_private.key -out $CERTS_PATH/${1}_ec384_cert.pem -days 3650 -batch
-
-  # Export RSA2048, EC256, and EC384 keys to their individual p12 files
-  openssl pkcs12 -export -in $CERTS_PATH/${1}_rsa2048_cert.pem -inkey $CERTS_PATH/${1}_rsa2048_private.key \
-    -name ${1}_rsa2048 -out $CERTS_PATH/${1}_rsa2048.p12 -password pass:${PASS_KEY}
-  openssl pkcs12 -export -in $CERTS_PATH/${1}_ec256_cert.pem -inkey $CERTS_PATH/${1}_ec256_private.key \
-    -name ${1}_ecdsa_256 -out $CERTS_PATH/${1}_ec256.p12 -password pass:${PASS_KEY}
-  openssl pkcs12 -export -in $CERTS_PATH/${1}_ec384_cert.pem -inkey $CERTS_PATH/${1}_ec384_private.key \
-    -name ${1}_ecdsa_384 -out $CERTS_PATH/${1}_ec384.p12 -password pass:${PASS_KEY}
+  generate_keypair_ec 256 ${PASS_KEY}
+  generate_keypair_ec 384 ${PASS_KEY}
+  generate_keypair_rsa 2048 ${PASS_KEY}
 
   # Import rsa2048, ec256, and ec384 p12 keystores to one p12 keystore
-  keytool -importkeystore -srckeystore $CERTS_PATH/${1}_rsa2048.p12 -srcstorepass ${PASS_KEY} \
-    -destkeystore $CERTS_PATH/${1}_keystore.p12 -deststorepass ${PASS_KEY} -deststoretype pkcs12 -noprompt > /dev/null 2>&1
-  keytool -importkeystore -srckeystore $CERTS_PATH/${1}_ec256.p12 -srcstorepass ${PASS_KEY} \
-    -destkeystore $CERTS_PATH/${1}_keystore.p12 -deststorepass ${PASS_KEY} -deststoretype pkcs12 -noprompt > /dev/null 2>&1
-  keytool -importkeystore -srckeystore $CERTS_PATH/${1}_ec384.p12 -srcstorepass ${PASS_KEY} \
-    -destkeystore $CERTS_PATH/${1}_keystore.p12 -deststorepass ${PASS_KEY} -deststoretype pkcs12 -noprompt > /dev/null 2>&1
+  import_keystore keystore.p12 ec256.p12 ${PASS_KEY}
+  import_keystore keystore.p12 ec384.p12 ${PASS_KEY}
+  import_keystore keystore.p12 rsa2048.p12 ${PASS_KEY}
 
   # Verify the keys from p12 keystore
-  keytool -list -keystore $CERTS_PATH/${1}_keystore.p12 -storepass ${PASS_KEY}
+  keytool -list -keystore keystore.p12 -storepass ${PASS_KEY}
 
   # Creating a keys.pem files
-  cat $CERTS_PATH/${1}_ec256_public.key | tee $CERTS_PATH/${1}_pub_keys.pem > /dev/null
-  cat $CERTS_PATH/${1}_ec384_public.key | tee -a $CERTS_PATH/${1}_pub_keys.pem > /dev/null
-  cat $CERTS_PATH/${1}_rsa2048_public.key | tee -a $CERTS_PATH/${1}_pub_keys.pem > /dev/null
+  cat ec256_public.key | tee pub_keys.pem > /dev/null
+  cat ec384_public.key | tee -a pub_keys.pem > /dev/null
+  cat rsa2048_public.key | tee -a pub_keys.pem > /dev/null
+
+  cat ec256_public.hash | tee pub_keys.hash > /dev/null
+  cat ec384_public.hash | tee -a pub_keys.hash > /dev/null
+  cat rsa2048_public.hash | tee -a pub_keys.hash > /dev/null
+  cat pub_keys.hash
+
+  # Preserve necessary artifacts
+  mv keystore.p12 ${1}_keystore.p12
+  mv pub_keys.pem ${1}_pub_keys.pem
+  mv pub_keys.hash ${1}_pub_keys.hash
+
+  # Delete temporary files
+  rm -f ec256.p12 ec384.p12 rsa2048.p12
+  rm -f ec256_public.key ec384_public.key rsa2048_public.key
 
   # Redirecting password into one file
   mkdir -p $CREDS_PATH/${1}
   echo "${PASS_KEY}" > $CERTS_PATH/${1}_keystore.pass
 }
 
-# Generation of all hashes using the certificates of rsa, ec256, and ec384
-# Certificate -> Encrypted .der file -> Hash
-# Redirect hashes to the corresponding *keys.hash files
 hash_gen()
 {
   # Hash generations
@@ -245,7 +333,7 @@ component_keys()
 
   # Generating keystores and hashes of the component
   keystore_gen $1
-  hash_gen $1 $PASS_KEY
+  #hash_gen $1 $PASS_KEY
 
   # Copying the keystores to the destination paths
   #cp $CERTS_PATH/${1}_keystore.p12 $COMP_PATH/${1}/${1}_keystore.p12
@@ -347,7 +435,6 @@ start_generation()
   elif [[ $# == 1 ]]; then
     arr+=('default')
   fi
-  mkdir -p $CERTS_PATH
   for option in ${arr[@]:1}; do
     case $option in
       "-m") component_keys "manufacturer";;
@@ -374,6 +461,13 @@ start_generation()
     fi
   done
 }
+
+# Change work directory to CERTS_PATH
+
+rm -rf $CERTS_PATH $CREDS_PATH
+mkdir -p $CERTS_PATH $CREDS_PATH
+
+cd $CERTS_PATH
 
 start_generation $*
 
