@@ -34,7 +34,7 @@ node('ubuntu18.04-OnDemand'){
       sh '''
         cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
         cd test-fidoiot/binaries/pri-fidoiot
-        bash keys_gen.sh .
+        bash scripts/keys_gen.sh .
         cp -r creds/* .
       '''
 
