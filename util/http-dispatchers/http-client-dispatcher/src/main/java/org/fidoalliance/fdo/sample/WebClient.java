@@ -214,7 +214,6 @@ public class WebClient implements Runnable {
       HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
           .uri(URI.create(url));
 
-      byte[] body = message.getAsComposite(Const.SM_BODY).toBytes();
       reqBuilder.setHeader("Content-Type", Const.HTTP_APPLICATION_CBOR);
 
       Composite info = message.getAsComposite(Const.SM_PROTOCOL_INFO);
@@ -223,6 +222,10 @@ public class WebClient implements Runnable {
             Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
       }
 
+      String msgId = message.getAsNumber(Const.SM_MSG_ID).toString();
+      logger.debug("msg/" + msgId + ": " + message.toString());
+
+      byte[] body = message.getAsComposite(Const.SM_BODY).toBytes();
       reqBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body));
 
       HttpResponse<byte[]> hr = httpClient
@@ -250,6 +253,9 @@ public class WebClient implements Runnable {
                 message.getAsNumber(Const.SM_PROTOCOL_VERSION))
             .set(Const.SM_PROTOCOL_INFO, authInfo)
             .set(Const.SM_BODY, Composite.fromObject(hr.body()));
+
+        msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.debug("msg/" + msgId + ": " + reply.toString());
 
         return new DispatchResult(reply, false);
       }

@@ -10,6 +10,7 @@ import org.apache.commons.configuration2.SystemConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 public class AioConfigLoader {
 
@@ -17,6 +18,8 @@ public class AioConfigLoader {
   private static EnvironmentConfiguration environmentConfiguration;
   private static SystemConfiguration systemConfiguration;
   private static FileBasedConfiguration fileBasedConfiguration;
+
+  private static final LoggerService logger = new LoggerService(AioConfigLoader.class);
 
   static {
     environmentConfiguration = new EnvironmentConfiguration();
@@ -32,7 +35,7 @@ public class AioConfigLoader {
         throw new ConfigurationException();
       }
     } catch (ConfigurationException e) {
-      System.out.println("The AIO application might not be using config file");
+      logger.debug("The AIO application might not be using config file.");
       // ignore the error since the application might not be using config file.
       // log when logging is enabled in the application.
     }
@@ -52,7 +55,7 @@ public class AioConfigLoader {
     } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
       return fileBasedConfiguration.getString(property);
     }
-    System.out.println("Could not load property: " + property);
+    logger.warn("Could not load property: " + property);
     return null;
   }
 }

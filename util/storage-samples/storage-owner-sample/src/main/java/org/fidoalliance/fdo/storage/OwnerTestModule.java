@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.serviceinfo.Module;
@@ -19,6 +21,8 @@ public class OwnerTestModule implements Module {
   private static final String TEST_MOD_ACTIVE = TEST_MOD_NAME + ":active";
   private final DataSource ds;
   private Composite state;
+
+  private static final LoggerService logger = new LoggerService(OwnerTestModule.class);
 
   /**
    * Constructs a OwnerTestModule.
@@ -91,7 +95,7 @@ public class OwnerTestModule implements Module {
   @Override
   public void setServiceInfo(Composite kvPair, boolean isMore) {
 
-    System.out.println(kvPair.getAsString(Const.FIRST_KEY));
+    logger.info(kvPair.getAsString(Const.FIRST_KEY));
     state.set(Const.THIRD_KEY, true);
 
   }

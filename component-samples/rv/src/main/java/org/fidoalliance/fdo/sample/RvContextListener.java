@@ -53,13 +53,14 @@ public class RvContextListener implements ServletContextListener {
     String epidTestMode = sc.getInitParameter(RvAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
       cs.setEpidTestMode();
-      sc.log("EPID Test mode enabled.");
+      logger.warn("*** WARNING ***");
+      logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
     String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
     if (null != epidUrl) {
       EpidUtils.setEpidOnlineUrl(epidUrl);
     } else {
-      sc.log("EPID URL not set. Default URL will be used: "
+      logger.info("EPID URL not set. Default URL will be used: "
               + EpidUtils.getEpidOnlineUrl().toString());
     }
 
@@ -88,32 +89,35 @@ public class RvContextListener implements ServletContextListener {
 
           @Override
           protected void replied(Composite reply) {
-            sc.log("replied with: " + reply.toString());
+            String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+            logger.debug("msg/" + msgId + ": " + reply.toString());
           }
 
           @Override
           protected void dispatching(Composite request) {
-            sc.log("dispatching: " + request.toString());
+            String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+            logger.debug("msg/" + msgId + ": " + request.toString());
           }
 
           @Override
           protected void failed(Exception e) {
             StringWriter writer = new StringWriter();
             try (PrintWriter pw = new PrintWriter(writer)) {
-              sc.log("Failed to write data: " + e.getMessage());
+              logger.warn("Failed to write data: " + e.getMessage());
             }
-            sc.log(writer.toString());
+            logger.warn(writer.toString());
           }
         };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
 
+    final String configFilePath = "config.properties";
     // create tables
     RvsDbManager manager = new RvsDbManager();
     manager.createTables(ds);
     manager.createAllowListDenyListTables(ds);
-    manager.importAllowListKeyHash(ds);
-    manager.importDenyListKeyHash(ds);
-    manager.importGuidFromDenyList(ds);
+    manager.importAllowListKeyHash(ds, configFilePath);
+    manager.importDenyListKeyHash(ds, configFilePath);
+    manager.importGuidFromDenyList(ds, configFilePath);
   }
 
   @Override
