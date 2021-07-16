@@ -330,8 +330,8 @@ generate_tls_keystore()
   printf "%.40s" "Generating ssl.p12 and truststore ..................."
 
   # TLS keystore and truststore creation steps
-  export INTERFACE_NAME=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
-  export SYS_IP="$(ifconfig | grep -A 1 $INTERFACE_NAME | tail -1 | cut -d ' ' -f 10)"
+  if=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
+  ip=$(ip addr | grep inet | grep " $if" | cut -d' ' -f6 | cut -d'/' -f1)
   openssl req \
     -x509 \
     -newkey rsa:2048 \
@@ -346,7 +346,7 @@ generate_tls_keystore()
     echo '[req]'; \
     echo 'distinguished_name=req'; \
     echo '[san]'; \
-    echo 'subjectAltName=DNS:localhost,IP.1:127.0.0.1,IP.2:'${SYS_IP}) > /dev/null 2>&1
+    echo 'subjectAltName=DNS:localhost,IP.1:127.0.0.1,IP.2:'${ip}) > /dev/null 2>&1
 
   export SSL_PASS=`openssl rand --base64 8 | tr -dc 0-9A-Za-z`
   openssl pkcs12 -export -in tls.crt -inkey tls.key -out ssl.p12 -password pass:${SSL_PASS}
