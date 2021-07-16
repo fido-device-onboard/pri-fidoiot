@@ -16,7 +16,7 @@ COPY ./lib ./lib/
 COPY ./certs ./certs/
 COPY log4j2.xml .
 COPY owner.jar .
-COPY owner_keystore.p12 .
+COPY owner_keystore.p12 owner_pub_keys.pem* owner2_pub_keys.pem* ./
 COPY owner-entrypoint.sh .
 CMD ["chmod", "+x", "owner-entrypoint.sh"]
 

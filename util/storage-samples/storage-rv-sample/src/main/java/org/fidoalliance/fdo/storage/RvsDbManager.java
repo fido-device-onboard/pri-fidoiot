@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.storage;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -16,11 +17,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * The Rendezvous Database Manager.
  */
 public class RvsDbManager {
+
+  LoggerService logger = new LoggerService(RvsDbManager.class);
 
   /**
    * Creates Database tables.
@@ -126,20 +130,18 @@ public class RvsDbManager {
    *
    * @param ds A SQL datasource.
    */
-  public void importGuidFromDenyList(DataSource ds) {
+  public void importGuidFromDenyList(DataSource ds, String path) {
 
     // list of default GUIDs to be added in denylist
     List<String> denylist = new ArrayList<>();
 
-    String fileName = "config.properties";
-    ClassLoader classLoader = getClass().getClassLoader();
-
     try {
-      InputStream inputStream = classLoader.getResourceAsStream(fileName);
+      InputStream inputStream = new FileInputStream(path);
       Properties properties = new Properties();
       properties.load(inputStream);
       denylist = Arrays.asList(properties.getProperty("guid.denylist").split(","));
     } catch (IOException e) {
+      logger.error("Unable to load config.properties file.");
       throw new RuntimeException(e);
     }
 
@@ -163,21 +165,19 @@ public class RvsDbManager {
    *
    * @param ds A SQL datasource.
    */
-  public void importAllowListKeyHash(DataSource ds) {
+  public void importAllowListKeyHash(DataSource ds, String path) {
 
     // list of default public key hash to be added in allowlist
     List<String> allowlist = new ArrayList<>();
 
     // Loading default values in the list
-    String fileName = "config.properties";
-    ClassLoader classLoader = getClass().getClassLoader();
-
     try {
-      InputStream inputStream = classLoader.getResourceAsStream(fileName);
+      InputStream inputStream = new FileInputStream(path);
       Properties properties = new Properties();
       properties.load(inputStream);
       allowlist = Arrays.asList(properties.getProperty("allowlist.publickeyhash").split(","));
     } catch (IOException e) {
+      logger.error("Unable to load config.properties file.");
       throw new RuntimeException(e);
     }
 
@@ -201,21 +201,19 @@ public class RvsDbManager {
    *
    * @param ds A SQL datasource.
    */
-  public void importDenyListKeyHash(DataSource ds) {
+  public void importDenyListKeyHash(DataSource ds, String path) {
 
     // list of default public key hash to be added in denylist
     List<String> denylist = new ArrayList<>();
 
     // Loading default values in the list
-    String fileName = "config.properties";
-    ClassLoader classLoader = getClass().getClassLoader();
-
     try {
-      InputStream inputStream = classLoader.getResourceAsStream(fileName);
+      InputStream inputStream = new FileInputStream(path);
       Properties properties = new Properties();
       properties.load(inputStream);
       denylist = Arrays.asList(properties.getProperty("denylist.publickeyhash").split(","));
     } catch (IOException e) {
+      logger.error("Unable to load config.properties file.");
       throw new RuntimeException(e);
     }
 
