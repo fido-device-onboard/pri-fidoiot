@@ -63,12 +63,6 @@
 shopt -s extglob
 set -e
 
-# Environmental variables
-components=("manufacturer" "owner" "reseller")
-COMP_PATH=$(realpath $1)
-CREDS_PATH=$COMP_PATH/creds
-CERTS_PATH=$CREDS_PATH/tmp
-
 # Usage message to be displayed whenever we provide wrong inputs
 usage()
 {
@@ -152,7 +146,7 @@ generate_keypair_rsa()
   # Generate public key hash
   generate_hash cert.pem rsa${keylen}_public.hash
 
-  cp public.key $CERTS_PATH/rsa${keylen}_public.key
+  cp public.key rsa${keylen}_public.key
 }
 
 # Generate EC keypair
@@ -201,12 +195,12 @@ import_keystore()
   # Arg3: Keystore password (both src and dest keystore have same passwrod)
   pass=$3
 
-  keytool -importkeystore -srckeystore $CERTS_PATH/${src} -srcstorepass ${pass} \
-    -destkeystore $CERTS_PATH/${dest} -deststorepass ${pass} \
+  keytool -importkeystore -srckeystore ${src} -srcstorepass ${pass} \
+    -destkeystore ${dest} -deststorepass ${pass} \
     -deststoretype pkcs12 -noprompt > /dev/null 2>&1
 }
 
-keystore_gen()
+generate_keystore()
 {
   PASS_KEY=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 
@@ -224,7 +218,7 @@ keystore_gen()
   import_keystore keystore.p12 rsa2048.p12 ${PASS_KEY}
 
   # Verify the keys from p12 keystore
-  keytool -list -keystore keystore.p12 -storepass ${PASS_KEY}
+  keytool -list -keystore keystore.p12 -storepass ${PASS_KEY} > /dev/null 2>&1
 
   # Creating a keys.pem files
   cat ec256_public.key | tee pub_keys.pem > /dev/null
@@ -234,7 +228,6 @@ keystore_gen()
   cat ec256_public.hash | tee pub_keys.hash > /dev/null
   cat ec384_public.hash | tee -a pub_keys.hash > /dev/null
   cat rsa2048_public.hash | tee -a pub_keys.hash > /dev/null
-  cat pub_keys.hash
 
   # Preserve necessary artifacts
   mv keystore.p12 ${1}_keystore.p12
@@ -244,122 +237,51 @@ keystore_gen()
   # Delete temporary files
   rm -f ec256.p12 ec384.p12 rsa2048.p12
   rm -f ec256_public.key ec384_public.key rsa2048_public.key
+  rm -f ec256_public.hash ec384_public.hash rsa2048_public.hash
 
   # Redirecting password into one file
-  mkdir -p $CREDS_PATH/${1}
-  echo "${PASS_KEY}" > $CERTS_PATH/${1}_keystore.pass
+  echo "${PASS_KEY}" > ${1}_keystore.pass
 }
 
-hash_gen()
-{
-  # Hash generations
-  openssl x509 -in $CERTS_PATH/${1}_rsa2048_cert.pem -pubkey -noout | openssl enc -base64 -d \
-    > $CERTS_PATH/${1}_rsa2048.der
-  export RSA2048_HASH=`cat $CERTS_PATH/${1}_rsa2048.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'`
-
-  openssl x509 -in $CERTS_PATH/${1}_ec256_cert.pem -pubkey -noout | openssl enc -base64 -d \
-    > $CERTS_PATH/${1}_ec256.der
-  export EC256_HASH=`cat $CERTS_PATH/${1}_ec256.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'`
-
-  openssl x509 -in $CERTS_PATH/${1}_ec384_cert.pem -pubkey -noout | openssl enc -base64 -d \
-    > $CERTS_PATH/${1}_ec384.der
-  export EC384_HASH=`cat $CERTS_PATH/${1}_ec384.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'`
-
-  # Redirect the Hashes to one file
-  echo $EC256_HASH | tee $CERTS_PATH/${1}_pub_keys.hash > /dev/null
-  echo $EC384_HASH | tee -a $CERTS_PATH/${1}_pub_keys.hash > /dev/null
-  echo $RSA2048_HASH | tee -a $CERTS_PATH/${1}_pub_keys.hash > /dev/null
-}
-
-# Generation of TLS keystore and truststore for signing purpose
-# Updating all the keystores and truststores in the required destination paths
-# Updating the ssl-keystore-password that is generated randomly in all the component environment files
-tls_keystore()
-{
-  # Cleaning all existing component keys to regenerate fresh keys
-  rm -rf $CERTS_PATH/ssl* $CERTS_PATH/truststore
-
-  # TLS keystore and truststore creation steps
-  export INTERFACE_NAME=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
-  export SYS_IP="$(ifconfig | grep -A 1 $INTERFACE_NAME | tail -1 | cut -d ' ' -f 10)"
-  openssl req \
-    -x509 \
-    -newkey rsa:2048 \
-    -sha256 \
-    -days 3560 \
-    -nodes \
-    -keyout $CERTS_PATH/tls.key \
-    -out $CERTS_PATH/tls.crt \
-    -subj '/CN=fdo' \
-    -extensions san \
-    -config <( \
-    echo '[req]'; \
-    echo 'distinguished_name=req'; \
-    echo '[san]'; \
-    echo 'subjectAltName=DNS:localhost,IP.1:127.0.0.1,IP.2:'${SYS_IP}) > /dev/null 2>&1
-
-  export SSL_PASS=`openssl rand --base64 8 | tr -dc 0-9A-Za-z`
-  openssl pkcs12 -export -in $CERTS_PATH/tls.crt -inkey $CERTS_PATH/tls.key -out $CERTS_PATH/ssl.p12 \
-    -password pass:${SSL_PASS}
-  keytool -import -alias fdo -file $CERTS_PATH/tls.crt -storetype PKCS12 -keystore $CERTS_PATH/truststore \
-    -storepass ${SSL_PASS} -noprompt > /dev/null 2>&1
-  echo "${SSL_PASS}" > $CERTS_PATH/ssl.pass; rm -rf $CERTS_PATH/tls.???
-  echo "Creation of SSL keystore & Truststore completes successfully"
-
-  # Copying the ssl keystore and truststores to the destination paths
-  for comp in "manufacturer" "rv" "owner" "reseller" "aio"; do
-    mkdir -p $CREDS_PATH/$comp/certs/
-    cp $CERTS_PATH/ssl.p12 $CREDS_PATH/$comp/certs/
-    pass_update_env_files $CREDS_PATH/$comp "${comp}_ssl_keystore-password=${SSL_PASS}"
-  done
-
-  for comp in "owner" "aio"; do
-    mkdir -p $CREDS_PATH/$comp/certs
-    cp $CERTS_PATH/truststore $CREDS_PATH/$comp/certs/
-    pass_update_env_files $CREDS_PATH/$comp "ssl_truststore_password=${SSL_PASS}"
-  done
-}
-
-# Calling the keystore_gen and hash_gen functions to generate keystores and hashes
+# Calling the generate_keystore functions generate keystores and hashes
 # Updating the existing component keystores with the newly generated keystores
 # Updating the corresponding passwords in all the component environment files
 # Logging the path of the generated keystores or hashes or passwords
-component_keys()
+generate_component_keys()
 {
   # Cleaning all component keys that only exists in order to regenerate fresh keys
-  if [[ -f $CERTS_PATH/${1}_keystore.p12 ]]; then
-    rm -rf $CERTS_PATH/${1}*
+  if [[ -f ${1}_keystore.p12 ]]; then
+    rm -rf ${1}*
   fi
 
+  printf "%.40s" "Generating ${1}_keystore.p12 ..................."
+
   # Generating keystores and hashes of the component
-  keystore_gen $1
-  #hash_gen $1 $PASS_KEY
+  generate_keystore $1
 
   # Copying the keystores to the destination paths
-  #cp $CERTS_PATH/${1}_keystore.p12 $COMP_PATH/${1}/${1}_keystore.p12
   mkdir -p $CREDS_PATH/${1}
-  cp -v $CERTS_PATH/${1}_keystore.p12 $CREDS_PATH/${1}/${1}_keystore.p12
+  cp ${1}_keystore.p12 $CREDS_PATH/${1}/${1}_keystore.p12
 
   # Updating the password in the component environment file
   pass_update_env_files $CREDS_PATH/${1} "${1}_keystore_password=${PASS_KEY}"
 
   # Logging the path of component hashes and it password
-  echo "Creation of ${1} keystore completes successfully"
-  echo -e "   ${1} hashes are redirected to the below path\n     $CERTS_PATH/${1}_keys.hash"
-  echo -e "   ${1} password redirected to the below path\n     $CERTS_PATH/pri_keys.pass"
+  printf " successful\n"
 }
 
 # Updating all component key hashes to the RV config.properties
-update_rv_hashes()
+prepare_rv_config()
 {
+  printf "%.40s" "Updating rv/config.properties ..................."
   # Capturing all component keystore hashes into one environmental variable HASHES
-  for i in $CERTS_PATH/*.hash; do
+  for i in *.hash; do
     if [[ $i =~ ".hash" ]]; then
-      sed -n '1,3'p $i | tee -a $CERTS_PATH/all_hashes.txt > /dev/null
+      sed -n '1,3'p $i | tee -a all_hashes.txt > /dev/null
     fi
   done
-  sed -i "1,$((`cat $CERTS_PATH/all_hashes.txt | wc -l`-1))s/$/,\\\\/g" $CERTS_PATH/all_hashes.txt
-  HASHES=`cat $CERTS_PATH/all_hashes.txt`; rm -rf $CERTS_PATH/all_hashes.txt;
+  sed -i "1,$((`cat all_hashes.txt | wc -l`-1))s/$/,\\\\/g" all_hashes.txt
+  HASHES=`cat all_hashes.txt`; rm -rf all_hashes.txt;
 
   # Updating the RV config.properties file with the new hashes of 3 components (mfg, own, & reseller)
   mkdir -p $CREDS_PATH/rv
@@ -373,61 +295,143 @@ update_rv_hashes()
   sed -i "$((ALLOW_LINE+1)),$((DENY_LINE-1))d" $CREDS_PATH/rv/config.properties
   sed -i "$((ALLOW_LINE)) a ${HASHES}" $CREDS_PATH/rv/config.properties;
   sed -i "s/,/,\\\\/g" $CREDS_PATH/rv/config.properties;
+
+  printf " successful\n"
 }
 
 # Generating new device keys and updating it into the device.pem file
 device_pem_files()
 {
-  # Device EC256 and EC384 pem file creation
-  openssl ecparam -name prime256v1 -genkey -noout -out $CERTS_PATH/device_ec256_private.key
-  openssl req -x509 -key $CERTS_PATH/device_ec256_private.key -out $CERTS_PATH/device_ec256_cert.pem -days 3650 -batch
-  openssl ecparam -name secp384r1 -genkey -noout -out $CERTS_PATH/device_ec384_private.key
-  openssl req -x509 -key $CERTS_PATH/device_ec384_private.key -out $CERTS_PATH/device_ec384_cert.pem -days 3650 -batch
   mkdir -p $CREDS_PATH/device
-  cat $CERTS_PATH/device_ec256_cert.pem > $CREDS_PATH/device/device_ec256.pem
-  cat $CERTS_PATH/device_ec256_private.key >> $CREDS_PATH/device/device_ec256.pem
 
-  cat $CERTS_PATH/device_ec384_cert.pem > $CREDS_PATH/device/device_ec384.pem
-  cat $CERTS_PATH/device_ec384_private.key >> $CREDS_PATH/device/device_ec384.pem
+  printf "%.40s" "Generating device_ec256.pem ..................."
+  generate_keypair_ec 256
+  cat cert.pem > $CREDS_PATH/device/device_ec256.pem
+  cat private.key >> $CREDS_PATH/device/device_ec256.pem
+  printf " successful\n"
+
+  printf "%.40s" "Generating device_ec384.pem ..................."
+  generate_keypair_ec 384
+  cat cert.pem > $CREDS_PATH/device/device_ec384.pem
+  cat private.key >> $CREDS_PATH/device/device_ec384.pem
+  printf " successful\n"
 
   cp $CREDS_PATH/device/device_ec256.pem $CREDS_PATH/device/device.pem
-  echo "Creation of Device PEM files completes successfully"
+}
+
+# Generation of TLS keystore and truststore for signing purpose
+# Updating all the keystores and truststores in the required destination paths
+# Updating the ssl-keystore-password that is generated randomly in all the component environment files
+generate_tls_keystore()
+{
+  # Cleaning all existing component keys to regenerate fresh keys
+  rm -f ssl.p12 ssl.pass truststore
+
+  printf "%.40s" "Generating ssl.p12 and truststore ..................."
+
+  # TLS keystore and truststore creation steps
+  export INTERFACE_NAME=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
+  export SYS_IP="$(ifconfig | grep -A 1 $INTERFACE_NAME | tail -1 | cut -d ' ' -f 10)"
+  openssl req \
+    -x509 \
+    -newkey rsa:2048 \
+    -sha256 \
+    -days 3560 \
+    -nodes \
+    -keyout tls.key \
+    -out tls.crt \
+    -subj '/CN=fdo' \
+    -extensions san \
+    -config <( \
+    echo '[req]'; \
+    echo 'distinguished_name=req'; \
+    echo '[san]'; \
+    echo 'subjectAltName=DNS:localhost,IP.1:127.0.0.1,IP.2:'${SYS_IP}) > /dev/null 2>&1
+
+  export SSL_PASS=`openssl rand --base64 8 | tr -dc 0-9A-Za-z`
+  openssl pkcs12 -export -in tls.crt -inkey tls.key -out ssl.p12 -password pass:${SSL_PASS}
+  keytool -import -alias fdo -file tls.crt -storetype PKCS12 -keystore truststore \
+    -storepass ${SSL_PASS} -noprompt > /dev/null 2>&1
+  echo "${SSL_PASS}" > ssl.pass
+
+  # Copying the ssl keystore and truststores to the destination paths
+  for comp in "manufacturer" "rv" "owner" "reseller" "aio"; do
+    mkdir -p $CREDS_PATH/$comp/certs/
+    cp ssl.p12 $CREDS_PATH/$comp/certs/
+    pass_update_env_files $CREDS_PATH/$comp "${comp}_ssl_keystore-password=${SSL_PASS}"
+  done
+
+  for comp in "owner" "aio"; do
+    mkdir -p $CREDS_PATH/$comp/certs
+    cp truststore $CREDS_PATH/$comp/certs/
+    pass_update_env_files $CREDS_PATH/$comp "ssl_truststore_password=${SSL_PASS}"
+  done
+
+  printf " successful\n"
+
+  rm -rf tls.???
+}
+
+# Copy only if source file exists
+# Create destination folder if it doesn't exist
+# Copy to destination with given filename
+copy_failsafe_rename()
+{
+  # Arg1: Source file
+  srcfile=$1
+
+  # Arg2: Destination directory
+  destdir=$2
+
+  # Arg3: Destination file
+  destfile=$3
+
+  if [ -e $srcfile ]; then
+    mkdir -p $destdir
+    cp $srcfile $destdir/$destfile
+  fi
+}
+
+# Create a folder if the destination folder doesn't exist
+copy_failsafe()
+{
+  copy_failsafe_rename $1 $2 $1
 }
 
 misc_copy()
 {
-  # Manufacturer needs {reseller,owner}_pub_keys.pem
-  mkdir -p $CREDS_PATH/manufacturer
-  cp $CERTS_PATH/reseller_pub_keys.pem $CREDS_PATH/manufacturer/
-  cp $CERTS_PATH/owner_pub_keys.pem $CREDS_PATH/manufacturer/
+  printf "%.40s" "Copying files to components ..................."
 
-  # Reseller needs owner_pub_keys.pem
-  mkdir -p $CREDS_PATH/reseller
-  cp $CERTS_PATH/owner_pub_keys.pem $CREDS_PATH/reseller/
+  # Copy owner_pub_keys.pem
+  copy_failsafe_rename owner_pub_keys.pem $CREDS_PATH/aio/resources owner_customer1.pem
+  copy_failsafe owner_pub_keys.pem $CREDS_PATH/manufacturer
+  copy_failsafe owner_pub_keys.pem $CREDS_PATH/owner
+  copy_failsafe owner_pub_keys.pem $CREDS_PATH/reseller
 
-  # Owner needs owner_pub_keys_pem and {reseller=>owner2}_pub_keys.pem
-  mkdir -p $CREDS_PATH/owner
-  cp $CERTS_PATH/owner_pub_keys.pem $CREDS_PATH/owner/
-  cp $CERTS_PATH/reseller_pub_keys.pem $CREDS_PATH/owner/owner2_pub_keys.pem
+  # Copy reseller_pub_keys.pem
+  copy_failsafe reseller_pub_keys.pem $CREDS_PATH/manufacturer
+  copy_failsafe_rename reseller_pub_keys.pem $CREDS_PATH/owner owner2_pub_keys.pem
 
-  # AIO needs owner_pub_keys.pem => owner_customer1.pem
-  mkdir -p $CREDS_PATH/aio/resources
-  cp $CERTS_PATH/owner_pub_keys.pem $CREDS_PATH/aio/resources/owner_customer1.pem
+  if [ -e manufacturer_keystore.p12 ]; then
+    copy_failsafe manufacturer_keystore.p12 $CREDS_PATH/aio
+    PASS_KEY=$(cat manufacturer_keystore.pass)
+    pass_update_env_files $CREDS_PATH/aio "manufacturer_keystore_password=${PASS_KEY}"
+  fi
 
-  # AIO needs {manufacturer,owner}_keystore.p12
-  cp $CERTS_PATH/manufacturer_keystore.p12 $CREDS_PATH/aio
-  PASS_KEY=$(cat $CERTS_PATH/manufacturer_keystore.pass)
-  pass_update_env_files $CREDS_PATH/aio "manufacturer_keystore_password=${PASS_KEY}"
+  if [ -e owner_keystore.p12 ]; then
+    copy_failsafe owner_keystore.p12 $CREDS_PATH/aio
+    PASS_KEY=$(cat owner_keystore.pass)
+    pass_update_env_files $CREDS_PATH/aio "owner_keystore_password=${PASS_KEY}"
+  fi
 
-  cp $CERTS_PATH/owner_keystore.p12 $CREDS_PATH/aio
-  PASS_KEY=$(cat $CERTS_PATH/owner_keystore.pass)
-  pass_update_env_files $CREDS_PATH/aio "owner_keystore_password=${PASS_KEY}"
+  printf " successful\n"
 }
 
 # Main functionality is defined in this function
 start_generation()
 {
   arr=($*)
+  components=("manufacturer" "owner" "reseller")
   if [[ $# == 0 ]]; then
     echo "For help, provide -h to the script"; exit 1;
   elif [[ $* =~ "-h" ]]; then
@@ -437,33 +441,53 @@ start_generation()
   fi
   for option in ${arr[@]:1}; do
     case $option in
-      "-m") component_keys "manufacturer";;
-      "-o") component_keys "owner";;
-      "-r") component_keys "reseller";;
-      "-t") tls_keystore;;
-      "-d") device_pem_files;;
+      "-m")
+        generate_component_keys "manufacturer"
+        prepare_rv_config
+        misc_copy
+        ;;
+      "-o")
+        generate_component_keys "owner"
+        prepare_rv_config
+        misc_copy
+        ;;
+      "-r")
+        generate_component_keys "reseller"
+        prepare_rv_config
+        misc_copy
+        ;;
+      "-t")
+        generate_tls_keystore
+        ;;
+      "-d")
+        device_pem_files
+        ;;
       *)
         for i in ${components[@]}; do
           if [[ "${components[@]}" =~ "$i" ]]; then
-            component_keys $i
+            generate_component_keys $i
           fi
         done
-        tls_keystore
+        prepare_rv_config;
+        generate_tls_keystore
         device_pem_files
         misc_copy
         break;;
     esac
   done
-  for i in $CERTS_PATH/*.hash; do
-    if [[ $i =~ ".hash" ]]; then
-      update_rv_hashes;
-      break;
-    fi
-  done
 }
 
-# Change work directory to CERTS_PATH
+# Environmental variables
+if [ $# -lt 1 ]; then
+  usage
+  exit
+fi
 
+COMP_PATH=$(realpath $1)
+CREDS_PATH=$COMP_PATH/creds
+CERTS_PATH=$CREDS_PATH/tmp
+
+# Change work directory to CERTS_PATH
 rm -rf $CERTS_PATH $CREDS_PATH
 mkdir -p $CERTS_PATH $CREDS_PATH
 
@@ -471,12 +495,5 @@ cd $CERTS_PATH
 
 start_generation $*
 
-# Final status of the whole execution process
-if [[ `ls $CERTS_PATH | wc -l` -gt 0 ]]; then
-  echo "KEYSTORE GENERATION IS SUCCESSFUL"
-  rm -rf $CERTS_PATH
-  tree $CREDS_PATH
-else
-  echo "KEYSTORE GENERATION IS UN-SUCCESSFUL"
-  usage
-fi
+# Remove temporary files
+rm -rf $CERTS_PATH
