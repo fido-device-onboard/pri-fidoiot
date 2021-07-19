@@ -29,10 +29,11 @@ public class ManufacturerAppSettings {
   public static final String SERVER_PATH = "catalina_home";
 
   // the user pin for HSM keystore that contains the owner keys
+  public static final String MFG_KEYSTORE = "manufacturer_keystore";
   public static final String MFG_KEYSTORE_PWD = "manufacturer_keystore_password";
 
   // the owner keystore type
-  public static final String MFG_KEYSTORE_TYPE = "PKCS11";
+  public static final String MFG_KEYSTORE_TYPE = "PKCS12";
 
   public static final String AUTH_METHOD = "DIGEST";
   public static final String AUTH_ROLE = "api";

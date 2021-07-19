@@ -6,10 +6,9 @@ ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update && apt-get install -y openjdk-11-jdk wget haveged
 
-RUN useradd -ms /bin/bash owner
-USER owner
-WORKDIR /home/owner/
-RUN mkdir -p /home/owner/lib /home/owner/serviceinfo
+RUN useradd -ms /bin/bash fdo
+WORKDIR /home/fdo/
+RUN mkdir -p /home/fdo/lib /home/fdo/serviceinfo
 
 # Setup owner dependencies
 COPY ./lib ./lib/
@@ -18,7 +17,9 @@ COPY log4j2.xml .
 COPY owner.jar .
 COPY owner_keystore.p12 owner_pub_keys.pem* owner2_pub_keys.pem* ./
 COPY owner-entrypoint.sh .
-CMD ["chmod", "+x", "owner-entrypoint.sh"]
+
+RUN chown -R fdo:fdo /home/fdo
+USER fdo
 
 # Configure and start owner
 CMD ["bash", "owner-entrypoint.sh"]

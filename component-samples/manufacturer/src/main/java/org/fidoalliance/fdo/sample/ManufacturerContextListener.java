@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -101,7 +102,9 @@ public class ManufacturerContextListener implements ServletContextListener {
     }
     final OnDieService ods = initialOds;
 
-    initManufacturerKeystore(sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
+    initManufacturerKeystore(
+        sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE),
+        sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     keyResolver = new CertificateResolver() {
       @Override
       public CloseableKey getPrivateKey(Certificate cert) {
@@ -241,15 +244,18 @@ public class ManufacturerContextListener implements ServletContextListener {
   }
 
   // load manufacturer keystore
-  private void initManufacturerKeystore(String mfgKeyStorePin) {
+  private void initManufacturerKeystore(String mfgKeyStorePath, String mfgKeyStorePin) {
     try {
-      if (null == mfgKeyStorePin) {
+      if (null == mfgKeyStorePath || null == mfgKeyStorePin) {
         throw new IOException();
       }
-      if (null == mfgKeyStore) {
-        mfgKeyStore = KeyStore.getInstance(ManufacturerAppSettings.MFG_KEYSTORE_TYPE);
-        mfgKeyStore.load(null, mfgKeyStorePin.toCharArray());
+      mfgKeyStore = KeyStore.getInstance(ManufacturerAppSettings.MFG_KEYSTORE_TYPE);
+      Path keystorePath = Path.of(mfgKeyStorePath);
+      if (!keystorePath.toAbsolutePath().toFile().exists()) {
+        throw new IOException();
       }
+      mfgKeyStore.load(new FileInputStream(keystorePath.toAbsolutePath().toFile()),
+          mfgKeyStorePin.toCharArray());
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
       logger.error("Error in loading keystore. " + e.getMessage());
     }
