@@ -45,11 +45,11 @@ public class RvsStorageTest {
   private static final LoggerService logger = new LoggerService(RvsStorageTest.class);
 
   private static final String DB_HOST = "localhost";
-  private static final String DB_PORT = "8043";
+  private static final String DB_PORT = "8091";
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
 
-  private static final String RV_BLOB = "http://localhost:8040?ipaddress=127.0.0.1";
+  private static final String RV_BLOB = "http://localhost:8090?ipaddress=127.0.0.1";
 
   private static final String VOUCHER = "8486186450994f1a570a694fdc8ad761e094ef7f7481858205696c6f6"
       + "3616c686f73748203191f68820c018202447f00000182041920fb6b4a6176612044657669636583260258402c"
