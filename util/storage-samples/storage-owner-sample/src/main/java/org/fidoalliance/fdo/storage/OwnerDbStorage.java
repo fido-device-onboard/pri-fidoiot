@@ -344,7 +344,7 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public void setMaxOwnerServiceInfoMtuSz(int mtu) {
 
-    // Restricting MTU requested by device upto owner threshold mtu size
+    // Restricting MTU requested by device upto ownerMtu size
     mtu = Math.min(mtu, getMaxOwnerServiceInfoMtuSz());
     modules.setMtu(mtu);
 
@@ -369,13 +369,13 @@ public class OwnerDbStorage implements To2ServerStorage {
   @Override
   public int getMaxOwnerServiceInfoMtuSz() {
 
-    int ownerMtuThreshold = ModuleManager.DEFAULT_MTU;
-    String sql = "SELECT OWNER_MTU_THRESHOLD FROM TO2_SETTINGS WHERE ID = 1;";
+    int ownerMtu = ModuleManager.DEFAULT_MTU;
+    String sql = "SELECT DEVICE_SERVICE_INFO_MTU_SIZE FROM TO2_SETTINGS WHERE ID = 1;";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql);) {
       try (ResultSet rs = pstmt.executeQuery()) {
         if (rs.next()) {
-          ownerMtuThreshold = rs.getInt(1);
+          ownerMtu = rs.getInt(1);
         }
       }
     } catch (SQLException e) {
@@ -383,7 +383,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     }
 
     // Restricting minimum threshold to maximum permitted
-    return Math.max(Const.DEFAULT_SERVICE_INFO_MTU_SIZE, ownerMtuThreshold);
+    return Math.max(Const.DEFAULT_SERVICE_INFO_MTU_SIZE, ownerMtu);
   }
 
   @Override
