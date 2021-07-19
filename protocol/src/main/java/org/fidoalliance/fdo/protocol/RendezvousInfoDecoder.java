@@ -152,8 +152,8 @@ public class RendezvousInfoDecoder {
       }
 
       value = queryIntValue(directive, Const.RV_PROTOCOL);
-      if (value != null
-          && (value == Const.RV_PROT_HTTP || value == Const.RV_PROT_HTTPS)) {
+      if (value == null
+          || (value == Const.RV_PROT_HTTP || value == Const.RV_PROT_HTTPS)) {
 
         String devPort = "";
         String ownerPort = "";
@@ -162,15 +162,16 @@ public class RendezvousInfoDecoder {
         if (filter == Const.RV_DEV_ONLY) {
           //Device protocol based on the RVProtocol value.
 
-          //default http value
-          devPort = "80";
+          //default value
+          //If RVprot value is not specified, then it should take HTTPS protocol by default.
+          devPort = "443";
           ownerPort = devPort;
-          protocol = "http://";
+          protocol = "https://";
 
-          //override with https
-          if (value == Const.RV_PROT_HTTPS) {
-            protocol = "https://";
-            ownerPort = devPort = "443";
+          //override with HTTP
+          if (value != null && value == Const.RV_PROT_HTTP) {
+            protocol = "http://";
+            ownerPort = devPort = "80";
           }
         } else if (filter == Const.RV_OWNER_ONLY) {
           //The Owner always chooses HTTPS for communication.
