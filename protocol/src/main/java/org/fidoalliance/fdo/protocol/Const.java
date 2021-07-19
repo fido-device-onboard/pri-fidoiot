@@ -440,6 +440,7 @@ public final class Const {
 
   public static final int SERVICE_INFO_MTU_MIN_SIZE = 256;
   public static final int OWNER_THRESHOLD_DEFAULT_MTU_SIZE = 8192;
+  public static final int OWNER_THRESHOLD_MAX_MTU_SIZE = 60000;
 
   public static final String COSE_CONTEXT_ENCRYPT0 = "Encrypt0";
 }

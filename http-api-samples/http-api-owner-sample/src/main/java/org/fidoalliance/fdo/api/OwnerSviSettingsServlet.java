@@ -35,16 +35,14 @@ public class OwnerSviSettingsServlet extends HttpServlet {
       String requestBody = req.getReader().lines().collect(Collectors.joining());
 
       /* Request format:
-      devicemtu:=<mtusettingze>,
-      ownerthreshold:=<thresholdmtu>,
-      wgetModContentVerification:=<boolean>
+      devicemtu:=<mtuvalue>
        */
       if (requestBody != null) {
         DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
         OwnerDbManager ownerDbManager = new OwnerDbManager();
 
         String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
-        if (to2Settings.length > 2) {
+        if (to2Settings.length > 1) {
           getServletContext().log("Invalid to2Settings request has been provided.");
           resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
           return;
@@ -59,18 +57,6 @@ public class OwnerSviSettingsServlet extends HttpServlet {
                 deviceMtu = Integer.parseInt(setting[1]);
                 getServletContext().log("Updating Device MTU for TO2 Settings");
                 ownerDbManager.updateMtu(ds, "DEVICE_SERVICE_INFO_MTU_SIZE", deviceMtu);
-                break;
-              case SETTINGS_OWNER_THRESHOLD:
-                ownerThresholdMtu = Integer.parseInt(setting[1]);
-                if (ownerThresholdMtu < 0) {
-                  getServletContext()
-                      .log(
-                          "Negative value received. "
-                              + "Updating Owner Threshold to default MTU size of 8192 bytes");
-                  ownerThresholdMtu = Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE;
-                }
-                getServletContext().log("Updating Owner Threshold MTU for TO2 Settings");
-                ownerDbManager.updateMtu(ds, "OWNER_MTU_THRESHOLD", ownerThresholdMtu);
                 break;
               default:
                 break;
