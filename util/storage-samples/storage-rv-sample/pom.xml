@@ -65,47 +65,4 @@
       <version>${fdo.version}</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.2.0</version>
-        <executions>
-          <execution>
-            <id>copy-lib</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>../${project-demo-directory}/rv</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src/main/resources</directory>
-                  <includes>
-                    <include>config.properties</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>${maven-clean-plugin.version}</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>../${project-demo-directory}/rv</directory>
-              <includes>
-                <include>config.properties</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

@@ -12,10 +12,14 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 /**
  * Decodes RendezvousInfo strings.
  */
 public class RendezvousInfoDecoder {
+
+  private static final LoggerService logger = new LoggerService(RendezvousInfoDecoder.class);
 
   private static boolean getBoolean(String value) {
     if (value.compareToIgnoreCase("true") == 0) {
@@ -219,7 +223,7 @@ public class RendezvousInfoDecoder {
           long rvVariable = (long) item.get(0);
           if (rvVariable < Const.RV_DEV_ONLY || rvVariable > Const.RV_EXTRV) {
             //Out of range rvVariable. Valid range is between 0-15.
-            System.out.println("Invalid RvVariable provided.");
+            logger.warn("Invalid RvVariable provided.");
             return false;
           } else if (rvVariable == Const.RV_DEV_ONLY || rvVariable == Const.RV_OWNER_ONLY
                   || rvVariable == Const.RV_BYPASS) {
@@ -234,14 +238,14 @@ public class RendezvousInfoDecoder {
             Integer devport = queryIntValue(directive, Const.RV_DEV_PORT);
             //Ensure that devport is in the valid range of (0,65535).
             if (devport < 0 || devport > 65535) {
-              System.out.println("Invalid devport.");
+              logger.warn("Invalid devport.");
               return false;
             }
           } else if (rvVariable == Const.RV_OWNER_PORT) {
             Integer ownerport = queryIntValue(directive, Const.RV_OWNER_PORT);
             //Ensure that ownerport is in the valid range of (0,65535).
             if (ownerport < 0 || ownerport > 65535) {
-              System.out.println("Invalid Ownerport.");
+              logger.warn("Invalid Ownerport.");
               return false;
             }
           } else if (rvVariable == Const.RV_SV_CERT_HASH) {
@@ -259,14 +263,14 @@ public class RendezvousInfoDecoder {
             Integer medium = queryIntValue(directive, Const.RV_DEV_PORT);
             //Ensure that medium is in the valid range of (0,21).
             if (medium < Const.RV_MED_ETH0 || medium > Const.RV_MED_WIFI_ALL) {
-              System.out.println("Invalid medium used.");
+              logger.warn("Invalid medium used.");
               return false;
             }
           } else if (rvVariable == Const.RV_PROTOCOL) {
             int value = queryIntValue(directive, Const.RV_PROTOCOL);
             //Ensure that protocol value is in the valid range of (0,6).
             if (value < Const.RV_PROT_REST || value > Const.RV_PROT_COAP_UDP) {
-              System.out.println("Invalid Protocol used.");
+              logger.warn("Invalid Protocol used.");
               return false;
             }
           } else if (rvVariable == Const.RV_DELAY_SEC) {
@@ -279,13 +283,13 @@ public class RendezvousInfoDecoder {
         }
       }
     } catch (InvalidIpAddressException e) {
-      System.out.println("Invalid IP address provided.");
+      logger.warn("Invalid IP address provided.");
       return false;
     } catch (MessageBodyException e) {
-      System.out.println("Invalid WiFi SSID/ WiFi PW provided.");
+      logger.warn("Invalid WiFi SSID/ WiFi PW provided.");
       return false;
     } catch (DispatchException e) {
-      System.out.println("Invalid user inpur provided.");
+      logger.warn("Invalid user input provided.");
     } catch (Exception e) {
       return false;
     }

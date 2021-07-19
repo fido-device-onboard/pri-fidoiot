@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -23,6 +24,7 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -43,43 +45,7 @@ import org.fidoalliance.fdo.storage.OwnerDbTo0Util;
  */
 public class OwnerContextListener implements ServletContextListener {
 
-  private final String ownerKeysPem = "-----BEGIN PUBLIC KEY-----\n"
-      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWVUE2G0GLy8scmAOyQyhcBiF/fSU\n"
-      + "d3i/Og7XDShiJb2IsbCZSRqt1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE4RFfGVQdojLIODXnUT6NqB6KpmmPV2Rl\n"
-      + "aVWXzdDef83f/JT+/XLPcpAZVoS++pwZpDoCkRU+E2FqKFdKDDD4g7obfqWd87z1\n"
-      + "EtjdVaI1qiagqaSlkul2oQPBAujpIaHZ\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwTWjO2WTkQJSRuf1sIlx\n"
-      + "365VxOxdIAnDZu/GYNMg8oKDapg0uvi/DguFkrxbs3AtRHGWdONYXbGd1ZsGcVY9\n"
-      + "DsCDR5R5+NCx8EEYfYSbz88dvncJMEq7iJiQXNdaj9dCHuZqaj5LGChBcLLldynX\n"
-      + "mx3ZDE780aKPGomjeXEqcWgpeb0L4O+vGxkvz42C1XtvlsjBNPGKAjMM6xRPkorL\n"
-      + "SfC1P0XyER3kqVYc4/cM9FyO7/vHLwH9byPCV4WbUpkti/bEtPs9xLnEtYP0oV30\n"
-      + "PcdFVOg8hcuaEy6GoseU1EhlpgWJeBsbHMTlOB20JJa0kfFzREaJENyH6nHW3bSU\n"
-      + "AwIDAQAB\n"
-      + "-----END PUBLIC KEY-----";
-
-  private final String owner2KeysPem = "-----BEGIN PUBLIC KEY-----\n"
-      + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE305J06Z2xAqL4pwiKst8QXVEmJzO\n"
-      + "lxgM43F4JSwI4XSKohIZ6GH6o1R25zrBgwXWE6imL754v/av1cHmwP8MSw==\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEKJGKqlmZZyeFw/9fltM3QotdCFhQoj3w\n"
-      + "plx5CFRmHdU3haPPKV8s0K+Fb2NO0gZXuF/bv5AUR5wL9/lDpQR9zgQgCNV2z6CZ\n"
-      + "Mhs4RzFN34ss4Hx1uhakIVBem3ubtP2o\n"
-      + "-----END PUBLIC KEY-----\n"
-      + "-----BEGIN PUBLIC KEY-----\n"
-      + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyr0lXjWv0vdvzxTklqKk\n"
-      + "sAD3Q0JEs8o12CQmybpn9QInC14SO4jRs592EVfun7CQGvxYk+1P4ll2ZctZa7QL\n"
-      + "Dw3cmJnkAFHd5bpgVqgqq3oMmAqVQsZzgSoz5vlvINorPFvP8Qnif0QND5QaBRPA\n"
-      + "OQEfZHJGCeAxPrU/6iVhZnZlTmoDJXBl8uUnM/suush8DQQkJSxQMG+A5goLdMgH\n"
-      + "CpcrrnVFWIYPQZMlwtX+JVCvh+OpmFYukgqbc9RP68C99TI6X1206wUsS/wEsqA9\n"
-      + "mKXCGo4hjbrFxaoFIEUFlOf3js7CIvotV0kNUaAIsF1Qz9dzKiEHXJCqaqksEd5z\n"
-      + "FwIDAQAB\n"
-      + "-----END PUBLIC KEY-----";
+  private static final LoggerService logger = new LoggerService(OwnerContextListener.class);
 
   private KeyResolver resolver;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -95,7 +61,7 @@ public class OwnerContextListener implements ServletContextListener {
     ds.setUsername(sc.getInitParameter(OwnerAppSettings.DB_USER));
     ds.setPassword(sc.getInitParameter(OwnerAppSettings.DB_PWD));
 
-    sc.log(ds.getUrl());
+    logger.info(ds.getUrl());
 
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
@@ -105,13 +71,14 @@ public class OwnerContextListener implements ServletContextListener {
     String epidTestMode = sc.getInitParameter(OwnerAppSettings.EPID_TEST_MODE);
     if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
       cs.setEpidTestMode();
-      sc.log("EPID Test mode enabled.");
+      logger.warn("*** WARNING ***");
+      logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
     String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
     if (null != epidUrl) {
       EpidUtils.setEpidOnlineUrl(epidUrl);
     } else {
-      sc.log("EPID URL not set. Default URL will be used: "
+      logger.info("EPID URL not set. Default URL will be used: "
           + EpidUtils.getEpidOnlineUrl().toString());
     }
 
@@ -161,29 +128,43 @@ public class OwnerContextListener implements ServletContextListener {
 
       @Override
       protected void replied(Composite reply) {
-        sc.log("replied with: " + reply.toString());
+        String msgId = reply.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.debug("msg/" + msgId + ": " + reply.toString());
       }
 
       @Override
       protected void dispatching(Composite request) {
-        sc.log("dispatching: " + request.toString());
+        String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
+        logger.debug("msg/" + msgId + ": " + request.toString());
       }
 
       @Override
       protected void failed(Exception e) {
         StringWriter writer = new StringWriter();
         try (PrintWriter pw = new PrintWriter(writer)) {
-          sc.log("Failed to write data: " + e.getMessage());
+          logger.warn("Failed to write data: " + e.getMessage());
         }
-        sc.log(writer.toString());
+        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
     // create tables
     OwnerDbManager manager = new OwnerDbManager();
     manager.createTables(ds);
-    manager.addCustomer(ds, 1, "owner", ownerKeysPem);
-    manager.addCustomer(ds, 2, "owner2", owner2KeysPem);
+    try {
+      final String ownerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(OwnerAppSettings.OWNER_PUB_KEY_PATH)));
+      manager.addCustomer(ds, 1, "owner", ownerKeysPem);
+    } catch (IOException e) {
+      logger.warn("No default public keys found for customer 'owner'");
+    }
+    try {
+      final String owner2KeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(OwnerAppSettings.OWNER2_PUB_KEY_PATH)));
+      manager.addCustomer(ds, 2, "owner2", owner2KeysPem);
+    } catch (IOException e) {
+      logger.warn("No default public keys found for customer 'owner2'");
+    }
     manager.loadTo2Settings(ds);
 
     // schedule devices for TO0 only if the flag is set
@@ -194,13 +175,13 @@ public class OwnerContextListener implements ServletContextListener {
           try {
             OwnerDbTo0Util to0Util = new OwnerDbTo0Util();
             List<UUID> uuids = to0Util.fetchDevicesForTo0(ds);
-            sc.log("Scheduling UUIDs for TO0: " + uuids.toString());
+            logger.info("Scheduling UUIDs for TO0: " + uuids.toString());
             for (UUID guid : uuids) {
               CompletableFuture.runAsync(() -> scheduleTo0(sc, ds, guid, to0Util),
                   to0ExecutorService);
             }
           } catch (Exception e) {
-            sc.log(e.getMessage());
+            logger.warn(e.getMessage());
           }
         }
       }, 5, Integer.parseInt(
@@ -242,7 +223,7 @@ public class OwnerContextListener implements ServletContextListener {
       to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();
     } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
-      sc.log("Error during TO0 for GUID: " + guid.toString());
+      logger.error("Error during TO0 for GUID: " + guid.toString());
       throw new RuntimeException(e);
     }
   }
