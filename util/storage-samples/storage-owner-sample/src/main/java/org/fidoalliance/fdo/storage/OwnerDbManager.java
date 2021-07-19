@@ -99,7 +99,6 @@ public class OwnerDbManager {
               + "TO2_SETTINGS("
               + "ID INT NOT NULL, "
               + "DEVICE_SERVICE_INFO_MTU_SIZE INT NOT NULL, "
-              + "OWNER_MTU_THRESHOLD INT NOT NULL, "
               + "PRIMARY KEY (ID), "
               + "UNIQUE (ID)"
               + ");";
@@ -310,15 +309,13 @@ public class OwnerDbManager {
 
     String sql = "MERGE INTO TO2_SETTINGS ("
         + "ID,"
-        + "DEVICE_SERVICE_INFO_MTU_SIZE, "
-        + "OWNER_MTU_THRESHOLD ) "
-        + "VALUES (?,?,?);";
+        + "DEVICE_SERVICE_INFO_MTU_SIZE ) "
+        + "VALUES (?,?);";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setInt(1, 1);
-      pstmt.setInt(2, Const.SERVICE_INFO_MTU_MIN_SIZE);
-      pstmt.setInt(3, Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
+      pstmt.setInt(2, Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
       pstmt.executeUpdate();
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -337,21 +334,16 @@ public class OwnerDbManager {
     String sql = "UPDATE TO2_SETTINGS" + " SET " + field + " = ?" + " WHERE ID = 1;";
 
     if (field.equals("DEVICE_SERVICE_INFO_MTU_SIZE")) {
-      if (mtu < 0) {
-        logger.info("Received value must be > 0. "
-            + "Updating MTU size to default minimum of "
-            + Const.SERVICE_INFO_MTU_MIN_SIZE);
-        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
-      } else if (mtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+      if (mtu < Const.DEFAULT_SERVICE_INFO_MTU_SIZE) {
         logger.info("Received value less than default minimum. "
             + "Updating MTU size to default minimum of "
-            + Const.SERVICE_INFO_MTU_MIN_SIZE);
-        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
-      } else if (mtu > Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE) {
+            + Const.DEFAULT_SERVICE_INFO_MTU_SIZE);
+        mtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      } else if (mtu > Const.OWNER_THRESHOLD_MAX_MTU_SIZE) {
         logger.info("MTU size greater than maximum allowed. "
             +  "Updating MTU size to maximum limit of "
-            +  Const.OWNER_THRESHOLD_DEFAULT_MTU_SIZE);
-        mtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+            +  Const.OWNER_THRESHOLD_MAX_MTU_SIZE);
+        mtu = Const.OWNER_THRESHOLD_MAX_MTU_SIZE;
       }
     }
 
