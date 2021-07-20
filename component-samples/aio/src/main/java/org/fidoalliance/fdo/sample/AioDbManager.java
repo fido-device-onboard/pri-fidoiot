@@ -18,12 +18,14 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * AIO Database Manager.
  */
 public class AioDbManager {
 
+  private static LoggerService logger = new LoggerService(AioDbManager.class);
   private static final int DEFAULT_WAIT_SECONDS = 315400000;
 
   /**
@@ -162,6 +164,26 @@ public class AioDbManager {
       stmt.executeUpdate(fmtSql);
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Updaters to0RvBlob in T02_Config table.
+   *
+   * @param ds         A sql datasource.
+   * @param to0RvBlob  rvBlob containing Owner address for device to be used in T02.
+   */
+  public void updateTo0RvBlob(DataSource ds, String to0RvBlob) {
+    // If to0RvBlob is not empty.
+    if (!to0RvBlob.equals("")) {
+      String sql = "UPDATE TO2_CONFIG SET RV_BLOB = ?";
+      try (Connection conn = ds.getConnection();
+           PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, to0RvBlob);
+        pstmt.executeUpdate();
+      } catch (SQLException e) {
+        logger.error("Unable to update to0_rv_blob in DB");
+      }
     }
   }
 
