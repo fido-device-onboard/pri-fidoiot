@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.protocol.Const;
+import org.fidoalliance.fdo.protocol.Debug;
 import org.fidoalliance.fdo.storage.OwnerDbManager;
 
 public class OwnerSetupInfoServlet extends HttpServlet {
@@ -68,9 +69,14 @@ public class OwnerSetupInfoServlet extends HttpServlet {
           if (si.length == 2) {
             switch (si[0]) {
               case SETUPINFO_GUID:
-                replacementGuid = UUID.fromString(si[1]);
-                getServletContext().log("Updating Replacement GUID for " + currentGuid.toString());
-                ownerDbManager.updateDeviceReplacementGuid(ds, currentGuid, replacementGuid);
+                if (Debug.IS_REUSE_DISABLED) {
+                  getServletContext().log("Reuse not enabled.  GUID cannot be set manually.");
+                } else {
+                  replacementGuid = UUID.fromString(si[1]);
+                  getServletContext().log(
+                      "Updating Replacement GUID for " + currentGuid.toString());
+                  ownerDbManager.updateDeviceReplacementGuid(ds, currentGuid, replacementGuid);
+                }
                 break;
               case SETUPINFO_RVINFO:
                 replacementRvInfo = si[1];

@@ -150,11 +150,24 @@ public abstract class To2ServerService extends MessagingService {
         replacementRvInfo = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
       }
 
-      UUID replacementGuid = getStorage().getReplacementGuid();
-      if (replacementGuid == null) {
+      UUID replacementGuid;
+      if (Debug.IS_REUSE_DISABLED) {
+        // Reuse is disabled - auto-generate the replacement GUID.
         Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-        replacementGuid = ovh.getAsUuid(Const.OVH_GUID);
+        UUID oldUuid = ovh.getAsUuid(Const.OVH_GUID);
+        replacementGuid = getStorage().generateReplacementGuid(oldUuid);
+
+      } else {
+        // Reuse is enabled - fetch the replacement GUID from database and fall back to 'no change'.
+        replacementGuid = getStorage().getReplacementGuid();
+        if (replacementGuid == null) {
+          Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+          replacementGuid = ovh.getAsUuid(Const.OVH_GUID);
+        }
+
       }
+
+
       Composite replacementKey = getStorage().getReplacementOwnerKey();
       if (replacementKey == null) {
         replacementKey = getCryptoService().getOwnerPublicKey(voucher);
@@ -344,6 +357,12 @@ public abstract class To2ServerService extends MessagingService {
   }
 
   private boolean isReuseSelected(Composite ovh, Composite pubKey) {
+    if (Debug.IS_REUSE_DISABLED) {
+      // Only check for reuse if compile-time flags are set correctly.
+      // Otherwise ignore any runtime configuration which might otherwise enable it.
+      return false;
+    }
+
     if (Arrays.equals(PrimitivesUtil.getCborNullBytes(), getStorage().getReplacementHmac())
         && ovh.getAsUuid(Const.OVH_GUID).equals(getStorage().getReplacementGuid())
         && (null != getStorage().getReplacementRvInfo()
