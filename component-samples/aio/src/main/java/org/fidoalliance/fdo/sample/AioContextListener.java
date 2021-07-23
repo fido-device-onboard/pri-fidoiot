@@ -239,6 +239,7 @@ public class AioContextListener implements ServletContextListener {
     AioDbManager aioDbManager = new AioDbManager();
     aioDbManager.createTables(ds);
     aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
+    aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
 
     // schedule session cleanup scheduler
     scheduler.scheduleWithFixedDelay(new Runnable() {

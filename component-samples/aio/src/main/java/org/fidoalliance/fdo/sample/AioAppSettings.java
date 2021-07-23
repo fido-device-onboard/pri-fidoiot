@@ -66,5 +66,5 @@ public class AioAppSettings {
   //servlet api config
   public static final String DOWNLOADS_PATH = "aio_downloads_path";
 
-
+  public static final String TO0_RV_BLOB = "owner_to0_rv_blob";
 }

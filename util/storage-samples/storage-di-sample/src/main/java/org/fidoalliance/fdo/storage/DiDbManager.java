@@ -75,7 +75,7 @@ public class DiDbManager {
                 + "CERTIFICATE_VALIDITY_DAYS,"
                 + "RENDEZVOUS_INFO) "
                 + "VALUES (1,'3650',"
-                + "'81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb');";
+                + "'81858205696c6f63616c686f73748203191f68820c018202447f0000018204191f69');";
             stmt.executeUpdate(sql);
           }
 
