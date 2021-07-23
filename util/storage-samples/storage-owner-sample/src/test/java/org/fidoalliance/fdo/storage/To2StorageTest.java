@@ -44,7 +44,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 public class To2StorageTest {
 
   private static final String DB_HOST = "localhost";
-  private static final String DB_PORT = "8043";
+  private static final String DB_PORT = "8091";
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
 
@@ -470,7 +470,7 @@ public class To2StorageTest {
       assertDoesNotThrow(
           ()-> { dbsManager.updateDeviceReplacementRvinfo(ds,
               UUID.fromString("f0956089-c0df-4c34-9c61-f460457e87eb"),
-              "http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040");
+              "http://localhost:8090?ipaddress=127.0.0.1&ownerport=8090");
           }
       );
 

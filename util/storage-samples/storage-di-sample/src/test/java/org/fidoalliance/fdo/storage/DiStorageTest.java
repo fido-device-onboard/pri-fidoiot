@@ -42,7 +42,7 @@ import org.fidoalliance.fdo.protocol.MessagingService;
 public class DiStorageTest {
 
   private static final String DB_HOST = "localhost";
-  private static final String DB_PORT = "8043";
+  private static final String DB_PORT = "8091";
   private static final String DB_USER = "sa";
   private static final String DB_PASSWORD = "";
   private static final Path BASE_PATH = Path
@@ -309,7 +309,7 @@ public class DiStorageTest {
 
       DiDbManager manager = new DiDbManager();
       manager.createTables(ds);
-      manager.addRvInfo(ds,"http://localhost:8040?ipaddress=127.0.0.1&ownerport=8040");
+      manager.addRvInfo(ds,"http://localhost:8090?ipaddress=127.0.0.1&ownerport=8090");
     } catch (Exception e) {
         throw new RuntimeException(e);
     } finally {
