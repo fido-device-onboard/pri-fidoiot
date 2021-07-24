@@ -156,11 +156,15 @@ public class DiDbStorage implements DiServerStorage {
         // validate test signature against certpath
 
         // create proper signed data format
-        // Note: protected header in second_key is empty since
+        // Note: value in third_key is empty since
         // we have no nonce with the test signature.
+        final byte[] protectedHeader = Composite.newMap()
+                .set(Const.COSE_ALG, Const.COSE_ES384_ONDIE)
+                .toBytes();
+
         Composite sigStruct = Composite.newArray()
                 .set(Const.FIRST_KEY, "Signature1")
-                .set(Const.SECOND_KEY, new byte[0])
+                .set(Const.SECOND_KEY, protectedHeader)
                 .set(Const.THIRD_KEY, new byte[0])
                 .set(Const.FOURTH_KEY, serialNo.getBytes());
 
