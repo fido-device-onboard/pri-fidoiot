@@ -321,6 +321,12 @@ public class Device {
           logger.info("Unable to contact RV at " + url + ". " + e.getMessage());
         }
       }
+
+      if (null == signedBlob.get()) {
+        logger.error("TO1 failed. Unable to onboard device. Exiting application.");
+        return;
+      }
+
     } else {
       logger.info("RVBypass flag is set, Skipping T01.");
     }
