@@ -235,6 +235,26 @@ public class OwnerDbStorage implements To2ServerStorage {
   }
 
   @Override
+  public UUID generateReplacementGuid(UUID oldUuid) {
+
+    UUID newUuid = UUID.randomUUID();
+    String sql = "UPDATE TO2_DEVICES"
+        + " SET REPLACEMENT_GUID = ?"
+        + " WHERE GUID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, newUuid.toString());
+      pstmt.setString(2, oldUuid.toString());
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    return newUuid;
+  }
+
+  @Override
   public UUID getReplacementGuid() {
 
     String sql = "SELECT REPLACEMENT_GUID FROM TO2_DEVICES WHERE GUID = ?;";

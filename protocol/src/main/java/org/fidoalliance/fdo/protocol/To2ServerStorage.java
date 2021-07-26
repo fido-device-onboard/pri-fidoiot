@@ -46,6 +46,10 @@ public interface To2ServerStorage extends StorageEvents {
 
   UUID getReplacementGuid();
 
+  default UUID generateReplacementGuid(UUID oldUuid) {
+    return UUID.randomUUID();
+  }
+
   Composite getReplacementOwnerKey();
 
   void discardReplacementOwnerKey();

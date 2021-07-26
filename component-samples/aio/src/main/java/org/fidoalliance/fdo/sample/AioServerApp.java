@@ -121,6 +121,9 @@ public class AioServerApp {
     ctx.addParameter(AioAppSettings.OWNER_TRANSFER_KEYS,
         AioConfigLoader.loadConfig(AioAppSettings.OWNER_TRANSFER_KEYS));
 
+    ctx.addParameter(AioAppSettings.TO0_RV_BLOB,
+        AioConfigLoader.loadConfig(AioAppSettings.TO0_RV_BLOB));
+
     ctx.addParameter(AioAppSettings.MANUFACTURER_KEYSTORE,
         AioConfigLoader.loadConfig(AioAppSettings.MANUFACTURER_KEYSTORE));
     ctx.addParameter(AioAppSettings.MANUFACTURER_KEYSTORE_PWD,
