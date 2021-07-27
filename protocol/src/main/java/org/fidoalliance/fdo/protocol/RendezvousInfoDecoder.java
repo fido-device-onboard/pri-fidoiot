@@ -196,12 +196,15 @@ public class RendezvousInfoDecoder {
         }
 
         String hostName = queryStringValue(directive, Const.RV_DNS);
-        list.add(protocol + hostName + ":" + portString);
+        if (hostName != null) {
+          list.add(protocol + hostName + ":" + portString);
+        }
 
         InetAddress ipAddr = queryIpAddressValue(directive);
-        String ipAddrString = ipAddr.getHostAddress();
-
-        list.add(protocol + ipAddrString + ":" + portString);
+        if (ipAddr != null) {
+          String ipAddrString = ipAddr.getHostAddress();
+          list.add(protocol + ipAddrString + ":" + portString);
+        }
       }
     }
 
