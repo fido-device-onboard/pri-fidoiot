@@ -119,7 +119,7 @@ generate_hash()
   # Generate public key hash
   openssl x509 -in $certfile -pubkey -noout | openssl enc -base64 -d > public.der
   cat public.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}' > $hashfile
- 
+
   rm -f public.der
 }
 
@@ -129,8 +129,8 @@ generate_keypair_rsa()
   # Arg1: Curve name
   keylen=$1
 
-  # Arg2: Keystore password
-  pass=$2
+  # Remove temporary files form last call
+  rm -f private.key public.key cert.pem
 
   # Generate RSA2048 Keys and include them in the keystore
   openssl genrsa -F4 -out private.key ${keylen} > /dev/null 2>&1
@@ -140,13 +140,30 @@ generate_keypair_rsa()
 
   openssl req -x509 -key private.key -out cert.pem -days 3650 -batch
 
-  openssl pkcs12 -export -in cert.pem -inkey private.key -name rsa${keylen} \
-    -out rsa${keylen}.p12 -password pass:${pass}
-
   # Generate public key hash
   generate_hash cert.pem rsa${keylen}_public.hash
 
   cp public.key rsa${keylen}_public.key
+}
+
+# Generate RSA keystore
+generate_keystore_rsa()
+{
+  # Arg1: Curve name
+  keylen=$1
+
+  # Arg2: Keystore password
+  pass=$2
+
+  # Arg3: Keystore name prefix
+  name=$3
+
+  rm -f rsa${keylen}.p12
+
+  generate_keypair_rsa $keylen
+
+  openssl pkcs12 -export -in cert.pem -inkey private.key -name ${name}_rsa${keylen} \
+    -out rsa${keylen}.p12 -password pass:${pass}
 }
 
 # Generate EC keypair
@@ -155,9 +172,6 @@ generate_keypair_ec()
   # Arg1: Curve name
   keylen=$1
 
-  # Arg2: Keystore password
-  pass=$2
-
   if [ $keylen == "256" ]; then
     curve=prime256v1
   else
@@ -165,7 +179,7 @@ generate_keypair_ec()
   fi
 
   # Remove temporary files form last call
-  rm -f private.key public.key cert.pem ec${keylen}.p12
+  rm -f private.key public.key cert.pem
 
   # Keys Generations
   openssl ecparam -name $curve -genkey -noout -out private.key > /dev/null 2>&1
@@ -174,13 +188,30 @@ generate_keypair_ec()
 
   openssl req -x509 -key private.key -out cert.pem -days 3650 -batch
 
-  openssl pkcs12 -export -in cert.pem -inkey private.key -name ec${keylen} \
-    -out ec${keylen}.p12 -password pass:${pass}
-
   # Generate public key hash
   generate_hash cert.pem ec${keylen}_public.hash
 
   cp public.key ec${keylen}_public.key
+}
+
+# Generate EC keystore
+generate_keystore_ec()
+{
+  # Arg1: Curve name
+  keylen=$1
+
+  # Arg2: Keystore password
+  pass=$2
+
+  # Arg3: Keystore name prefix
+  name=$3
+
+  rm -f ec${keylen}.p12
+
+  generate_keypair_ec $keylen
+
+  openssl pkcs12 -export -in cert.pem -inkey private.key -name ${name}_ec${keylen} \
+    -out ec${keylen}.p12 -password pass:${pass}
 }
 
 # Import one keystore into another keystore
@@ -189,33 +220,38 @@ import_keystore()
   # Arg1: Destination keystore
   dest=$1
 
-  # Arg2: Source keystore
-  src=$2
+  # Arg3: Destination Keystore password
+  destpass=$2
 
-  # Arg3: Keystore password (both src and dest keystore have same passwrod)
-  pass=$3
+  # Arg3: Source keystore
+  src=$3
 
-  keytool -importkeystore -srckeystore ${src} -srcstorepass ${pass} \
-    -destkeystore ${dest} -deststorepass ${pass} \
+  # Arg4: Source Keystore password
+  srcpass=$4
+
+  keytool -importkeystore -srckeystore ${src} -srcstorepass ${srcpass} \
+    -destkeystore ${dest} -deststorepass ${destpass} \
     -deststoretype pkcs12 -noprompt > /dev/null 2>&1
 }
 
 generate_keystore()
 {
+  comp=${1}
+
   PASS_KEY=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 
   rm -f keystore.p12 ec256.p12 ec384.p12 rsa2048.p12
   rm -f pub_keys.pem
 
   # RSA2048 Keys Generations
-  generate_keypair_ec 256 ${PASS_KEY}
-  generate_keypair_ec 384 ${PASS_KEY}
-  generate_keypair_rsa 2048 ${PASS_KEY}
+  generate_keystore_ec 256 ${PASS_KEY} ${comp}
+  generate_keystore_ec 384 ${PASS_KEY} ${comp}
+  generate_keystore_rsa 2048 ${PASS_KEY} ${comp}
 
   # Import rsa2048, ec256, and ec384 p12 keystores to one p12 keystore
-  import_keystore keystore.p12 ec256.p12 ${PASS_KEY}
-  import_keystore keystore.p12 ec384.p12 ${PASS_KEY}
-  import_keystore keystore.p12 rsa2048.p12 ${PASS_KEY}
+  import_keystore keystore.p12 ${PASS_KEY} ec256.p12 ${PASS_KEY}
+  import_keystore keystore.p12 ${PASS_KEY} ec384.p12 ${PASS_KEY}
+  import_keystore keystore.p12 ${PASS_KEY} rsa2048.p12 ${PASS_KEY}
 
   # Verify the keys from p12 keystore
   keytool -list -keystore keystore.p12 -storepass ${PASS_KEY} > /dev/null 2>&1
@@ -412,6 +448,11 @@ misc_copy()
   copy_failsafe reseller_pub_keys.pem $CREDS_PATH/manufacturer
   copy_failsafe_rename reseller_pub_keys.pem $CREDS_PATH/owner owner2_pub_keys.pem
 
+  # Import reseller keystore into owner keystore, to allow use of Owner2 key
+  import_keystore owner_keystore.p12 $(cat owner_keystore.pass) \
+    reseller_keystore.p12 $(cat reseller_keystore.pass)
+  copy_failsafe owner_keystore.p12 $CREDS_PATH/owner
+
   if [ -e manufacturer_keystore.p12 ]; then
     copy_failsafe manufacturer_keystore.p12 $CREDS_PATH/aio
     PASS_KEY=$(cat manufacturer_keystore.pass)
@@ -431,7 +472,7 @@ misc_copy()
 start_generation()
 {
   arr=($*)
-  components=("manufacturer" "owner" "reseller")
+  components=("manufacturer" "reseller" "owner")
   if [[ $# == 0 ]]; then
     echo "For help, provide -h to the script"; exit 1;
   elif [[ $* =~ "-h" ]]; then
