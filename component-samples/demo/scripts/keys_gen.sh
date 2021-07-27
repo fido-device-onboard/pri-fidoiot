@@ -354,9 +354,6 @@ generate_tls_keystore()
     -storepass ${SSL_PASS} -noprompt > /dev/null 2>&1
   echo "${SSL_PASS}" > ssl.pass
 
-  # TODO: Remove following chmod call
-  chmod 0755 ssl.p12
-
   # Copying the ssl keystore and truststores to the destination paths
   for comp in "manufacturer" "rv" "owner" "reseller" "aio"; do
     mkdir -p $CREDS_PATH/$comp/certs/

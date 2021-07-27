@@ -125,6 +125,8 @@ public class ManufacturerApp {
       // ondie is optional so if config cannot be loaded just default to no config
     }
 
+    ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE,
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE));
     ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     ctx.addApplicationListener(DbStarter.class.getName());

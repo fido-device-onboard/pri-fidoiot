@@ -83,6 +83,8 @@ public class ResellerServerApp {
 
     ctx.addParameter(ResellerAppConstants.KEYSTORE_PWD,
         ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
+    ctx.addParameter(ResellerAppConstants.KEYSTORE_PATH,
+        ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PATH));
 
     try {
       ctx.addParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH,
