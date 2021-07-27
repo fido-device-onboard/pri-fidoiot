@@ -154,9 +154,23 @@ public class DiDbStorage implements DiServerStorage {
                         this.onDieService.getOnDieCache());
 
         // validate test signature against certpath
+
+        // create proper signed data format
+        // Note: value in third_key is empty since
+        // we have no nonce with the test signature.
+        final byte[] protectedHeader = Composite.newMap()
+                .set(Const.COSE_ALG, Const.COSE_ES384_ONDIE)
+                .toBytes();
+
+        Composite sigStruct = Composite.newArray()
+                .set(Const.FIRST_KEY, "Signature1")
+                .set(Const.SECOND_KEY, protectedHeader)
+                .set(Const.THIRD_KEY, new byte[0])
+                .set(Const.FOURTH_KEY, serialNo.getBytes());
+
         if (!onDieService.validateSignature(
                 (List<Certificate>) certPath.getCertificates(),
-                serialNo.getBytes(),
+                sigStruct.toBytes(),
                 mstr.getAsBytes(Const.FIFTH_KEY))) {
           throw new InvalidMessageException("OnDie test signature failure.");
         }
