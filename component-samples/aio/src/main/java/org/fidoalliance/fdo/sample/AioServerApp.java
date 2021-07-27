@@ -195,6 +195,10 @@ public class AioServerApp {
     wrapper.setAsyncSupported(true);
     //wrapper.setLoadOnStartup(4);
 
+    wrapper = tomcat.addServlet(ctx, "AioRvInfoApi", new AioRvInfoServlet());
+    wrapper.addMapping("/api/v1/aio/rvinfo/*");
+    wrapper.setAsyncSupported(true);
+
     wrapper = tomcat.addServlet(ctx, "downloadServlet", new AioFileDownloadServlet());
     wrapper.addMapping("/downloads/*");
     wrapper.addInitParameter(AioAppSettings.DOWNLOADS_PATH,
