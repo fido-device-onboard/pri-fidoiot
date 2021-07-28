@@ -22,7 +22,7 @@ node('ubuntu18.04-OnDemand'){
     {
 
       // Checking out the smoke test code
-      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'test-fidoiot']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard/test-fidoiot']]])
+      checkout([$class: 'GitSCM', branches: [[name: '*/trb-api-pass']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'test-fidoiot']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/trbehera/test-fidoiot']]])
 
       // Creating the required directories
       sh '''
