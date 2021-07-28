@@ -53,7 +53,7 @@ public class ResellerContextListener implements ServletContextListener {
 
       @Override
       protected String getKeyStoreType() {
-        return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_TYPE);
+        return ResellerAppConstants.KEYSTORE_TYPE;
       }
 
       @Override

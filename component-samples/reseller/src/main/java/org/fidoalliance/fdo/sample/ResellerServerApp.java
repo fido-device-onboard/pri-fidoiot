@@ -83,6 +83,8 @@ public class ResellerServerApp {
 
     ctx.addParameter(ResellerAppConstants.KEYSTORE_PWD,
         ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
+    ctx.addParameter(ResellerAppConstants.KEYSTORE_PATH,
+        ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PATH));
 
     try {
       ctx.addParameter(ResellerAppConstants.OWNER_PUB_KEY_PATH,
@@ -164,7 +166,7 @@ public class ResellerServerApp {
     constraint.addCollection(collection);
     ctx.addConstraint(constraint);
 
-    tomcat.addRole("admin", AUTH_ROLE);
+    tomcat.addRole(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_USER), AUTH_ROLE);
     tomcat.addUser(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_USER),
         ResellerConfigLoader.loadConfig(ResellerAppConstants.API_PWD));
 

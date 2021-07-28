@@ -681,25 +681,6 @@ public final class CryptoService {
                         Composite sigInfoA,
                         OnDieService onDieService,
                         Composite onDieCertPath) {
-    if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
-        .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
-      // EPID verification
-      verifyMaroePrefix(cose);
-      EpidSignatureVerifier.Result verificationResult =
-              EpidSignatureVerifier.verify(cose, sigInfoA);
-      if (verificationResult == EpidSignatureVerifier.Result.VERIFIED) {
-        return true;
-      } else if (this.epidTestMode) {
-        // in test mode ignore the validation of EPID signatures but
-        // still perform the verification to check for non-signature issues
-        if (verificationResult == EpidSignatureVerifier.Result.UNKNOWN_ERROR
-                || verificationResult == EpidSignatureVerifier.Result.MALFORMED_REQUEST) {
-          return false;
-        }
-        return true;
-      }
-      return false;
-    }
 
     final byte[] protectedHeader;
     final Composite header1;
@@ -714,6 +695,46 @@ public final class CryptoService {
     final ByteBuffer payload = cose.getAsByteBuffer(Const.COSE_SIGN1_PAYLOAD);
     final byte[] sig = cose.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
 
+    // Signature must be computed over a sig_structure:
+    // Sig_structure = [
+    //   context : "Signature" / "Signature1" / "CounterSignature",
+    //   body_protected : empty_or_serialized_map,
+    //   external_aad : bstr,
+    //   payload : bstr
+    // ]
+    //
+    // See the COSE RFC 8152 for details on this.
+
+    Composite sigStruct = Composite.newArray()
+            .set(Const.FIRST_KEY, "Signature1")
+            .set(Const.SECOND_KEY, protectedHeader)
+            .set(Const.THIRD_KEY, new byte[0])
+            .set(Const.FOURTH_KEY, payload);
+
+    // Three types of RoT signatures: 1) EPID, 2) OnDie ECDSA and 3) ECDSA.
+
+    // *** 1) EPID based signature ***
+    if (null != sigInfoA && sigInfoA.size() > 0 && Arrays.asList(Const.SG_EPIDv10, Const.SG_EPIDv11)
+            .contains(sigInfoA.getAsNumber(Const.FIRST_KEY).intValue())) {
+      // EPID verification
+      verifyMaroePrefix(cose);
+      EpidSignatureVerifier.Result verificationResult =
+              EpidSignatureVerifier.verify(cose, sigStruct.toBytes(), sigInfoA);
+      if (verificationResult == EpidSignatureVerifier.Result.VERIFIED) {
+        return true;
+      } else if (this.epidTestMode) {
+        // in test mode ignore the validation of EPID signatures but
+        // still perform the verification to check for non-signature issues
+        if (verificationResult == EpidSignatureVerifier.Result.UNKNOWN_ERROR
+                || verificationResult == EpidSignatureVerifier.Result.MALFORMED_REQUEST) {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }
+
+    // *** 2) OnDie ECDSA based signature ***
     try {
       // OnDie ECDSA signature verification
       if (algId == Const.COSE_ES384_ONDIE) {
@@ -731,35 +752,16 @@ public final class CryptoService {
                       cf.generateCertificate(
                               new ByteArrayInputStream((byte[]) onDieCertPath.get(i))));
             }
-            return onDieService.validateSignature(certPath, payload.array(), sig);
+            return onDieService.validateSignature(certPath, sigStruct.toBytes(), sig);
           } else {
-            return onDieService.validateSignature(verificationKey, payload.array(), sig);
+            return onDieService.validateSignature(verificationKey, sigStruct.toBytes(), sig);
           }
         } catch (CertificateException ex) {
           return false;
         }
       }
 
-      // ECDSA verification
-      final String algName = getSignatureAlgorithm(algId);
-      final Signature signer = getSignatureInstance(algName);
-
-      // Signature must be computed over a sig_structure:
-      // Sig_structure = [
-      //   context : "Signature" / "Signature1" / "CounterSignature",
-      //   body_protected : empty_or_serialized_map,
-      //   external_aad : bstr,
-      //   payload : bstr
-      // ]
-      //
-      // See the COSE RFC 8152 for details on this.
-
-      Composite sigStruct = Composite.newArray()
-          .set(Const.FIRST_KEY, "Signature1")
-          .set(Const.SECOND_KEY, protectedHeader)
-          .set(Const.THIRD_KEY, new byte[0])
-          .set(Const.FOURTH_KEY, payload);
-
+      // *** 3) ECDSA based signature ***
       byte [] derSig = sig;
       if (verificationKey instanceof ECKey) {
         // The encoded signature is fixed-width r|s concatenated, we must convert it to DER.
@@ -773,6 +775,9 @@ public final class CryptoService {
         byte [] b = sigBytes.toByteArray();
         derSig = Arrays.copyOf(b, b.length);
       }
+
+      final String algName = getSignatureAlgorithm(algId);
+      final Signature signer = getSignatureInstance(algName);
 
       signer.initVerify(verificationKey);
       signer.update(sigStruct.toBytes());
