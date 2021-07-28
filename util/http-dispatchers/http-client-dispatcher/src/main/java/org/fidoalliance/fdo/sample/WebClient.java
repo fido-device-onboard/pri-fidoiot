@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ import org.fidoalliance.fdo.protocol.MessageDispatcher;
 /**
  * Represents a WebClient for dispatching HTTP messages.
  */
-public class WebClient implements Runnable {
+public class WebClient implements Callable<Void> {
 
   private static final String SSL_MODE = "fido_ssl_mode";
   private final MessageDispatcher dispatcher;
@@ -270,20 +271,14 @@ public class WebClient implements Runnable {
   }
 
   @Override
-  public void run() {
+  public Void call() throws Exception {
 
-    try {
-      DispatchResult dr = helloMessage;
-      while (!dr.isDone()) {
-        dr = sendMessage(dr.getReply());
-        dr = dispatcher.dispatch(dr.getReply());
-      }
-    } catch (ConnectException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+    DispatchResult dr = helloMessage;
+    while (!dr.isDone()) {
+      dr = sendMessage(dr.getReply());
+      dr = dispatcher.dispatch(dr.getReply());
     }
+
+    return null;
   }
 }
