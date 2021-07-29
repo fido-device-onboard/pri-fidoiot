@@ -144,6 +144,7 @@ public class OwnerServerApp {
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO_READY));
     wrapper.addMapping(getMessagePath(Const.TO2_DEVICE_SERVICE_INFO));
     wrapper.addMapping(getMessagePath(Const.TO2_DONE));
+    wrapper.addMapping(getMessagePath(Const.ERROR));
 
     wrapper.setAsyncSupported(true);
 
