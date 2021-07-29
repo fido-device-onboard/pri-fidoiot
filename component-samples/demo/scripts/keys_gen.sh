@@ -306,6 +306,17 @@ generate_component_keys()
   printf " successful\n"
 }
 
+generate_api_pass()
+{
+  api_pass=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+
+  # Update API password
+  for comp in "aio" "manufacturer" "owner" "reseller"; do
+    pass_update_env_files $CREDS_PATH/$comp "${comp}_api_password=${api_pass}"
+  done
+
+}
+
 # Updating all component key hashes to the RV config.properties
 prepare_rv_config()
 {
@@ -509,6 +520,7 @@ start_generation()
             generate_component_keys $i
           fi
         done
+        generate_api_pass
         prepare_rv_config;
         generate_tls_keystore
         device_pem_files

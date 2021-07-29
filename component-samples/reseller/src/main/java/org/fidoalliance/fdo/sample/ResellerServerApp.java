@@ -166,7 +166,7 @@ public class ResellerServerApp {
     constraint.addCollection(collection);
     ctx.addConstraint(constraint);
 
-    tomcat.addRole("admin", AUTH_ROLE);
+    tomcat.addRole(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_USER), AUTH_ROLE);
     tomcat.addUser(ResellerConfigLoader.loadConfig(ResellerAppConstants.API_USER),
         ResellerConfigLoader.loadConfig(ResellerAppConstants.API_PWD));
 
