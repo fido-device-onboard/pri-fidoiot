@@ -122,7 +122,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| POST /api/v1/assign/?id=<customer_id>&guid=<device_guid> | Assigns customer ID to Ownership Voucher having the input GUID. | Query - id: Customer ID, guid = Device GUID | | | |
+| POST /api/v1/assign/?id=<customer_id>&serial=<serial_no> | Assigns customer ID to Ownership Voucher having the input serial no. | Query - id: Customer ID, serial = Device serial number | | | |
 | GET /api/v1/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | | Ownership Voucher |
 | POST /api/v1/customers/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
 | POST /api/v1/rvinfo/ | Updates RV Info in `MT_SETTINGS` table | | text/plain; charset=us-ascii | RV Info | | |
