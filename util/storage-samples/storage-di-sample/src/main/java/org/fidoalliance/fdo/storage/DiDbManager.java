@@ -140,25 +140,25 @@ public class DiDbManager {
    * 
    * @param ds The datasource to use.
    * @param id The id of the customer.
-   * @param guid The GUID of the device
+   * @param serial The Serial Number of the device
    */
-  public int assignCustomerToVoucher(DataSource ds, int id, String guid) {
+  public int assignCustomerToVoucher(DataSource ds, int id, String serial) {
 
     String sql = ""
         + "UPDATE MT_DEVICES   "
         + "SET CUSTOMER_ID=? "
-        + "WHERE GUID=?; ";
+        + "WHERE SERIAL_NO=?; ";
 
     int rowsAffected = 0;
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setInt(1, id);
-      pstmt.setString(2, guid);
+      pstmt.setString(2, serial);
       rowsAffected = pstmt.executeUpdate();
       logger.info(rowsAffected);
 
     } catch (SQLException e) {
-      logger.error("Unable to update customer for guid: " + guid);
+      logger.error("Unable to update customer for serial no: " + serial);
       throw new RuntimeException(e);
     }
     return rowsAffected;
