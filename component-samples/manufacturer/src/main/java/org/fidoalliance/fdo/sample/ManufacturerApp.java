@@ -153,6 +153,7 @@ public class ManufacturerApp {
 
     wrapper.addMapping(getMessagePath(Const.DI_APP_START));
     wrapper.addMapping(getMessagePath(Const.DI_SET_HMAC));
+    wrapper.addMapping(getMessagePath(Const.ERROR));
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "DiApi", new DiApiServlet());
