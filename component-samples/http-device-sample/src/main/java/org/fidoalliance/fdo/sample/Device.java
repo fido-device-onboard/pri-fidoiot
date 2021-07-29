@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -324,6 +325,9 @@ public class Device {
           client.call();
         } catch (ConnectException e) {
           logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
+          return;
+        } catch (HttpResponseCodeException e) {
+          logger.error("HTTP code " + e.getCode() + " returned by server");
           return;
         }
       }

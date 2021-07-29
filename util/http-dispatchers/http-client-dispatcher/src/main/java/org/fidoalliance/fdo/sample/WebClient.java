@@ -204,7 +204,9 @@ public class WebClient implements Callable<Void> {
     }
   }
 
-  private DispatchResult sendMessage(Composite message) throws IOException, InterruptedException {
+  private DispatchResult sendMessage(Composite message)
+      throws IOException, InterruptedException, HttpResponseCodeException {
+
     String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
@@ -260,7 +262,7 @@ public class WebClient implements Callable<Void> {
 
         return new DispatchResult(reply, false);
       }
-      throw new RuntimeException("http status: " + hr.statusCode());
+      throw new HttpResponseCodeException(hr.statusCode());
     } finally {
       // To clean httpClient threads and avoid memory leaks.
       executor.shutdownNow();
