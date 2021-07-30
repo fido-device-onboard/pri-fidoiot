@@ -47,12 +47,12 @@ public class AioRvInfoServlet extends HttpServlet {
 
     Composite rvInstruction = Composite.newArray();
 
-    String dns = req.getParameter("dns");
+    final String dns = req.getParameter("dns");
     if (dns != null) {
       rvInstruction.set(rvInstruction.size(), new Object[]{Const.RV_DNS, dns});
     }
 
-    String ip = req.getParameter("ip");
+    final String ip = req.getParameter("ip");
     if (ip != null) {
       try {
         rvInstruction.set(rvInstruction.size(),
@@ -62,19 +62,22 @@ public class AioRvInfoServlet extends HttpServlet {
       }
     }
 
-    String rvProt = req.getParameter("rvprot");
+    final String rvProt = null != req.getParameter("rvprot")
+            ? req.getParameter("rvprot") : "https";
+    String devPort = "8443";
     if (rvProt != null) {
       if (rvProt.equals("http")) {
         rvInstruction.set(rvInstruction.size(),
                 new Object[]{Const.RV_PROTOCOL, Const.RV_PROT_HTTP});
+        devPort = AioConfigLoader.loadConfig(AioAppSettings.AIO_PORT);
       } else if (rvProt.equals("https")) {
         rvInstruction.set(rvInstruction.size(),
                 new Object[]{Const.RV_PROTOCOL, Const.RV_PROT_HTTPS});
+        devPort = AioConfigLoader.loadConfig(AioAppSettings.AIO_HTTPS_PORT);
       }
     }
 
-    String devPort = AioConfigLoader.loadConfig(AioAppSettings.AIO_PORT);
-    String ownerPort = AioConfigLoader.loadConfig(AioAppSettings.AIO_HTTPS_PORT);
+    final String ownerPort = AioConfigLoader.loadConfig(AioAppSettings.AIO_HTTPS_PORT);
 
     rvInstruction.set(rvInstruction.size(),
             new Object[]{Const.RV_DEV_PORT, Integer.parseInt(devPort)});
@@ -87,11 +90,26 @@ public class AioRvInfoServlet extends HttpServlet {
     List<String> directives = RendezvousInfoDecoder
             .getHttpDirectives(rvInfoBlob, Const.RV_DEV_ONLY);
     if (directives.size() > 0) {
+      StringBuilder to0RvBlob = new StringBuilder();
+      to0RvBlob.append(rvProt + "://");
+      if (dns != null) {
+        to0RvBlob.append(dns + ":" + devPort);
+        if (ip != null) {
+          to0RvBlob.append("?ipaddress=" + ip);
+        } else {
+          to0RvBlob.append("?ipaddress=127.0.0.1");
+        }
+      } else if (ip != null) {
+        to0RvBlob.append(ip + ":" + devPort);
+        to0RvBlob.append("?ipaddress=" + ip);
+      }
+
       AioDbManager db = new AioDbManager();
       ServletContext sc = req.getServletContext();
       BasicDataSource ds = (BasicDataSource) sc.getAttribute("datasource");
       db.addRvInfo(ds, rvInfoBlob.toString());
-      logger.info("Updated RVInfo.");
+      db.updateTo0RvBlob(ds, to0RvBlob.toString());
+      logger.info("Updated RVInfo: " + directives.toString());
       res.setStatus(HttpServletResponse.SC_OK);
     } else {
       logger.error("Received invalid RVInfo.");
