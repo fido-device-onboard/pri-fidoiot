@@ -55,7 +55,7 @@ public final class EpidSignatureVerifier {
           path = String.join(Const.URL_PATH_SEPARATOR, Arrays.asList(Const.EPID_PROTOCOL_VERSION_V1,
                   Const.EPID_11, Const.EPID_PROOF_URI_PATH));
           url = new URL(EpidUtils.getEpidOnlineUrl().toString()).toURI()
-              .resolve(Const.URL_PATH_SEPARATOR + path).toString();
+                .resolve(Const.URL_PATH_SEPARATOR + path).toString();
           break;
         default:
           throw new IOException("Invalid sgType");
@@ -130,10 +130,10 @@ public final class EpidSignatureVerifier {
     return msg;
   }
 
-  // Generate the signed Payload depnding on the sgType.
+  // Generate the signed Payload depending on the sgType.
   private static byte[] createEpidPayload(Composite uph,
-                                          byte[] payloadAsBytes,
                                           byte[] nonce,
+                                          byte[] payloadAsBytes,
                                           int sgType) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     switch (sgType) {
