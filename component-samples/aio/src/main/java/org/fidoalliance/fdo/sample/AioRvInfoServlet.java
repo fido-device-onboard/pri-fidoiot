@@ -96,9 +96,12 @@ public class AioRvInfoServlet extends HttpServlet {
         to0RvBlob.append(dns + ":" + devPort);
         if (ip != null) {
           to0RvBlob.append("?ipaddress=" + ip);
+        } else {
+          to0RvBlob.append("?ipaddress=127.0.0.1");
         }
       } else if (ip != null) {
         to0RvBlob.append(ip + ":" + devPort);
+        to0RvBlob.append("?ipaddress=" + ip);
       }
 
       AioDbManager db = new AioDbManager();
