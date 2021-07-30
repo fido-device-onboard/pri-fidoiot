@@ -250,8 +250,6 @@ public class AioContextListener implements ServletContextListener {
     Consumer<String> injector = a -> newDevice(a,ds,cs,certResolver);
     sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR,injector);
 
-
-
     // schedule session cleanup scheduler
     scheduler.scheduleWithFixedDelay(new Runnable() {
       @Override
