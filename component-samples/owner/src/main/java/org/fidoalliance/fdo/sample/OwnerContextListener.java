@@ -222,7 +222,7 @@ public class OwnerContextListener implements ServletContextListener {
               guid, to0Util);
       to0Client.setRvBlob(sc.getInitParameter(OwnerAppSettings.TO0_RV_BLOB));
       to0Client.run();
-    } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
+    } catch (Exception e) {
       logger.error("Error during TO0 for GUID: " + guid.toString());
       throw new RuntimeException(e);
     }

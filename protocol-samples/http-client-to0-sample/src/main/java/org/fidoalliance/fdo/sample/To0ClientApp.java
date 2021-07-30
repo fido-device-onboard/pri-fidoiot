@@ -298,7 +298,7 @@ public class To0ClientApp {
       responseWait = null;
       try {
         WebClient client = new WebClient(path, dr, dispatcher);
-        client.run();
+        client.call();
         if (responseWait != null) {
           break;
         }
