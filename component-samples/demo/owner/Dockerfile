@@ -10,6 +10,9 @@ RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
 RUN mkdir -p /home/fdo/lib /home/fdo/serviceinfo
 
+# Uncomment the following line to enable onDie support for Owner
+# COPY ./ondie_cache ./ondie_cache/
+
 # Setup owner dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/

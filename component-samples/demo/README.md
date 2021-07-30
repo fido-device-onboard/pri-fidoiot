@@ -114,7 +114,7 @@ python3 component-samples/scripts/onDieCache.py --cachedir <path-to-ondie_cache-
 ```
 *Requires internet access for the component.
 
-Finally, the `ondie_cache` directory needs to be copied into the docker container, add the following line to `Dockerfile` of Manufacturer and Owner.
+Finally, the `ondie_cache` directory needs to be copied into the docker container, uncomment the following line in `Dockerfile` of Manufacturer and Owner.
 ```
 COPY ./ondie_cache ./ondie_cache/
 ```
@@ -124,10 +124,10 @@ COPY ./ondie_cache ./ondie_cache/
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
-To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, update manufacturer.env and owner.env respectively as below.
+To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, uncomment the following lines in manufacturer.env and owner.env respectively.
 
 ```
-ondie_cache=file:///home/manufacturer/ondie_cache/ # file:///home/owner/ondie_cache/ for FDO PRI Owner
+ondie_cache=file:///home/fdo/ondie_cache/
 ondie_autoupdate=true
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
