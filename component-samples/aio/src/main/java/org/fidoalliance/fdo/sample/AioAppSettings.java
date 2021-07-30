@@ -65,6 +65,6 @@ public class AioAppSettings {
 
   //servlet api config
   public static final String DOWNLOADS_PATH = "aio_downloads_path";
-
+  public static final String AUTO_INJECT_BLOB = "aio_auto_inject_blob";
   public static final String TO0_RV_BLOB = "owner_to0_rv_blob";
 }
