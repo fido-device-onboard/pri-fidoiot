@@ -106,7 +106,7 @@ public class AioRvInfoServlet extends HttpServlet {
       BasicDataSource ds = (BasicDataSource) sc.getAttribute("datasource");
       db.addRvInfo(ds, rvInfoBlob.toString());
       db.updateTo0RvBlob(ds, to0RvBlob.toString());
-      logger.info("Updated RVInfo.");
+      logger.info("Updated RVInfo: " + directives.toString());
       res.setStatus(HttpServletResponse.SC_OK);
     } else {
       logger.error("Received invalid RVInfo.");
