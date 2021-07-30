@@ -10,6 +10,9 @@ RUN useradd -ms /bin/bash fdo
 RUN mkdir -p /home/fdo/lib
 WORKDIR /home/fdo/
 
+# Uncomment the following line to enable onDie support for manufacturer
+# COPY ./ondie_cache ./ondie_cache/
+
 # Setup manufacturer dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
