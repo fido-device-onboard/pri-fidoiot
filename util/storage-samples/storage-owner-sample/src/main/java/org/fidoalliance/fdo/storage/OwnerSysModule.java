@@ -229,9 +229,10 @@ public class OwnerSysModule implements Module {
 
   private boolean getBooleanContent(String resId) {
     byte[] content = new OwnerDbManager().getSystemResourceContent(dataSource, resId);
-    if (content.length == 1 && content[0] == CBOR_TRUE) {
+
+    if (content != null && content.length == 1 && content[0] == CBOR_TRUE) {
       return true;
-    } else if (content.length == 1 && content[0] == CBOR_FALSE) {
+    } else if (content != null && content.length == 1 && content[0] == CBOR_FALSE) {
       return false;
     }
     throw new RuntimeException(new InvalidMessageException());

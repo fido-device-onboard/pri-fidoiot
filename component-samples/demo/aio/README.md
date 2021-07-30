@@ -220,6 +220,7 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | PUT /api/v1/uploads/<file> | PUT a file that can later be retrieved via /downloads api |  | | | |
 | GET /downloads/<file> | Gets for onboarding   | | | |
 | GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in last `n` seconds | |||
+| GET /api/v1/register/{guid} | registers the To0 RVBlob with the RV Server | |||
 
 
 ***NOTE***: These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.

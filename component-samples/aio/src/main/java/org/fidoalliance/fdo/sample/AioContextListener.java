@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -63,6 +64,7 @@ public class AioContextListener implements ServletContextListener {
   private KeyResolver ownResolver;
   private CertificateResolver certResolver;
   private String newDevicePath;
+  private boolean autoInjectBlob;
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
   private static final LoggerService logger = new LoggerService(AioContextListener.class);
 
@@ -71,6 +73,7 @@ public class AioContextListener implements ServletContextListener {
     BasicDataSource ds = new BasicDataSource();
 
     ServletContext sc = sce.getServletContext();
+
     ds.setUrl(sc.getInitParameter(AioAppSettings.DB_URL));
     ds.setDriverClassName(sc.getInitParameter(AioAppSettings.DB_DRIVER));
     ds.setUsername(sc.getInitParameter(AioAppSettings.DB_USER));
@@ -143,6 +146,7 @@ public class AioContextListener implements ServletContextListener {
     );
 
     newDevicePath = sc.getInitParameter(AioAppSettings.DB_NEW_DEVICE_SQL);
+    autoInjectBlob = Boolean.parseBoolean(sc.getInitParameter(AioAppSettings.AUTO_INJECT_BLOB));
 
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
@@ -204,7 +208,9 @@ public class AioContextListener implements ServletContextListener {
         if (reply.getAsNumber(Const.SM_MSG_ID).intValue() == Const.DI_DONE) {
           String guid = request.getAsComposite(Const.SM_PROTOCOL_INFO)
               .getAsString(Const.PI_TOKEN);
-          newDevice(guid, ds, cs, certResolver);
+          if (autoInjectBlob) {
+            newDevice(guid, ds, cs, certResolver);
+          }
         }
       }
 
@@ -240,6 +246,9 @@ public class AioContextListener implements ServletContextListener {
     aioDbManager.createTables(ds);
     aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
     aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
+
+    Consumer<String> injector = a -> newDevice(a,ds,cs,certResolver);
+    sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR,injector);
 
     // schedule session cleanup scheduler
     scheduler.scheduleWithFixedDelay(new Runnable() {
@@ -414,6 +423,7 @@ public class AioContextListener implements ServletContextListener {
     aioDbManager.storeRedirectBlob(guid, singedBlob, fingerPrint, deviceX509.toBytes(), ds);
     aioDbManager.loadNewDeviceScript(ds, newDevicePath, guid);
 
+    logger.info("TO0 completed for GUID: " + guid);
   }
 
   private byte[] generateSignedBlob(DataSource ds, CryptoService cs, Composite voucher) {
