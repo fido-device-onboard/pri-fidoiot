@@ -103,7 +103,7 @@ public class OwnerTo0Client {
   /**
    * Initiates TO0 for a device.
    */
-  public void run() throws NoSuchAlgorithmException, IOException, InterruptedException {
+  public void run() throws Exception {
     logger.info("TO0 Client started for GUID " + guid.toString());
     MessageDispatcher dispatcher = createDispatcher();
 
@@ -123,12 +123,12 @@ public class OwnerTo0Client {
 
       try {
         WebClient client = new WebClient(path, dr, dispatcher);
-        client.run();
+        client.call();
         long responseWait = this.to0Util.getResponseWait(dataSource, guid);
         if (responseWait > 0) {
           break;
         }
-      } catch (RuntimeException e) {
+      } catch (ConnectException e) {
         logger.error("Unable to connect with RV at " + path + ". " + e.getMessage());
       } catch (Exception e) {
         logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
