@@ -300,9 +300,10 @@ generate_tls_keystore()
   if=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
   ip=$(ip addr | grep inet | grep " $if" | cut -d' ' -f6 | cut -d'/' -f1)
 
-  # Apppend additional IPs at the end within double-quotes
-  # The SSL certificate would include all these IPs in the subjectAlName field
+  # The SSL certificate would include all these DNS/IP in the subjectAlName field
+  # Apppend additional DNSs at the end within double-quotes
   # Example: dns_list=("rv1.fdo" "rv2.fdo")
+  # Apppend additional IPs at the end within double-quotes
   # Example: ip_list=("${ip}" "127.0.0.1" "192.168.0.1)
   subjectAltName="DNS:localhost"
   dns_list=()
