@@ -19,7 +19,7 @@ public class AioRegisterBlobServlet extends HttpServlet {
     final String guid = req.getRequestURI().substring(pos + 1);
 
     if (guid.startsWith(".") || guid.indexOf('\\') > 0) {
-      logger.warn("Received invalid guid: " + guid);
+      logger.warn("Received invalid GUID: " + guid);
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
@@ -28,9 +28,8 @@ public class AioRegisterBlobServlet extends HttpServlet {
       Consumer<String> injector =
           (Consumer<String>) req.getServletContext().getAttribute(BLOB_INJECTOR);
       injector.accept(guid);
-      logger.info("Registered guid: " + guid);
     } catch (Exception ex) {
-      logger.warn("Failed to register guid: " + guid);
+      logger.warn("Failed to register GUID: " + guid);
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
   }

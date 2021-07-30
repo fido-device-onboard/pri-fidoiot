@@ -425,6 +425,7 @@ public class AioContextListener implements ServletContextListener {
     aioDbManager.storeRedirectBlob(guid, singedBlob, fingerPrint, deviceX509.toBytes(), ds);
     aioDbManager.loadNewDeviceScript(ds, newDevicePath, guid);
 
+    logger.info("TO0 completed for GUID: " + guid);
   }
 
   private byte[] generateSignedBlob(DataSource ds, CryptoService cs, Composite voucher) {
