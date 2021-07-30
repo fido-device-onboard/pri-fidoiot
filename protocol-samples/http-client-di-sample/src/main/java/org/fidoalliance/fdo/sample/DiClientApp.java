@@ -174,7 +174,7 @@ public class DiClientApp {
 
     try {
       WebClient client = new WebClient(DI_URI, clientService.getHelloMessage(), dispatcher);
-      client.run();
+      client.call();
       logger.info("Device Credentials: " + deviceCredentials);
 
     } catch (Exception e) {
