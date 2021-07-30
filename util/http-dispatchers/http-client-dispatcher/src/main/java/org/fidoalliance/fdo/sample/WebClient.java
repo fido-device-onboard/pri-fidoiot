@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ import org.fidoalliance.fdo.protocol.MessageDispatcher;
 /**
  * Represents a WebClient for dispatching HTTP messages.
  */
-public class WebClient implements Runnable {
+public class WebClient implements Callable<Void> {
 
   private static final String SSL_MODE = "fido_ssl_mode";
   private final MessageDispatcher dispatcher;
@@ -203,7 +204,9 @@ public class WebClient implements Runnable {
     }
   }
 
-  private DispatchResult sendMessage(Composite message) throws IOException, InterruptedException {
+  private DispatchResult sendMessage(Composite message)
+      throws IOException, InterruptedException, HttpResponseCodeException {
+
     String url = getMessagePath(message.getAsNumber(Const.SM_PROTOCOL_VERSION).intValue(),
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
@@ -259,7 +262,7 @@ public class WebClient implements Runnable {
 
         return new DispatchResult(reply, false);
       }
-      throw new RuntimeException("http status: " + hr.statusCode());
+      throw new HttpResponseCodeException(hr.statusCode());
     } finally {
       // To clean httpClient threads and avoid memory leaks.
       executor.shutdownNow();
@@ -270,20 +273,14 @@ public class WebClient implements Runnable {
   }
 
   @Override
-  public void run() {
+  public Void call() throws Exception {
 
-    try {
-      DispatchResult dr = helloMessage;
-      while (!dr.isDone()) {
-        dr = sendMessage(dr.getReply());
-        dr = dispatcher.dispatch(dr.getReply());
-      }
-    } catch (ConnectException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+    DispatchResult dr = helloMessage;
+    while (!dr.isDone()) {
+      dr = sendMessage(dr.getReply());
+      dr = dispatcher.dispatch(dr.getReply());
     }
+
+    return null;
   }
 }
