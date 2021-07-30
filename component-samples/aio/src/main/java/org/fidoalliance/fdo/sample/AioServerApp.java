@@ -124,6 +124,9 @@ public class AioServerApp {
     ctx.addParameter(AioAppSettings.TO0_RV_BLOB,
         AioConfigLoader.loadConfig(AioAppSettings.TO0_RV_BLOB));
 
+    ctx.addParameter(AioAppSettings.AUTO_INJECT_BLOB,
+        AioConfigLoader.loadConfig(AioAppSettings.AUTO_INJECT_BLOB));
+
     ctx.addParameter(AioAppSettings.MANUFACTURER_KEYSTORE,
         AioConfigLoader.loadConfig(AioAppSettings.MANUFACTURER_KEYSTORE));
     ctx.addParameter(AioAppSettings.MANUFACTURER_KEYSTORE_PWD,
@@ -209,6 +212,10 @@ public class AioServerApp {
     wrapper.addMapping("/api/v1/uploads/*");
     wrapper.addInitParameter(AioAppSettings.DOWNLOADS_PATH,
         AioConfigLoader.loadConfig(AioAppSettings.DOWNLOADS_PATH));
+    wrapper.setAsyncSupported(true);
+
+    wrapper = tomcat.addServlet(ctx, "to0Servlet", new AioRegisterBlobServlet());
+    wrapper.addMapping("/api/v1/register/*");
     wrapper.setAsyncSupported(true);
 
 
