@@ -79,6 +79,7 @@ public class RvServerApp {
     wrapper.addMapping(getMessagePath(Const.TO0_OWNER_SIGN));
     wrapper.addMapping(getMessagePath(Const.TO1_HELLO_RV));
     wrapper.addMapping(getMessagePath(Const.TO1_PROVE_TO_RV));
+    wrapper.addMapping(getMessagePath(Const.ERROR));
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "H2Console", new WebServlet());

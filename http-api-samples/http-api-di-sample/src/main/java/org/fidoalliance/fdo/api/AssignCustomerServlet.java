@@ -21,14 +21,16 @@ public class AssignCustomerServlet extends HttpServlet {
     DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
 
     try {
-      String guid = req.getParameter("guid");
+
+      String serial = req.getParameter("serial");
       String id = req.getParameter("id");
-      if (id.equals("") && guid.equals("") && !id.matches("[0-9]+")) {
+      if (id.equals("") && serial.equals("") && !id.matches("[0-9]+")) {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
 
-      int rowsAffected = new DiDbManager().assignCustomerToVoucher(ds, Integer.parseInt(id), guid);
+      int rowsAffected = new DiDbManager()
+          .assignCustomerToVoucher(ds, Integer.parseInt(id), serial);
       if (rowsAffected == 0) {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;

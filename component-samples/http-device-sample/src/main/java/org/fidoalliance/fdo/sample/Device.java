@@ -331,6 +331,12 @@ public class Device {
           return;
         }
       }
+
+      if (null == signedBlob.get()) {
+        logger.error("TO1 failed. Unable to onboard device. Exiting application.");
+        return;
+      }
+
     } else {
       logger.info("RVBypass flag is set, Skipping T01.");
     }
