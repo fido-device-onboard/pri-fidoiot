@@ -127,7 +127,7 @@ COPY ./ondie_cache ./ondie_cache/
 To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, uncomment the following lines in manufacturer.env and owner.env respectively.
 
 ```
-ondie_cache=file:///home/manufacturer/ondie_cache/ # file:///home/owner/ondie_cache/ for FDO PRI Owner
+ondie_cache=file:///home/fdo/ondie_cache/
 ondie_autoupdate=true
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
