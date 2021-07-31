@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 
 filename=payload.bin
-cksum_tx=1612472339
+cksum_tx=1088928820
 cksum_rx=$(cksum $filename | cut -d ' ' -f 1)
 if [ $cksum_tx -eq $cksum_rx  ]; then
   echo "Device onboarded successfully."
