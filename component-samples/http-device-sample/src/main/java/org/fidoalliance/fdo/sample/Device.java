@@ -226,6 +226,8 @@ public class Device {
       client.call();
     } catch (ConnectException e) {
       logger.warn("Can't connect to " + url + ": " + e.getMessage());
+    } catch (HttpResponseCodeException e) {
+      logger.error("Server " + url + " returns error code " + e.getCode());
     }
   }
 
