@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServlet;
@@ -254,7 +255,6 @@ public class Device {
     if (!rvBypass) {
       logger.info("RVBypass flag not set, Starting TO1.");
 
-      List<String> to1Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
       To1ClientStorage to1Storage = new To1ClientStorage() {
 
         @Override
@@ -313,24 +313,53 @@ public class Device {
         }
       };
 
-      for (String url : to1Urls) {
-        if (null != signedBlob.get()) {
-          break;
-        }
-        try {
-          logger.info("TO1 URL is " + url);
+      List<Composite> rviDirectives = RendezvousInfoDecoder.filter(rvi, Const.RV_DEV_ONLY);
+      long delaySec = 0;
 
-          DispatchResult dr = to1Service.getHelloMessage();
-          WebClient client = new WebClient(url, dr, to1Dispatcher);
-          client.call();
-        } catch (ConnectException e) {
-          logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
-          return;
-        } catch (HttpResponseCodeException e) {
-          logger.error("HTTP code " + e.getCode() + " returned by server");
-          return;
+      for (Composite rviDirective : rviDirectives) {
+        if (null != signedBlob.get()) {
+          // The last iteration completed successfully, no need to keep looping
+          break;
+        } else {
+          // we haven't received a signedBlob yet, so we must try the next entry after the previous
+          // delaySec.
+          if (0 != delaySec) {
+            long delayMs = delaySec * 1000;
+            long jitterMs = delayMs / 4; // jitter is +-25%
+            // Jitter doesn't require a secure random source, so let's use a fast one.
+            jitterMs = ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs);
+            logger.info("DelaySec set.  Delay: " + delayMs + "ms, jitter: " + jitterMs + "ms");
+            logger.info("Delaying for " + (delayMs + jitterMs) + " ms...");
+            Thread.sleep(delayMs + jitterMs);
+          }
         }
-      }
+
+        // Each directive can produce more than one URL.
+        List<String> to1Urls =
+            RendezvousInfoDecoder.getHttpInstructions(rviDirective, Const.RV_DEV_ONLY);
+        delaySec = RendezvousInfoDecoder.getDelaySec(rviDirective);
+
+        for (String url : to1Urls) {
+          try {
+            logger.info("TO1 URL is " + url);
+
+            DispatchResult dr = to1Service.getHelloMessage();
+            WebClient client = new WebClient(url, dr, to1Dispatcher);
+            client.call();
+          } catch (ConnectException e) {
+            logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
+            continue;
+          } catch (HttpResponseCodeException e) {
+            logger.error("HTTP code " + e.getCode() + " returned by server");
+            continue;
+          }
+
+          if (null != signedBlob.get()) {
+            // The last iteration completed successfully, no need to keep looping
+            break;
+          }
+        }
+      } // foreach RVI directive
 
       if (null == signedBlob.get()) {
         logger.error("TO1 failed. Unable to onboard device. Exiting application.");
