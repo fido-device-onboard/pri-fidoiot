@@ -22,7 +22,7 @@ services:
       - manufacturer.env
       - creds.env
     volumes:
-      - ./target:/home/manufacturer/target
+      - ./target:/home/fdo/target
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024

@@ -30,19 +30,23 @@ public final class EpidSignatureVerifier {
 
   /**
    * Verifies EPID signature. Returns result of verification via enum Result.
-   * 
+   *
    * @param signatureComposite {@link Composite} that represents the COSE signature object
+   * @param signedData the byte array containing the data that was signed
    * @param sigInfoAComposite {@link Composite} that represents the SigInfo object
    * @return VerificationResult result of verification
    */
-  public static Result verify(Composite signatureComposite, Composite sigInfoAComposite) {
+  public static Result verify(Composite signatureComposite,
+                              byte[] signedData,
+                              Composite sigInfoAComposite) {
     try {
       if (null == signatureComposite || null == sigInfoAComposite) {
         throw new RuntimeException();
       }
       int sgType = sigInfoAComposite.getAsNumber(Const.FIRST_KEY).intValue();
       byte[] groupId = sigInfoAComposite.getAsBytes(Const.SECOND_KEY);
-      String msg = createEpidSignatureBodyMessage(signatureComposite, groupId, sgType);
+      String msg = createEpidSignatureBodyMessage(
+              signatureComposite, signedData, groupId, sgType);
       String url = null;
       String path;
       switch (sgType) {
@@ -51,7 +55,7 @@ public final class EpidSignatureVerifier {
           path = String.join(Const.URL_PATH_SEPARATOR, Arrays.asList(Const.EPID_PROTOCOL_VERSION_V1,
                   Const.EPID_11, Const.EPID_PROOF_URI_PATH));
           url = new URL(EpidUtils.getEpidOnlineUrl().toString()).toURI()
-              .resolve(Const.URL_PATH_SEPARATOR + path).toString();
+                .resolve(Const.URL_PATH_SEPARATOR + path).toString();
           break;
         default:
           throw new IOException("Invalid sgType");
@@ -75,10 +79,18 @@ public final class EpidSignatureVerifier {
     }
   }
 
-  private static String createEpidSignatureBodyMessage(Composite signatureComposite, byte[] groupId,
-      int sgType) throws IOException {
+  private static String createEpidSignatureBodyMessage(Composite signatureComposite,
+                                                       byte[] signedData,
+                                                       byte[] groupId,
+                                                       int sgType) throws IOException {
     byte[] signature = signatureComposite.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
-    byte[] signedPayload = createEpidPayload(signatureComposite, sgType);
+    byte[] payloadAsBytes = signatureComposite.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+    Composite payload = Composite.fromObject(payloadAsBytes);
+    byte[] signedPayload = createEpidPayload(
+            signatureComposite.getAsComposite(Const.COSE_SIGN1_UNPROTECTED),
+            payload.getAsBytes(Const.EAT_NONCE),
+            signedData,
+            sgType);
 
     // EPID devices may return a signature is a slightly different format than that
     // expected by the EPID verifier. Adjust the signature for these cases here, before
@@ -118,24 +130,24 @@ public final class EpidSignatureVerifier {
     return msg;
   }
 
-  // Generate the signed Payload depnding on the sgType.
-  private static byte[] createEpidPayload(Composite signatureBody, int sgType) throws IOException {
-    Composite uph = signatureBody.getAsComposite(Const.COSE_SIGN1_UNPROTECTED);
-    byte[] payloadAsBytes = signatureBody.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
-    Composite payload = Composite.fromObject(payloadAsBytes);
+  // Generate the signed Payload depending on the sgType.
+  private static byte[] createEpidPayload(Composite uph,
+                                          byte[] nonce,
+                                          byte[] payloadAsBytes,
+                                          int sgType) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     switch (sgType) {
       case Const.SG_EPIDv10:
         baos.write((byte) uph.getAsBytes(Const.EAT_MAROE_PREFIX).length);
         baos.write(uph.getAsBytes(Const.EAT_MAROE_PREFIX));
-        baos.write(payload.getAsBytes(Const.EAT_NONCE));
+        baos.write(nonce);
         baos.write(payloadAsBytes);
         break;
       case Const.SG_EPIDv11:
         baos.write(ByteBuffer.allocate(48).put(4, (byte) 0x48).put(8, (byte) 0x08).array());
         baos.write(uph.getAsBytes(Const.EAT_MAROE_PREFIX));
         baos.write(ByteBuffer.allocate(16).array());
-        baos.write(payload.getAsBytes(Const.EAT_NONCE));
+        baos.write(nonce);
         baos.write(ByteBuffer.allocate(16).array());
         baos.write(payloadAsBytes);
         break;

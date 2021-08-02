@@ -6,10 +6,9 @@ ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update && apt-get install -y openjdk-11-jdk haveged
 
-RUN useradd -ms /bin/bash fdouser
-USER fdouser
-WORKDIR /home/fdouser/
-RUN mkdir -p /home/fdouser/lib
+RUN useradd -ms /bin/bash fdo
+RUN mkdir -p /home/fdo/lib
+WORKDIR /home/fdo/
 
 # Setup rv dependencies
 COPY ./lib ./lib/
@@ -18,7 +17,9 @@ COPY log4j2.xml .
 COPY config.properties .
 COPY rv.jar .
 COPY rv-entrypoint.sh .
-CMD ["chmod", "+x", "rv-entrypoint.sh"]
+
+RUN chown -R fdo:fdo /home/fdo
+USER fdo
 
 # Configure and start rv
 CMD ["bash", "rv-entrypoint.sh"]

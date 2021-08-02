@@ -79,55 +79,61 @@ public class ResellerVoucherServlet extends HttpServlet {
       return;
     }
 
-    Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-    List<PublicKey> nextOwnerPublicKeys =
-        PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
+    try {
+      Composite voucher = result.getAsComposite(Const.FIRST_KEY);
+      List<PublicKey> nextOwnerPublicKeys =
+          PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
 
-    //find the public key
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    Composite prevOwner = ovh.getAsComposite(Const.OVH_PUB_KEY);
-    Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
-    //can be zero
-    if (entries.size() > 0) {
-      Composite entry = entries.getAsComposite(entries.size() - 1);
-      Composite payload = Composite.fromObject(entry.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
-      prevOwner = payload.getAsComposite(Const.OVE_PUB_KEY);
-    }
-
-    CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
-    PublicKey ownerPub = cs.decode(prevOwner);
-    PublicKey nextOwner = null;
-    int keyType = prevOwner.getAsNumber(Const.PK_TYPE).intValue();
-    for (PublicKey pub : nextOwnerPublicKeys) {
-      int ownerType = cs.getPublicKeyType(pub);
-      if (ownerType == keyType) {
-        nextOwner = pub;
-        break;
+      //find the public key
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      Composite prevOwner = ovh.getAsComposite(Const.OVH_PUB_KEY);
+      Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
+      //can be zero
+      if (entries.size() > 0) {
+        Composite entry = entries.getAsComposite(entries.size() - 1);
+        Composite payload = Composite.fromObject(entry.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+        prevOwner = payload.getAsComposite(Const.OVE_PUB_KEY);
       }
-    }
-    // we didn't find an owner entry in database as per the current owner's key-type.
-    if (null == nextOwner) {
-      logger.error("Customer entry missing for " + serialNo);
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
-    }
 
-    VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
-    try (CloseableKey signer = new CloseableKey(resolver.getKey(ownerPub))) {
-      if (signer.get() != null) {
-        vse.add(signer.get(), nextOwner);
-      } else {
-        logger.error("Reseller is not the current owner for " + serialNo);
+      CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
+      PublicKey ownerPub = cs.decode(prevOwner);
+      PublicKey nextOwner = null;
+      int keyType = prevOwner.getAsNumber(Const.PK_TYPE).intValue();
+      for (PublicKey pub : nextOwnerPublicKeys) {
+        int ownerType = cs.getPublicKeyType(pub);
+        if (ownerType == keyType) {
+          nextOwner = pub;
+          break;
+        }
+      }
+      // we didn't find an owner entry in database as per the current owner's key-type.
+      if (null == nextOwner) {
+        logger.error("Customer entry missing for " + serialNo);
         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return;
       }
+
+      VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
+      try (CloseableKey signer = new CloseableKey(resolver.getKey(ownerPub))) {
+        if (signer.get() != null) {
+          vse.add(signer.get(), nextOwner);
+        } else {
+          logger.error("Reseller is not the current owner for " + serialNo);
+          resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+          return;
+        }
+      }
+
+      resp.setContentType(Const.HTTP_APPLICATION_CBOR);
+      byte[] voucherBytes = voucher.toBytes();
+      getServletContext().log("Extended voucher: " + Composite.toString(voucherBytes));
+      resp.setContentLength(voucherBytes.length);
+      resp.getOutputStream().write(voucherBytes);
+    } catch (Exception ex) {
+      logger.warn("No keys found for given customer id.");
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    resp.setContentType(Const.HTTP_APPLICATION_CBOR);
-    byte[] voucherBytes = voucher.toBytes();
-    getServletContext().log("Extended voucher: " + Composite.toString(voucherBytes));
-    resp.setContentLength(voucherBytes.length);
-    resp.getOutputStream().write(voucherBytes);
 
   }
 

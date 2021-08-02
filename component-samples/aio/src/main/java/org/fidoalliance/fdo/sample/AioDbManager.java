@@ -288,4 +288,24 @@ public class AioDbManager {
     return rootNode.toString();
   }
 
+  /**
+   * For updating RvInfo within AIO DB.
+   *
+   * @param ds The datasource to use.
+   * @param rvInfo rvInfoBlob in cbor bytes encoded form.
+   */
+  public void addRvInfo(DataSource ds, String rvInfo) {
+
+    String sql = "" + "UPDATE MT_SETTINGS   " + "SET RENDEZVOUS_INFO=? " + "WHERE ID=1; ";
+
+    try (Connection conn = ds.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setString(1, rvInfo);
+      pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 }

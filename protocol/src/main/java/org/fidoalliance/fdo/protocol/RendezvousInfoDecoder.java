@@ -120,6 +120,26 @@ public class RendezvousInfoDecoder {
   }
 
   /**
+   * Query the value of Long based RendezvousInfo variable.
+   *
+   * @param directive     The directive containing RendezvousInfo variables.
+   * @param queryVariable The variable id to query.
+   * @return The value of the variable if present, otherwise null.
+   */
+  public static Long queryLongValue(Composite directive, int queryVariable) {
+
+    Long result = null;
+    for (int i = 0; i < directive.size(); i++) {
+      Composite variable = directive.getAsComposite(i);
+      if (variable.getAsNumber(Const.FIRST_KEY).intValue() == queryVariable) {
+        result = variable.getAsNumber(Const.SECOND_KEY).longValue();
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Gets a List of HTTP directives.
    *
    * @param rvi    A composite with RendezvousInfo.
@@ -130,83 +150,12 @@ public class RendezvousInfoDecoder {
    */
   public static List<String> getHttpDirectives(Composite rvi, int filter) {
 
-    List<String> list = new ArrayList<String>();
-
-    for (int i = 0; i < rvi.size(); i++) {
-
-      Composite directive = rvi.getAsComposite(i);
-
-      Integer value = null;
-      if (filter == Const.RV_DEV_ONLY) {
-        value = queryIntValue(directive, Const.RV_OWNER_ONLY);
-        if (value != null) {
-          continue;
-        }
-      } else if (filter == Const.RV_OWNER_ONLY) {
-        value = queryIntValue(directive, Const.RV_DEV_ONLY);
-        if (value != null) {
-          continue;
-        }
-      } else {
-        throw new IllegalArgumentException(Integer.toString(filter));
-      }
-
-      value = queryIntValue(directive, Const.RV_PROTOCOL);
-      if (value == null
-          || (value == Const.RV_PROT_HTTP || value == Const.RV_PROT_HTTPS)) {
-
-        String devPort = "";
-        String ownerPort = "";
-        String protocol = "";
-
-        if (filter == Const.RV_DEV_ONLY) {
-          //Device protocol based on the RVProtocol value.
-
-          //default value
-          //If RVprot value is not specified, then it should take HTTPS protocol by default.
-          devPort = "443";
-          ownerPort = devPort;
-          protocol = "https://";
-
-          //override with HTTP
-          if (value != null && value == Const.RV_PROT_HTTP) {
-            protocol = "http://";
-            ownerPort = devPort = "80";
-          }
-        } else if (filter == Const.RV_OWNER_ONLY) {
-          //The Owner always chooses HTTPS for communication.
-          protocol = "https://";
-          ownerPort = devPort = "443";
-        }
-
-        String portString = null;
-        if (filter == Const.RV_DEV_ONLY) {
-          Integer portQuery = queryIntValue(directive, Const.RV_DEV_PORT);
-          if (portQuery != null) {
-            devPort = portQuery.toString();
-          }
-          portString = devPort;
-        } else if (filter == Const.RV_OWNER_ONLY) {
-          //override owner port
-          Integer portQuery = queryIntValue(directive, Const.RV_OWNER_PORT);
-          if (portQuery != null) {
-            ownerPort = portQuery.toString();
-          }
-          portString = ownerPort;
-        }
-
-        String hostName = queryStringValue(directive, Const.RV_DNS);
-        list.add(protocol + hostName + ":" + portString);
-
-        InetAddress ipAddr = queryIpAddressValue(directive);
-        String ipAddrString = ipAddr.getHostAddress();
-
-        list.add(protocol + ipAddrString + ":" + portString);
-      }
+    List<Composite> directives = filter(rvi, filter);
+    List<String> urls = new ArrayList<>();
+    for (Composite directive : directives) {
+      urls.addAll(getHttpInstructions(directive, filter));
     }
-
-    return list;
-
+    return urls;
   }
 
   /**
@@ -296,5 +245,124 @@ public class RendezvousInfoDecoder {
     }
 
     return true;
+  }
+
+  /**
+   * Return the 'delaySec' value from a given rvi directive, or 0 if none.
+   */
+  public static long getDelaySec(Composite directive) {
+
+    long delaySec = 0;
+    Long l = queryLongValue(directive, Const.RV_DELAY_SEC);
+    if (null != l) {
+      delaySec = l;
+    }
+
+    return delaySec;
+  }
+
+  /**
+   * Filter RVI to a list of directives which pass the filter.
+   *
+   * @param rvi The rendezvous info composite.
+   * @param only The filter, RV_DEVICE_ONLY or RV_OWNER_ONLY.
+   * @return A list of directives which passed the filter.
+   */
+  public static List<Composite> filter(Composite rvi, int only) {
+
+    List<Composite> result = new ArrayList<>();
+
+    for (int i = 0; i < rvi.size(); i++) {
+
+      Composite directive = rvi.getAsComposite(i);
+
+      Integer value = null;
+      if (only == Const.RV_DEV_ONLY) {
+        value = queryIntValue(directive, Const.RV_OWNER_ONLY);
+        if (value != null) {
+          continue;
+        }
+      } else if (only == Const.RV_OWNER_ONLY) {
+        value = queryIntValue(directive, Const.RV_DEV_ONLY);
+        if (value != null) {
+          continue;
+        }
+      } else {
+        throw new IllegalArgumentException(Integer.toString(only));
+      }
+
+      result.add(directive); // we didn't find a conflicting only, so this directive passes
+    } // for each directive in the input composite
+
+    return result;
+  }
+
+  /**
+   * Return a list of URLs derived from the given RVI directive.
+   *
+   * @param directive The directive to parse.
+   * @param filter RV_DEVICE_ONLY or RV_OWNER_ONLY, controlling which port is returned.
+   * @return The list of URLs produced by this directive.
+   */
+  public static List<String> getHttpInstructions(Composite directive, int filter) {
+
+    List<String> result = new ArrayList<>();
+
+    Integer value = queryIntValue(directive, Const.RV_PROTOCOL);
+    if (value == null
+        || (value == Const.RV_PROT_HTTP || value == Const.RV_PROT_HTTPS)) {
+
+      String devPort = "";
+      String ownerPort = "";
+      String protocol = "";
+
+      if (filter == Const.RV_DEV_ONLY) {
+        //Device protocol based on the RVProtocol value.
+
+        //default value
+        //If RVprot value is not specified, then it should take HTTPS protocol by default.
+        devPort = "443";
+        ownerPort = devPort;
+        protocol = "https://";
+
+        //override with HTTP
+        if (value != null && value == Const.RV_PROT_HTTP) {
+          protocol = "http://";
+          ownerPort = devPort = "80";
+        }
+      } else if (filter == Const.RV_OWNER_ONLY) {
+        //The Owner always chooses HTTPS for communication.
+        protocol = "https://";
+        ownerPort = devPort = "443";
+      }
+
+      String portString = null;
+      if (filter == Const.RV_DEV_ONLY) {
+        Integer portQuery = queryIntValue(directive, Const.RV_DEV_PORT);
+        if (portQuery != null) {
+          devPort = portQuery.toString();
+        }
+        portString = devPort;
+      } else if (filter == Const.RV_OWNER_ONLY) {
+        //override owner port
+        Integer portQuery = queryIntValue(directive, Const.RV_OWNER_PORT);
+        if (portQuery != null) {
+          ownerPort = portQuery.toString();
+        }
+        portString = ownerPort;
+      }
+
+      String hostName = queryStringValue(directive, Const.RV_DNS);
+      if (hostName != null) {
+        result.add(protocol + hostName + ":" + portString);
+      }
+
+      InetAddress ipAddr = queryIpAddressValue(directive);
+      if (ipAddr != null) {
+        String ipAddrString = ipAddr.getHostAddress();
+        result.add(protocol + ipAddrString + ":" + portString);
+      }
+    }
+    return result;
   }
 }

@@ -20,10 +20,10 @@ public class ResellerAppConstants {
   public static final String SERVER_PATH = "reseller_home";
 
   // the owner keystore type
-  public static final String KEYSTORE_TYPE = "reseller_keystore_type";
+  public static final String KEYSTORE_TYPE = "PKCS12";
   // the user pin for HSM keystore that contains the owner keys
   public static final String KEYSTORE_PWD = "reseller_keystore_password";
-  public static final String KEYSTORE_PATH = "";
+  public static final String KEYSTORE_PATH = "reseller_keystore";
 
   public static final String SSL_KEYSTORE_PATH = "reseller_ssl_keystore";
   public static final String SSL_KEYSTORE_PASSWORD = "reseller_ssl_keystore-password";

@@ -9,11 +9,14 @@ import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * Decodes a Rendezvous 'Blob' String.
  */
 public class RendezvousBlobDecoder {
+
+  private static final LoggerService logger = new LoggerService(RendezvousBlobDecoder.class);
 
   private static byte[] getIpAddress(String value) {
 
@@ -38,21 +41,25 @@ public class RendezvousBlobDecoder {
       Composite blob = Composite.newArray();
       URI uri = URI.create(directive);
 
-      String[] queryParams = uri.getQuery().split("&");
-      for (String param : queryParams) {
-        String[] pair = param.split("=");
+      String query = uri.getQuery();
+      if (query != null) {
+        String[] queryParams = uri.getQuery().split("&");
+        for (String param : queryParams) {
+          String[] pair = param.split("=");
 
-        if (pair[0].compareToIgnoreCase("ipaddress") == 0) {
-          blob.set(Const.BLOB_IP_ADDRESS,
-              getIpAddress(pair[1]));
+          if (pair[0].compareToIgnoreCase("ipaddress") == 0) {
+            blob.set(Const.BLOB_IP_ADDRESS,
+                    getIpAddress(pair[1]));
+          }
         }
-      }
-      if (blob.size() == 0) {
-        throw new MessageBodyException(new InvalidParameterException());
       }
 
       blob.set(Const.BLOB_DNS, uri.getHost());
       blob.set(Const.BLOB_PORT, uri.getPort());
+
+      if (blob.size() == 0) {
+        throw new MessageBodyException(new InvalidParameterException());
+      }
 
       //set the protocol
       String scheme = uri.getScheme();
@@ -99,7 +106,12 @@ public class RendezvousBlobDecoder {
     Composite directives = to1d.getAsComposite(Const.TO1D_RV);
     for (int i = 0; i < directives.size(); i++) {
       Composite directive = directives.getAsComposite(i);
-      byte[] ipBytes = directive.getAsBytes(Const.BLOB_IP_ADDRESS);
+      byte[] ipBytes = new byte[0];
+      try {
+        ipBytes = directive.getAsBytes(Const.BLOB_IP_ADDRESS);
+      } catch (Exception e) {
+        logger.debug("No IP address found in TO0_RV_BLOB");
+      }
       String dns = directive.getAsString(Const.BLOB_DNS);
       int port = directive.getAsNumber(Const.BLOB_PORT).intValue();
       int protocol = directive.getAsNumber(Const.BLOB_PROTOCOL).intValue();
@@ -110,15 +122,20 @@ public class RendezvousBlobDecoder {
         }
 
         InetAddress netAdress = null;
+        String ipAddrString = null;
         try {
           netAdress = InetAddress.getByAddress(ipBytes);
+          ipAddrString = netAdress.getHostAddress();
         } catch (UnknownHostException e) {
-          throw new InvalidIpAddressException(e);
+          logger.debug("Invalid IP address in TO0_RV_BLOB");
         }
-        String ipAddrString = netAdress.getHostAddress();
 
-        list.add(protocolString + dns + ":" + Integer.toString(port));
-        list.add(protocolString + ipAddrString + ":" + Integer.toString(port));
+        if (dns != null) {
+          list.add(protocolString + dns + ":" + Integer.toString(port));
+        }
+        if (ipAddrString != null) {
+          list.add(protocolString + ipAddrString + ":" + Integer.toString(port));
+        }
 
       }
     }

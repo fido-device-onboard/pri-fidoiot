@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.sample;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,8 +16,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -137,7 +140,7 @@ public class Device {
     return myCryptoService.getRandomBytes(512 / 8);
   }
 
-  void doDeviceInit() {
+  void doDeviceInit() throws Exception {
 
     // Start with 'blank' credentials.  The protocol library will overwrite them as it goes.
     Composite credentials = Composite.newArray()
@@ -219,7 +222,11 @@ public class Device {
 
     DispatchResult dr = service.getHelloMessage();
     WebClient client = new WebClient(url, dr, dispatcher);
-    client.run();
+    try {
+      client.call();
+    } catch (ConnectException e) {
+      logger.warn("Can't connect to " + url + ": " + e.getMessage());
+    }
   }
 
   boolean isRvBypassSet(Composite rvInformation) {
@@ -233,7 +240,7 @@ public class Device {
     return false;
   }
 
-  void doTransferOwnership(Composite credentials) {
+  void doTransferOwnership(Composite credentials) throws Exception {
 
     Composite rvi = credentials.getAsComposite(Const.DC_RENDEZVOUS_INFO);
 
@@ -248,7 +255,6 @@ public class Device {
     if (!rvBypass) {
       logger.info("RVBypass flag not set, Starting TO1.");
 
-      List<String> to1Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
       To1ClientStorage to1Storage = new To1ClientStorage() {
 
         @Override
@@ -307,20 +313,59 @@ public class Device {
         }
       };
 
-      for (String url : to1Urls) {
-        if (null != signedBlob.get()) {
-          break;
-        }
-        try {
-          logger.info("TO1 URL is " + url);
+      List<Composite> rviDirectives = RendezvousInfoDecoder.filter(rvi, Const.RV_DEV_ONLY);
+      long delaySec = 0;
 
-          DispatchResult dr = to1Service.getHelloMessage();
-          WebClient client = new WebClient(url, dr, to1Dispatcher);
-          client.run();
-        } catch (RuntimeException e) {
-          logger.info("Unable to contact RV at " + url + ". " + e.getMessage());
+      for (Composite rviDirective : rviDirectives) {
+        if (null != signedBlob.get()) {
+          // The last iteration completed successfully, no need to keep looping
+          break;
+        } else {
+          // we haven't received a signedBlob yet, so we must try the next entry after the previous
+          // delaySec.
+          if (0 != delaySec) {
+            long delayMs = delaySec * 1000;
+            long jitterMs = delayMs / 4; // jitter is +-25%
+            // Jitter doesn't require a secure random source, so let's use a fast one.
+            jitterMs = ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs);
+            logger.info("DelaySec set.  Delay: " + delayMs + "ms, jitter: " + jitterMs + "ms");
+            logger.info("Delaying for " + (delayMs + jitterMs) + " ms...");
+            Thread.sleep(delayMs + jitterMs);
+          }
         }
+
+        // Each directive can produce more than one URL.
+        List<String> to1Urls =
+            RendezvousInfoDecoder.getHttpInstructions(rviDirective, Const.RV_DEV_ONLY);
+        delaySec = RendezvousInfoDecoder.getDelaySec(rviDirective);
+
+        for (String url : to1Urls) {
+          try {
+            logger.info("TO1 URL is " + url);
+
+            DispatchResult dr = to1Service.getHelloMessage();
+            WebClient client = new WebClient(url, dr, to1Dispatcher);
+            client.call();
+          } catch (ConnectException e) {
+            logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
+            continue;
+          } catch (HttpResponseCodeException e) {
+            logger.error("HTTP code " + e.getCode() + " returned by server");
+            continue;
+          }
+
+          if (null != signedBlob.get()) {
+            // The last iteration completed successfully, no need to keep looping
+            break;
+          }
+        }
+      } // foreach RVI directive
+
+      if (null == signedBlob.get()) {
+        logger.error("TO1 failed. Unable to onboard device. Exiting application.");
+        return;
       }
+
     } else {
       logger.info("RVBypass flag is set, Skipping T01.");
     }
@@ -489,10 +534,10 @@ public class Device {
       try {
         DispatchResult dr = to2Service.getHelloMessage();
         WebClient client = new WebClient(url, dr, to2Dispatcher);
-        client.run();
+        client.call();
       } catch (RuntimeException e) {
         if (isCausedBy(e, SocketException.class)) {
-          logger.info("Unable to contact Owner at " + url + ". " + e.getMessage());
+          logger.warn("Unable to contact Owner at " + url + ". " + e.getMessage());
         } else {
           lastFailure = e;
           logger.error("Unable to onboard from owner at "
@@ -516,7 +561,7 @@ public class Device {
     }
   }
 
-  void run() {
+  void run() throws Exception {
 
     try {
       Composite credentials = myCredStore.load();

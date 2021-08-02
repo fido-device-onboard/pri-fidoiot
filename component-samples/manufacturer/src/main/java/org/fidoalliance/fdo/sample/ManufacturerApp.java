@@ -125,6 +125,8 @@ public class ManufacturerApp {
       // ondie is optional so if config cannot be loaded just default to no config
     }
 
+    ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE,
+        ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE));
     ctx.addParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD,
         ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
     ctx.addApplicationListener(DbStarter.class.getName());
@@ -151,6 +153,7 @@ public class ManufacturerApp {
 
     wrapper.addMapping(getMessagePath(Const.DI_APP_START));
     wrapper.addMapping(getMessagePath(Const.DI_SET_HMAC));
+    wrapper.addMapping(getMessagePath(Const.ERROR));
     wrapper.setAsyncSupported(true);
 
     wrapper = tomcat.addServlet(ctx, "DiApi", new DiApiServlet());

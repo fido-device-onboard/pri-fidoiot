@@ -68,7 +68,7 @@ public class To1ClientApp {
 
       try {
         WebClient client = new WebClient(path, clientService.getHelloMessage(), dispatcher);
-        client.run();
+        client.call();
         if (signedTo1Blob != null) {
           break;
         }
