@@ -9,12 +9,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 /**
  * To1 Server message processing service.
  */
 public abstract class To1ServerService extends MessagingService {
 
   public abstract To1ServerStorage getStorage();
+
+  private static final LoggerService logger = new LoggerService(To1ServerService.class);
 
   protected void doHello(Composite request, Composite reply) {
 
@@ -50,6 +54,7 @@ public abstract class To1ServerService extends MessagingService {
       getStorage().started(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO1 failed (msg/30) for GUID: " + getStorage().getGuid().toString());
       getStorage().failed(request, reply);
       throw new RuntimeException(e);
     }
@@ -76,7 +81,7 @@ public abstract class To1ServerService extends MessagingService {
               sigA,
               getStorage().getOnDieService(),
               null)) {
-        throw new InvalidMessageException();
+        throw new InvalidMessageException("Signature verification failed.");
       }
 
       Composite payload = Composite.fromObject(
@@ -88,7 +93,7 @@ public abstract class To1ServerService extends MessagingService {
       UUID deviceId = getStorage().getGuid();
 
       if (deviceId.compareTo(ueGuid) != 0) {
-        throw new InvalidMessageException(ueGuid.toString());
+        throw new InvalidMessageException("Error parsing message payload.");
       }
 
       cryptoService.verifyBytes(nonceTo1Proof, getStorage().getNonceTo1Proof());
@@ -96,8 +101,9 @@ public abstract class To1ServerService extends MessagingService {
       reply.set(Const.SM_MSG_ID, Const.TO1_RV_REDIRECT);
       reply.set(Const.SM_BODY, getStorage().getRedirectBlob());
       getStorage().completed(request, reply);
-
+      logger.info("TO1 completed for GUID: " + deviceId.toString());
     } catch (Exception e) {
+      logger.error("TO1 failed (msg/32) for GUID: " + getStorage().getGuid().toString());
       getStorage().failed(request, reply);
       throw e;
     }

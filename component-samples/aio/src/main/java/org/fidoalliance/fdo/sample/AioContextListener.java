@@ -219,16 +219,6 @@ public class AioContextListener implements ServletContextListener {
         String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
         logger.debug("msg/" + msgId + ": " + request.toString());
       }
-
-      @Override
-      protected void failed(Exception e) {
-        StringWriter writer = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(writer)) {
-          writer.write(e.getMessage());
-          writer.write("\n");
-        }
-        logger.warn(writer.toString());
-      }
     };
 
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
@@ -255,16 +245,13 @@ public class AioContextListener implements ServletContextListener {
       @Override
       public void run() {
         try {
-
           new AioDbManager().removeSessions(ds);
-
         } catch (Exception e) {
-          logger.warn(e.getMessage());
+          logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
         }
       }
     }, 5, Integer.parseInt(
         sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
-
   }
 
 

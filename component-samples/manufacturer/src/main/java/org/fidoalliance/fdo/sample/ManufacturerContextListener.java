@@ -48,7 +48,7 @@ public class ManufacturerContextListener implements ServletContextListener {
 
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
-  private static LoggerService logger = new LoggerService(ManufacturerContextListener.class);
+  private static final LoggerService logger = new LoggerService(ManufacturerContextListener.class);
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -128,6 +128,7 @@ public class ManufacturerContextListener implements ServletContextListener {
             logger.error("Unable to retrieve Private Key. " + e.getMessage());
           }
         }
+        logger.error("Keystore is not configured.");
         throw new RuntimeException();
       }
 
@@ -162,6 +163,7 @@ public class ManufacturerContextListener implements ServletContextListener {
             logger.error("Unable to retrieve Certificate chain. " + e.getMessage());
           }
         }
+        logger.error("Keystore is not configured.");
         throw new RuntimeException();
       }
     };
@@ -182,15 +184,6 @@ public class ManufacturerContextListener implements ServletContextListener {
       protected void dispatching(Composite request) {
         String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
         logger.debug("msg/" + msgId + ": " + request.toString());
-      }
-
-      @Override
-      protected void failed(Exception e) {
-        StringWriter writer = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(writer)) {
-          logger.warn(e.getMessage());
-        }
-        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);

@@ -82,7 +82,7 @@ public class DiDbStorage implements DiServerStorage {
 
     if (createParams == Optional.empty() || createParams == null
         || !(createParams instanceof List)) {
-      throw new InvalidMessageException("mino must be an array");
+      throw new InvalidMessageException("Invalid DeviceMfgInfo");
     }
 
     // Determine type of device and create appropriate voucher
@@ -193,7 +193,7 @@ public class DiDbStorage implements DiServerStorage {
       }
     } else {
       // placeholder for future device types
-      throw new InvalidMessageException("Unsupported keytype in mstr: " + keyType);
+      throw new InvalidMessageException("Unsupported keytype in DeviceMfgInfo: " + keyType);
     }
 
     String modelNo = mstr.getAsString(Const.THIRD_KEY);
