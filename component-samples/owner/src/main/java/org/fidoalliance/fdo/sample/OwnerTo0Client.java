@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.sample;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
@@ -119,8 +120,13 @@ public class OwnerTo0Client {
       throw new IOException("TO0 failed for " + guid.toString() + ".");
     }
 
-    for (String path : paths) {
+    // iterate through all paths and throw an exception only if there are no more paths
+    // left to try
+    String path = null;
+    Iterator<String> pathIterator = paths.listIterator();
+    while (pathIterator.hasNext()) {
 
+      path = pathIterator.next();
       try {
         WebClient client = new WebClient(path, dr, dispatcher);
         client.call();
@@ -130,9 +136,14 @@ public class OwnerTo0Client {
         }
       } catch (ConnectException e) {
         logger.error("Unable to connect with RV at " + path + ". " + e.getMessage());
+        if (!pathIterator.hasNext()) {
+          throw e;
+        }
       } catch (Exception e) {
         logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
-        throw e;
+        if (!pathIterator.hasNext()) {
+          throw e;
+        }
       }
     }
   }
