@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
@@ -113,38 +114,56 @@ public class OwnerTo0Client {
     Composite ovh = clientStorage().getVoucher().getAsComposite(Const.OV_HEADER);
     Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
-    List<String> paths = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_OWNER_ONLY);
+    List<Composite> rviDirectives = RendezvousInfoDecoder.filter(rvi, Const.RV_OWNER_ONLY);
 
-    if (paths.size() == 0) {
+    if (rviDirectives.size() == 0) {
       logger.error("No Directives found. Invalid RVInfo Blob in " + guid.toString());
       throw new IOException("TO0 failed for " + guid.toString() + ".");
     }
 
     // iterate through all paths and throw an exception only if there are no more paths
     // left to try
-    String path = null;
-    Iterator<String> pathIterator = paths.listIterator();
-    while (pathIterator.hasNext()) {
+    Exception lastExc = null;
+    long delaySec = 0;
+    for (Composite directive: rviDirectives) {
 
-      path = pathIterator.next();
-      try {
-        WebClient client = new WebClient(path, dr, dispatcher);
-        client.call();
-        long responseWait = this.to0Util.getResponseWait(dataSource, guid);
-        if (responseWait > 0) {
-          break;
-        }
-      } catch (ConnectException e) {
-        logger.error("Unable to connect with RV at " + path + ". " + e.getMessage());
-        if (!pathIterator.hasNext()) {
-          throw e;
-        }
-      } catch (Exception e) {
-        logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
-        if (!pathIterator.hasNext()) {
-          throw e;
-        }
+      if (0 != delaySec) {
+        long delayMs = delaySec * 1000;
+        long jitterMs = delayMs / 4; // jitter is +-25%
+        // Jitter doesn't require a secure random source, so let's use a fast one.
+        jitterMs = ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs);
+        logger.info("DelaySec set.  Delay: " + delayMs + "ms, jitter: " + jitterMs + "ms");
+        logger.info("Delaying for " + (delayMs + jitterMs) + " ms...");
+        Thread.sleep(delayMs + jitterMs);
       }
+      delaySec = RendezvousInfoDecoder.getDelaySec(directive);
+
+      List<String> to0Urls =
+          RendezvousInfoDecoder.getHttpInstructions(directive, Const.RV_OWNER_ONLY);
+      for (String path: to0Urls) {
+
+        try {
+          WebClient client = new WebClient(path, dr, dispatcher);
+          client.call();
+          long responseWait = this.to0Util.getResponseWait(dataSource, guid);
+          if (responseWait > 0) {
+            return;
+          }
+        } catch (ConnectException e) {
+          logger.error("Unable to connect with RV at " + path + ". " + e.getMessage());
+          lastExc = e;
+        } catch (Exception e) {
+          logger.error("TO0 failed for " + guid.toString() + "." + e.getMessage());
+          lastExc = e;
+        }
+      } // foreach URL path in this directive
+    } // foreach directive in RVI
+
+    // if we get here and lastExc is NOT set, that's a bug.  We already tested for a zero-length
+    // directives list, there must have been at least one attempt.
+    if (null == lastExc) {
+      throw new RuntimeException("BUG CAUGHT: lastExc must never be null");
     }
+    throw lastExc;
   }
 }
