@@ -228,6 +228,8 @@ public class Device {
       logger.warn("Can't connect to " + url + ": " + e.getMessage());
     } catch (IOException e) {
       logger.warn("Can't connect to " + url + ": " + e.getMessage());
+    } catch (Exception e) {
+      logger.warn("Can't connect to " + url + ": " + e.getMessage());
     }
   }
 
