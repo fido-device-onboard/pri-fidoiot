@@ -133,6 +133,17 @@ ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
 ```
 
+# Configuring log messages
+
+The components use LOG4J2 for logging. The logging configuration can be updated through log4j2.xml
+file stored within each component folder. By default, INFO logs are prints on console and DEBUG logs
+are printed in the log file.
+
+Use following command to extract the log file from a running container.
+```
+$ docker container cp <container-id>:/home/fdo/log .
+```
+
 # Running Demo
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
