@@ -64,10 +64,10 @@ public class DispatchResult {
   public int calculateLength(Composite msg) {
 
     if (msg.size() > 0) {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      WritableByteChannel wbc = Channels.newChannel(out);
-      Encoder encoder = new Encoder.Builder(wbc).build();
-      try {
+      try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+          WritableByteChannel wbc = Channels.newChannel(out)) {
+
+        Encoder encoder = new Encoder.Builder(wbc).build();
         encoder.writeObject(msg.get());
         do {
           msg.set(Const.SM_LENGTH, out.size());
