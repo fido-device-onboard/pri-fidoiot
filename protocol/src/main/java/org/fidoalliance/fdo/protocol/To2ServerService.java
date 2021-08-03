@@ -333,7 +333,10 @@ public abstract class To2ServerService extends MessagingService {
         ovh.set(Const.OVH_GUID, getStorage().getReplacementGuid());
         ovh.set(Const.OVH_RENDEZVOUS_INFO, getStorage().getReplacementRvInfo());
         ovh.set(Const.OVH_PUB_KEY, getStorage().getReplacementOwnerKey());
-
+        if (getStorage().getReplacementGuid() != null) {
+          // Some test cases set this as NULL, adding check so that build passes through.
+          logger.info("Replacement GUID: " + getStorage().getReplacementGuid().toString());
+        }
         // check if owner supports Resale
         // if supported, replacement hmac is set in the replacement voucher
         // if not supported, replacement hmac is discarded
