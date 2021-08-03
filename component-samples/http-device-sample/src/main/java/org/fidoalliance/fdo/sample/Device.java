@@ -226,6 +226,8 @@ public class Device {
       client.call();
     } catch (ConnectException e) {
       logger.warn("Can't connect to " + url + ": " + e.getMessage());
+    } catch (IOException e) {
+      logger.warn("Can't connect to " + url + ": " + e.getMessage());
     }
   }
 
@@ -350,8 +352,10 @@ public class Device {
             logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
             continue;
           } catch (HttpResponseCodeException e) {
-            logger.error("HTTP code " + e.getCode() + " returned by server");
+            logger.error("HTTP code " + e.getCode() + " returned by RV server");
             continue;
+          } catch (IOException e) {
+            logger.warn("Unable to connect RV at " + url + ": " + e.getMessage());
           }
 
           if (null != signedBlob.get()) {
@@ -543,6 +547,8 @@ public class Device {
           logger.error("Unable to onboard from owner at "
               + url + ". " + e.getMessage());
         }
+      } catch (IOException e) {
+        logger.warn("Unable to contact Owner at " + url + ": " + e.getMessage());
       }
     }
 
