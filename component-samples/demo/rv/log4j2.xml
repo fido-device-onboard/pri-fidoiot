@@ -1,4 +1,4 @@
-<Configuration status="debug">
+<Configuration status="info">
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%-5level] %msg%n"/>
