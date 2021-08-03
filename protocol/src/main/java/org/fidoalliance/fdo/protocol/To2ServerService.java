@@ -333,9 +333,12 @@ public abstract class To2ServerService extends MessagingService {
         ovh.set(Const.OVH_GUID, getStorage().getReplacementGuid());
         ovh.set(Const.OVH_RENDEZVOUS_INFO, getStorage().getReplacementRvInfo());
         ovh.set(Const.OVH_PUB_KEY, getStorage().getReplacementOwnerKey());
-        if (getStorage().getReplacementGuid() != null) {
+        try {
           // Some test cases set this as NULL, adding check so that build passes through.
           logger.info("Replacement GUID: " + getStorage().getReplacementGuid().toString());
+        } catch (Exception e) {
+          // Ignore this exception, just log it (mostly because of unit test)
+          logger.warn("Invalid replacement GUID");
         }
         // check if owner supports Resale
         // if supported, replacement hmac is set in the replacement voucher
@@ -359,7 +362,6 @@ public abstract class To2ServerService extends MessagingService {
       reply.set(Const.SM_MSG_ID, Const.TO2_DONE2);
       reply.set(Const.SM_BODY, body);
       getStorage().completed(request, reply);
-      logger.info("Replacement GUID: " + ovh.getAsUuid(Const.OVH_GUID).toString());
     } catch (Exception e) {
       logger.error("TO2 failed (msg/70)");
       getStorage().failed(request, reply);
