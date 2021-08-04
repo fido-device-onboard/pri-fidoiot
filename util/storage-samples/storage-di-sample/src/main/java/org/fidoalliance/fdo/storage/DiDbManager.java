@@ -155,8 +155,6 @@ public class DiDbManager {
       pstmt.setInt(1, id);
       pstmt.setString(2, serial);
       rowsAffected = pstmt.executeUpdate();
-      logger.info(rowsAffected);
-
     } catch (SQLException e) {
       logger.error("Unable to update customer for serial no: " + serial);
       throw new RuntimeException(e);

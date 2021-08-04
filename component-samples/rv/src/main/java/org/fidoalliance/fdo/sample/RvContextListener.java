@@ -98,15 +98,6 @@ public class RvContextListener implements ServletContextListener {
             String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
             logger.debug("msg/" + msgId + ": " + request.toString());
           }
-
-          @Override
-          protected void failed(Exception e) {
-            StringWriter writer = new StringWriter();
-            try (PrintWriter pw = new PrintWriter(writer)) {
-              logger.warn("Failed to write data: " + e.getMessage());
-            }
-            logger.warn(writer.toString());
-          }
         };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
 

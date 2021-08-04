@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.storage.OwnerDbManager;
 
@@ -21,12 +23,14 @@ public class OwnerSviSettingsServlet extends HttpServlet {
       "wgetModContentVerification";
   private static final String SETUPINFO_ARRAY_DELIMETER = ",";
   private static final String SETUPINFO_VALUE_DELIMETER = ":=";
+  private static final LoggerService logger = new LoggerService(OwnerSviSettingsServlet.class);
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase("application/text") != 0) {
+      logger.warn("Request failed because of invalid content type.");
       resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
@@ -43,7 +47,7 @@ public class OwnerSviSettingsServlet extends HttpServlet {
 
         String[] to2Settings = requestBody.split(SETUPINFO_ARRAY_DELIMETER);
         if (to2Settings.length > 1) {
-          getServletContext().log("Invalid to2Settings request has been provided.");
+          logger.warn("Invalid to2Settings request has been provided.");
           resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
           return;
         }
@@ -55,21 +59,21 @@ public class OwnerSviSettingsServlet extends HttpServlet {
             switch (setting[0]) {
               case SETTINGS_DEVICE_MTU:
                 deviceMtu = Integer.parseInt(setting[1]);
-                getServletContext().log("Updating Device MTU for TO2 Settings");
+                logger.info("Updating Device MTU for TO2 Settings");
                 ownerDbManager.updateMtu(ds, "DEVICE_SERVICE_INFO_MTU_SIZE", deviceMtu);
                 break;
               default:
                 break;
             }
           } else {
-            getServletContext().log("Invalid settings request has been provided.");
+            logger.warn("Invalid settings request has been provided.");
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
           }
         }
       }
     } catch (Exception exp) {
-      getServletContext().log("Error occurred while updating TO2 settings " + exp.getMessage());
+      logger.warn("Error occurred while updating TO2 settings " + exp.getMessage());
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }

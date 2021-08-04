@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.CryptoService;
@@ -25,6 +27,9 @@ import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 
 public class To0AllowListDenyListDbStorage extends To0DbStorage {
+
+  private static final LoggerService logger =
+      new LoggerService(To0AllowListDenyListDbStorage.class);
 
   /**
    * Constructs a To0DbStorage instance.
@@ -159,6 +164,7 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
     }
 
     if (rowCount > 0) {
+      logger.warn("GUID " + guid + "was found in denylist.");
       throw new InvalidGuidException(new MessageBodyException());
     }
   }
@@ -201,8 +207,7 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
     }
 
     if (rowCount == 0) {
-      throw new InvalidMessageException(
-          new InvalidKeyException("No OV Public Key hash found on allow list"));
+      throw new InvalidMessageException("No OV Public Key hash found on allow list");
     }
   }
 
@@ -243,8 +248,7 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
     }
 
     if (rowCount > 0) {
-      throw new InvalidMessageException(
-          new InvalidKeyException("OV Public Key hash is in deny list"));
+      throw new InvalidMessageException("OV Public Key hash is in deny list");
     }
   }
 }

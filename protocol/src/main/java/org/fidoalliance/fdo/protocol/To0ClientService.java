@@ -6,12 +6,16 @@ package org.fidoalliance.fdo.protocol;
 import java.io.IOException;
 import java.security.PublicKey;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 /**
  * To0 Client message processing service.
  */
 public abstract class To0ClientService extends ClientService {
 
   protected Composite voucher;
+
+  private static final LoggerService logger = new LoggerService(To0ClientService.class);
 
   protected abstract To0ClientStorage getStorage();
 
@@ -48,9 +52,13 @@ public abstract class To0ClientService extends ClientService {
     Composite singedBlob = null;
     try (CloseableKey key = new CloseableKey(
         getStorage().getOwnerSigningKey(ownerPublicKey))) {
+      if (key.get() == null) {
+        throw new IOException();
+      }
       singedBlob = getCryptoService().sign(
           key.get(), to01Payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
     } catch (IOException e) {
+      logger.error("Voucher not extended to current owner.");
       throw new DispatchException(e);
     }
 
@@ -69,7 +77,7 @@ public abstract class To0ClientService extends ClientService {
     body.verifyMaxKey(Const.FIRST_KEY);
     long responseWait = body.getAsNumber(Const.FIRST_KEY).longValue();
     if (responseWait > Const.MAX_UINT32) {
-      throw new InvalidMessageException(new IllegalArgumentException());
+      throw new InvalidMessageException("Invalid to0d.WaitSeconds");
     }
     getStorage().setResponseWait(responseWait);
     reply.clear();
