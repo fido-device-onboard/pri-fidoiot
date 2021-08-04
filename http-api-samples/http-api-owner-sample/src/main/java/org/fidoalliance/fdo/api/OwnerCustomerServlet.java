@@ -71,6 +71,7 @@ public class OwnerCustomerServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       int rowsUpdated = new OwnerDbManager().removeCustomer(ds, customerId);
       if (rowsUpdated == 0) {
+        logger.warn("Request failed because of invalid customer ID");
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
