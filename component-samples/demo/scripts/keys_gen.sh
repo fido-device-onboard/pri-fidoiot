@@ -3,6 +3,11 @@
 # Copyright 2021 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
+# ***WARNING***: The script generates the credentials using default system
+# configurations and might not provide necessary security strength for a
+# production deployment. Care must be taken to maintain necessary cryptographic
+# strength while generating keys for production deployment.
+#
 # Summary:
 # keys_gen.sh script is implemented to generate necessary keys and credentials
 # for different PRI components.
@@ -33,6 +38,12 @@ set -e
 usage()
 {
   echo -e "
+  WARNING:
+  The script generates the credentials using default system configurations and
+  might not provide necessary security strength for a production deployment.
+  Care must be taken to maintain necessary cryptographic strength while
+  generating keys for production deployment.
+
   Usage:
     $0 [destdir | -h]
 
