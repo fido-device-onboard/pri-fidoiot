@@ -105,6 +105,12 @@ public class ProtocolHandler implements Runnable {
       Composite msg = getMessage(request);
       DispatchResult result = dispatcher.dispatch(msg);
       Composite reply = result.getReply();
+
+      if (reply.size() == 0) {
+        response.setContentLength(0);
+        response.setStatus(HttpServletResponse.SC_OK);
+        return;
+      }
       int replyId = reply.getAsNumber(Const.SM_MSG_ID).intValue();
       if (replyId == Const.ERROR) {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
