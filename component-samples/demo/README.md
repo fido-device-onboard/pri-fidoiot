@@ -227,90 +227,87 @@ To enable ServiceInfo transfer to a Device with a given GUID, follow the steps b
 
 Insert required ServiceInfo resources into the database table 'SYSTEM_MODULE_RESOURCE' using the API `PUT /api/v1/device/svi?<parameter1>=<value1>&...&<parameterN>=<valueN>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table with appropriate tags, start TO1.
 
-# Generating Key-Pair
+# Preparing credentials for components
 
-## Generating ECDSA Key-Pair
+The credentials (keystores, truststore, key files, password) required to run different components
+can be generated using the [Key Generation script](scripts/keys_gen.sh). 
 
-FDO PRI spec supports the National Institute of Standards and Technology (NIST) P-256 curve and P-384 types.
+***WARNING***: The script generates the credentials using default system configurations and might
+not provide necessary security strength for a production deployment. Care must be taken to maintain
+necessary cryptographic strength while generating keys for production deployment.
 
-**Step 1:** Generate the private key.
+The instructions below assumes that the current working directory is the root of binaries folder
+(while using binary package), or component-samples/demo folder (while using source package).
 
-Generate the NIST-256 key by running the following command:
+## Update credentials for components
 
-`$ openssl ecparam -genkey -name secp256r1 -out eckey.pem`
+Use following command to generate the credentials and copy them for respective components.
 
-Alternatively, generate the NIST-384 key by running the following command:
+```
+$ bash scripts/keys_gen.sh .
+$ cp -r creds/* .
+```
 
-`$ openssl ecparam -genkey -name secp384r1 -out eckey.pem`
+This would generate all necessary credentails in a folder named 'creds' in current working
+directory.
 
-**Step 2:** Generate a self-signed certificate.
+```
+$ tree creds
+creds
+├── aio
+│   ├── certs
+│   │   ├── ssl.p12
+│   │   └── truststore
+│   ├── creds.env
+│   ├── manufacturer_keystore.p12
+│   ├── owner_keystore.p12
+│   └── resources
+│       └── owner_customer1.pem
+├── device
+│   ├── device_ec256.pem
+│   ├── device_ec384.pem
+│   └── device.pem
+├── manufacturer
+│   ├── certs
+│   │   └── ssl.p12
+│   ├── creds.env
+│   ├── manufacturer_keystore.p12
+│   ├── owner_pub_keys.pem
+│   └── reseller_pub_keys.pem
+├── owner
+│   ├── certs
+│   │   ├── ssl.p12
+│   │   └── truststore
+│   ├── creds.env
+│   ├── owner2_pub_keys.pem
+│   ├── owner_keystore.p12
+│   └── owner_pub_keys.pem
+├── reseller
+│   ├── certs
+│   │   └── ssl.p12
+│   ├── creds.env
+│   ├── owner_pub_keys.pem
+│   └── reseller_keystore.p12
+└── rv
+    ├── certs
+    │   └── ssl.p12
+    ├── config.properties
+    └── creds.env
+```
 
-Generate the self-signed certificate for the previously generated NIST-256 key as:
+Run the script with '-h' flag to print the syntax.
 
-`$ openssl req -x509 -sha256 -nodes -days 3650 -key eckey.pem -out eccert.crt`
+```
+$ bash scripts/keys_gen.sh -h
+```
 
-Alternatively, generate the self-signed certificate for the previously generated NIST-384 key as:
+## Customize for multi-machine setup
 
-`$ openssl req -x509 -sha384 -nodes -days 3650 -key eckey.pem -out eccert.crt`
+While testing for a scenario where different components are running in different
+machines, the SSL certificate needs to be updated to include the DNS / IP of
+these machines in its SubjectAltName.
 
-**Step 3:** Convert the key to public key cryptography standards (PKCS\#8) format (optional):
+Update the script (function: generate_tls_keystore) to add multiple DNS / IP
+details and then follow above steps to create required SSL keystore and
+certificates.
 
-`$ openssl pkcs8 -topk8 -nocrypt -in eckey.pem -out eckey.key`
-
-**Step 4:** Create a certificate signing request to send for generating a certificate chain (optional):
-
-`$ openssl x509 -x509toreq -in eccert.crt -out CSR.csr -signkey eckey.key`
-
-## Generating RSA Key-Pair
-
-FDO spec supports the RSA2048
-
-**Step 1:** Generate the private key.
-
-Generate the NIST-256 key by running the following command:
-
-`$ openssl genrsa -out rsakey.pem 2048`
-
-**Step 2:** Generate a self-signed certificate.
-
-Generate the self-signed certificate for the previously generated NIST-256 key as:
-
-`$ openssl req -x509 -key rsakey.pem -days 365 -out rsacert.pem`
-
-# Working with Keystore
-
-## Inserting Keys into Keystore
-
-Assuming that there is already an existing certificate named 'certificate.pem' and the corresponding private key 'private-key.pem', follow these steps to insert them as 'PrivateKeyEntry' into the keystore 'dest-keystore.p12':
-
-**Step 1:** Convert the certificate and private key into 'PKCS12' format:
-
-`$ openssl pkcs12 -export -in certificate.pem -inkey private-key.pem -name newkeypair -out src-keystore.p12`
-
-**Step 2:** Delete an existing alias (only needed if there is a need to replace PrivateKeyEntry having a particular algorithm):
-
-`$ keytool -delete -alias newkeypair -keystore keystore.jks`
-
-**Step 3:** Import the above generated source PKCS12 file into the existing destination keystore file 'dest-keystore.p12' located with alias 'newkeypair'.
-
-`$ keytool -importkeystore -destkeystore path/to/dest-keystore.p12 -srckeystore src-keystore.p12 -srcstoretype PKCS12 -alias newkeypair`
-
-***NOTE***: The password entered in Step 1 to generate the src-keystore.p12 must be the same as that of dest-keystore.p12, that is, the password of the newly created keystore must match the existing keystore where it will be imported to.
-
-## Exporting an Existing Certificate from Keystore
-
-Assuming that there is an existing certificate and private key stored in the keystore as a PrivateKeyEntry under the alias 'newkeypair', run the following command to extract the certificate into <certificate.pem\>:
-
-**Step 1:** Get the list of key-pairs, along with their respective aliases, from the keystore:
-
-`$ keytool -list -v -keystore /path/to/dest-keystore.p12`
-
-**Step 2:** Export the certificate from the keystore using any of the aliases present in the keystore**:**
-
-`$ keytool -exportcert -alias newkeypair -file <certificate.pem> -rfc -keystore path/to/dest-keystore.p12`
-
-## Removing an Existing Key-Pair from Keystore
-
-Assuming that there is an existing owner's certificate and private key stored in the keystore as a PrivateKeyEntry under the alias 'newkeypair', run the following command to remove the key-pair corresponding to the alias:
-
-`$ keytool -delete -alias newkeypair -keystore path/to/dest-keystore.p12`
