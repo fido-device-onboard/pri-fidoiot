@@ -11,10 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.storage.OwnerDbManager;
 
 public class OwnerCustomerServlet extends HttpServlet {
+
+  private static final LoggerService logger = new LoggerService(OwnerCustomerServlet.class);
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -25,6 +28,7 @@ public class OwnerCustomerServlet extends HttpServlet {
     String contentType = req.getContentType();
 
     if (null == id || null == name) {
+      logger.warn("Request failed because of invalid input.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
@@ -32,6 +36,7 @@ public class OwnerCustomerServlet extends HttpServlet {
     //accept no content type or text/plain us-ascii pem
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
+        logger.warn("Request failed because of invalid content type.");
         resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
@@ -44,7 +49,9 @@ public class OwnerCustomerServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       OwnerDbManager ownerDbManager = new OwnerDbManager();
       ownerDbManager.addCustomer(ds, Integer.parseInt(id), name, keySet);
+      logger.info("Added customer '" + name + "' with id '" + id + "'");
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
@@ -55,6 +62,7 @@ public class OwnerCustomerServlet extends HttpServlet {
 
     String customerId = req.getParameter("id");
     if (customerId == null) {
+      logger.warn("Request failed because of invalid input.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
@@ -63,6 +71,7 @@ public class OwnerCustomerServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       new OwnerDbManager().removeCustomer(ds, customerId);
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }

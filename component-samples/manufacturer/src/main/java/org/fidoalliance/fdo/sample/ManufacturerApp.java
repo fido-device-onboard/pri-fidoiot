@@ -208,9 +208,10 @@ public class ManufacturerApp {
 
     tomcat.getConnector();
     try {
-
       tomcat.start();
+      logger.info("Started Manufacturer Service.");
     } catch (LifecycleException e) {
+      logger.error("Failed to start Manufacturer Service.");
       throw new RuntimeException(e);
     }
   }

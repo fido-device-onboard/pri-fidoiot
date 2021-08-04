@@ -52,6 +52,7 @@ public class ResellerCustomerServlet extends HttpServlet {
       List<PublicKey> key = PemLoader.loadPublicKeys(keySet);
       if (key.size() > 0) {
         new ResellerDbManager().defineKeySet(ds, keySet, name, Integer.parseInt(id));
+        logger.info("Added customer '" + name + "' with id '" + id + "'");
       } else {
         logger.warn("PEM file is not properly formatted.");
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); //Invalid PEM string

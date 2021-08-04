@@ -356,7 +356,7 @@ public final class CryptoService {
    */
   public void verifyBytes(byte[] nonce1, byte[] nonce2) {
     if (ByteBuffer.wrap(nonce1).compareTo(ByteBuffer.wrap(nonce2)) != 0) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Received Nonce doesn't match.");
     }
   }
 
@@ -373,7 +373,7 @@ public final class CryptoService {
     ByteBuffer hash2 = hashResult.getAsByteBuffer(Const.HASH);
 
     if (hash1.compareTo(hash2) != 0) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Hash doesn't match.");
     }
   }
 
@@ -1993,10 +1993,10 @@ public final class CryptoService {
   public UUID getGuidFromUeid(byte[] ueid) {
 
     if (ueid.length != Const.GUID_SIZE + 1) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Error parsing COSE UEID");
     }
     if (ueid[0] != Const.EAT_RAND) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Error parsing COSE UEID");
     }
 
     byte[] guid = new byte[Const.GUID_SIZE];

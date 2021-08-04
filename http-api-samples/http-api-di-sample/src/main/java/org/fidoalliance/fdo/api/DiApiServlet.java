@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -28,6 +29,8 @@ import org.fidoalliance.fdo.storage.CertificateResolver;
  * Device Initialization API servlet..
  */
 public class DiApiServlet extends HttpServlet {
+
+  private static final LoggerService logger = new LoggerService(DiApiServlet.class);
 
   protected Composite queryVoucher(DataSource dataSource, String serialNo) {
 
@@ -68,6 +71,7 @@ public class DiApiServlet extends HttpServlet {
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
+      logger.warn("Request failed because of device with given serial was not found.");
       resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
@@ -99,9 +103,9 @@ public class DiApiServlet extends HttpServlet {
 
     resp.setContentType(Const.HTTP_APPLICATION_CBOR);
     byte[] voucherBytes = voucher.toBytes();
-    getServletContext().log("Extended voucher: " + Composite.toString(voucherBytes));
+    logger.info("Extended voucher with serial " + serialNo);
+    logger.debug("Extended voucher: " + Composite.toString(voucherBytes));
     resp.setContentLength(voucherBytes.length);
     resp.getOutputStream().write(voucherBytes);
-
   }
 }

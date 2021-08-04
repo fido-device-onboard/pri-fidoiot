@@ -9,12 +9,16 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 /**
  * To2 Server message processing service.
  */
 public abstract class To2ServerService extends MessagingService {
 
   public abstract To2ServerStorage getStorage();
+
+  private static final LoggerService logger = new LoggerService(To2ServerService.class);
 
   protected void doHello(Composite request, Composite reply) {
     getStorage().starting(request, reply);
@@ -70,6 +74,7 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().started(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/60)");
       getStorage().failed(request, reply);
       throw e;
     }
@@ -84,7 +89,7 @@ public abstract class To2ServerService extends MessagingService {
       Composite voucher = getStorage().getVoucher();
       Composite entries = voucher.getAsComposite(Const.OV_ENTRIES);
       if (entryNum < 0 || entryNum >= entries.size()) {
-        throw new InvalidMessageException();
+        throw new InvalidMessageException("Invalid OVEntryNum received.");
       }
 
       Composite entry = entries.getAsComposite(entryNum);
@@ -98,6 +103,7 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().continued(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/62)");
       getStorage().failed(request, reply);
       throw e;
     }
@@ -119,7 +125,7 @@ public abstract class To2ServerService extends MessagingService {
           sigInfoA,
           getStorage().getOnDieService(),
           certPath)) {
-        throw new InvalidMessageException();
+        throw new InvalidMessageException("OnDie signature verification failed.");
       }
 
       Composite payload = Composite.fromObject(
@@ -197,6 +203,7 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().continued(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/64)");
       getStorage().failed(request, reply);
       throw e;
     }
@@ -258,6 +265,7 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().continued(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/66)");
       getStorage().failed(request, reply);
       throw e;
     }
@@ -295,6 +303,7 @@ public abstract class To2ServerService extends MessagingService {
       getStorage().continued(request, reply);
 
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/68)");
       getStorage().failed(request, reply);
       throw e;
     }
@@ -314,6 +323,9 @@ public abstract class To2ServerService extends MessagingService {
       Composite voucher = getStorage().getVoucher();
       Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
       Composite pubKey = getCryptoService().getOwnerPublicKey(voucher);
+
+      logger.info("TO2 completed for GUID: " + ovh.getAsUuid(Const.OVH_GUID).toString());
+
       // if reuse, do nothing.
       // create replacement ownership voucher otherwise
       if (!isReuseSelected(ovh, pubKey)) {
@@ -321,7 +333,13 @@ public abstract class To2ServerService extends MessagingService {
         ovh.set(Const.OVH_GUID, getStorage().getReplacementGuid());
         ovh.set(Const.OVH_RENDEZVOUS_INFO, getStorage().getReplacementRvInfo());
         ovh.set(Const.OVH_PUB_KEY, getStorage().getReplacementOwnerKey());
-
+        try {
+          // Some test cases set this as NULL, adding check so that build passes through.
+          logger.info("Replacement GUID: " + getStorage().getReplacementGuid().toString());
+        } catch (Exception e) {
+          // Ignore this exception, just log it (mostly because of unit test)
+          logger.warn("Invalid replacement GUID");
+        }
         // check if owner supports Resale
         // if supported, replacement hmac is set in the replacement voucher
         // if not supported, replacement hmac is discarded
@@ -344,8 +362,8 @@ public abstract class To2ServerService extends MessagingService {
       reply.set(Const.SM_MSG_ID, Const.TO2_DONE2);
       reply.set(Const.SM_BODY, body);
       getStorage().completed(request, reply);
-
     } catch (Exception e) {
+      logger.error("TO2 failed (msg/70)");
       getStorage().failed(request, reply);
       throw e;
     }

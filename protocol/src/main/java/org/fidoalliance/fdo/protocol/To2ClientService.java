@@ -59,11 +59,12 @@ public abstract class To2ClientService extends DeviceService {
   protected void verifyEntry(int entryNum, Composite entry) {
 
     if (entryNum != this.entryNum) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Invalid Ownership Voucher entry received.");
     }
     PublicKey verifyKey = getCryptoService().decode(this.prevEntryKey);
     if (!getCryptoService().verify(verifyKey, entry, null, null, null)) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException(
+          "Public key for OwnershipVoucher entry could not be verified.");
     }
 
     Composite payload = Composite.fromObject(entry.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
@@ -73,13 +74,13 @@ public abstract class To2ClientService extends DeviceService {
     ByteBuffer value1 = hashPrevEntry.getAsByteBuffer(Const.HASH);
     ByteBuffer value2 = this.prevEntryHash.getAsByteBuffer(Const.HASH);
     if (value1.compareTo(value2) != 0) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Hash for OwnershipVoucher entry could not be verified.");
     }
 
     value1 = hdrHash.getAsByteBuffer(Const.HASH);
     value2 = this.hdrHash.getAsByteBuffer(Const.HASH);
     if (value1.compareTo(value2) != 0) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("Hash for OwnershipVoucherHeader could not be verified.");
     }
 
     //update variable
@@ -90,7 +91,7 @@ public abstract class To2ClientService extends DeviceService {
       PublicKey key1 = getCryptoService().decode(this.cupKey);
       PublicKey key2 = getCryptoService().decode(this.prevEntryKey);
       if (getCryptoService().compare(key1, key2) != 0) {
-        throw new InvalidMessageException();
+        throw new InvalidMessageException("Ownership Voucher is not extended to current owner.");
       }
     }
   }
@@ -182,7 +183,7 @@ public abstract class To2ClientService extends DeviceService {
     ByteBuffer b1 = hmac1.getAsByteBuffer(Const.HASH);
     ByteBuffer b2 = hmac.getAsByteBuffer(Const.HASH);
     if (b1.compareTo(b2) != 0) {
-      throw new InvalidMessageException();
+      throw new InvalidMessageException("OwnershipVoucherHeader HMAC comparison failed.");
     }
 
     //verify this message
@@ -197,7 +198,7 @@ public abstract class To2ClientService extends DeviceService {
       //CUPHOwnerPubKey must be able to verify the signature of the TO1d signedBlob message
       if (!getCryptoService().verify(verifyKey, to1d, null, null, null)) {
         //If T01d signature does not verify, Then T02 should fail with error message.
-        throw new InvalidMessageException();
+        throw new InvalidMessageException("Failed to verify TO1D signature.");
       }
     }
 
