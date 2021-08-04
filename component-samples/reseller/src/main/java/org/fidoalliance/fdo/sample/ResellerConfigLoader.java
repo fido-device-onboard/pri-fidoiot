@@ -50,13 +50,6 @@ public class ResellerConfigLoader {
       defaultConfiguration.addProperty(ResellerAppConstants.DB_DRIVER, "org.h2.Driver");
       defaultConfiguration.addProperty(ResellerAppConstants.SERVER_PATH,
           System.getProperty(ResellerAppConstants.USER_DIR));
-      defaultConfiguration.addProperty(ResellerAppConstants.DB_USER, "sa");
-      defaultConfiguration.addProperty(ResellerAppConstants.DB_PWD, "");
-      defaultConfiguration.addProperty(ResellerAppConstants.DB_PORT, "8071");
-      defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PATH, "");
-      defaultConfiguration.addProperty(ResellerAppConstants.KEYSTORE_PWD, "RsrKs@3er");
-      defaultConfiguration.addProperty(ResellerAppConstants.API_USER, "admin");
-      defaultConfiguration.addProperty(ResellerAppConstants.API_PWD, "test");
 
       final String url = "jdbc:h2:tcp://localhost:8071/"
           + Path.of(System.getProperty(ResellerAppConstants.USER_DIR),
