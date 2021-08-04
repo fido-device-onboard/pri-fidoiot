@@ -541,11 +541,14 @@ public class Device {
         DispatchResult dr = to2Service.getHelloMessage();
         WebClient client = new WebClient(url, dr, to2Dispatcher);
         client.call();
+      } catch (HttpResponseCodeException e) {
+        lastFailure = e;
+        logger.error("HTTP code " + e.getCode() + " returned by server");
       } catch (RuntimeException e) {
+        lastFailure = e;
         if (isCausedBy(e, SocketException.class)) {
           logger.warn("Unable to contact Owner at " + url + ". " + e.getMessage());
         } else {
-          lastFailure = e;
           logger.error("Unable to onboard from owner at "
               + url + ". " + e.getMessage());
         }
