@@ -38,7 +38,7 @@ public class ManufacturerConfigLoader {
         throw new ConfigurationException();
       }
     } catch (ConfigurationException e) {
-      logger.warn("The Manufacturer application might not be using config file");
+      logger.debug("The Manufacturer application might not be using config file");
       // ignore the error since the application might not be using config file.
       // log when logging is enabled in the application.
     }

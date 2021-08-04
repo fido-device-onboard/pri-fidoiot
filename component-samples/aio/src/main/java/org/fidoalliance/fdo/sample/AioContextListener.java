@@ -170,8 +170,7 @@ public class AioContextListener implements ServletContextListener {
           case Const.DI_SET_HMAC:
             return createDiService(cs, ds, ods);
           case Const.ERROR:
-            Composite body = request.getAsComposite(Const.SM_BODY);
-            msgId = body.getAsNumber(Const.SM_MSG_ID).intValue();
+            msgId = request.getAsNumber(Const.SM_MSG_ID).intValue();
             switch (msgId) {
               case Const.TO2_HELLO_DEVICE:
               case Const.TO2_GET_OVNEXT_ENTRY:
@@ -219,16 +218,6 @@ public class AioContextListener implements ServletContextListener {
         String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
         logger.debug("msg/" + msgId + ": " + request.toString());
       }
-
-      @Override
-      protected void failed(Exception e) {
-        StringWriter writer = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(writer)) {
-          writer.write(e.getMessage());
-          writer.write("\n");
-        }
-        logger.warn(writer.toString());
-      }
     };
 
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
@@ -247,24 +236,21 @@ public class AioContextListener implements ServletContextListener {
     aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
     aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
 
-    Consumer<String> injector = a -> newDevice(a,ds,cs,certResolver);
-    sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR,injector);
+    Consumer<String> injector = a -> newDevice(a, ds, cs, certResolver);
+    sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR, injector);
 
     // schedule session cleanup scheduler
     scheduler.scheduleWithFixedDelay(new Runnable() {
       @Override
       public void run() {
         try {
-
           new AioDbManager().removeSessions(ds);
-
         } catch (Exception e) {
-          logger.warn(e.getMessage());
+          logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
         }
       }
     }, 5, Integer.parseInt(
         sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
-
   }
 
 

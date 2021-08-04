@@ -116,7 +116,6 @@ public class OwnerContextListener implements ServletContextListener {
     }
     final OnDieService ods = initialOds;
 
-
     resolver = new OwnerKeyResolver(sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE),
         sc.getInitParameter(OwnerAppSettings.OWNER_KEYSTORE_PWD));
 
@@ -136,15 +135,6 @@ public class OwnerContextListener implements ServletContextListener {
       protected void dispatching(Composite request) {
         String msgId = request.getAsNumber(Const.SM_MSG_ID).toString();
         logger.debug("msg/" + msgId + ": " + request.toString());
-      }
-
-      @Override
-      protected void failed(Exception e) {
-        StringWriter writer = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(writer)) {
-          logger.warn("Failed to write data: " + e.getMessage());
-        }
-        logger.warn(writer.toString());
       }
     };
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
@@ -181,7 +171,7 @@ public class OwnerContextListener implements ServletContextListener {
                   to0ExecutorService);
             }
           } catch (Exception e) {
-            logger.warn(e.getMessage());
+            logger.warn("TO0 scheduler failed. Reason: " + e.getMessage());
           }
         }
       }, 5, Integer.parseInt(

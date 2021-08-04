@@ -22,6 +22,7 @@ COPY ./certs ./certs
 COPY ./downloads ./downloads
 COPY ./resources ./resources
 COPY ./ondie_cache ./ondie_cache
+COPY log4j2.xml .
 COPY aio.jar .
 COPY manufacturer_keystore.p12 .
 COPY owner_keystore.p12 .

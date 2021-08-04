@@ -87,7 +87,7 @@ public class To2ClientApp {
         // break here since no exception is thrown, so TO2 is successful.
         break;
       } catch (Exception e) {
-        logger.error(e.getMessage());
+        logger.error(e);
       }
     }
 

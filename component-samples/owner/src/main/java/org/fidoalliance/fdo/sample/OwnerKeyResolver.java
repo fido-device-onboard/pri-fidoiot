@@ -53,7 +53,7 @@ public class OwnerKeyResolver implements KeyResolver {
           }
         }
       } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
-        logger.error(e.getMessage());
+        logger.error("Failed to get private key for given public key.");
       }
     }
     return null;
@@ -74,8 +74,7 @@ public class OwnerKeyResolver implements KeyResolver {
             ownerKeyStorePin.toCharArray());
       }
     } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-      logger.error("Keystore not configured.");
-      logger.error(e.getMessage());
+      logger.error("Keystore is not properly configured.");
     }
   }
 }
