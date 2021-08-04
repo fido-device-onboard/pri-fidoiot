@@ -427,43 +427,4 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
   }
 
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-
-    String byteString = req.getParameter(BYTES_TAG);
-
-    byte[] byteContent = null;
-    if (byteString != null) {
-      byteContent = getQueryBytes(byteString);
-    }
-
-    String sql = ""
-        + "UPDATE SYSTEM_MODULE_RESOURCE SET CONTENT = ? , UPDATED = ? "
-        + getWhereClause(req);
-
-    try (Connection conn = ((DataSource) getServletContext().getAttribute("datasource"))
-        .getConnection();
-        InputStream input = req.getInputStream();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-      if (byteContent == null) {
-        pstmt.setBinaryStream(1, input);
-      } else {
-        pstmt.setBytes(1, byteContent);
-      }
-
-      Timestamp updated = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(2, updated);
-
-      int count = pstmt.executeUpdate();
-
-      if (count == 0) {
-        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      }
-
-    } catch (SQLException e) {
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-  }
 }
