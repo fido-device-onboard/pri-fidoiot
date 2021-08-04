@@ -294,7 +294,7 @@ $ bash scripts/keys_gen.sh -h
 
 While testing for a scenario where different components are running in different
 machines, the SSL certificate needs to be updated to include the DNS / IP of
-these machines are SubjectAltName.
+these machines in its SubjectAltName.
 
 Update the script (function: generate_tls_keystore) to add multiple DNS / IP
 details and then follow above steps to create required SSL keystore and
