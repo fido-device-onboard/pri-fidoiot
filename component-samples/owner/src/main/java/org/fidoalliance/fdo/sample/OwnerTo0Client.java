@@ -93,11 +93,6 @@ public class OwnerTo0Client {
       protected MessagingService getMessagingService(Composite request) {
         return clientService();
       }
-
-      @Override
-      protected void failed(Exception e) {
-        logger.error(e.getMessage());
-      }
     };
   }
 

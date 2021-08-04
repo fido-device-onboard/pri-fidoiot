@@ -173,7 +173,9 @@ public class ResellerServerApp {
     tomcat.getConnector();
     try {
       tomcat.start();
+      logger.info("Started Reseller Service.");
     } catch (LifecycleException e) {
+      logger.error("Failed to start Reseller Service.");
       throw new RuntimeException(e);
     }
   }

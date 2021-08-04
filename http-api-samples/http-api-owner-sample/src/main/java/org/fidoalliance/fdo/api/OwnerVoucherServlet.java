@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 
@@ -26,6 +28,8 @@ import org.fidoalliance.fdo.storage.OwnerDbManager;
  * Manages Ownership vouchers for a To2 Server.
  */
 public class OwnerVoucherServlet extends HttpServlet {
+
+  private static final LoggerService logger = new LoggerService(OwnerVoucherServlet.class);
 
   protected void getVouchers(DataSource ds, OutputStream out) {
     String sql = "SELECT VOUCHER FROM TO2_DEVICES;";
@@ -82,6 +86,7 @@ public class OwnerVoucherServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
+      logger.warn("Request failed because of invalid content type.");
       resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
@@ -97,10 +102,11 @@ public class OwnerVoucherServlet extends HttpServlet {
 
       resp.setContentType("text/plain; charset=UTF-8");
       byte[] guidBytes = guid.toString().getBytes(StandardCharsets.UTF_8);
-      getServletContext().log("imported voucher for " + guid.toString());
+      logger.info("Imported voucher for GUID: " + guid.toString());
       resp.setContentLength(guidBytes.length);
       resp.getOutputStream().write(guidBytes);
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -112,6 +118,7 @@ public class OwnerVoucherServlet extends HttpServlet {
 
     String id = req.getParameter("id");
     if (id == null) {
+      logger.warn("Request failed because of invalid input.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
@@ -121,8 +128,9 @@ public class OwnerVoucherServlet extends HttpServlet {
 
       UUID guid = UUID.fromString(id);
       new OwnerDbManager().removeVoucher(ds, guid);
-
+      logger.info("Removed voucher with GUID: " + guid);
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
@@ -143,6 +151,7 @@ public class OwnerVoucherServlet extends HttpServlet {
           resp.setContentLength(result.length);
           resp.getOutputStream().write(result);
         } else {
+          logger.warn("Request failed because of invalid credentials.");
           resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
       } else {
@@ -150,6 +159,7 @@ public class OwnerVoucherServlet extends HttpServlet {
         getVouchers(ds, resp.getOutputStream());
       }
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }

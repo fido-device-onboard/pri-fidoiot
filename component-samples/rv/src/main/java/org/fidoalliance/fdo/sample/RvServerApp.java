@@ -10,6 +10,7 @@ import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -29,6 +30,8 @@ public class RvServerApp {
   private static final String RV_SCHEME =
       null != RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME)
           ? RvConfigLoader.loadConfig(RvAppSettings.RV_SCHEME) : "http";
+
+  private static final LoggerService logger = new LoggerService(RvServerApp.class);
 
   private static String getMessagePath(int msgId) {
     return RvAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
@@ -120,7 +123,9 @@ public class RvServerApp {
     tomcat.getConnector();
     try {
       tomcat.start();
+      logger.info("Started Rendezvous Service.");
     } catch (LifecycleException e) {
+      logger.error("Failed to start Rendezvous Service.");
       throw new RuntimeException(e);
     }
   }

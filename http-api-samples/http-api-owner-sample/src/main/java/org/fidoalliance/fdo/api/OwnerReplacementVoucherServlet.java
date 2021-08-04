@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 
@@ -26,6 +28,9 @@ import org.fidoalliance.fdo.storage.OwnerDbManager;
  * Manages Ownership vouchers for a To2 Server.
  */
 public class OwnerReplacementVoucherServlet extends HttpServlet {
+
+  private static final LoggerService logger =
+      new LoggerService(OwnerReplacementVoucherServlet.class);
 
   /**
    * Gets a device voucher.
@@ -77,11 +82,12 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
           resp.setContentLength(result.length);
           resp.getOutputStream().write(result);
         } else {
-          getServletContext().log("No replacement voucher found for " + id);
+          logger.warn("Request failed because replacement voucher is not found.");
           resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
       }
     } catch (Exception exp) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
