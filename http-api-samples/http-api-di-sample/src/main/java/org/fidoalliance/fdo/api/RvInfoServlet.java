@@ -30,6 +30,7 @@ public class RvInfoServlet extends HttpServlet {
 
     if (contentType != null) {
       if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
+        logger.warn("Request failed because of unsupported content type.");
         resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
@@ -46,14 +47,15 @@ public class RvInfoServlet extends HttpServlet {
       if (directives.size() > 0 && RendezvousInfoDecoder.sanityCheck(rvi)) {
         DiDbManager dbManager = new DiDbManager();
         dbManager.addRvInfo(ds, rvInfo);
+        logger.info("Updated RVInfo.");
       } else {
         //If we are unable to resolve even one directive, then we return 400 BAD_REQUEST.
-        logger.error("Received invalid RVInfo");
+        logger.warn("Request failed because of invalid RVInfo.");
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
     } catch (Exception e) {
-      logger.error("Received invalid RVInfo");
+      logger.warn("Request failed because of invalid RVInfo.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }

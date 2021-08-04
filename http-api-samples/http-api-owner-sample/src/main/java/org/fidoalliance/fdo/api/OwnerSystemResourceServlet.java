@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.serviceinfo.ModuleManager;
@@ -40,6 +42,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   public static final String VAR_TAG = "var";
   public static final String WHERE_AND = " AND ";
 
+  private static final LoggerService logger = new LoggerService(OwnerSystemResourceServlet.class);
 
   private byte[] getQueryBytes(String queryArg) {
     StringBuilder hex = new StringBuilder();
@@ -168,6 +171,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     String contentType = null;
     if (module != null && varName != null) {
       contentType = module + ModuleManager.MODULE_DELIMITER + varName;
+      logger.info("Processing request for " + contentType);
     }
     if (contentType != null) {
       whereString.append(WHERE_AND);
@@ -179,6 +183,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
+    logger.info("GET request.");
     String sql = "SELECT "
         + "RESOURCE_ID, "
         + "CONTENT_TYPE_TAG, "
@@ -260,11 +265,13 @@ public class OwnerSystemResourceServlet extends HttpServlet {
           }
 
           if (count == 0) {
+            logger.warn("Request failed as required resource was not found.");
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND); //not found
           }
         }
       }
     } catch (SQLException e) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -274,6 +281,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
+    logger.info("DELETE request.");
     String where = getWhereClause(req);
     String sql = "DELETE FROM SYSTEM_MODULE_RESOURCE WHERE CONTENT_RESOURCE_TAG = "
         + "(SELECT RESOURCE_ID FROM SYSTEM_MODULE_RESOURCE " + where + ")";
@@ -290,11 +298,13 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         applyValues(req, pstmt2);
         int count2 = pstmt2.executeUpdate();
         if (count1 == 0 && count2 == 0) {
+          logger.warn("Delete request failed as required resource was not found.");
           resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
       }
 
     } catch (SQLException e) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
@@ -302,7 +312,9 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   protected void doPut(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
+    logger.info("PUT request.");
     if (req.getContentType().compareToIgnoreCase("application/octet-stream") != 0) {
+      logger.warn("Request failed because of invalid content type.");
       resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE); //unsupported meida
       return;
     }
@@ -326,6 +338,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
     }
 
     if (contentType == null) {
+      logger.warn("Request failed because of invalid input.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); //bad request
       return;
     }
@@ -422,7 +435,11 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       }
 
       pstmt.executeUpdate();
+      if (contentType != null) {
+        logger.info("Updated content for " + contentType);
+      }
     } catch (SQLException e) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
@@ -430,6 +447,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
+    logger.info("POST request.");
     String byteString = req.getParameter(BYTES_TAG);
 
     byte[] byteContent = null;
@@ -458,10 +476,12 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       int count = pstmt.executeUpdate();
 
       if (count == 0) {
+        logger.warn("Request failed as required resource was not found.");
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       }
 
     } catch (SQLException e) {
+      logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

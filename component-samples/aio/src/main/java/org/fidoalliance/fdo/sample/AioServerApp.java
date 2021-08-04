@@ -24,6 +24,7 @@ import org.fidoalliance.fdo.api.OwnerSviSettingsServlet;
 import org.fidoalliance.fdo.api.OwnerSystemResourceServlet;
 import org.fidoalliance.fdo.api.OwnerVoucherServlet;
 import org.fidoalliance.fdo.api.RvInfoServlet;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
@@ -43,6 +44,8 @@ public class AioServerApp {
   private static final String AIO_SCHEME =
       null != AioConfigLoader.loadConfig(AioAppSettings.AIO_SCHEME)
           ? AioConfigLoader.loadConfig(AioAppSettings.AIO_SCHEME) : "http";
+
+  private static final LoggerService logger = new LoggerService(AioServerApp.class);
 
   private static String getMessagePath(int msgId) {
     return AioAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
@@ -224,9 +227,7 @@ public class AioServerApp {
     // To enable remote connections to the DB set webAllowOthers=true
     // This creates a security hole in the system.
     // Not recommended to use especially on production system
-    wrapper.addInitParameter("webAllowOthers",
-        AioConfigLoader.loadConfig(AioAppSettings.DB_ALLOW_OTHERS));
-    //wrapper.addInitParameter("trace", "");
+    wrapper.addInitParameter("webAllowOthers", "false");
     wrapper.setLoadOnStartup(3);
 
     //setup digest auth
@@ -280,7 +281,9 @@ public class AioServerApp {
     tomcat.getConnector();
     try {
       tomcat.start();
+      logger.info("Started All-in-One Demo Service.");
     } catch (LifecycleException e) {
+      logger.warn("Failed to start All-in-One Demo Service.");
       throw new RuntimeException(e);
     }
   }

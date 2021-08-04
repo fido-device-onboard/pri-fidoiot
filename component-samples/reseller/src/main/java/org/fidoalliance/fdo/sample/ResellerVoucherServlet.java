@@ -75,6 +75,7 @@ public class ResellerVoucherServlet extends HttpServlet {
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
+      logger.warn("Request failed because of incorrect credentials.");
       resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
@@ -118,7 +119,7 @@ public class ResellerVoucherServlet extends HttpServlet {
         if (signer.get() != null) {
           vse.add(signer.get(), nextOwner);
         } else {
-          logger.error("Reseller is not the current owner for " + serialNo);
+          logger.warn("Reseller is not the current owner for " + serialNo);
           resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
           return;
         }
@@ -126,15 +127,14 @@ public class ResellerVoucherServlet extends HttpServlet {
 
       resp.setContentType(Const.HTTP_APPLICATION_CBOR);
       byte[] voucherBytes = voucher.toBytes();
-      getServletContext().log("Extended voucher: " + Composite.toString(voucherBytes));
+      logger.info("Extended voucher with serial " + serialNo);
+      logger.debug("Extended voucher: " + Composite.toString(voucherBytes));
       resp.setContentLength(voucherBytes.length);
       resp.getOutputStream().write(voucherBytes);
     } catch (Exception ex) {
-      logger.warn("No keys found for given customer id.");
+      logger.warn("No keys found for current owner.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
-
-
   }
 
   @Override
@@ -142,16 +142,23 @@ public class ResellerVoucherServlet extends HttpServlet {
       throws ServletException, IOException {
 
     if (req.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
+      logger.warn("Request failed because of invalid content type.");
       resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
       return;
     }
 
-    String uri = req.getRequestURI();
-    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
-    String id = req.getParameter("id");
-    Composite voucher = Composite.fromObject(req.getInputStream());
-    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    new ResellerDbManager().importVoucher(ds, voucher, serialNo, id);
+    try {
+      String uri = req.getRequestURI();
+      String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+      String id = req.getParameter("id");
+      Composite voucher = Composite.fromObject(req.getInputStream());
+      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+      new ResellerDbManager().importVoucher(ds, voucher, serialNo, id);
+      logger.info("Voucher upload successful.");
+    } catch (Exception ex) {
+      logger.warn("Request failed because of invalid input.");
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Override

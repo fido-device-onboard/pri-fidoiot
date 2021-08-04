@@ -47,6 +47,8 @@ public class OwnerServerApp {
     return OwnerAppSettings.WEB_PATH + "/" + Integer.toString(msgId);
   }
 
+  private static final LoggerService logger = new LoggerService(OwnerServerApp.class);
+
   /**
    * Application main.
    *
@@ -211,7 +213,6 @@ public class OwnerServerApp {
       httpsConnector.setProperty("sslProtocol", "TLS");
       httpsConnector.setProperty("SSLEnabled", "true");
       service.addConnector(httpsConnector);
-
     }
 
     Connector httpConnector = new Connector();
@@ -226,7 +227,9 @@ public class OwnerServerApp {
     tomcat.getConnector();
     try {
       tomcat.start();
+      logger.info("Started Owner Service.");
     } catch (LifecycleException e) {
+      logger.error("Failed to start Owner Service.");
       throw new RuntimeException(e);
     }
   }

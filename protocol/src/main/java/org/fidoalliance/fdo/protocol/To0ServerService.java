@@ -7,12 +7,16 @@ import java.security.PublicKey;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 /**
  * To0 Server message processing service.
  */
 public abstract class To0ServerService extends MessagingService {
 
   public abstract To0ServerStorage getStorage();
+
+  private static final LoggerService logger = new LoggerService(To0ServerService.class);
 
   protected void doHello(Composite request, Composite reply) {
     getStorage().starting(request, reply);
@@ -25,6 +29,7 @@ public abstract class To0ServerService extends MessagingService {
     reply.set(Const.SM_MSG_ID, Const.TO0_HELLO_ACK);
     reply.set(Const.SM_BODY, nonceTo0Sign);
     getStorage().started(request, reply);
+    logger.info("TO0 request received.");
   }
 
   protected void doOwnerSign(Composite request, Composite reply) {
@@ -75,6 +80,7 @@ public abstract class To0ServerService extends MessagingService {
     reply.set(Const.SM_MSG_ID, Const.TO0_ACCEPT_OWNER);
     reply.set(Const.SM_BODY, wsReply);
     getStorage().completed(request, reply);
+    logger.info("TO0 completed for GUID: " + ovh.getAsUuid(Const.OVH_GUID).toString());
   }
 
   protected void doError(Composite request, Composite reply) {
