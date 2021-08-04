@@ -61,7 +61,11 @@ public class OwnerCustomerServlet extends HttpServlet {
 
     try {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      new OwnerDbManager().removeCustomer(ds, customerId);
+      int rowsUpdated = new OwnerDbManager().removeCustomer(ds, customerId);
+      if (rowsUpdated == 0) {
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return;
+      }
     } catch (Exception exp) {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
