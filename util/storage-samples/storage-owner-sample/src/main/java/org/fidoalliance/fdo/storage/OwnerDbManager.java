@@ -685,13 +685,14 @@ public class OwnerDbManager {
    * @param ds         Datasource
    * @param customerId customer ID
    */
-  public void removeCustomer(DataSource ds, String customerId) {
+  public int removeCustomer(DataSource ds, String customerId) {
     String sql = "DELETE FROM OWNER_CUSTOMERS WHERE CUSTOMER_ID = ?;";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
       pstmt.setString(1, customerId);
-      pstmt.executeUpdate();
+      final int rowsUpdated = pstmt.executeUpdate();
+      return rowsUpdated;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
