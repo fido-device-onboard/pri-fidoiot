@@ -157,12 +157,12 @@ public abstract class MessageDispatcher implements Closeable {
             .set(Const.SM_MSG_ID, prevMessage)
             .set(Const.SM_PROTOCOL_VERSION, request.get(Const.SM_PROTOCOL_VERSION))
             .set(Const.SM_PROTOCOL_INFO, request.get(Const.SM_PROTOCOL_INFO))
-            .set(Const.SM_BODY, Const.EMPTY_MESSAGE);
+            .set(Const.SM_BODY, body);
 
         MessagingService service = getMessagingService(errorRequest);
 
         service.dispatch(request, reply);
-        dispatched(request,Const.EMPTY_MESSAGE);
+        dispatched(request, request);
 
         return new DispatchResult(Const.EMPTY_MESSAGE, true);
       }
@@ -170,7 +170,7 @@ public abstract class MessageDispatcher implements Closeable {
       MessagingService service = getMessagingService(request);
 
       boolean isDone = service.dispatch(request, reply);
-      dispatched(request,reply);
+      dispatched(request, reply);
 
       DispatchResult dr = new DispatchResult(reply, isDone);
       replied(reply);

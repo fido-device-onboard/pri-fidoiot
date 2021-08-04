@@ -170,8 +170,7 @@ public class AioContextListener implements ServletContextListener {
           case Const.DI_SET_HMAC:
             return createDiService(cs, ds, ods);
           case Const.ERROR:
-            Composite body = request.getAsComposite(Const.SM_BODY);
-            msgId = body.getAsNumber(Const.SM_MSG_ID).intValue();
+            msgId = request.getAsNumber(Const.SM_MSG_ID).intValue();
             switch (msgId) {
               case Const.TO2_HELLO_DEVICE:
               case Const.TO2_GET_OVNEXT_ENTRY:
@@ -237,8 +236,8 @@ public class AioContextListener implements ServletContextListener {
     aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
     aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
 
-    Consumer<String> injector = a -> newDevice(a,ds,cs,certResolver);
-    sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR,injector);
+    Consumer<String> injector = a -> newDevice(a, ds, cs, certResolver);
+    sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR, injector);
 
     // schedule session cleanup scheduler
     scheduler.scheduleWithFixedDelay(new Runnable() {
