@@ -21,7 +21,7 @@ Owner runtime arguments:
 
 - `owner_database_connection_url`
 
-  JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file.
+  JDBC URL for database connection. Includes the database driver name, port number for database, and the location of `.db` file.
 
   Default value: jdbc:h2:tcp://localhost:8051/./target/data/ops
 
@@ -195,8 +195,8 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | POST /api/v1/owner/setupinfo/?id=current_guid | Updates `Replacement GUID` (only if REUSE support is enabled) or `Replacement RVInfo` or `Customer ID` or all three in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or New CUSTOMER_ID or all three. <br/> To update GUID, RV Info and CUSTOMER_ID: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\>,ownerkey:=\<customer_id\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\> <br/> To update CUSTOMER_ID: ownerkey:=\<customer_id\> | | |
 | POST /api/v1/owner/customer/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
 | DELETE /api/v1/owner/customer/?id=<customer_id> | Deletes device entry from `OWNER_CUSTOMERS` table. | Query - id: Customer Id  | | | |
-| GET /api/v1/device/svi/?guid=<guid> | Retieves tag information about a resoruce including id. | Query - guid: Device GUID  | | | |
-| PUT /api/v1/device/svi/?module=<module-name><br>&var=<variable-name>&priority=<priority-no><br>&guid=<device-guid>&filename=\<filename\><br>&bytes=<contents-in-cbor-bytes> | Adds a new tagged resource. |  Query - module: Module Name. <br/>  var: Message Name. <br/> filename: zero length file to be created on device with the given filename. <br/> bytes: content to be populated in file, specified using filename. <br/> guid: Tag resource using GUID. <br/> device: device type tag. <br/> priority: priority order to send messages to device. Recommended to set priority to a non-negative value. Setting to a negative value might cause instability in SVI transfer.<br/> os: os name tag. <br/> version: os version tag. <br/> arch: device architecture tag. <br/> crid : content resource identifier tag. <br/> hash: storing hash value of content. **NOTE** Resource will be transferred only to devices matching the tagged architecture version type. Some parameters of the API are **optional** | application/octet-stream | File to be transferred in binary format. | |
+| GET /api/v1/device/svi/?guid=<guid> | Retrieves tag information about a resource including id. | Query - guid: Device GUID  | | | |
+| PUT /api/v1/device/svi/?module=<module-name><br>&var=<variable-name>&priority=<priority-no><br>&guid=<device-guid>&filename=\<filename\><br>&bytes=<contents-in-cbor-bytes> | Adds a new tagged resource. |  Query - module: Module Name. <br/>  var: Message Name. <br/> filename: zero length file to be created on device with the given filename. <br/> bytes: content to be populated in file, specified using filename. <br/> guid: Tag resource using GUID. <br/> device: device type tag. <br/> priority: priority order to send messages to device. Recommended to set priority to a non-negative value. Setting  a negative value might cause instability in SVI transfer.<br/> os: os name tag. <br/> version: os version tag. <br/> arch: device architecture tag. <br/> crid : content resource identifier tag. <br/> hash: storing hash value of content. **NOTE** Resource will be transferred only to devices matching the tagged architecture version type. Some parameters of the API are **optional** | application/octet-stream | File to be transferred in binary format. | |
 | DELETE /api/v1/device/svi/?id=<resource_id> | Removes resource(s) by tag or id. | Query - id: Resource Id  | | | |
 
 
@@ -216,7 +216,7 @@ As the H2 DB grows, larger heap space will be required by the application to run
 
 # Configuring Owner for HTTPS/TLS Communication
 
-By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS request from the device.
+By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS requests from the device.
 
 - Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
@@ -237,7 +237,7 @@ By default, the Owner uses HTTP for all communications on port 8042. In addition
     | owner_ssl_keystore-password| keystore-password | Password of the keystore. |
     | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
     | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
-    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
+    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS, PKCS12   |
     | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
 
     ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.

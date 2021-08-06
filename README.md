@@ -17,22 +17,20 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `component-samples`: It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile.
 
-- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server service.
+- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server services.
 
-- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end user with the protocol workflow.
+- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end-user with the protocol workflow.
 
 - `protocol`: It contains implementations related to protocol message processing.
 
-- `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
+- `util`: It contains utility packages such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
 
 ## Building FDO PRI Source
 
 FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
 [Apache Maven* software](http://maven.apache.org).
 
-Following ports are used for unit-tests and sample code - 8039, 8040, 8042, 8043, 8049, 8050, and 8051.
-Ensure that these ports are not used by other applications while building and executing the
-binaries.
+Following ports are used for unit tests and sample code - 8090, 8091, 8049, 8050, and 8051.
 
 Use the following commands to build FDO PRI source.
 ```
@@ -89,7 +87,7 @@ Device Credentials: 87f5..
 
 DI Client finished.
 
-Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
+Refer [Ownership Voucher Creation](#ownership-voucher-creation) for the next steps.
 
 #### Running the FDO PRI TO0 HTTP Client
 ```
