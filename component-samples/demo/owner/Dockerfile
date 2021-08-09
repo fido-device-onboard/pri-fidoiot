@@ -10,12 +10,10 @@ RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
 RUN mkdir -p /home/fdo/lib /home/fdo/serviceinfo
 
-# Uncomment the following line to enable onDie support for Owner
-# COPY ./ondie_cache ./ondie_cache/
-
 # Setup owner dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
+COPY ./ondie_cache ./ondie_cache/
 COPY log4j2.xml .
 COPY owner.jar .
 COPY owner_keystore.p12 owner_pub_keys.pem* owner2_pub_keys.pem* ./

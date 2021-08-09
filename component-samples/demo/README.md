@@ -97,7 +97,7 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the .env files.
 
-OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded directly from java if the ondie_autoupdate property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
+OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the [onDieCache.py script](scripts/onDieCache.py). They can also be downloaded directly during runtime if the `ondie_autoupdate` property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
 
 ***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases, it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
@@ -110,7 +110,7 @@ Note that this requires internet access by the component.
 Ensure `ondie_cache` directory is present before executing the script.
 
 ```
-python3 component-samples/scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
+python3 scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
 ```
 *Requires internet access for the component.
 
@@ -118,9 +118,6 @@ Finally, the `ondie_cache` directory needs to be copied into the docker containe
 ```
 COPY ./ondie_cache ./ondie_cache/
 ```
-*For Owner component, add `--chown=owner` along with the `COPY` command. Eg: `COPY --chown=owner ./ondie_cache ./ondie_cache/`
-
-`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certificates and CRLs.
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
@@ -128,7 +125,7 @@ To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, uncomment the
 
 ```
 ondie_cache=file:///home/fdo/ondie_cache/
-ondie_autoupdate=true
+ondie_autoupdate=false
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
 ```
