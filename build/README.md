@@ -6,7 +6,7 @@ Docker Script for building `pri-fidoiot` repository. Using this script you can b
 
 - Operating system: **Ubuntu 20.04.**
 
-- Docker engine : **18.06.0** (Supported till version <=20.10.7)
+- Docker engine : **18.06.0** (Supported till version 20.10.7)
 
 - Docker-compose : **1.23.2**
 
