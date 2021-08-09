@@ -11,7 +11,7 @@
   <parent>
     <artifactId>fdo</artifactId>
     <groupId>org.fidoalliance</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
 
   <name>Http Api Samples</name>

@@ -13,7 +13,7 @@
   <parent>
     <artifactId>http-dispatchers</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
 
   <name>HTTP Client Dispatcher</name>
