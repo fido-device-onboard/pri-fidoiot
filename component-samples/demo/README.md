@@ -13,7 +13,7 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 18.09)
+  - Docker engine (minimum version 18.09, Supported till version 20.10.7)
 
   - Docker-compose (minimum version 1.21.2)
 
