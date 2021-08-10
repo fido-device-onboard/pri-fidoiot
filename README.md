@@ -30,7 +30,27 @@ FDO PRI source code is organized into the following sub-folders.
 FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
 [Apache Maven* software](http://maven.apache.org).
 
-Following ports are used for unit tests and sample code - 8090, 8091, 8049, 8050, and 8051.
+The list of ports that are used for unit tests and sample code:
+
+| Port | Description    |
+| ---- | -------------- |
+| 8038 | manufacturer https port |
+| 8039 | manufacturer http port |
+| 8040 | rv http port |
+| 8041 | rv https port |
+| 8042 | owner http port |
+| 8043 | owner https port |
+| 8049 | manufacturer database port |
+| 8050 | rv database port |
+| 8051 | owner database port |
+| 8070 | reseller http port |
+| 8071 | reseller database port |
+| 8072 | reseller https port |
+| 8080 | aio http port |
+| 8081 | aio database port |
+| 8090 | Test RV port |
+| 8091 | Test DB port |
+| 8443 | aio https port |
 
 Use the following commands to build FDO PRI source.
 ```
