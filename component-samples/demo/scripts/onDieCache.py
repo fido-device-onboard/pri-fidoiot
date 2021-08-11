@@ -38,7 +38,7 @@ def artifact_copy(source_pathname, destdir):
 
 parser = argparse.ArgumentParser(description='Update local OnDieCache.')
 parser = argparse.ArgumentParser(prog='ondieCache', usage='%(prog)s --cachedir CACHEDIR -f')
-parser.add_argument('-c', '--cachedir', required=True, help='local directory to store cache artifacts')
+parser.add_argument('--cachedir', required=True, help='local directory to store cache artifacts, the directory must exist.')
 parser.add_argument('-f', required=False, action='store_true', help='force update when previous update not yet processed')
 
 args = parser.parse_args()

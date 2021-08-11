@@ -10,12 +10,10 @@ RUN useradd -ms /bin/bash fdo
 RUN mkdir -p /home/fdo/lib
 WORKDIR /home/fdo/
 
-# Uncomment the following line to enable onDie support for manufacturer
-# COPY ./ondie_cache ./ondie_cache/
-
 # Setup manufacturer dependencies
 COPY ./lib ./lib/
 COPY ./certs ./certs/
+COPY ./ondie_cache ./ondie_cache/
 COPY log4j2.xml .
 COPY manufacturer.jar .
 COPY manufacturer_keystore.p12 owner_pub_keys.pem* reseller_pub_keys.pem* ./
