@@ -22,7 +22,7 @@ RV runtime arguments:
 
 - `rv_database_connection_url`
 
-   JDBC URL for connection to database. Includes the database driver name, port number for database and the location of `.db` file
+   JDBC URL for database connection. Includes the database driver name, port number for database and the location of `.db` file
 
   Default value: jdbc:h2:tcp://localhost:8050/./target/data/rvs
 
@@ -152,7 +152,7 @@ $ cat example_allowlist_publickey.der | openssl dgst -sha256 | awk '/s/{print to
 
 # Configuring RV for HTTPS/TLS Communication
 
-By default, the RV uses HTTP for all communications on port 8040. In addition to that, the RV can be configured to handle HTTPS request from the owner & device on port 8443.
+By default, the RV uses HTTP for all communications on port 8040. In addition to that, the RV can be configured to handle HTTPS requests from the owner & device on port 8041.
 
 - Generate the Keystore/Certificate for the RV. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 

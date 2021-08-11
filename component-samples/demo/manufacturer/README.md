@@ -22,7 +22,7 @@ Manufacturer runtime arguments:
 
 - `manufacturer_database_connection_url`
 
-   JDBC URL for connection to database. Includes the database driver name, port number for database and the location of `.db` file
+   JDBC URL for database connection. Includes the database driver name, port number for database and the location of `.db` file
 
   Default value: jdbc:h2:tcp://localhost:8049/./target/data/mfg
 
@@ -76,7 +76,7 @@ Manufacturer runtime arguments:
 
 - `manufacturer_https_port`
 
-  Allows enduser to select a port for accepting HTTPS requests.
+  Allows end user to select a port for accepting HTTPS requests.
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
@@ -136,7 +136,7 @@ The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/man
 
 # Configuring Manufacturer for HTTPS/TLS Communication
 
-By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. In addition to that, the PRI-Manufacturer can be configured to handle HTTPS request from the device.
+By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. In addition to that, the PRI-Manufacturer can be configured to handle HTTPS requests from the device.
 
 - Generate the Keystore/Certificate for the PRI-manufacturer. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
@@ -144,7 +144,7 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
 
 - Copy the generated Keystore/Certificate to `<fdo-pri-src>/component-samples/demo/manufacturer/certs` folder.
 
-- Update the following environment varibles in `<fdo-pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
+- Update the following environment variables in `<fdo-pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
 
     |  Variable            |  Value            |             description       |
     | ---------------------|-------------------|-------------------------------|
@@ -157,7 +157,7 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configuration of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]` which points to localhost over the port 8443 for Owner during TO0 and localhost over the port 8040 for device during TO1
+Commonly referred as RvInfo, is one of the most important configurations of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]` which points to localhost over the port 8443 for Owner during TO0 and localhost over the port 8040 for device during TO1
 and the equivalent bytes representation is `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
 
 ## Generating CBOR RVInfo

@@ -17,22 +17,40 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `component-samples`: It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile.
 
-- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server service.
+- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server services.
 
-- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end user with the protocol workflow.
+- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end-user with the protocol workflow.
 
 - `protocol`: It contains implementations related to protocol message processing.
 
-- `util`: It contains utility package such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
+- `util`: It contains utility packages such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
 
 ## Building FDO PRI Source
 
 FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
 [Apache Maven* software](http://maven.apache.org).
 
-Following ports are used for unit-tests and sample code - 8039, 8040, 8042, 8043, 8049, 8050, and 8051.
-Ensure that these ports are not used by other applications while building and executing the
-binaries.
+The list of ports that are used for unit tests and sample code:
+
+| Port | Description    |
+| ---- | -------------- |
+| 8038 | manufacturer https port |
+| 8039 | manufacturer http port |
+| 8040 | rv http port |
+| 8041 | rv https port |
+| 8042 | owner http port |
+| 8043 | owner https port |
+| 8049 | manufacturer database port |
+| 8050 | rv database port |
+| 8051 | owner database port |
+| 8070 | reseller http port |
+| 8071 | reseller database port |
+| 8072 | reseller https port |
+| 8080 | aio http port |
+| 8081 | aio database port |
+| 8090 | Test RV port |
+| 8091 | Test DB port |
+| 8443 | aio https port |
 
 Use the following commands to build FDO PRI source.
 ```
@@ -89,7 +107,7 @@ Device Credentials: 87f5..
 
 DI Client finished.
 
-Refer [Ownership Voucher Creation](#ownership-voucher-creation) for next steps.
+Refer [Ownership Voucher Creation](#ownership-voucher-creation) for the next steps.
 
 #### Running the FDO PRI TO0 HTTP Client
 ```

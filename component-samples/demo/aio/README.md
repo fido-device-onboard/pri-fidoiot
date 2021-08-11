@@ -51,7 +51,7 @@ public static final String AIO_PORT = "aio_port";
 
 - `aio_database_connection_url`
 
-  JDBC URL for connection to database. Includes the database driver name, port number for database, and the location of `.db` file.
+  JDBC URL for database connection. Includes the database driver name, port number for database, and the location of `.db` file.
 
   Default value: jdbc:h2:tcp://localhost:8081/./aio
 
@@ -62,7 +62,6 @@ public static final String AIO_PORT = "aio_port";
   Default value: sa
 
 - `aio_database_password`
-
   AIO database password.
 
   Default value: <no-password>
@@ -144,7 +143,7 @@ public static final String AIO_PORT = "aio_port";
 
 - `owner_to0_rv_blob"`
 
-  Information containing network address of prospective owner. Owner shares this information with RV during TO0. RV, then shares the same during TO1. Device, then uses this information to initiate TO2 protocol.
+  Information containing network address of the prospective owner. Owner shares this information with RV during TO0. RV, then shares the same during TO1. Device, then uses this information to initiate TO2 protocol.
 
   Default value: http://localhost:8042?ipaddress=127.0.0.1
 
@@ -262,7 +261,7 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
 | PUT /api/v1/uploads/<file> | PUT a file that can later be retrieved via /downloads api |  | | | |
 | GET /downloads/<file> | Gets for onboarding   | | | |
-| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in last `n` seconds | |||
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | |||
 | GET /api/v1/register/{guid} | registers the To0 RVBlob with the RV Server | |||
 
 
@@ -278,10 +277,10 @@ The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keys
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. Default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
 # Configuring Owner for HTTPS/TLS Communication
 
-By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS request from the device.
+By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS requests from the device.
 
 - Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
