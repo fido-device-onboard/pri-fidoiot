@@ -13,7 +13,7 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 18.09)
+  - Docker engine (minimum version 18.09, Supported till version 20.10.7)
 
   - Docker-compose (minimum version 1.21.2)
 
@@ -95,22 +95,22 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 # Configuring OnDie (Optional)
 
-OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries the .env files.
+OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries in the .env files.
 
-OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the script provided in the component-samples/scripts directory (onDieCache.py). They can also be downloaded directly from java if the ondie_autoupdate property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
+OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the [onDieCache.py script](scripts/onDieCache.py). They can also be downloaded directly during runtime if the `ondie_autoupdate` property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
 
 ***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases, it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
 `ondie_cache`: (required if supporting OnDie, optional otherwise) Specifies the path to the directory containing the OnDie certificates and CRLs.
 
-`ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certificates and CRLs are downloaded from the cloud at start up into the directory specified by ondie_cache.
+`ondie_autoupdate`: (optional, default = false) if "true" then the OnDie certificates and CRLs are downloaded from the cloud at startup into the directory specified by ondie_cache.
 Note that this requires internet access by the component.
 
 ***NOTE***: If the component is executed in on-prem mode then `ondie_autoupdate` should be set to "false". In such cases, the artifacts can be preloaded by running the script in component-samples/scripts/onDieCache.py.
 Ensure `ondie_cache` directory is present before executing the script.
 
 ```
-python3 component-samples/scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
+python3 scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
 ```
 *Requires internet access for the component.
 
@@ -118,9 +118,6 @@ Finally, the `ondie_cache` directory needs to be copied into the docker containe
 ```
 COPY ./ondie_cache ./ondie_cache/
 ```
-*For Owner component, add `--chown=owner` along with the `COPY` command. Eg: `COPY --chown=owner ./ondie_cache ./ondie_cache/`
-
-`ondie_zip_artifact`: (optional, default = https://tsci.intel.com/content/csme.zip). Specifies the URL of the zip file that contains the OnDie certificates and CRLs.
 
 `ondie_check_revocations`: (optional, default = true for Manufacturer and Owner, false for RV) if "true" then revocations are checked by the component, no revocation checking is done if "false".
 
@@ -128,7 +125,7 @@ To enable OnDie support in FDO PRI Manufacturer and FDO PRI Owner, uncomment the
 
 ```
 ondie_cache=file:///home/fdo/ondie_cache/
-ondie_autoupdate=true
+ondie_autoupdate=false
 ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
 ```
@@ -136,7 +133,7 @@ ondie_check_revocations=false
 # Configuring log messages
 
 The components use LOG4J2 for logging. The logging configuration can be updated through log4j2.xml
-file stored within each component folder. By default, INFO logs are prints on console and DEBUG logs
+file stored within each component folder. By default, INFO logs are prints on the console and DEBUG logs
 are printed in the log file.
 
 Use following command to extract the log file from a running container.
@@ -150,7 +147,7 @@ $ docker container cp <container-id>:/home/fdo/log .
 
 2. Complete Device Initialization (DI) by starting the FDO HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
 
-3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. By default, existing customer with customer Id '1', is assigned to the device. To add a new customer and assign the inserted customer to the device, please refer to [PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about the API.
+3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. By default, an existing customer with customer Id '1', is assigned to the device. To add a new customer and assign the inserted customer to the device, please refer to [PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about the API.
 
 4. Start the PRI RV Sample as per the steps outlined in [RV README](rv/README.md).
 
@@ -158,7 +155,7 @@ $ docker container cp <container-id>:/home/fdo/log .
 
 6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample again. The previously created 'credential.bin' from Step#2 will be used directly by the Device.
 
-***NOTE***: Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remains unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API.
+***NOTE***: Credential Reuse protocol is enabled by default, that is, after a successful onboarding the device credentials remain unchanged. To enable the Resale protocol instead, wherein, after a successful onboarding the device credentials are replaced, update the fields `REPLACEMENT_GUID` and/or `REPLACEMENT_RVINFO` in Owner `TO2_DEVICES` table by using the API `POST /api/v1/owner/setupinfo?id=<device_guid>` before starting TO2. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API.
 
 # Running Demo using Reseller
 
@@ -233,10 +230,10 @@ The credentials (keystores, truststore, key files, password) required to run dif
 can be generated using the [Key Generation script](scripts/keys_gen.sh). 
 
 ***WARNING***: The script generates the credentials using default system configurations and might
-not provide necessary security strength for a production deployment. Care must be taken to maintain
+not provide the necessary security strength for production deployment. Care must be taken to maintain
 necessary cryptographic strength while generating keys for production deployment.
 
-The instructions below assumes that the current working directory is the root of binaries folder
+The instructions below assume that the current working directory is the root of binaries folder
 (while using binary package), or component-samples/demo folder (while using source package).
 
 ## Update credentials for components
@@ -308,6 +305,6 @@ machines, the SSL certificate needs to be updated to include the DNS / IP of
 these machines in its SubjectAltName.
 
 Update the script (function: generate_tls_keystore) to add multiple DNS / IP
-details and then follow above steps to create required SSL keystore and
+details and then follow the above steps to create the required SSL keystore and
 certificates.
 
