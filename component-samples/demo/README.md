@@ -11,7 +11,7 @@
 
 * Operating System: Ubuntu 20.04.
 
-* Linux packages:
+* Linux* packages:
 
   - Docker engine (minimum version 18.09, Supported till version 20.10.7)
 
@@ -19,7 +19,7 @@
 
   - Haveged
 
-  - Java 11
+  - Java* 11
 
   - Maven (minimum 3.6.3)
 
@@ -130,13 +130,13 @@ ondie_zip_artifact=https://tsci.intel.com/content/csme.zip
 ondie_check_revocations=false
 ```
 
-# Configuring log messages
+# Configuring Log Messages
 
 The components use LOG4J2 for logging. The logging configuration can be updated through log4j2.xml
 file stored within each component folder. By default, INFO logs are prints on the console and DEBUG logs
 are printed in the log file.
 
-Use following command to extract the log file from a running container.
+Use the following command to extract the log file from a running container.
 ```
 $ docker container cp <container-id>:/home/fdo/log .
 ```
@@ -166,7 +166,7 @@ In the following use-case (use-case: 1), the FDO PRI Manufacturer provisions the
 
 2. Complete Device Initialization (DI) by starting the FDO PRI HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credential.bin' before starting the device.
 
-3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. Assign customer with customer Id '2' to the device. Please refer to [FDO PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about assigning customer to a device.
+3. Complete Ownership Voucher Extension by using the API `GET /api/v1/vouchers/<serial_no>` and save the Ownership Voucher. Assign customer with customer ID '2' to the device. Please refer to [FDO PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about assigning customer to a device.
 
 4. After DI and before starting Transfer Ownership Protocol 1, add the owner2 keypair in the current owner's (reseller) keystore. Start the FDO PRI Reseller Sample as per the steps outlined in [Reseller README](reseller/README.md).
 
@@ -224,7 +224,7 @@ To enable ServiceInfo transfer to a Device with a given GUID, follow the steps b
 
 Insert required ServiceInfo resources into the database table 'SYSTEM_MODULE_RESOURCE' using the API `PUT /api/v1/device/svi?<parameter1>=<value1>&...&<parameterN>=<valueN>`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table with appropriate tags, start TO1.
 
-# Preparing credentials for components
+# Preparing Credentials for Components
 
 The credentials (keystores, truststore, key files, password) required to run different components
 can be generated using the [Key Generation script](scripts/keys_gen.sh). 
@@ -236,9 +236,9 @@ necessary cryptographic strength while generating keys for production deployment
 The instructions below assume that the current working directory is the root of binaries folder
 (while using binary package), or component-samples/demo folder (while using source package).
 
-## Update credentials for components
+## Update Credentials for Components
 
-Use following command to generate the credentials and copy them for respective components.
+Use the following command to generate the credentials and copy them for the respective components.
 
 ```
 $ bash scripts/keys_gen.sh .
@@ -298,7 +298,7 @@ Run the script with '-h' flag to print the syntax.
 $ bash scripts/keys_gen.sh -h
 ```
 
-## Customize for multi-machine setup
+## Customize for Multi-machineSsetup
 
 While testing for a scenario where different components are running in different
 machines, the SSL certificate needs to be updated to include the DNS / IP of
