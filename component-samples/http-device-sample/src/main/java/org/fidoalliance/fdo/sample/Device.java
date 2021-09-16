@@ -358,6 +358,13 @@ public class Device {
             continue;
           } catch (IOException e) {
             logger.warn("Unable to connect RV at " + url + ": " + e.getMessage());
+            continue;
+          } catch (IllegalArgumentException e) {
+            logger.warn("Unable to connect RV at " + url + ": " + e.getMessage());
+            continue;
+          } catch (Exception e) {
+            logger.warn("Unable to connect RV at " + url + ": " + e.getMessage());
+            continue;
           }
 
           if (null != signedBlob.get()) {

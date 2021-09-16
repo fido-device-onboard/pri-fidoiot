@@ -353,7 +353,7 @@ public class RendezvousInfoDecoder {
       }
 
       String hostName = queryStringValue(directive, Const.RV_DNS);
-      if (hostName != null) {
+      if (hostName != null && !hostName.isBlank()) {
         result.add(protocol + hostName + ":" + portString);
       }
 
