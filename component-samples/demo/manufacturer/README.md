@@ -114,7 +114,7 @@ webAllowOthers = true
 
 # Starting the Manufacturer Service
 
-Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
+Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
