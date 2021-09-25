@@ -196,9 +196,17 @@ public class To2ContextListener implements ServletContextListener {
     CryptoService cs = new CryptoService();
     // Setting epid test mode enables epid signatures from debug and test
     // devices to pass validation. In production, this should never be used.
-    cs.setEpidTestMode();
-    logger.warn("*** WARNING ***");
-    logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
+    try {
+      if (Boolean.valueOf(sc.getInitParameter("epid_test_mode"))) {
+        cs.setEpidTestMode();
+        logger.warn("*** WARNING ***");
+        logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
+      } else {
+        logger.info("*** EPID test mode disabled. ***");
+      }
+    } catch (Exception ex) {
+      // intentional fall-through
+    }
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
