@@ -92,8 +92,8 @@ public final class Const {
   //EAT Claims
   public static final long EAT_FDO = -17760707; // need IANA number
   public static final long EAT_MAROE_PREFIX = -17760708;// need IANA number
-  public static final long EAT_NONCE = 10; //from spec
-  public static final long EAT_UEID = 11; // from spec
+  public static final long EAT_NONCE = 9; //from spec
+  public static final long EAT_UEID = 10; // from spec
   public static final int EAT_RAND = 1;
   public static final long CUPH_NONCE = -17760701;// need IANA number
   public static final long EUPH_NONCE = -17760709;// need IANA number
