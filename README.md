@@ -9,7 +9,7 @@ deploying the example implementation for these components.
 
 ## System Requirements:
 
-* **Ubuntu 20.04**.
+* **Ubuntu 20.04 / RHEL 8.4**.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
