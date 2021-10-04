@@ -23,36 +23,43 @@ public class OwnerCustomerServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    String id = req.getParameter("id");
-    String name = req.getParameter("name");
-    String contentType = req.getContentType();
+    try {
+      String id = req.getParameter("id");
+      String name = req.getParameter("name");
+      String contentType = req.getContentType();
 
-    if (null == id || null == name) {
-      logger.warn("Request failed because of invalid input.");
-      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
-    //accept no content type or text/plain us-ascii pem
-    if (contentType != null) {
-      if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
-        logger.warn("Request failed because of invalid content type.");
-        resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+      if (null == id || null == name) {
+        logger.warn("Request failed because of invalid input.");
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
-    }
 
-    String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
-    PemLoader.loadPublicKeys(keySet);
+      //accept no content type or text/plain us-ascii pem
+      if (contentType != null) {
+        if (contentType.compareToIgnoreCase("text/plain; charset=us-ascii") != 0) {
+          logger.warn("Request failed because of invalid content type.");
+          resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+          return;
+        }
+      }
 
-    try {
-      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-      OwnerDbManager ownerDbManager = new OwnerDbManager();
-      ownerDbManager.addCustomer(ds, Integer.parseInt(id), name, keySet);
-      logger.info("Added customer '" + name + "' with id '" + id + "'");
-    } catch (Exception exp) {
-      logger.warn("Request failed because of internal server error.");
+      String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+      PemLoader.loadPublicKeys(keySet);
+
+      try {
+        DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+        OwnerDbManager ownerDbManager = new OwnerDbManager();
+        ownerDbManager.addCustomer(ds, Integer.parseInt(id), name, keySet);
+        logger.info("Added customer '" + name + "' with id '" + id + "'");
+      } catch (Exception exp) {
+        logger.warn("Request failed because of internal server error.");
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return;
+      }
+    } catch (Exception e) {
+      logger.error("Unable to add new customer.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
     }
   }
 

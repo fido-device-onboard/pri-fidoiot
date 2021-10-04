@@ -3,9 +3,9 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.io.IOException;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 
-import java.io.IOException;
 
 /**
  * To1 Client message processing service.

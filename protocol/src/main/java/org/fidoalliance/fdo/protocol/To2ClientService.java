@@ -340,7 +340,8 @@ public abstract class To2ClientService extends DeviceService {
         Composite headerCopy = Composite.newArray();
         headerCopy.set(Const.OVH_VERSION, voucherHdr.get(Const.OVH_VERSION));
         headerCopy.set(Const.OVH_GUID, newCreds.getAsUuid(Const.DC_GUID));
-        headerCopy.set(Const.OVH_RENDEZVOUS_INFO, newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
+        headerCopy.set(Const.OVH_RENDEZVOUS_INFO,
+                newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
         headerCopy.set(Const.OVH_DEVICE_INFO, voucherHdr.get(Const.OVH_DEVICE_INFO));
         headerCopy.set(Const.OVH_PUB_KEY, ownerKey2);
         headerCopy.set(Const.OVH_CERT_CHAIN_HASH, voucherHdr.get(Const.OVH_CERT_CHAIN_HASH));
@@ -368,7 +369,8 @@ public abstract class To2ClientService extends DeviceService {
 
       Composite payload =
               Composite.newArray()
-                      .set(Const.FIRST_KEY, newHash != null ? newHash : PrimitivesUtil.getCborNullBytes())
+                      .set(Const.FIRST_KEY,
+                              newHash != null ? newHash : PrimitivesUtil.getCborNullBytes())
                       .set(
                               Const.SECOND_KEY,
                               getStorage().getMaxOwnerServiceInfoMtuSz() != null
@@ -410,7 +412,8 @@ public abstract class To2ClientService extends DeviceService {
         }
       }
       getStorage()
-              .setMaxDeviceServiceInfoMtuSz(Math.max(deviceMtu, Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
+              .setMaxDeviceServiceInfoMtuSz(Math.max(deviceMtu,
+                      Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
 
       Composite payload = getStorage().getNextServiceInfo();
       body = getCryptoService().encrypt(payload.toBytes(), this.ownState);

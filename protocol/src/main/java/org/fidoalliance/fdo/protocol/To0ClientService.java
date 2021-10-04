@@ -5,7 +5,6 @@ package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.security.PublicKey;
-
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
@@ -57,7 +56,8 @@ public abstract class To0ClientService extends ClientService {
           throw new IOException();
         }
         singedBlob = getCryptoService().sign(
-                key.get(), to01Payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
+                key.get(), to01Payload.toBytes(),
+                getCryptoService().getCoseAlgorithm(ownerPublicKey));
       } catch (IOException e) {
         logger.error("Voucher not extended to current owner.");
         throw new DispatchException(e);

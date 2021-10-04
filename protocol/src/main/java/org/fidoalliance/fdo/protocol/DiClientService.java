@@ -3,9 +3,8 @@
 
 package org.fidoalliance.fdo.protocol;
 
-import org.fidoalliance.fdo.loggingutils.LoggerService;
-
 import java.security.PublicKey;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * A Device Initialization client Service.

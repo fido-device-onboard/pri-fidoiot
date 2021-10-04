@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.certutils.PemLoader;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * Keystore management API servlet.
@@ -25,6 +26,7 @@ public class KeyStoreServlet extends HttpServlet {
 
   public static final String STORE_ATTRIBUTE = "keystore";
   public static final String STORE_PASSWORD = "keystore_password";
+  public static final LoggerService logger = new LoggerService(KeyStoreServlet.class);
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
@@ -56,17 +58,26 @@ public class KeyStoreServlet extends HttpServlet {
       alias = UUID.randomUUID().toString();
     }
 
-    String pemString = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+    String pemString = "";
+    Certificate[] certArray;
 
-    List<Certificate> certs = PemLoader.loadCerts(pemString);
+    try {
+      pemString = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+      List<Certificate> certs = PemLoader.loadCerts(pemString);
 
-    if (certs.size() == 0) {
+      if (certs.size() == 0) {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+
+      certArray = new Certificate[certs.size()];
+      certArray = certs.toArray(certArray);
+    } catch (Exception e) {
+      logger.error("Received invalid pem string.");
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
-    Certificate[] certArray = new Certificate[certs.size()];
-    certArray = certs.toArray(certArray);
 
     try {
       PrivateKey key = PemLoader.loadPrivateKey(pemString);
@@ -77,8 +88,10 @@ public class KeyStoreServlet extends HttpServlet {
       } catch (DestroyFailedException e) {
         //suppress error if not support
       }
-    } catch (KeyStoreException e) {
-      throw new ServletException(e);
+    } catch (Exception e) {
+      logger.error("Unable to insert private key into keystore.");
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
   }
 }

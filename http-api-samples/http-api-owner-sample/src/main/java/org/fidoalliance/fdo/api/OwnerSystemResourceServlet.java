@@ -270,7 +270,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
           }
         }
       }
-    } catch (SQLException e) {
+    } catch (Exception e) {
       logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -303,7 +303,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
         }
       }
 
-    } catch (SQLException e) {
+    } catch (Exception e) {
       logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -438,7 +438,7 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       if (contentType != null) {
         logger.info("Updated content for " + contentType);
       }
-    } catch (SQLException e) {
+    } catch (Exception e) {
       logger.warn("Request failed because of internal server error.");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

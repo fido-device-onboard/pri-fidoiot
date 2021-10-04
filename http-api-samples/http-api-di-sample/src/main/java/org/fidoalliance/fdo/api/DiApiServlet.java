@@ -60,52 +60,55 @@ public class DiApiServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
+    try {
+      String uri = req.getRequestURI();
+      String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
 
-    String uri = req.getRequestURI();
-    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+      CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
+      CertificateResolver resolver =
+              (CertificateResolver) getServletContext().getAttribute("resolver");
 
-    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
-    CertificateResolver resolver =
-        (CertificateResolver) getServletContext().getAttribute("resolver");
-
-    Composite result = queryVoucher(ds, serialNo);
-    if (result.size() == 0) {
-      logger.warn("Request failed because of device with given serial was not found.");
-      resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-      return;
-    }
-
-    Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-    List<PublicKey> certs =
-        PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
-
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
-
-    int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
-    Certificate[] issuerChain =
-        resolver.getCertChain(keyType);
-
-    PublicKey ownerPub = null;
-    for (PublicKey pub : certs) {
-      int ownerType = cs.getPublicKeyType(pub);
-      if (ownerType == keyType) {
-        ownerPub = pub;
-        break;
+      Composite result = queryVoucher(ds, serialNo);
+      if (result.size() == 0) {
+        logger.warn("Request failed because of device with given serial was not found.");
+        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
       }
-    }
 
-    VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
-    try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
-      vse.add(signer.get(), ownerPub);
-    }
+      Composite voucher = result.getAsComposite(Const.FIRST_KEY);
+      List<PublicKey> certs =
+              PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
 
-    resp.setContentType(Const.HTTP_APPLICATION_CBOR);
-    byte[] voucherBytes = voucher.toBytes();
-    logger.info("Extended voucher with serial " + serialNo);
-    logger.debug("Extended voucher: " + Composite.toString(voucherBytes));
-    resp.setContentLength(voucherBytes.length);
-    resp.getOutputStream().write(voucherBytes);
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
+
+      int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
+      Certificate[] issuerChain =
+              resolver.getCertChain(keyType);
+
+      PublicKey ownerPub = null;
+      for (PublicKey pub : certs) {
+        int ownerType = cs.getPublicKeyType(pub);
+        if (ownerType == keyType) {
+          ownerPub = pub;
+          break;
+        }
+      }
+
+      VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
+      try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
+        vse.add(signer.get(), ownerPub);
+      }
+
+      resp.setContentType(Const.HTTP_APPLICATION_CBOR);
+      byte[] voucherBytes = voucher.toBytes();
+      logger.info("Extended voucher with serial " + serialNo);
+      logger.debug("Extended voucher: " + Composite.toString(voucherBytes));
+      resp.setContentLength(voucherBytes.length);
+      resp.getOutputStream().write(voucherBytes);
+    } catch (Exception e) {
+      logger.error("Unable to extend voucher.");
+    }
   }
 }

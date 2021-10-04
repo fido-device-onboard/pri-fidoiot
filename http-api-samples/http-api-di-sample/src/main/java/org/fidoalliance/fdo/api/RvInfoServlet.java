@@ -35,12 +35,11 @@ public class RvInfoServlet extends HttpServlet {
         return;
       }
     }
-
-    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-
-    String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
-
     try {
+
+      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+      String rvInfo = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+
       Composite rvi = Composite.fromObject(rvInfo);
       List<String> directives = RendezvousInfoDecoder
               .getHttpDirectives(rvi,Const.RV_DEV_ONLY);
