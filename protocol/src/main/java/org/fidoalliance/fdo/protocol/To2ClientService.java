@@ -154,304 +154,340 @@ public abstract class To2ClientService extends DeviceService {
   }
 
   protected void doProveHeader(Composite request, Composite reply) {
-    getStorage().starting(request, reply);
+    try {
+      getStorage().starting(request, reply);
 
-    Composite cose = request.getAsComposite(Const.SM_BODY);
-    Composite payload = Composite.fromObject(cose.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
+      Composite cose = request.getAsComposite(Const.SM_BODY);
+      Composite payload = Composite.fromObject(cose.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
-    nonceTo2ProveDv = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
-        .getAsBytes(Const.CUPH_NONCE);
+      nonceTo2ProveDv = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
+              .getAsBytes(Const.CUPH_NONCE);
 
-    int entries = payload.getAsNumber(Const.SECOND_KEY).intValue();
-    byte[] receivedNonceTo2ProveOv = payload.getAsBytes(Const.FOURTH_KEY);
-    this.kexA = payload.getAsBytes(Const.SIXTH_KEY);
-    this.numEntries = entries;
+      int entries = payload.getAsNumber(Const.SECOND_KEY).intValue();
+      byte[] receivedNonceTo2ProveOv = payload.getAsBytes(Const.FOURTH_KEY);
+      this.kexA = payload.getAsBytes(Const.SIXTH_KEY);
+      this.numEntries = entries;
 
-    //verify nonce from hello
-    getCryptoService().verifyBytes(receivedNonceTo2ProveOv, nonceTo2ProveOv);
+      //verify nonce from hello
+      getCryptoService().verifyBytes(receivedNonceTo2ProveOv, nonceTo2ProveOv);
 
-    Composite hmac = payload.getAsComposite(Const.THIRD_KEY);
-    Composite ovh = payload.getAsComposite(Const.FIRST_KEY);
-    Composite hmac1 = getCryptoService().hash(
-        hmac.getAsNumber(Const.HASH_TYPE).intValue(),
-        getStorage()
-            .getDeviceCredentials()
-            .getAsBytes(Const.DC_HMAC_SECRET),
-        ovh.toBytes());
+      Composite hmac = payload.getAsComposite(Const.THIRD_KEY);
+      Composite ovh = payload.getAsComposite(Const.FIRST_KEY);
+      Composite hmac1 = getCryptoService().hash(
+              hmac.getAsNumber(Const.HASH_TYPE).intValue(),
+              getStorage()
+                      .getDeviceCredentials()
+                      .getAsBytes(Const.DC_HMAC_SECRET),
+              ovh.toBytes());
 
-    //verify HMAC
-    ByteBuffer b1 = hmac1.getAsByteBuffer(Const.HASH);
-    ByteBuffer b2 = hmac.getAsByteBuffer(Const.HASH);
-    if (b1.compareTo(b2) != 0) {
-      throw new InvalidMessageException("OwnershipVoucherHeader HMAC comparison failed.");
-    }
-
-    //verify this message
-    Composite pub = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
-        .getAsComposite(Const.CUPH_PUBKEY);
-
-    PublicKey verifyKey = getCryptoService().decode(pub);
-    getCryptoService().verify(verifyKey, cose, null, null, null);
-
-    // Skipping to1d verification, if the RVBypass flag is set.
-    if (!rvBypass) {
-      //CUPHOwnerPubKey must be able to verify the signature of the TO1d signedBlob message
-      if (!getCryptoService().verify(verifyKey, to1d, null, null, null)) {
-        //If T01d signature does not verify, Then T02 should fail with error message.
-        throw new InvalidMessageException("Failed to verify TO1D signature.");
+      //verify HMAC
+      ByteBuffer b1 = hmac1.getAsByteBuffer(Const.HASH);
+      ByteBuffer b2 = hmac.getAsByteBuffer(Const.HASH);
+      if (b1.compareTo(b2) != 0) {
+        throw new InvalidMessageException("OwnershipVoucherHeader HMAC comparison failed.");
       }
+
+      //verify this message
+      Composite pub = cose.getAsComposite(Const.COSE_SIGN1_UNPROTECTED)
+              .getAsComposite(Const.CUPH_PUBKEY);
+
+      PublicKey verifyKey = getCryptoService().decode(pub);
+      getCryptoService().verify(verifyKey, cose, null, null, null);
+
+      // Skipping to1d verification, if the RVBypass flag is set.
+      if (!rvBypass) {
+        //CUPHOwnerPubKey must be able to verify the signature of the TO1d signedBlob message
+        if (!getCryptoService().verify(verifyKey, to1d, null, null, null)) {
+          //If T01d signature does not verify, Then T02 should fail with error message.
+          throw new InvalidMessageException("Failed to verify TO1D signature.");
+        }
+      }
+
+      //calculate and set hdrHash
+      byte[] guid = ovh.getAsBytes(Const.OVH_GUID);
+      byte[] devInfo = ovh.getAsBytes(Const.OVH_DEVICE_INFO);
+      ByteBuffer buffer = ByteBuffer.allocate(guid.length + devInfo.length);
+      buffer.put(guid);
+      buffer.put(devInfo);
+      buffer.flip();
+
+      int hashType = getCryptoService().getCompatibleHashType(verifyKey);
+      this.hdrHash = getCryptoService().hash(hashType, Composite.unwrap(buffer));
+
+      //calculate prevHash
+      byte[] ovhBytes = ovh.toBytes();
+      byte[] hmacBytes = hmac.toBytes();
+      buffer = ByteBuffer.allocate(ovhBytes.length + hmacBytes.length);
+      buffer.put(ovhBytes);
+      buffer.put(hmacBytes);
+      buffer.flip();
+      Composite prevHash = getCryptoService().hash(hashType, Composite.unwrap(buffer));
+
+      Composite ovhKey = ovh.getAsComposite(Const.OVH_PUB_KEY);
+
+      this.entryNum = 0;
+      this.prevEntryHash = prevHash;
+      this.prevEntryKey = ovhKey;
+      this.cupKey = pub;
+      this.voucherHdr = ovh;
+
+      nextMessage(request, reply);
+      getStorage().started(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/61)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    //calculate and set hdrHash
-    byte[] guid = ovh.getAsBytes(Const.OVH_GUID);
-    byte[] devInfo = ovh.getAsBytes(Const.OVH_DEVICE_INFO);
-    ByteBuffer buffer = ByteBuffer.allocate(guid.length + devInfo.length);
-    buffer.put(guid);
-    buffer.put(devInfo);
-    buffer.flip();
-
-    int hashType = getCryptoService().getCompatibleHashType(verifyKey);
-    this.hdrHash = getCryptoService().hash(hashType, Composite.unwrap(buffer));
-
-    //calculate prevHash
-    byte[] ovhBytes = ovh.toBytes();
-    byte[] hmacBytes = hmac.toBytes();
-    buffer = ByteBuffer.allocate(ovhBytes.length + hmacBytes.length);
-    buffer.put(ovhBytes);
-    buffer.put(hmacBytes);
-    buffer.flip();
-    Composite prevHash = getCryptoService().hash(hashType, Composite.unwrap(buffer));
-
-    Composite ovhKey = ovh.getAsComposite(Const.OVH_PUB_KEY);
-
-    this.entryNum = 0;
-    this.prevEntryHash = prevHash;
-    this.prevEntryKey = ovhKey;
-    this.cupKey = pub;
-    this.voucherHdr = ovh;
-
-    nextMessage(request, reply);
-    getStorage().started(request, reply);
   }
 
   protected void doNextOpEntry(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
+    try {
+      getStorage().continuing(request, reply);
 
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    int entryNum = body.getAsNumber(Const.FIRST_KEY).intValue();
-    Composite entry = body.getAsComposite(Const.SECOND_KEY);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      int entryNum = body.getAsNumber(Const.FIRST_KEY).intValue();
+      Composite entry = body.getAsComposite(Const.SECOND_KEY);
 
-    verifyEntry(entryNum, entry);
+      verifyEntry(entryNum, entry);
 
-    this.entryNum++;
-    nextMessage(request, reply);
-    getStorage().continued(request, reply);
+      this.entryNum++;
+      nextMessage(request, reply);
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/63)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doSetupDevice(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
+    try {
+      getStorage().continuing(request, reply);
 
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    // Once decrypted, the TO2SetupDevicePayload must have its signature verified.
-    // The verification key is explicitly contained in the message body.
-    byte[] signedBytes = message.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
-    Composite signedBody = Composite.fromObject(signedBytes);
-    Composite encodedKey = signedBody.getAsComposite(Const.FOURTH_KEY);
-    PublicKey verificationKey = getCryptoService().decode(encodedKey);
-    getCryptoService().verify(verificationKey, message, null, null, null);
-    message = signedBody; // signature ok, focus on payload
+      // Once decrypted, the TO2SetupDevicePayload must have its signature verified.
+      // The verification key is explicitly contained in the message body.
+      byte[] signedBytes = message.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+      Composite signedBody = Composite.fromObject(signedBytes);
+      Composite encodedKey = signedBody.getAsComposite(Const.FOURTH_KEY);
+      PublicKey verificationKey = getCryptoService().decode(encodedKey);
+      getCryptoService().verify(verificationKey, message, null, null, null);
+      message = signedBody; // signature ok, focus on payload
 
-    byte[] receivedNonceTo2SetupDv = message.getAsBytes(Const.THIRD_KEY);
-    getCryptoService().verifyBytes(receivedNonceTo2SetupDv, nonceTo2SetupDv);
+      byte[] receivedNonceTo2SetupDv = message.getAsBytes(Const.THIRD_KEY);
+      getCryptoService().verifyBytes(receivedNonceTo2SetupDv, nonceTo2SetupDv);
 
-    Composite ownerKey2 = message.getAsComposite(Const.FOURTH_KEY);
-    Composite oldCreds = getStorage().getDeviceCredentials();
-    Composite newCreds = Composite.newArray()
+      Composite ownerKey2 = message.getAsComposite(Const.FOURTH_KEY);
+      Composite oldCreds = getStorage().getDeviceCredentials();
+      Composite newCreds = Composite.newArray()
 
-        .set(Const.DC_PROTVER,
-            oldCreds.getAsNumber(Const.DC_PROTVER))
-        .set(Const.DC_HMAC_SECRET,
-            oldCreds.getAsBytes(Const.DC_HMAC_SECRET))
-        .set(Const.DC_DEVICE_INFO,
-            oldCreds.getAsString(Const.DC_DEVICE_INFO))
-        .set(Const.DC_GUID,
-            message.getAsUuid(Const.SECOND_KEY))
-        .set(Const.DC_RENDEZVOUS_INFO,
-            message.getAsComposite(Const.FIRST_KEY));
+              .set(Const.DC_PROTVER,
+                      oldCreds.getAsNumber(Const.DC_PROTVER))
+              .set(Const.DC_HMAC_SECRET,
+                      oldCreds.getAsBytes(Const.DC_HMAC_SECRET))
+              .set(Const.DC_DEVICE_INFO,
+                      oldCreds.getAsString(Const.DC_DEVICE_INFO))
+              .set(Const.DC_GUID,
+                      message.getAsUuid(Const.SECOND_KEY))
+              .set(Const.DC_RENDEZVOUS_INFO,
+                      message.getAsComposite(Const.FIRST_KEY));
 
-    PublicKey mfgPubKey = getCryptoService().decode(ownerKey2);
-    int hashType = getCryptoService().getCompatibleHashType(mfgPubKey);
-    Composite pubKeyHash = getCryptoService().hash(hashType, ownerKey2.toBytes());
-    getStorage().getDeviceCredentials().set(Const.DC_PUBLIC_KEY_HASH,
-        pubKeyHash);
+      PublicKey mfgPubKey = getCryptoService().decode(ownerKey2);
+      int hashType = getCryptoService().getCompatibleHashType(mfgPubKey);
+      Composite pubKeyHash = getCryptoService().hash(hashType, ownerKey2.toBytes());
+      getStorage().getDeviceCredentials().set(Const.DC_PUBLIC_KEY_HASH,
+              pubKeyHash);
 
-    //check for credential reuse
-    boolean isReuse = true;
+      //check for credential reuse
+      boolean isReuse = true;
 
-    //check if GUIDs equal
-    UUID guid1 = oldCreds.getAsUuid((Const.DC_GUID));
-    UUID guid2 = newCreds.getAsUuid(Const.DC_GUID);
-    if (guid1.compareTo(guid2) != 0) {
-      isReuse = false;
-    }
-    //check if owner key equal
-    if (isReuse) {
-      PublicKey publicKey1 = getCryptoService().decode(cupKey);
-      PublicKey publicKey2 = getCryptoService().decode(ownerKey2);
-      if (getCryptoService().compare(publicKey1, publicKey2) != 0) {
+      //check if GUIDs equal
+      UUID guid1 = oldCreds.getAsUuid((Const.DC_GUID));
+      UUID guid2 = newCreds.getAsUuid(Const.DC_GUID);
+      if (guid1.compareTo(guid2) != 0) {
         isReuse = false;
       }
-    }
-
-    //check if rvinfo equal
-    if (isReuse) {
-      byte[] info1 = oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
-      byte[] info2 = newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
-      if (Arrays.compare(info1, info2) != 0) {
-        isReuse = false;
-      }
-    }
-
-    if (!getStorage().isDeviceCredReuseSupported() && isReuse) {
-      logger.error("Credential reuse rejected by device. Device onboarding failed.");
-      throw new RuntimeException(
-          new CredReuseRejectedException(new UnsupportedOperationException()));
-    }
-
-    byte[] secret = getStorage().getReplacementHmacSecret(newCreds, isReuse);
-    Composite newHash = null;
-
-    if (secret != null) {
-      Composite headerCopy = Composite.newArray();
-      headerCopy.set(Const.OVH_VERSION, voucherHdr.get(Const.OVH_VERSION));
-      headerCopy.set(Const.OVH_GUID, newCreds.getAsUuid(Const.DC_GUID));
-      headerCopy.set(Const.OVH_RENDEZVOUS_INFO, newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
-      headerCopy.set(Const.OVH_DEVICE_INFO, voucherHdr.get(Const.OVH_DEVICE_INFO));
-      headerCopy.set(Const.OVH_PUB_KEY, ownerKey2);
-      headerCopy.set(Const.OVH_CERT_CHAIN_HASH, voucherHdr.get(Const.OVH_CERT_CHAIN_HASH));
-      hashType = getCryptoService().getCompatibleHmacType(getCryptoService().decode(ownerKey2));
-      newHash = getCryptoService().hash(hashType, secret, headerCopy.toBytes());
-    }
-
-    int ownerMtu = 0;
-    if (getStorage().getMaxOwnerServiceInfoMtuSz() != null) {
-      try {
-        ownerMtu = Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz());
-        if (ownerMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
-          logger.warn("Received DeviceMTU size below the minimum MTU value."
-              + " Proceeding with minimum MTU size of 256 bytes");
-          ownerMtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+      //check if owner key equal
+      if (isReuse) {
+        PublicKey publicKey1 = getCryptoService().decode(cupKey);
+        PublicKey publicKey2 = getCryptoService().decode(ownerKey2);
+        if (getCryptoService().compare(publicKey1, publicKey2) != 0) {
+          isReuse = false;
         }
-      } catch (Exception e) {
-        logger.warn(
-            "Out of Bound value received."
-                + e.getMessage()
-                + " Proceeding with default MTU size of 1300 bytes");
-        ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       }
+
+      //check if rvinfo equal
+      if (isReuse) {
+        byte[] info1 = oldCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
+        byte[] info2 = newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO).toBytes();
+        if (Arrays.compare(info1, info2) != 0) {
+          isReuse = false;
+        }
+      }
+
+      if (!getStorage().isDeviceCredReuseSupported() && isReuse) {
+        logger.error("Credential reuse rejected by device. Device onboarding failed.");
+        throw new RuntimeException(
+                new CredReuseRejectedException(new UnsupportedOperationException()));
+      }
+
+      byte[] secret = getStorage().getReplacementHmacSecret(newCreds, isReuse);
+      Composite newHash = null;
+
+      if (secret != null) {
+        Composite headerCopy = Composite.newArray();
+        headerCopy.set(Const.OVH_VERSION, voucherHdr.get(Const.OVH_VERSION));
+        headerCopy.set(Const.OVH_GUID, newCreds.getAsUuid(Const.DC_GUID));
+        headerCopy.set(Const.OVH_RENDEZVOUS_INFO, newCreds.getAsComposite(Const.DC_RENDEZVOUS_INFO));
+        headerCopy.set(Const.OVH_DEVICE_INFO, voucherHdr.get(Const.OVH_DEVICE_INFO));
+        headerCopy.set(Const.OVH_PUB_KEY, ownerKey2);
+        headerCopy.set(Const.OVH_CERT_CHAIN_HASH, voucherHdr.get(Const.OVH_CERT_CHAIN_HASH));
+        hashType = getCryptoService().getCompatibleHmacType(getCryptoService().decode(ownerKey2));
+        newHash = getCryptoService().hash(hashType, secret, headerCopy.toBytes());
+      }
+
+      int ownerMtu = 0;
+      if (getStorage().getMaxOwnerServiceInfoMtuSz() != null) {
+        try {
+          ownerMtu = Integer.parseInt(getStorage().getMaxOwnerServiceInfoMtuSz());
+          if (ownerMtu < Const.SERVICE_INFO_MTU_MIN_SIZE) {
+            logger.warn("Received DeviceMTU size below the minimum MTU value."
+                    + " Proceeding with minimum MTU size of 256 bytes");
+            ownerMtu = Const.SERVICE_INFO_MTU_MIN_SIZE;
+          }
+        } catch (Exception e) {
+          logger.warn(
+                  "Out of Bound value received."
+                          + e.getMessage()
+                          + " Proceeding with default MTU size of 1300 bytes");
+          ownerMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+        }
+      }
+
+      Composite payload =
+              Composite.newArray()
+                      .set(Const.FIRST_KEY, newHash != null ? newHash : PrimitivesUtil.getCborNullBytes())
+                      .set(
+                              Const.SECOND_KEY,
+                              getStorage().getMaxOwnerServiceInfoMtuSz() != null
+                                      ? ownerMtu
+                                      : PrimitivesUtil.getCborNullBytes());
+
+      body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
+
+      reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO_READY);
+      reply.set(Const.SM_BODY, body);
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/65)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    Composite payload =
-        Composite.newArray()
-            .set(Const.FIRST_KEY, newHash != null ? newHash : PrimitivesUtil.getCborNullBytes())
-            .set(
-                Const.SECOND_KEY,
-                getStorage().getMaxOwnerServiceInfoMtuSz() != null
-                    ? ownerMtu
-                    : PrimitivesUtil.getCborNullBytes());
-
-    body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
-
-    reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO_READY);
-    reply.set(Const.SM_BODY, body);
-    getStorage().continued(request, reply);
   }
 
   protected void doOwnerServiceInfoReady(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    int deviceMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
-    Object maxDeviceServiceInfoSz = message.get(Const.FIRST_KEY);
-    if (!maxDeviceServiceInfoSz.equals(Optional.empty())) {
-      try {
-        deviceMtu = message.getAsNumber(Const.FIRST_KEY).intValue();
-      } catch (Exception e) {
-        maxDeviceServiceInfoSz = message.get(Const.FIRST_KEY);
+      int deviceMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+      Object maxDeviceServiceInfoSz = message.get(Const.FIRST_KEY);
+      if (!maxDeviceServiceInfoSz.equals(Optional.empty())) {
         try {
-          if (PrimitivesUtil.isCborNull(maxDeviceServiceInfoSz)) {
-            deviceMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+          deviceMtu = message.getAsNumber(Const.FIRST_KEY).intValue();
+        } catch (Exception e) {
+          maxDeviceServiceInfoSz = message.get(Const.FIRST_KEY);
+          try {
+            if (PrimitivesUtil.isCborNull(maxDeviceServiceInfoSz)) {
+              deviceMtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
+            }
+          } catch (Exception exception) {
+            throw new RuntimeException(new MessageBodyException(exception));
           }
-        } catch (Exception exception) {
-          throw new RuntimeException(new MessageBodyException(exception));
         }
       }
-    }
-    getStorage()
-        .setMaxDeviceServiceInfoMtuSz(Math.max(deviceMtu, Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
+      getStorage()
+              .setMaxDeviceServiceInfoMtuSz(Math.max(deviceMtu, Const.DEFAULT_SERVICE_INFO_MTU_SIZE));
 
-    Composite payload = getStorage().getNextServiceInfo();
-    body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
-    reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO);
-    reply.set(Const.SM_BODY, body);
-    getStorage().continued(request, reply);
+      Composite payload = getStorage().getNextServiceInfo();
+      body = getCryptoService().encrypt(payload.toBytes(), this.ownState);
+      reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO);
+      reply.set(Const.SM_BODY, body);
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/67)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doServiceInfo(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    Composite svi = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      Composite svi = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    boolean isMore = svi.getAsBoolean(Const.FIRST_KEY);
-    boolean isDone = svi.getAsBoolean(Const.SECOND_KEY);
+      boolean isMore = svi.getAsBoolean(Const.FIRST_KEY);
+      boolean isDone = svi.getAsBoolean(Const.SECOND_KEY);
 
-    Composite sviValues = svi.getAsComposite(Const.THIRD_KEY);
-    Composite values = sviValues.size() > 0 ? sviValues.getAsComposite(Const.FIRST_KEY)
-        : Composite.newArray();
+      Composite sviValues = svi.getAsComposite(Const.THIRD_KEY);
+      Composite values = sviValues.size() > 0 ? sviValues.getAsComposite(Const.FIRST_KEY)
+              : Composite.newArray();
 
-    int numOfValues = values.size();
-    for (int i = 0; i < numOfValues; i++) {
-      Composite sviValue = values.getAsComposite(i);
-      boolean moreFlag = true;
-      boolean doneFlag = false;
-      if (i == numOfValues - 1) {
-        moreFlag = isMore;
-        doneFlag = isDone;
+      int numOfValues = values.size();
+      for (int i = 0; i < numOfValues; i++) {
+        Composite sviValue = values.getAsComposite(i);
+        boolean moreFlag = true;
+        boolean doneFlag = false;
+        if (i == numOfValues - 1) {
+          moreFlag = isMore;
+          doneFlag = isDone;
+        }
+        getStorage().setServiceInfo(sviValue, moreFlag, doneFlag);
       }
-      getStorage().setServiceInfo(sviValue, moreFlag, doneFlag);
+
+      Composite payload = getStorage().getNextServiceInfo();
+
+      boolean isMore2 = payload.getAsBoolean(Const.FIRST_KEY);
+      int sviCount = payload.getAsComposite(Const.SECOND_KEY).size();
+
+      if (isDone && isMore == false && isMore2 == false && sviCount == 0) {
+        //change message to done
+        payload = Composite.newArray()
+                .set(Const.FIRST_KEY, this.nonceTo2ProveDv);
+        reply.set(Const.SM_MSG_ID, Const.TO2_DONE);
+      } else {
+        reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO);
+      }
+
+      body = getCryptoService().encrypt(payload.toBytes(), ownState);
+      reply.set(Const.SM_BODY, body);
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/69)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    Composite payload = getStorage().getNextServiceInfo();
-
-    boolean isMore2 = payload.getAsBoolean(Const.FIRST_KEY);
-    int sviCount = payload.getAsComposite(Const.SECOND_KEY).size();
-
-    if (isDone && isMore == false && isMore2 == false && sviCount == 0) {
-      //change message to done
-      payload = Composite.newArray()
-          .set(Const.FIRST_KEY, this.nonceTo2ProveDv);
-      reply.set(Const.SM_MSG_ID, Const.TO2_DONE);
-    } else {
-      reply.set(Const.SM_MSG_ID, Const.TO2_DEVICE_SERVICE_INFO);
-    }
-
-    body = getCryptoService().encrypt(payload.toBytes(), ownState);
-    reply.set(Const.SM_BODY, body);
-    getStorage().continued(request, reply);
   }
 
   protected void doDone2(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      Composite message = Composite.fromObject(getCryptoService().decrypt(body, this.ownState));
 
-    getCryptoService().verifyBytes(nonceTo2SetupDv, message.getAsBytes(Const.FIRST_KEY));
+      getCryptoService().verifyBytes(nonceTo2SetupDv, message.getAsBytes(Const.FIRST_KEY));
 
-    reply.clear();
-    getStorage().completed(request, reply);
+      reply.clear();
+      getStorage().completed(request, reply);
+    } catch (Exception e) {
+      logger.error("TO2 failed (msg/71)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doError(Composite request, Composite reply) {

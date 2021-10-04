@@ -12,12 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 
 /**
  * A Concise Binary Object Representation (CBOR) Encoder.
  */
 public class Encoder {
 
+  private static final LoggerService logger = new LoggerService(Encoder.class);
   private final WritableByteChannel myOutput;
 
   private Encoder(Builder builder) {
@@ -28,11 +30,16 @@ public class Encoder {
    * Encode a java Collection as a CBOR array.
    */
   public <T> Encoder writeArray(Collection<T> val) throws IOException {
-    startArray(val.size());
-    for (T t : val) {
-      writeObject(t);
+    try {
+      startArray(val.size());
+      for (T t : val) {
+        writeObject(t);
+      }
+      endArray();
+    } catch (Exception e) {
+      logger.error("Error writing CBOR array.");
+      throw new RuntimeException(e);
     }
-    endArray();
     return this;
   }
 
@@ -40,12 +47,17 @@ public class Encoder {
    * Encode a java BigInteger as a CBOR BigNum.
    */
   public Encoder writeBigNum(BigInteger val) throws IOException {
-    if (0 <= val.compareTo(BigInteger.ZERO)) {
-      writeTag(Tag.POSITIVE_BIGNUM);
-      writeBytes(ByteBuffer.wrap(val.toByteArray()));
-    } else {
-      writeTag(Tag.NEGATIVE_BIGNUM);
-      writeBytes(ByteBuffer.wrap(BigInteger.valueOf(-1).subtract(val).toByteArray()));
+    try {
+      if (0 <= val.compareTo(BigInteger.ZERO)) {
+        writeTag(Tag.POSITIVE_BIGNUM);
+        writeBytes(ByteBuffer.wrap(val.toByteArray()));
+      } else {
+        writeTag(Tag.NEGATIVE_BIGNUM);
+        writeBytes(ByteBuffer.wrap(BigInteger.valueOf(-1).subtract(val).toByteArray()));
+      }
+    } catch (Exception e) {
+      logger.error("Error writing CBOR BigNum.");
+      throw new RuntimeException(e);
     }
     return this;
   }
@@ -76,12 +88,17 @@ public class Encoder {
    * Encode a java Map as a CBOR map.
    */
   public <K, V> Encoder writeMap(Map<K, V> val) throws IOException {
-    startMap(val.size());
-    for (Map.Entry<K, V> e : val.entrySet()) {
-      writeObject(e.getKey());
-      writeObject(e.getValue());
+    try {
+      startMap(val.size());
+      for (Map.Entry<K, V> e : val.entrySet()) {
+        writeObject(e.getKey());
+        writeObject(e.getValue());
+      }
+      endMap();
+    } catch (Exception e) {
+      logger.error("Error writing CBOR map.");
+      throw new RuntimeException(e);
     }
-    endMap();
     return this;
   }
 

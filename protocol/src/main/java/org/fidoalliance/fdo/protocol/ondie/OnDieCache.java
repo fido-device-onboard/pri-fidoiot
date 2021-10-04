@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 
@@ -76,33 +78,41 @@ public class OnDieCache {
       return;
     }
 
-    if (cacheDir != null) {
-      File cache = new File(cacheDir);
-      if (!cache.exists()) {
-        if (autoUpdate) {
-          //create cache directory, if the directory does not exist & autoupdate is set to true.
-          cache.mkdir();
-        } else {
-          throw new IOException("OnDieCertCache: cache directory does not exist: " + cacheDir);
+    try {
+      if (cacheDir != null) {
+        File cache = new File(cacheDir);
+        if (!cache.exists()) {
+          if (autoUpdate) {
+            //create cache directory, if the directory does not exist & autoupdate is set to true.
+            cache.mkdir();
+          } else {
+            throw new IOException("OnDieCertCache: cache directory does not exist: " + cacheDir);
+          }
         }
-      }
-      if (!cache.isDirectory()) {
-        throw new IOException("OnDieCertCache: cache directory must be a directory: " + cacheDir);
-      }
+        if (!cache.isDirectory()) {
+          throw new IOException("OnDieCertCache: cache directory must be a directory: " + cacheDir);
+        }
 
-      if (autoUpdate) {
-        // update local cache
-        copyFromUrlSources();
-      }
+        if (autoUpdate) {
+          // update local cache
+          copyFromUrlSources();
+        }
 
-      if (Files.exists(Paths.get(cache.getAbsolutePath(), cacheUpdatedTouchFile))) {
-        //if touch file is present; then rename all .new files and remove touch file
-        updateCacheFiles(cache);
-      }
+        if (Files.exists(Paths.get(cache.getAbsolutePath(), cacheUpdatedTouchFile))) {
+          //if touch file is present; then rename all .new files and remove touch file
+          updateCacheFiles(cache);
+        }
 
-      loadCacheMap();
+        loadCacheMap();
+      }
+      initialized = true;
+    } catch (NullPointerException | IllegalArgumentException e) {
+      logger.error("Invalid OnDieCache directory");
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unable to initialize OnDieCache:" + e.getMessage());
+      throw new RuntimeException(e);
     }
-    initialized = true;
   }
 
 
@@ -112,32 +122,46 @@ public class OnDieCache {
    */
   private void copyFromUrlSources() throws IOException {
 
-    File cache = new File(cacheDir);
-    if (!cache.exists()) {
-      cache.mkdir();
-    }
-
-    URL url = new URL(artifactZipUrl);
-    URLConnection urlConn = url.openConnection();
-    try (InputStream zipFileInput = urlConn.getInputStream()) {
-      ZipInputStream zipInput = new ZipInputStream(zipFileInput);
-      ZipEntry zipEntry = zipInput.getNextEntry();
-      while (zipEntry != null) {
-        logger.info(zipEntry.getName());
-        if (zipEntry.getName().startsWith("content/OnDieCA")
-            && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
-          Path p = Paths.get(zipEntry.getName());
-          File newFile = new File(cacheDir.getPath() + p.getFileName().toString());
-          FileOutputStream fos = new FileOutputStream(newFile);
-          byte[] buffer = new byte[1024];
-          int len;
-          while ((len = zipInput.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-          }
-          fos.close();
-        }
-        zipEntry = zipInput.getNextEntry();
+    try {
+      File cache = new File(cacheDir);
+      if (!cache.exists()) {
+        cache.mkdir();
       }
+
+      URL url = new URL(artifactZipUrl);
+      URLConnection urlConn = url.openConnection();
+      try (InputStream zipFileInput = urlConn.getInputStream()) {
+        ZipInputStream zipInput = new ZipInputStream(zipFileInput);
+        ZipEntry zipEntry = zipInput.getNextEntry();
+        while (zipEntry != null) {
+          logger.info(zipEntry.getName());
+          if (zipEntry.getName().startsWith("content/OnDieCA")
+                  && (zipEntry.getName().endsWith(".cer") || zipEntry.getName().endsWith(".crl"))) {
+            Path p = Paths.get(zipEntry.getName());
+            File newFile = new File(cacheDir.getPath() + p.getFileName().toString());
+            FileOutputStream fos = new FileOutputStream(newFile);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = zipInput.read(buffer)) > 0) {
+              fos.write(buffer, 0, len);
+            }
+            fos.close();
+          }
+          zipEntry = zipInput.getNextEntry();
+        }
+      }
+    } catch (NullPointerException | IllegalArgumentException e) {
+      logger.error("Invalid OnDieCache directory" + e.getMessage());
+      throw new RuntimeException(e);
+    } catch (MalformedURLException e) {
+      logger.error("Invalid OnDieCache artifact Url" + e.getMessage());
+      throw new RuntimeException(e);
+    } catch (ZipException e) {
+      logger.error("Unable to extract OnDie artifacts" + e.getMessage());
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      logger.error("Unable to download OnDie artifacts" + e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 

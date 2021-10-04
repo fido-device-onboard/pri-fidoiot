@@ -60,6 +60,9 @@ public final class EpidMaterialService {
     } catch (URISyntaxException | IOException e) {
       logger.error(e.getMessage());
       throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Failed to connect with EPID Service");
+      throw new RuntimeException(e);
     }
   }
 

@@ -36,6 +36,8 @@ public class Decoder implements Iterator<Object> {
         myNext = readItem();
       } catch (NoSuchElementException e) {
         return false;
+      } catch (Exception e) {
+        return false;
       }
     }
     return true;
@@ -72,17 +74,21 @@ public class Decoder implements Iterator<Object> {
   }
 
   private Object readBigNum(int signum) {
-    Object o = readItem();
-    if (o instanceof byte[]) {
-      byte[] bytes = (byte[]) o;
-      BigInteger i = new BigInteger(1, bytes);
-      if (signum >= 0) {
-        return i;
+    try {
+      Object o = readItem();
+      if (o instanceof byte[]) {
+        byte[] bytes = (byte[]) o;
+        BigInteger i = new BigInteger(1, bytes);
+        if (signum >= 0) {
+          return i;
+        } else {
+          return BigInteger.valueOf(-1L).subtract(i);
+        }
       } else {
-        return BigInteger.valueOf(-1L).subtract(i);
+        throw new IllegalArgumentException("bignums must be CBOR arrays");
       }
-    } else {
-      throw new IllegalArgumentException("bignums must be CBOR arrays");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -226,6 +232,8 @@ public class Decoder implements Iterator<Object> {
       }
     } catch (IOException e) {
       throw new NoSuchElementException(e.getMessage());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 

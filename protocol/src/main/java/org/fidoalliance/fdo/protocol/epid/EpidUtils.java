@@ -37,10 +37,16 @@ public class EpidUtils {
    */
   public static void setEpidOnlineUrl(String url) {
     if (null == url) {
+      logger.error("EPID URL is empty");
       throw new IllegalArgumentException();
     }
-    epidOnlineUrl = URI.create(url);
-    logger.info("EPID Online URL: " + epidOnlineUrl.toString());
+    try {
+      epidOnlineUrl = URI.create(url);
+      logger.info("EPID Online URL: " + epidOnlineUrl.toString());
+    } catch (IllegalArgumentException e) {
+      logger.error("Invalid EPID URL");
+      throw new IllegalArgumentException();
+    }
   }
 
   /**

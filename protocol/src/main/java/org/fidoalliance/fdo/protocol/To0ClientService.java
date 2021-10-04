@@ -20,68 +20,80 @@ public abstract class To0ClientService extends ClientService {
   protected abstract To0ClientStorage getStorage();
 
   protected void doHelloAck(Composite request, Composite reply) {
-    getStorage().starting(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    byte[] nonceTo0Sign = body.getAsBytes(Const.FIRST_KEY);
-    if (nonceTo0Sign.length != Const.NONCE16_SIZE) {
-      throw new MessageBodyException();
-    }
-
-    CryptoService cryptoService = getCryptoService();
-
-    Composite voucher = getStorage().getVoucher();
-
-    Composite to0d = Composite.newArray()
-        .set(Const.TO0D_VOUCHER, voucher)
-        .set(Const.TO0D_WAIT_SECONDS, getStorage().getRequestWait())
-        .set(Const.TO0D_NONCETO0SIGN, nonceTo0Sign);
-
-    Composite to1dBlob = getStorage().getRedirectBlob();
-    Composite to01Payload = Composite.newArray()
-        .set(Const.TO1D_RV, to1dBlob);
-
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    PublicKey mfgPublic = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
-    int hashType = cryptoService.getCompatibleHashType(mfgPublic);
-    Composite hash = cryptoService.hash(hashType, to0d.toBytes());
-
-    to01Payload.set(Const.TO1D_TO0D_HASH, hash);
-
-    Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
-    PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
-    Composite singedBlob = null;
-    try (CloseableKey key = new CloseableKey(
-        getStorage().getOwnerSigningKey(ownerPublicKey))) {
-      if (key.get() == null) {
-        throw new IOException();
+    try {
+      getStorage().starting(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      byte[] nonceTo0Sign = body.getAsBytes(Const.FIRST_KEY);
+      if (nonceTo0Sign.length != Const.NONCE16_SIZE) {
+        throw new MessageBodyException();
       }
-      singedBlob = getCryptoService().sign(
-          key.get(), to01Payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
-    } catch (IOException e) {
-      logger.error("Voucher not extended to current owner.");
-      throw new DispatchException(e);
+
+      CryptoService cryptoService = getCryptoService();
+
+      Composite voucher = getStorage().getVoucher();
+
+      Composite to0d = Composite.newArray()
+              .set(Const.TO0D_VOUCHER, voucher)
+              .set(Const.TO0D_WAIT_SECONDS, getStorage().getRequestWait())
+              .set(Const.TO0D_NONCETO0SIGN, nonceTo0Sign);
+
+      Composite to1dBlob = getStorage().getRedirectBlob();
+      Composite to01Payload = Composite.newArray()
+              .set(Const.TO1D_RV, to1dBlob);
+
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      PublicKey mfgPublic = cryptoService.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
+      int hashType = cryptoService.getCompatibleHashType(mfgPublic);
+      Composite hash = cryptoService.hash(hashType, to0d.toBytes());
+
+      to01Payload.set(Const.TO1D_TO0D_HASH, hash);
+
+      Composite pubEncKey = getCryptoService().getOwnerPublicKey(voucher);
+      PublicKey ownerPublicKey = getCryptoService().decode(pubEncKey);
+      Composite singedBlob = null;
+      try (CloseableKey key = new CloseableKey(
+              getStorage().getOwnerSigningKey(ownerPublicKey))) {
+        if (key.get() == null) {
+          throw new IOException();
+        }
+        singedBlob = getCryptoService().sign(
+                key.get(), to01Payload.toBytes(), getCryptoService().getCoseAlgorithm(ownerPublicKey));
+      } catch (IOException e) {
+        logger.error("Voucher not extended to current owner.");
+        throw new DispatchException(e);
+      }
+
+      Composite ownerSign = Composite.newArray()
+              .set(Const.TO0_TO0D, to0d)
+              .set(Const.TO0_TO1D, singedBlob);
+
+      reply.set(Const.SM_MSG_ID, Const.TO0_OWNER_SIGN);
+      reply.set(Const.SM_BODY, ownerSign);
+      getStorage().started(request, reply);
+    } catch (Exception e) {
+      logger.error("TO0 failed (msg/20)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    Composite ownerSign = Composite.newArray()
-        .set(Const.TO0_TO0D, to0d)
-        .set(Const.TO0_TO1D, singedBlob);
-
-    reply.set(Const.SM_MSG_ID, Const.TO0_OWNER_SIGN);
-    reply.set(Const.SM_BODY, ownerSign);
-    getStorage().started(request, reply);
   }
 
   protected void doAcceptOwner(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    body.verifyMaxKey(Const.FIRST_KEY);
-    long responseWait = body.getAsNumber(Const.FIRST_KEY).longValue();
-    if (responseWait > Const.MAX_UINT32) {
-      throw new InvalidMessageException("Invalid to0d.WaitSeconds");
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      body.verifyMaxKey(Const.FIRST_KEY);
+      long responseWait = body.getAsNumber(Const.FIRST_KEY).longValue();
+      if (responseWait > Const.MAX_UINT32) {
+        throw new InvalidMessageException("Invalid to0d.WaitSeconds");
+      }
+      getStorage().setResponseWait(responseWait);
+      reply.clear();
+      getStorage().completed(request, reply);
+    } catch (Exception e) {
+      logger.error("TO0 failed (msg/22)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-    getStorage().setResponseWait(responseWait);
-    reply.clear();
-    getStorage().completed(request, reply);
   }
 
   protected void doError(Composite request, Composite reply) {

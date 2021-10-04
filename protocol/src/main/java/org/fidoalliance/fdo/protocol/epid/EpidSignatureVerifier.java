@@ -12,8 +12,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
+import org.fidoalliance.fdo.protocol.MessageBodyException;
 
 public final class EpidSignatureVerifier {
 
@@ -27,6 +29,7 @@ public final class EpidSignatureVerifier {
 
   // This is not defined in HttpUrlConnection
   public static final int HTTP_EXPECTATION_FAILED = 417;
+  private static final LoggerService logger = new LoggerService(EpidSignatureVerifier.class);
 
   /**
    * Verifies EPID signature. Returns result of verification via enum Result.
@@ -76,6 +79,12 @@ public final class EpidSignatureVerifier {
       }
     } catch (IOException | URISyntaxException ex) {
       return Result.UNKNOWN_ERROR;
+    } catch (MessageBodyException e) {
+      logger.error("Invalid signature composite");
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unable to verify EPID Signature");
+      throw new RuntimeException(e);
     }
   }
 
@@ -83,51 +92,59 @@ public final class EpidSignatureVerifier {
                                                        byte[] signedData,
                                                        byte[] groupId,
                                                        int sgType) throws IOException {
-    byte[] signature = signatureComposite.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
-    byte[] payloadAsBytes = signatureComposite.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
-    Composite payload = Composite.fromObject(payloadAsBytes);
-    byte[] signedPayload = createEpidPayload(
-            signatureComposite.getAsComposite(Const.COSE_SIGN1_UNPROTECTED),
-            payload.getAsBytes(Const.EAT_NONCE),
-            signedData,
-            sgType);
+    try {
+      byte[] signature = signatureComposite.getAsBytes(Const.COSE_SIGN1_SIGNATURE);
+      byte[] payloadAsBytes = signatureComposite.getAsBytes(Const.COSE_SIGN1_PAYLOAD);
+      Composite payload = Composite.fromObject(payloadAsBytes);
+      byte[] signedPayload = createEpidPayload(
+              signatureComposite.getAsComposite(Const.COSE_SIGN1_UNPROTECTED),
+              payload.getAsBytes(Const.EAT_NONCE),
+              signedData,
+              sgType);
 
-    // EPID devices may return a signature is a slightly different format than that
-    // expected by the EPID verifier. Adjust the signature for these cases here, before
-    // building the body for the verifier.
+      // EPID devices may return a signature is a slightly different format than that
+      // expected by the EPID verifier. Adjust the signature for these cases here, before
+      // building the body for the verifier.
 
-    final int sigWithHeaderNoCounts = 569;
-    final int sigNoHeaderNoCounts = 565;
-    final int sigWithHeaderWithCounts = 573;
+      final int sigWithHeaderNoCounts = 569;
+      final int sigNoHeaderNoCounts = 565;
+      final int sigWithHeaderWithCounts = 573;
 
-    // Conversion cases:
-    // 1) (siglength == SIG_WITH_HEADER_NO_COUNTS)
-    //    remove first 4 bytes and add 8 zeroes on the end
-    //    sver and blobid are prepended and sigRLVersion and n2 are not included
-    // 2) (sigLength == SIG_NO_HEADER_NO_COUNTS)
-    //    add 8 zeroes on the end (signature is missing sigRLVersion and n2 values)
-    // 3) ((sigLength - SIG_WITH_HEADER_WITH_COUNTS) % 160 == 4)
-    //    remove first 4 bytes (sver and blobid)
+      // Conversion cases:
+      // 1) (siglength == SIG_WITH_HEADER_NO_COUNTS)
+      //    remove first 4 bytes and add 8 zeroes on the end
+      //    sver and blobid are prepended and sigRLVersion and n2 are not included
+      // 2) (sigLength == SIG_NO_HEADER_NO_COUNTS)
+      //    add 8 zeroes on the end (signature is missing sigRLVersion and n2 values)
+      // 3) ((sigLength - SIG_WITH_HEADER_WITH_COUNTS) % 160 == 4)
+      //    remove first 4 bytes (sver and blobid)
 
-    byte[] adjSignature = signature;
-    if (signature.length == sigWithHeaderNoCounts) {
-      adjSignature = new byte[signature.length + 4];
-      System.arraycopy(signature, 4, adjSignature, 0, signature.length - 4);
-    } else if (signature.length == sigNoHeaderNoCounts) {
-      adjSignature = new byte[signature.length + 8];
-      System.arraycopy(signature, 0, adjSignature, 0, signature.length);
-    } else if (((signature.length - sigWithHeaderWithCounts) % 160) == 4) {
-      adjSignature = new byte[signature.length - 4];
-      System.arraycopy(signature, 4, adjSignature, 0, signature.length - 4);
+      byte[] adjSignature = signature;
+      if (signature.length == sigWithHeaderNoCounts) {
+        adjSignature = new byte[signature.length + 4];
+        System.arraycopy(signature, 4, adjSignature, 0, signature.length - 4);
+      } else if (signature.length == sigNoHeaderNoCounts) {
+        adjSignature = new byte[signature.length + 8];
+        System.arraycopy(signature, 0, adjSignature, 0, signature.length);
+      } else if (((signature.length - sigWithHeaderWithCounts) % 160) == 4) {
+        adjSignature = new byte[signature.length - 4];
+        System.arraycopy(signature, 4, adjSignature, 0, signature.length - 4);
+      }
+      // Create the JSON encoded message body to send to verifier
+      String msg = "{"
+              + "\"groupId\":\"" + Base64.getEncoder().encodeToString(groupId) + "\""
+              + ",\"msg\":\"" + Base64.getEncoder().encodeToString(signedPayload) + "\""
+              + ",\"epidSignature\":\"" + Base64.getEncoder().encodeToString(adjSignature) + "\""
+              + "}";
+
+      return msg;
+    } catch (MessageBodyException e) {
+      logger.error("Invalid signature composite.Unable to create EPID signature body.");
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unable to create EPID signature body.");
+      throw new RuntimeException(e);
     }
-
-    // Create the JSON encoded message body to send to verifier
-    String msg = "{"
-            + "\"groupId\":\"" + Base64.getEncoder().encodeToString(groupId) + "\""
-            + ",\"msg\":\"" + Base64.getEncoder().encodeToString(signedPayload) + "\""
-            + ",\"epidSignature\":\"" + Base64.getEncoder().encodeToString(adjSignature) + "\""
-            + "}";
-    return msg;
   }
 
   // Generate the signed Payload depending on the sgType.

@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 import java.security.PublicKey;
 
 /**
@@ -12,44 +14,58 @@ public abstract class DiClientService extends DeviceService {
 
   protected abstract DiClientStorage getStorage();
 
+  private static final LoggerService logger = new LoggerService(DiClientService.class);
+
   protected void doSetCredentials(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
 
-    Composite body = request.getAsComposite(Const.SM_BODY);
-    Composite ovh = body.getAsComposite(Const.FIRST_KEY);
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
+      Composite ovh = body.getAsComposite(Const.FIRST_KEY);
 
-    byte[] secret = getStorage().getDeviceCredentials().getAsBytes(Const.DC_HMAC_SECRET);
-    CryptoService crypto = getCryptoService();
-    Composite pubKey = ovh.getAsComposite(Const.OVH_PUB_KEY);
-    PublicKey mfgPubKey = crypto.decode(pubKey);
+      byte[] secret = getStorage().getDeviceCredentials().getAsBytes(Const.DC_HMAC_SECRET);
+      CryptoService crypto = getCryptoService();
+      Composite pubKey = ovh.getAsComposite(Const.OVH_PUB_KEY);
+      PublicKey mfgPubKey = crypto.decode(pubKey);
 
-    getStorage().getDeviceCredentials().set(Const.DC_PROTVER,
-        ovh.getAsNumber(Const.OVH_VERSION));
-    getStorage().getDeviceCredentials().set(Const.DC_DEVICE_INFO,
-        ovh.getAsString(Const.OVH_DEVICE_INFO));
-    getStorage().getDeviceCredentials().set(Const.DC_GUID,
-        ovh.getAsBytes(Const.OVH_GUID));
-    getStorage().getDeviceCredentials().set(Const.DC_RENDEZVOUS_INFO,
-        ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO));
+      getStorage().getDeviceCredentials().set(Const.DC_PROTVER,
+              ovh.getAsNumber(Const.OVH_VERSION));
+      getStorage().getDeviceCredentials().set(Const.DC_DEVICE_INFO,
+              ovh.getAsString(Const.OVH_DEVICE_INFO));
+      getStorage().getDeviceCredentials().set(Const.DC_GUID,
+              ovh.getAsBytes(Const.OVH_GUID));
+      getStorage().getDeviceCredentials().set(Const.DC_RENDEZVOUS_INFO,
+              ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO));
 
-    int hashType = crypto.getCompatibleHmacType(mfgPubKey);
-    Composite hash = crypto.hash(hashType, secret, ovh.toBytes());
+      int hashType = crypto.getCompatibleHmacType(mfgPubKey);
+      Composite hash = crypto.hash(hashType, secret, ovh.toBytes());
 
-    hashType = crypto.getCompatibleHashType(mfgPubKey);
-    Composite pubKeyHash = crypto.hash(hashType, pubKey.toBytes());
-    getStorage().getDeviceCredentials().set(Const.DC_PUBLIC_KEY_HASH,
-        pubKeyHash);
+      hashType = crypto.getCompatibleHashType(mfgPubKey);
+      Composite pubKeyHash = crypto.hash(hashType, pubKey.toBytes());
+      getStorage().getDeviceCredentials().set(Const.DC_PUBLIC_KEY_HASH,
+              pubKeyHash);
 
-    reply.set(Const.SM_MSG_ID, Const.DI_SET_HMAC);
-    reply.set(Const.SM_BODY, Composite.newArray().set(Const.FIRST_KEY, hash));
-    getStorage().continued(request, reply);
+      reply.set(Const.SM_MSG_ID, Const.DI_SET_HMAC);
+      reply.set(Const.SM_BODY, Composite.newArray().set(Const.FIRST_KEY, hash));
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("DI failed (msg/11)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doDone(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    request.getAsComposite(Const.SM_BODY).verifyMaxKey(Const.NO_KEYS);
-    reply.clear();
-    getStorage().completed(request, reply);
+    try {
+      getStorage().continuing(request, reply);
+      request.getAsComposite(Const.SM_BODY).verifyMaxKey(Const.NO_KEYS);
+      reply.clear();
+      getStorage().completed(request, reply);
+    } catch (Exception e) {
+      logger.error("DI failed (msg/12)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   protected void doError(Composite request, Composite reply) {

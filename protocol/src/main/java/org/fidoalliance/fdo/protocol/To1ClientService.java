@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import org.fidoalliance.fdo.loggingutils.LoggerService;
+
 import java.io.IOException;
 
 /**
@@ -12,47 +14,61 @@ public abstract class To1ClientService extends DeviceService {
 
   protected abstract To1ClientStorage getStorage();
 
+  LoggerService logger = new LoggerService(To1ClientService.class);
+
   protected void doHelloAck(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    Composite body = request.getAsComposite(Const.SM_BODY);
+    try {
+      getStorage().continuing(request, reply);
+      Composite body = request.getAsComposite(Const.SM_BODY);
 
-    byte[] nonceTo1Proof = body.getAsBytes(Const.FIRST_KEY);
-    body.verifyMaxKey(Const.SECOND_KEY);
+      byte[] nonceTo1Proof = body.getAsBytes(Const.FIRST_KEY);
+      body.verifyMaxKey(Const.SECOND_KEY);
 
-    byte[] ueid = getCryptoService().getUeidFromGuid(
-        getStorage().getDeviceCredentials().getAsBytes(Const.DC_GUID));
+      byte[] ueid = getCryptoService().getUeidFromGuid(
+              getStorage().getDeviceCredentials().getAsBytes(Const.DC_GUID));
 
-    //build EAT token based on private key and sign
-    Composite payload = Composite.newMap()
-        .set(Const.EAT_NONCE, nonceTo1Proof)
-        .set(Const.EAT_UEID, ueid);
+      //build EAT token based on private key and sign
+      Composite payload = Composite.newMap()
+              .set(Const.EAT_NONCE, nonceTo1Proof)
+              .set(Const.EAT_UEID, ueid);
 
-    Composite signature = null;
-    try (CloseableKey key = new CloseableKey(getStorage().getSigningKey())) {
-      signature = getCryptoService().sign(
-          key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(key.get()));
-    } catch (IOException e) {
-      throw new DispatchException(e);
+      Composite signature = null;
+      try (CloseableKey key = new CloseableKey(getStorage().getSigningKey())) {
+        signature = getCryptoService().sign(
+                key.get(), payload.toBytes(), getCryptoService().getCoseAlgorithm(key.get()));
+      } catch (IOException e) {
+        throw new DispatchException(e);
+      }
+
+      Composite uph = Composite.newMap();
+      byte[] maroePrefix = getStorage().getMaroePrefix();
+      if (maroePrefix != null) {
+        uph.set(Const.EAT_MAROE_PREFIX, maroePrefix);
+      }
+
+      signature.set(Const.COSE_SIGN1_UNPROTECTED, uph);
+
+      reply.set(Const.SM_MSG_ID, Const.TO1_PROVE_TO_RV);
+      reply.set(Const.SM_BODY, signature);
+      getStorage().continued(request, reply);
+    } catch (Exception e) {
+      logger.error("TO0 failed (msg/30)");
+      getStorage().failed(request, reply);
+      throw e;
     }
-
-    Composite uph = Composite.newMap();
-    byte[] maroePrefix = getStorage().getMaroePrefix();
-    if (maroePrefix != null) {
-      uph.set(Const.EAT_MAROE_PREFIX, maroePrefix);
-    }
-
-    signature.set(Const.COSE_SIGN1_UNPROTECTED, uph);
-
-    reply.set(Const.SM_MSG_ID, Const.TO1_PROVE_TO_RV);
-    reply.set(Const.SM_BODY, signature);
-    getStorage().continued(request, reply);
   }
 
   protected void doRedirect(Composite request, Composite reply) {
-    getStorage().continuing(request, reply);
-    getStorage().storeSignedBlob(request.getAsComposite(Const.SM_BODY));
-    reply.clear();
-    getStorage().completed(request, reply);
+    try {
+      getStorage().continuing(request, reply);
+      getStorage().storeSignedBlob(request.getAsComposite(Const.SM_BODY));
+      reply.clear();
+      getStorage().completed(request, reply);
+    } catch (Exception e) {
+      logger.error("TO0 failed (msg/32)");
+      getStorage().failed(request, reply);
+      throw e;
+    }
   }
 
   @Override
