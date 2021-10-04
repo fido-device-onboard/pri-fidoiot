@@ -238,11 +238,18 @@ public class Device {
     try {
       client.call();
     } catch (ConnectException e) {
-      logger.warn("Can't connect to " + url + ": " + e.getMessage());
+      logger.warn("Can't connect to " + url + ".");
     } catch (IOException e) {
-      logger.warn("Can't connect to " + url + ": " + e.getMessage());
+      logger.warn("Can't connect to " + url + ".");
     } catch (Exception e) {
-      logger.warn("Can't connect to " + url + ": " + e.getMessage());
+      logger.warn("Can't connect to " + url + ".");
+    }
+
+    try {
+      myCredStore.load();
+    } catch (Exception e) {
+      logger.error("DI failed. Exiting application");
+      System.exit(-1);
     }
   }
 
@@ -364,13 +371,13 @@ public class Device {
             WebClient client = new WebClient(url, dr, to1Dispatcher);
             client.call();
           } catch (ConnectException e) {
-            logger.warn("Unable to contact RV at " + url + ": " + e.getMessage());
+            logger.warn("Unable to contact RV at " + url + ".");
             continue;
           } catch (HttpResponseCodeException e) {
             logger.error("HTTP code " + e.getCode() + " returned by RV server");
             continue;
           } catch (Exception e) {
-            logger.warn("Unable to connect RV at " + url + ": " + e.getMessage());
+            logger.warn("Unable to connect RV at " + url + ".");
           }
 
           if (null != signedBlob.get()) {
@@ -560,13 +567,12 @@ public class Device {
       } catch (RuntimeException e) {
         lastFailure = e;
         if (isCausedBy(e, SocketException.class)) {
-          logger.warn("Unable to contact Owner at " + url + ". " + e.getMessage());
+          logger.warn("Unable to contact Owner at " + url + ".");
         } else {
-          logger.error("Unable to onboard from owner at "
-                  + url + ". " + e.getMessage());
+          logger.error("Unable to onboard from owner at " + url + ".");
         }
       } catch (Exception e) {
-        logger.warn("Unable to contact Owner at " + url + ": " + e.getMessage());
+        logger.warn("Unable to contact Owner at " + url + ".");
       }
     }
 
