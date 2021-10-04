@@ -1,0 +1,40 @@
+# Copyright 2021 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+FROM registry.access.redhat.com/ubi8/ubi
+ARG _JAVA_OPTIONS
+ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+RUN yum -y install java-11-openjdk-devel opensc wget haveged softhsm
+RUN yum clean all
+
+RUN useradd -ms /bin/bash fdo
+
+RUN mkdir -p /home/fdo/lib
+RUN mkdir -p /home/fdo/certs
+RUN mkdir -p /home/fdo/resources
+RUN mkdir -p /home/fdo/downloads
+RUN mkdir -p /home/fdo/ondie_cache
+
+WORKDIR /home/fdo/
+
+# Setup aio dependencies
+COPY ./lib ./lib/
+COPY ./certs ./certs
+COPY ./downloads ./downloads
+COPY ./resources ./resources
+COPY ./ondie_cache ./ondie_cache
+COPY log4j2.xml .
+COPY aio.jar .
+COPY manufacturer_keystore.p12 .
+COPY owner_keystore.p12 .
+COPY init.sql .
+COPY new-device.sql .
+COPY aio-entrypoint.sh .
+
+RUN chown -R fdo:fdo /home/fdo
+USER fdo
+
+# Configure and start aio
+CMD ["bash", "aio-entrypoint.sh"]
+

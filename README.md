@@ -9,7 +9,7 @@ deploying the example implementation for these components.
 
 ## System Requirements:
 
-* **Ubuntu 20.04**.
+* **Ubuntu 20.04 / RHEL 8.4**.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
@@ -66,6 +66,13 @@ $ mvn clean install
 The build creates artifacts which will be used in the rest of this guide.
 
 ## Using Protocol Samples
+
+Protocol samples can run directly without any configuration. There is only one
+option and that is to set EPID test mode. By default this is set to false. To enable 
+test mode set the following variable to true in the application.properties file:
+epid_test_mode=true
+Place a copy of the file in both the protocol-samples\http-server-to0-to1-sample and 
+protocol-samples\http-server-to2-sample directories before starting the servers.
 
 ### Starting FDO PRI HTTP Servers
 

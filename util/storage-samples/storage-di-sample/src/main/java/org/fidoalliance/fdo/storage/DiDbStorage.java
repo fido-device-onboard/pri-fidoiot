@@ -277,12 +277,31 @@ public class DiDbStorage implements DiServerStorage {
 
   @Override
   public void started(Composite request, Composite reply) {
-
     Composite body = reply.getAsComposite(Const.SM_BODY);
     Composite ovh = body.getAsComposite(Const.FIRST_KEY);
-    UUID guid = ovh.getAsUuid(Const.OVH_GUID);
+    String guid = ovh.getAsUuid(Const.OVH_GUID).toString();
+    String sessionId = UUID.randomUUID().toString();
     reply.set(Const.SM_PROTOCOL_INFO,
-        Composite.newMap().set(Const.PI_TOKEN, guid.toString()));
+        Composite.newMap().set(Const.PI_TOKEN, sessionId));
+
+    String sql = "MERGE INTO DI_SESSIONS ("
+            + "SESSION_ID,"
+            + "GUID,"
+            + "CREATED)"
+            + "VALUES (?,?,?);";
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+      pstmt.setString(1, sessionId);
+      pstmt.setString(2, guid);
+      pstmt.setTimestamp(3, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+      pstmt.execute();
+
+    } catch (SQLException e) {
+      logger.error("Unable to create DI session");
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -290,7 +309,9 @@ public class DiDbStorage implements DiServerStorage {
     String token = getToken(request);
 
     String sql = "SELECT VOUCHER FROM MT_DEVICES "
-        + "WHERE GUID = ?;";
+        + "WHERE GUID = (SELECT GUID FROM "
+        + "DI_SESSIONS WHERE SESSION_ID = ?);";
+
 
     try (Connection conn = dataSource.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -318,7 +339,21 @@ public class DiDbStorage implements DiServerStorage {
 
   @Override
   public void completed(Composite request, Composite reply) {
+    String token = getToken(request);
 
+    String sql = "UPDATE DI_SESSIONS "
+            + " SET UPDATED = ?"
+            + " WHERE SESSION_ID = ?;";
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setTimestamp(1, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+      pstmt.setString(2, token);
+      pstmt.executeUpdate();
+    } catch (SQLException e) {
+      logger.error("Unable to update completed timestamp");
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
