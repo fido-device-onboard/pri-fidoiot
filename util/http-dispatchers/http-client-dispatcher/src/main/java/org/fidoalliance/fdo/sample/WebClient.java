@@ -164,6 +164,9 @@ public class WebClient implements Callable<Void> {
             .build();
       } catch (NoSuchAlgorithmException | KeyManagementException e) {
         throw new RuntimeException(e);
+      } catch (Exception e) {
+        logger.error("Unable to create an HTTPS client object.");
+        throw new RuntimeException(e);
       }
     }
     return httpClient;
@@ -211,9 +214,9 @@ public class WebClient implements Callable<Void> {
         message.getAsNumber(Const.SM_MSG_ID).intValue());
 
     executor = Executors.newSingleThreadExecutor();
-    getClient();
 
     try {
+      getClient();
       HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
           .uri(URI.create(url));
 

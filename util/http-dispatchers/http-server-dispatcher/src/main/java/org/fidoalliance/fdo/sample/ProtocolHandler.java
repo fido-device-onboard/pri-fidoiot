@@ -90,56 +90,62 @@ public class ProtocolHandler implements Runnable {
     HttpServletRequest request = (HttpServletRequest) asyncCtx.getRequest();
     HttpServletResponse response = (HttpServletResponse) asyncCtx.getResponse();
 
-    if (request.getContentType() == null
-        || request.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
-      response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-      return;
-    }
-
-    if (request.getContentLength() < 0) {
-      response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
-      return;
-    }
-
     try {
-      Composite msg = getMessage(request);
-      DispatchResult result = dispatcher.dispatch(msg);
-      Composite reply = result.getReply();
-
-      if (reply.size() == 0) {
-        response.setContentLength(0);
-        response.setStatus(HttpServletResponse.SC_OK);
+      if (request.getContentType() == null
+              || request.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
+        response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         return;
       }
-      int replyId = reply.getAsNumber(Const.SM_MSG_ID).intValue();
-      if (replyId == Const.ERROR) {
+
+      if (request.getContentLength() < 0) {
+        response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
+        return;
+      }
+
+      try {
+        Composite msg = getMessage(request);
+        DispatchResult result = dispatcher.dispatch(msg);
+        Composite reply = result.getReply();
+
+        if (reply.size() == 0) {
+          response.setContentLength(0);
+          response.setStatus(HttpServletResponse.SC_OK);
+          return;
+        }
+        int replyId = reply.getAsNumber(Const.SM_MSG_ID).intValue();
+        if (replyId == Const.ERROR) {
+          response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } else {
+          response.setHeader(Const.HTTP_MESSAGE_TYPE,
+                  Integer.toUnsignedString(
+                          reply.getAsNumber(Const.SM_MSG_ID)
+                                  .intValue()));
+        }
+
+        //set content type to cbor
+        response.setContentType(Const.HTTP_APPLICATION_CBOR);
+
+        //set bearer token (if any)
+        Composite info = reply.getAsComposite(Const.SM_PROTOCOL_INFO);
+        if (info.containsKey(Const.PI_TOKEN)) {
+          response.setHeader(Const.HTTP_AUTHORIZATION,
+                  Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
+        }
+
+        //send the body
+        byte[] body = reply.getAsComposite(Const.SM_BODY).toBytes();
+        response.setContentLength(body.length);
+        response.getOutputStream().write(body);
+      } catch (IOException e) {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      } else {
-        response.setHeader(Const.HTTP_MESSAGE_TYPE,
-            Integer.toUnsignedString(
-                reply.getAsNumber(Const.SM_MSG_ID)
-                    .intValue()));
+        writeException(response, e);
+      } finally {
+        asyncCtx.complete();
       }
-
-      //set content type to cbor
-      response.setContentType(Const.HTTP_APPLICATION_CBOR);
-
-      //set bearer token (if any)
-      Composite info = reply.getAsComposite(Const.SM_PROTOCOL_INFO);
-      if (info.containsKey(Const.PI_TOKEN)) {
-        response.setHeader(Const.HTTP_AUTHORIZATION,
-            Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
-      }
-
-      //send the body
-      byte[] body = reply.getAsComposite(Const.SM_BODY).toBytes();
-      response.setContentLength(body.length);
-      response.getOutputStream().write(body);
-    } catch (IOException e) {
+    } catch (Exception e) {
+      logger.error("Error while sending response.");
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      writeException(response, e);
-    } finally {
-      asyncCtx.complete();
+      return;
     }
   }
 }
