@@ -123,6 +123,10 @@ public class ResellerVoucherServlet extends HttpServlet {
           resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
           return;
         }
+      } catch (Exception e) {
+        logger.error("Unable to resolve private key");
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return;
       }
 
       resp.setContentType(Const.HTTP_APPLICATION_CBOR);

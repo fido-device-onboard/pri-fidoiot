@@ -51,14 +51,19 @@ public class RvConfigLoader {
    * @return
    */
   public static String loadConfig(String property) {
-    if (systemConfiguration.containsKey(property)) {
-      return systemConfiguration.interpolatedConfiguration().getString(property);
-    } else if (environmentConfiguration.containsKey(property)) {
-      return environmentConfiguration.getString(property);
-    } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
-      return fileBasedConfiguration.getString(property);
+    try {
+      if (systemConfiguration.containsKey(property)) {
+        return systemConfiguration.interpolatedConfiguration().getString(property);
+      } else if (environmentConfiguration.containsKey(property)) {
+        return environmentConfiguration.getString(property);
+      } else if (null != fileBasedConfiguration && fileBasedConfiguration.containsKey(property)) {
+        return fileBasedConfiguration.getString(property);
+      }
+      logger.warn("Could not load property: " + property);
+      return null;
+    } catch (Exception e) {
+      logger.error("Exception raised while loading property:" + property);
+      return null;
     }
-    logger.warn("Could not load property: " + property);
-    return null;
   }
 }

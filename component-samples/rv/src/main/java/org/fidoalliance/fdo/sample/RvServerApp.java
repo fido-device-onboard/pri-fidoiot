@@ -93,22 +93,25 @@ public class RvServerApp {
     Connector httpsConnector = new Connector();
 
     if (RV_SCHEME.toLowerCase().equals("https")) {
+      try {
+        httpsConnector.setPort(RV_HTTPS_PORT);
+        httpsConnector.setSecure(true);
+        httpsConnector.setScheme(RV_SCHEME);
 
-      httpsConnector.setPort(RV_HTTPS_PORT);
-      httpsConnector.setSecure(true);
-      httpsConnector.setScheme(RV_SCHEME);
+        Path keyStoreFile =
+                Path.of(RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PATH));
+        String keystorePass =
+                RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PASSWORD);
 
-      Path keyStoreFile =
-          Path.of(RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PATH));
-      String keystorePass =
-          RvConfigLoader.loadConfig(RvAppSettings.SSL_KEYSTORE_PASSWORD);
-
-      httpsConnector.setProperty("keystorePass", keystorePass);
-      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
-      httpsConnector.setProperty("clientAuth", "false");
-      httpsConnector.setProperty("sslProtocol", "TLS");
-      httpsConnector.setProperty("SSLEnabled", "true");
-      service.addConnector(httpsConnector);
+        httpsConnector.setProperty("keystorePass", keystorePass);
+        httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+        httpsConnector.setProperty("clientAuth", "false");
+        httpsConnector.setProperty("sslProtocol", "TLS");
+        httpsConnector.setProperty("SSLEnabled", "true");
+        service.addConnector(httpsConnector);
+      } catch (Exception e) {
+        logger.error("Error while starting server in SSL mode. HTTPS service won't be available.");
+      }
     }
 
     Connector httpConnector = new Connector();

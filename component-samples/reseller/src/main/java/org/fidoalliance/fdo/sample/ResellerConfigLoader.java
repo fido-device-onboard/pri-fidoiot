@@ -32,41 +32,46 @@ public class ResellerConfigLoader {
    * @return
    */
   public static String loadConfig(String property) {
-
-    if (null == fileBasedConfiguration) {
-      FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
-          new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
-              .configure(new Parameters().properties().setFileName(configurationFile));
-      try {
-        fileBasedConfiguration = builder.getConfiguration();
-      } catch (ConfigurationException e) {
-        // ignore the error since the application might not be using config file.
-        // log when logging is enabled in the application.
+    try {
+      if (null == fileBasedConfiguration) {
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>(
+                        PropertiesConfiguration.class)
+                        .configure(new Parameters().properties().setFileName(configurationFile));
+        try {
+          fileBasedConfiguration = builder.getConfiguration();
+        } catch (ConfigurationException e) {
+          // ignore the error since the application might not be using config file.
+          // log when logging is enabled in the application.
+        }
       }
-    }
-    if (null == defaultConfiguration) {
-      defaultConfiguration = new PropertiesConfiguration();
-      defaultConfiguration.addProperty(ResellerAppConstants.API_PORT, "8070");
-      defaultConfiguration.addProperty(ResellerAppConstants.DB_DRIVER, "org.h2.Driver");
-      defaultConfiguration.addProperty(ResellerAppConstants.SERVER_PATH,
-          System.getProperty(ResellerAppConstants.USER_DIR));
+      if (null == defaultConfiguration) {
+        defaultConfiguration = new PropertiesConfiguration();
+        defaultConfiguration.addProperty(ResellerAppConstants.API_PORT, "8070");
+        defaultConfiguration.addProperty(ResellerAppConstants.DB_DRIVER, "org.h2.Driver");
+        defaultConfiguration.addProperty(ResellerAppConstants.SERVER_PATH,
+                System.getProperty(ResellerAppConstants.USER_DIR));
 
-      final String url = "jdbc:h2:tcp://localhost:8071/"
-          + Path.of(System.getProperty(ResellerAppConstants.USER_DIR),
-          "reseller").toString();
+        final String url = "jdbc:h2:tcp://localhost:8071/"
+                + Path.of(System.getProperty(ResellerAppConstants.USER_DIR),
+                "reseller").toString();
 
-      defaultConfiguration.addProperty(ResellerAppConstants.DB_URL, url);
+        defaultConfiguration.addProperty(ResellerAppConstants.DB_URL, url);
+      }
+      if (systemConfiguration.containsKey(property)) {
+        return systemConfiguration.interpolatedConfiguration().getString(property);
+      } else if (environmentConfiguration.containsKey(property)) {
+        return environmentConfiguration.getString(property);
+      } else if (null != fileBasedConfiguration
+              && fileBasedConfiguration.containsKey(property)) {
+        return fileBasedConfiguration.getString(property);
+      } else if (defaultConfiguration.containsKey(property)) {
+        return defaultConfiguration.getProperty(property).toString();
+      }
+      throw new RuntimeException();
+    } catch (Exception e) {
+      logger.error("Error while loading property:" + property);
+      return null;
     }
-    if (systemConfiguration.containsKey(property)) {
-      return systemConfiguration.interpolatedConfiguration().getString(property);
-    } else if (environmentConfiguration.containsKey(property)) {
-      return environmentConfiguration.getString(property);
-    } else if (null != fileBasedConfiguration
-        && fileBasedConfiguration.containsKey(property)) {
-      return fileBasedConfiguration.getString(property);
-    } else if (defaultConfiguration.containsKey(property)) {
-      return defaultConfiguration.getProperty(property).toString();
-    }
-    throw new RuntimeException();
   }
 }

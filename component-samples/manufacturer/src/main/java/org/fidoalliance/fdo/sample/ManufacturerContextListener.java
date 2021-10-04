@@ -102,72 +102,78 @@ public class ManufacturerContextListener implements ServletContextListener {
     }
     final OnDieService ods = initialOds;
 
-    initManufacturerKeystore(
-        sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE),
-        sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
-    keyResolver = new CertificateResolver() {
-      @Override
-      public CloseableKey getPrivateKey(Certificate cert) {
+    try {
+      initManufacturerKeystore(
+              sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE),
+              sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD));
+      keyResolver = new CertificateResolver() {
+        @Override
+        public CloseableKey getPrivateKey(Certificate cert) {
 
-        if (null != mfgKeyStore && null != cert) {
-          try {
-            Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
-            while (aliases.hasNext()) {
-              String alias = aliases.next();
-              Certificate certificate = mfgKeyStore.getCertificate(alias);
-              if (null == certificate) {
-                continue;
+          if (null != mfgKeyStore && null != cert) {
+            try {
+              Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
+              while (aliases.hasNext()) {
+                String alias = aliases.next();
+                Certificate certificate = mfgKeyStore.getCertificate(alias);
+                if (null == certificate) {
+                  continue;
+                }
+                if (Arrays.equals(certificate.getEncoded(), cert.getEncoded())) {
+                  return new CloseableKey((PrivateKey) mfgKeyStore.getKey(alias,
+                          sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD)
+                                  .toCharArray()));
+                }
               }
-              if (Arrays.equals(certificate.getEncoded(), cert.getEncoded())) {
-                return new CloseableKey((PrivateKey) mfgKeyStore.getKey(alias,
-                    sc.getInitParameter(ManufacturerAppSettings.MFG_KEYSTORE_PWD).toCharArray()));
-              }
+            } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
+                    | CertificateEncodingException e) {
+              logger.error("Unable to retrieve Private Key. " + e.getMessage());
             }
-          } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
-              | CertificateEncodingException e) {
-            logger.error("Unable to retrieve Private Key. " + e.getMessage());
           }
+          logger.error("Keystore is not configured.");
+          throw new RuntimeException();
         }
-        logger.error("Keystore is not configured.");
-        throw new RuntimeException();
-      }
 
-      @Override
-      public Certificate[] getCertChain(int publicKeyType) {
-        String algName;
-        switch (publicKeyType) {
-          case Const.PK_RSA2048RESTR:
-          case Const.PK_RSA3072:
-            algName = Const.RSA_ALG_NAME;
-            break;
-          case Const.PK_SECP256R1:
-          case Const.PK_SECP384R1:
-            algName = Const.EC_ALG_NAME;
-            break;
-          default:
-            throw new RuntimeException();
-        }
-        if (null != mfgKeyStore) {
-          try {
-            Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
-            while (aliases.hasNext()) {
-              String alias = aliases.next();
-              Certificate[] certificateChain = mfgKeyStore.getCertificateChain(alias);
-              if (certificateChain != null && certificateChain.length > 0
-                  && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)
-                  && publicKeyType == cs.getPublicKeyType(certificateChain[0].getPublicKey())) {
-                return certificateChain;
+        @Override
+        public Certificate[] getCertChain(int publicKeyType) {
+          String algName;
+          switch (publicKeyType) {
+            case Const.PK_RSA2048RESTR:
+            case Const.PK_RSA3072:
+              algName = Const.RSA_ALG_NAME;
+              break;
+            case Const.PK_SECP256R1:
+            case Const.PK_SECP384R1:
+              algName = Const.EC_ALG_NAME;
+              break;
+            default:
+              throw new RuntimeException();
+          }
+          if (null != mfgKeyStore) {
+            try {
+              Iterator<String> aliases = mfgKeyStore.aliases().asIterator();
+              while (aliases.hasNext()) {
+                String alias = aliases.next();
+                Certificate[] certificateChain = mfgKeyStore.getCertificateChain(alias);
+                if (certificateChain != null && certificateChain.length > 0
+                        && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)
+                        && publicKeyType == cs.getPublicKeyType(certificateChain[0]
+                        .getPublicKey())) {
+                  return certificateChain;
+                }
               }
+            } catch (KeyStoreException e) {
+              logger.error("Unable to retrieve Certificate chain. " + e.getMessage());
             }
-          } catch (KeyStoreException e) {
-            logger.error("Unable to retrieve Certificate chain. " + e.getMessage());
           }
+          logger.error("Keystore is not configured.");
+          throw new RuntimeException();
         }
-        logger.error("Keystore is not configured.");
-        throw new RuntimeException();
-      }
-    };
-
+      };
+    } catch (Exception e) {
+      logger.error("Error while loading keystore. Exiting application.");
+      System.exit(-1);
+    }
     MessageDispatcher dispatcher = new MessageDispatcher() {
       @Override
       protected MessagingService getMessagingService(Composite request) {
@@ -189,26 +195,30 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
     sc.setAttribute("resolver", keyResolver);
 
-    //create tables
-    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
-    DiDbManager manager = new DiDbManager();
-    manager.createTables(ds);
     try {
-      final String ownerKeysPem = Files.readString(Paths.get(
-              sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
-      manager.addCustomer(ds, 1, "owner", ownerKeysPem);
-      manager.setAutoEnroll(ds, 1);
-      logger.info("Registered public keys for customer 'owner'");
-    } catch (IOException e) {
-      logger.info("No default public keys found for customer 'owner'");
-    }
-    try {
-      final String resellerKeysPem = Files.readString(Paths.get(
-              sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
-      manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
-      logger.info("Registered public keys for customer 'reseller'");
-    } catch (IOException e) {
-      logger.info("No default public keys found for customer 'reseller'");
+      //create tables
+      DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
+      DiDbManager manager = new DiDbManager();
+      manager.createTables(ds);
+      try {
+        final String ownerKeysPem = Files.readString(Paths.get(
+                sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
+        manager.addCustomer(ds, 1, "owner", ownerKeysPem);
+        manager.setAutoEnroll(ds, 1);
+        logger.info("Registered public keys for customer 'owner'");
+      } catch (IOException e) {
+        logger.info("No default public keys found for customer 'owner'");
+      }
+      try {
+        final String resellerKeysPem = Files.readString(Paths.get(
+                sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
+        manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
+        logger.info("Registered public keys for customer 'reseller'");
+      } catch (IOException e) {
+        logger.info("No default public keys found for customer 'reseller'");
+      }
+    } catch (Exception e) {
+      logger.error("Error while adding customer key.");
     }
 
   }

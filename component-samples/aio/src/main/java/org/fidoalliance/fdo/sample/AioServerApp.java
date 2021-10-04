@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.security.Security;
 import org.apache.catalina.Context;
@@ -250,22 +251,25 @@ public class AioServerApp {
     Connector httpsConnector = new Connector();
 
     if (AIO_SCHEME.toLowerCase().equals("https")) {
+      try {
+        httpsConnector.setPort(AIO_HTTPS_PORT);
+        httpsConnector.setSecure(true);
+        httpsConnector.setScheme(AIO_SCHEME);
 
-      httpsConnector.setPort(AIO_HTTPS_PORT);
-      httpsConnector.setSecure(true);
-      httpsConnector.setScheme(AIO_SCHEME);
+        Path keyStoreFile =
+                Path.of(AioConfigLoader.loadConfig(AioAppSettings.SSL_KEYSTORE_PATH));
+        String keystorePass =
+                AioConfigLoader.loadConfig(AioAppSettings.SSL_KEYSTORE_PASSWORD);
 
-      Path keyStoreFile =
-          Path.of(AioConfigLoader.loadConfig(AioAppSettings.SSL_KEYSTORE_PATH));
-      String keystorePass =
-          AioConfigLoader.loadConfig(AioAppSettings.SSL_KEYSTORE_PASSWORD);
-
-      httpsConnector.setProperty("keystorePass", keystorePass);
-      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
-      httpsConnector.setProperty("clientAuth", "false");
-      httpsConnector.setProperty("sslProtocol", "TLS");
-      httpsConnector.setProperty("SSLEnabled", "true");
-      service.addConnector(httpsConnector);
+        httpsConnector.setProperty("keystorePass", keystorePass);
+        httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+        httpsConnector.setProperty("clientAuth", "false");
+        httpsConnector.setProperty("sslProtocol", "TLS");
+        httpsConnector.setProperty("SSLEnabled", "true");
+        service.addConnector(httpsConnector);
+      } catch (Exception e) {
+        logger.error("Error while starting server in SSL mode. HTTPS service won't be available.");
+      }
 
     }
 

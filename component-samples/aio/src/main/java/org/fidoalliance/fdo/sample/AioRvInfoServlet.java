@@ -38,7 +38,11 @@ public class AioRvInfoServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
     final AsyncContext asyncCtx = req.startAsync();
     asyncCtx.setTimeout(0);
-    new Thread(() -> postAsync(asyncCtx)).start();
+    try {
+      new Thread(() -> postAsync(asyncCtx)).start();
+    } catch (Exception e) {
+      logger.error("Unable to update RvInfo.");
+    }
   }
 
   private void postAsync(AsyncContext asyncCtx) {

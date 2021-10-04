@@ -92,13 +92,16 @@ public class AioContextListener implements ServletContextListener {
       logger.warn("*** WARNING ***");
       logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
-    String epidUrl = sc.getInitParameter(AioAppSettings.EPID_URL);
-    if (null != epidUrl) {
-      EpidUtils.setEpidOnlineUrl(epidUrl);
-    } else {
+    try {
+      String epidUrl = sc.getInitParameter(AioAppSettings.EPID_URL);
+      if (null != epidUrl) {
+        EpidUtils.setEpidOnlineUrl(epidUrl);
+      }
+    } catch (IllegalArgumentException e) {
       logger.info("EPID URL not set. Default URL will be used: "
           + EpidUtils.getEpidOnlineUrl().toString());
     }
+
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
@@ -341,110 +344,117 @@ public class AioContextListener implements ServletContextListener {
 
   private void newDevice(String guid, DataSource ds,
       CryptoService cs, CertificateResolver resolver) {
+    try {
+      Composite voucher = Const.EMPTY_MESSAGE;
+      String ownerKeys = "";
+      String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS "
+              + "FROM MT_DEVICES "
+              + "LEFT JOIN MT_CUSTOMERS "
+              + "ON MT_CUSTOMERS.CUSTOMER_ID=MT_DEVICES.CUSTOMER_ID "
+              + "WHERE MT_DEVICES.GUID = ?";
 
-    Composite voucher = Const.EMPTY_MESSAGE;
-    String ownerKeys = "";
-    String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS "
-        + "FROM MT_DEVICES "
-        + "LEFT JOIN MT_CUSTOMERS "
-        + "ON MT_CUSTOMERS.CUSTOMER_ID=MT_DEVICES.CUSTOMER_ID "
-        + "WHERE MT_DEVICES.GUID = ?";
+      try (Connection conn = ds.getConnection();
+           PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, guid);
+        try (ResultSet rs = pstmt.executeQuery()) {
+          while (rs.next()) {
+            voucher = Composite.fromObject(rs.getBytes(1));
+            ownerKeys = rs.getString(2);
+          }
+        }
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
 
-    try (Connection conn = ds.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, guid);
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          voucher = Composite.fromObject(rs.getBytes(1));
-          ownerKeys = rs.getString(2);
+      //now extend the voucher
+      List<PublicKey> certs =
+              PemLoader.loadPublicKeys(ownerKeys);
+
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
+
+      int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
+      Certificate[] issuerChain =
+              resolver.getCertChain(keyType);
+
+      PublicKey ownerPub = null;
+      for (PublicKey pub : certs) {
+        int ownerType = cs.getPublicKeyType(pub);
+        if (ownerType == keyType) {
+          ownerPub = pub;
+          break;
         }
       }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
 
-    //now extend the voucher
-    List<PublicKey> certs =
-        PemLoader.loadPublicKeys(ownerKeys);
-
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
-
-    int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
-    Certificate[] issuerChain =
-        resolver.getCertChain(keyType);
-
-    PublicKey ownerPub = null;
-    for (PublicKey pub : certs) {
-      int ownerType = cs.getPublicKeyType(pub);
-      if (ownerType == keyType) {
-        ownerPub = pub;
-        break;
+      VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
+      try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
+        vse.add(signer.get(), ownerPub);
+        OwnerDbManager ownManager = new OwnerDbManager();
+        ownManager.importVoucher(ds, voucher);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
+
+      //create a rv blob
+      Composite encodedKey = cs.getOwnerPublicKey(voucher);
+      PublicKey pubKey = cs.decode(encodedKey);
+      String fingerPrint = cs.getFingerPrint(pubKey);
+      pubKey = cs.getDevicePublicKey(voucher);
+      Composite deviceX509 = Composite.newArray();
+      if (pubKey != null) {
+        deviceX509 = cs.encode(pubKey, Const.PK_ENC_X509);
+      }
+
+      byte[] singedBlob = generateSignedBlob(ds, cs, voucher);
+
+      AioDbManager aioDbManager = new AioDbManager();
+
+      aioDbManager.storeRedirectBlob(guid, singedBlob, fingerPrint, deviceX509.toBytes(), ds);
+      aioDbManager.loadNewDeviceScript(ds, newDevicePath, guid);
+
+      logger.info("TO0 completed for GUID: " + guid);
+    } catch (Exception e) {
+      logger.error("TO0 failed for GUID: " + guid);
     }
-
-    VoucherExtensionService vse = new VoucherExtensionService(voucher, cs);
-    try (CloseableKey signer = resolver.getPrivateKey(issuerChain[0])) {
-      vse.add(signer.get(), ownerPub);
-      OwnerDbManager ownManager = new OwnerDbManager();
-      ownManager.importVoucher(ds, voucher);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    //create a rv blob
-    Composite encodedKey = cs.getOwnerPublicKey(voucher);
-    PublicKey pubKey = cs.decode(encodedKey);
-    String fingerPrint = cs.getFingerPrint(pubKey);
-    pubKey = cs.getDevicePublicKey(voucher);
-    Composite deviceX509 = Composite.newArray();
-    if (pubKey != null) {
-      deviceX509 = cs.encode(pubKey, Const.PK_ENC_X509);
-    }
-
-    byte[] singedBlob = generateSignedBlob(ds, cs, voucher);
-
-    AioDbManager aioDbManager = new AioDbManager();
-
-    aioDbManager.storeRedirectBlob(guid, singedBlob, fingerPrint, deviceX509.toBytes(), ds);
-    aioDbManager.loadNewDeviceScript(ds, newDevicePath, guid);
-
-    logger.info("TO0 completed for GUID: " + guid);
   }
 
   private byte[] generateSignedBlob(DataSource ds, CryptoService cs, Composite voucher) {
+    try {
+      Composite ownerBlob = RendezvousBlobDecoder.decode(new AioDbManager().loadRvBlob(ds));
+      Composite to01Payload = Composite.newArray()
+              .set(Const.TO1D_RV, ownerBlob); //unsigned blob
 
-    Composite ownerBlob = RendezvousBlobDecoder.decode(new AioDbManager().loadRvBlob(ds));
-    Composite to01Payload = Composite.newArray()
-        .set(Const.TO1D_RV, ownerBlob); //unsigned blob
+      //to0d does not matter for direct injection
+      //we will just generate the hash to make it parse
+      Composite to0d = Composite.newArray()
+              .set(Const.TO0D_VOUCHER, voucher)
+              .set(Const.TO0D_WAIT_SECONDS, Integer.MAX_VALUE)
+              .set(Const.TO0D_NONCETO0SIGN, cs.getRandomBytes(Const.NONCE16_SIZE));
 
-    //to0d does not matter for direct injection
-    //we will just generate the hash to make it parse
-    Composite to0d = Composite.newArray()
-        .set(Const.TO0D_VOUCHER, voucher)
-        .set(Const.TO0D_WAIT_SECONDS, Integer.MAX_VALUE)
-        .set(Const.TO0D_NONCETO0SIGN, cs.getRandomBytes(Const.NONCE16_SIZE));
+      Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
+      PublicKey mfgPublic = cs.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
+      int hashType = cs.getCompatibleHashType(mfgPublic);
+      Composite hash = cs.hash(hashType, to0d.toBytes());
 
-    Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
-    PublicKey mfgPublic = cs.decode(ovh.getAsComposite(Const.OVH_PUB_KEY));
-    int hashType = cs.getCompatibleHashType(mfgPublic);
-    Composite hash = cs.hash(hashType, to0d.toBytes());
+      //hash does not matter for direct injection
+      to01Payload.set(Const.TO1D_TO0D_HASH, hash);
 
-    //hash does not matter for direct injection
-    to01Payload.set(Const.TO1D_TO0D_HASH, hash);
+      Composite pubEncKey = cs.getOwnerPublicKey(voucher);
+      PublicKey ownerPublicKey = cs.decode(pubEncKey);
+      Composite singedBlob = null;
+      try (CloseableKey key = new CloseableKey(
+              ownResolver.getKey(ownerPublicKey))) {
+        singedBlob = cs.sign(
+                key.get(), to01Payload.toBytes(), cs.getCoseAlgorithm(ownerPublicKey));
+      } catch (IOException e) {
+        throw new DispatchException(e);
+      }
 
-    Composite pubEncKey = cs.getOwnerPublicKey(voucher);
-    PublicKey ownerPublicKey = cs.decode(pubEncKey);
-    Composite singedBlob = null;
-    try (CloseableKey key = new CloseableKey(
-        ownResolver.getKey(ownerPublicKey))) {
-      singedBlob = cs.sign(
-          key.get(), to01Payload.toBytes(), cs.getCoseAlgorithm(ownerPublicKey));
-    } catch (IOException e) {
-      throw new DispatchException(e);
+      return singedBlob.toBytes();
+    } catch (Exception e) {
+      logger.error("Unable to generate signed blob");
+      throw new RuntimeException(e);
     }
-
-    return singedBlob.toBytes();
   }
 
 }

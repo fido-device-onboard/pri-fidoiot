@@ -66,40 +66,49 @@ public class AioInfoServlet extends HttpServlet {
 
   private void getAsync(AsyncContext asyncCtx) {
     LoggerService logger = new LoggerService(AioInfoServlet.class);
-    AioDbManager db = new AioDbManager();
 
     HttpServletRequest req = (HttpServletRequest) asyncCtx.getRequest();
     HttpServletResponse res = (HttpServletResponse) asyncCtx.getResponse();
-    ServletContext sc = req.getServletContext();
-    BasicDataSource ds = (BasicDataSource) sc.getAttribute("datasource");
 
-    List<String> list = getPathElements(req.getRequestURI());
-    logger.info(list.toString());
-    if (list.size() > 3) {
-      try {
-        int pollTime = Integer.parseInt(list.get(3));
-        if (pollTime < 0) {
-          pollTime = 20;
+    try {
+      AioDbManager db = new AioDbManager();
+      ServletContext sc = req.getServletContext();
+      BasicDataSource ds = (BasicDataSource) sc.getAttribute("datasource");
+
+      List<String> list = getPathElements(req.getRequestURI());
+      logger.info(list.toString());
+      if (list.size() > 3) {
+        try {
+          int pollTime = Integer.parseInt(list.get(3));
+          if (pollTime < 0) {
+            pollTime = 20;
+          }
+          res.setContentType("application/json");
+          res.setCharacterEncoding("utf-8");
+          PrintWriter out = res.getWriter();
+          out.print(db.getDevicesInfoWithTime(ds, pollTime));
+        } catch (NumberFormatException e) {
+          logger.error("Invalid poll time. Couldn't fetch device information.");
+          res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
+          logger.error("Unable to retrieve Device Information.");
+          res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-        res.setContentType("application/json");
-        res.setCharacterEncoding("utf-8");
-        PrintWriter out = res.getWriter();
-        out.print(db.getDevicesInfoWithTime(ds, pollTime));
-      } catch (NumberFormatException e) {
-        logger.error("Invalid poll time. Couldn't fetch device information.");
-      } catch (Exception e) {
-        logger.error("Unable to retrieve Device Information.");
+      } else {
+        try {
+          res.setContentType("application/json");
+          res.setCharacterEncoding("utf-8");
+          PrintWriter out = res.getWriter();
+          out.print(db.getDevicesInfo(ds));
+        } catch (Exception e) {
+          logger.error("Unable to retrieve Device Information.");
+          res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
       }
-    } else {
-      try {
-        res.setContentType("application/json");
-        res.setCharacterEncoding("utf-8");
-        PrintWriter out = res.getWriter();
-        out.print(db.getDevicesInfo(ds));
-      } catch (Exception e) {
-        logger.error("Unable to retrieve Device Information.");
-      }
+      asyncCtx.complete();
+    } catch (Exception e)  {
+      logger.error("Unable to retrieve Device Information.");
+      res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-    asyncCtx.complete();
   }
 }

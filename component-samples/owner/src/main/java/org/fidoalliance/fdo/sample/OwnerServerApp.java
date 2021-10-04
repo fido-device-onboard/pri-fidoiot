@@ -198,21 +198,25 @@ public class OwnerServerApp {
 
     if (OWNER_SCHEME.toLowerCase().equals("https")) {
 
-      httpsConnector.setPort(OWNER_HTTPS_PORT);
-      httpsConnector.setSecure(true);
-      httpsConnector.setScheme(OWNER_SCHEME);
+      try {
+        httpsConnector.setPort(OWNER_HTTPS_PORT);
+        httpsConnector.setSecure(true);
+        httpsConnector.setScheme(OWNER_SCHEME);
 
-      Path keyStoreFile =
-          Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PATH));
-      String keystorePass =
-          OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PASSWORD);
+        Path keyStoreFile =
+                Path.of(OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PATH));
+        String keystorePass =
+                OwnerConfigLoader.loadConfig(OwnerAppSettings.SSL_KEYSTORE_PASSWORD);
 
-      httpsConnector.setProperty("keystorePass", keystorePass);
-      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
-      httpsConnector.setProperty("clientAuth", "false");
-      httpsConnector.setProperty("sslProtocol", "TLS");
-      httpsConnector.setProperty("SSLEnabled", "true");
-      service.addConnector(httpsConnector);
+        httpsConnector.setProperty("keystorePass", keystorePass);
+        httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+        httpsConnector.setProperty("clientAuth", "false");
+        httpsConnector.setProperty("sslProtocol", "TLS");
+        httpsConnector.setProperty("SSLEnabled", "true");
+        service.addConnector(httpsConnector);
+      } catch (Exception e) {
+        logger.error("Error while starting server in SSL mode. HTTPS service won't be available.");
+      }
     }
 
     Connector httpConnector = new Connector();

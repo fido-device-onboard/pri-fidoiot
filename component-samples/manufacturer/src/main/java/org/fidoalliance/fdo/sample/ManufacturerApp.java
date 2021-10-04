@@ -183,18 +183,22 @@ public class ManufacturerApp {
       httpsConnector.setSecure(true);
       httpsConnector.setScheme(DI_SCHEME);
 
-      Path keyStoreFile =
-          Path.of(ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PATH));
-      String keystorePass =
-          ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PASSWORD);
+      try {
+        Path keyStoreFile =
+                Path.of(ManufacturerConfigLoader
+                        .loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PATH));
+        String keystorePass =
+                ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.SSL_KEYSTORE_PASSWORD);
 
-      httpsConnector.setProperty("keystorePass", keystorePass);
-      httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
-      httpsConnector.setProperty("clientAuth", "false");
-      httpsConnector.setProperty("sslProtocol", "TLS");
-      httpsConnector.setProperty("SSLEnabled", "true");
-      service.addConnector(httpsConnector);
-
+        httpsConnector.setProperty("keystorePass", keystorePass);
+        httpsConnector.setProperty("keystoreFile", keyStoreFile.toFile().getAbsolutePath());
+        httpsConnector.setProperty("clientAuth", "false");
+        httpsConnector.setProperty("sslProtocol", "TLS");
+        httpsConnector.setProperty("SSLEnabled", "true");
+        service.addConnector(httpsConnector);
+      } catch (Exception e) {
+        logger.error("Error while loading keystore file");
+      }
     }
 
     Connector httpConnector = new Connector();

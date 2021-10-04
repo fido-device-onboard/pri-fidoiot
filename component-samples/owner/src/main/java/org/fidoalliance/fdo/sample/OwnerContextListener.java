@@ -74,12 +74,14 @@ public class OwnerContextListener implements ServletContextListener {
       logger.warn("*** WARNING ***");
       logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
     }
-    String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
-    if (null != epidUrl) {
-      EpidUtils.setEpidOnlineUrl(epidUrl);
-    } else {
+    try {
+      String epidUrl = sc.getInitParameter(OwnerAppSettings.EPID_URL);
+      if (null != epidUrl) {
+        EpidUtils.setEpidOnlineUrl(epidUrl);
+      }
+    } catch (IllegalArgumentException e) {
       logger.info("EPID URL not set. Default URL will be used: "
-          + EpidUtils.getEpidOnlineUrl().toString());
+              + EpidUtils.getEpidOnlineUrl().toString());
     }
 
     sc.setAttribute("datasource", ds);
@@ -157,25 +159,29 @@ public class OwnerContextListener implements ServletContextListener {
     }
     manager.loadTo2Settings(ds);
 
-    // schedule devices for TO0 only if the flag is set
-    if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
-      scheduler.scheduleWithFixedDelay(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            OwnerDbTo0Util to0Util = new OwnerDbTo0Util();
-            List<UUID> uuids = to0Util.fetchDevicesForTo0(ds);
-            logger.info("Scheduling UUIDs for TO0: " + uuids.toString());
-            for (UUID guid : uuids) {
-              CompletableFuture.runAsync(() -> scheduleTo0(sc, ds, guid, to0Util),
-                  to0ExecutorService);
+    try {
+      // schedule devices for TO0 only if the flag is set
+      if (Boolean.valueOf(sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_ENABLED))) {
+        scheduler.scheduleWithFixedDelay(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              OwnerDbTo0Util to0Util = new OwnerDbTo0Util();
+              List<UUID> uuids = to0Util.fetchDevicesForTo0(ds);
+              logger.info("Scheduling UUIDs for TO0: " + uuids.toString());
+              for (UUID guid : uuids) {
+                CompletableFuture.runAsync(() -> scheduleTo0(sc, ds, guid, to0Util),
+                        to0ExecutorService);
+              }
+            } catch (Exception e) {
+              logger.warn("TO0 scheduler failed. Reason: " + e.getMessage());
             }
-          } catch (Exception e) {
-            logger.warn("TO0 scheduler failed. Reason: " + e.getMessage());
           }
-        }
-      }, 5, Integer.parseInt(
-          sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
+        }, 5, Integer.parseInt(
+                sc.getInitParameter(OwnerAppSettings.TO0_SCHEDULING_INTREVAL)), TimeUnit.SECONDS);
+      }
+    } catch (Exception e) {
+      logger.error("Error while scheduling TO0.");
     }
   }
 

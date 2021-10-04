@@ -80,34 +80,39 @@ public class DeviceSysModule implements Module {
 
   @Override
   public void setServiceInfo(Composite kvPair, boolean isMore) {
-    String name = kvPair.getAsString(Const.FIRST_KEY);
-    switch (name) {
-      case FdoSys.KEY_ACTIVE:
-        isActive = kvPair.getAsBoolean(Const.SECOND_KEY);
-        break;
-      case FdoSys.KEY_FILEDESC:
-        if (isActive) {
-          createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
-        } else {
-          logger.warn("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
-        }
-        break;
-      case FdoSys.KEY_WRITE:
-        if (isActive) {
-          writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
-        } else {
-          logger.warn("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
-        }
-        break;
-      case FdoSys.KEY_EXEC:
-        if (isActive) {
-          exec(kvPair.getAsComposite(Const.SECOND_KEY));
-        } else {
-          logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
-        }
-        break;
-      default:
-        break;
+    try {
+      String name = kvPair.getAsString(Const.FIRST_KEY);
+      switch (name) {
+        case FdoSys.KEY_ACTIVE:
+          isActive = kvPair.getAsBoolean(Const.SECOND_KEY);
+          break;
+        case FdoSys.KEY_FILEDESC:
+          if (isActive) {
+            createFile(Path.of(kvPair.getAsString(Const.SECOND_KEY)));
+          } else {
+            logger.warn("fdo_sys module not active. Ignoring fdo_sys:filedesc.");
+          }
+          break;
+        case FdoSys.KEY_WRITE:
+          if (isActive) {
+            writeFile(kvPair.getAsBytes(Const.SECOND_KEY));
+          } else {
+            logger.warn("fdo_sys module not active. Ignoring fdo_sys:filewrite.");
+          }
+          break;
+        case FdoSys.KEY_EXEC:
+          if (isActive) {
+            exec(kvPair.getAsComposite(Const.SECOND_KEY));
+          } else {
+            logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (Exception e) {
+      logger.error("Invalid serviceInfo message");
+      throw e;
     }
   }
 
@@ -163,6 +168,10 @@ public class DeviceSysModule implements Module {
       try (FileChannel channel = FileChannel.open(path, openOptions)) {
         // opening the channel is enough to create the file
       } catch (IOException e) {
+        logger.error("Unable to create file" + e.getMessage());
+        throw new RuntimeException(e);
+      } catch (Exception e) {
+        logger.error("Error while creating file");
         throw new RuntimeException(e);
       }
     }
@@ -185,7 +194,8 @@ public class DeviceSysModule implements Module {
         channel.write(ByteBuffer.wrap(data));
 
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
+      logger.error("Unable to writeFile" + e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -239,6 +249,9 @@ public class DeviceSysModule implements Module {
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (TimeoutException e) {
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      logger.error("Unable to perform exec");
       throw new RuntimeException(e);
     }
   }

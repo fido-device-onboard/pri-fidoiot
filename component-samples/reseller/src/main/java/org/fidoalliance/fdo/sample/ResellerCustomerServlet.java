@@ -68,13 +68,19 @@ public class ResellerCustomerServlet extends HttpServlet {
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    String uri = req.getRequestURI();
-    String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
-    DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
-    int rowsAffected = new ResellerDbManager().deleteKeySet(ds, serialNo);
-    if (rowsAffected == 0) {
-      logger.warn("Customer ID not found.");
-      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    try {
+      String uri = req.getRequestURI();
+      String serialNo = uri.substring(uri.lastIndexOf('/') + 1);
+      DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
+      int rowsAffected = new ResellerDbManager().deleteKeySet(ds, serialNo);
+      if (rowsAffected == 0) {
+        logger.warn("Customer ID not found.");
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return;
+      }
+    } catch (Exception e) {
+      logger.error("Unable to delete keys for the given serial number.");
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       return;
     }
   }

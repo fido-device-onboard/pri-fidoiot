@@ -50,18 +50,24 @@ public class RvContextListener implements ServletContextListener {
     ds.setMaxOpenPreparedStatements(100);
 
     final CryptoService cs = new CryptoService();
-    String epidTestMode = sc.getInitParameter(RvAppSettings.EPID_TEST_MODE);
-    if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
-      cs.setEpidTestMode();
-      logger.warn("*** WARNING ***");
-      logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
-    }
-    String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
-    if (null != epidUrl) {
-      EpidUtils.setEpidOnlineUrl(epidUrl);
-    } else {
-      logger.info("EPID URL not set. Default URL will be used: "
-              + EpidUtils.getEpidOnlineUrl().toString());
+    try {
+      String epidTestMode = sc.getInitParameter(RvAppSettings.EPID_TEST_MODE);
+      if (null != epidTestMode && Boolean.valueOf(epidTestMode)) {
+        cs.setEpidTestMode();
+        logger.warn("*** WARNING ***");
+        logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
+      }
+      try {
+        String epidUrl = sc.getInitParameter(RvAppSettings.EPID_URL);
+        if (null != epidUrl) {
+          EpidUtils.setEpidOnlineUrl(epidUrl);
+        }
+      } catch (IllegalArgumentException e) {
+        logger.info("EPID URL not set. Default URL will be used: "
+                + EpidUtils.getEpidOnlineUrl().toString());
+      }
+    } catch (Exception e) {
+      logger.error("Invalid EPID configurations.");
     }
 
     sc.setAttribute("datasource", ds);

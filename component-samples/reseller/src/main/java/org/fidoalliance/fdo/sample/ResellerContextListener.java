@@ -45,27 +45,33 @@ public class ResellerContextListener implements ServletContextListener {
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
-    KeyStoreResolver resolver = new KeyStoreResolver() {
-      @Override
-      protected String getPassword() {
-        return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD);
-      }
 
-      @Override
-      protected String getKeyStoreType() {
-        return ResellerAppConstants.KEYSTORE_TYPE;
-      }
+    try {
+      KeyStoreResolver resolver = new KeyStoreResolver() {
+        @Override
+        protected String getPassword() {
+          return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD);
+        }
 
-      @Override
-      protected String getKeyStorePath() {
-        return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PATH);
-      }
-    };
+        @Override
+        protected String getKeyStoreType() {
+          return ResellerAppConstants.KEYSTORE_TYPE;
+        }
 
-    sc.setAttribute("keyresolver", resolver);
-    sc.setAttribute("keystore", resolver.getKeyStore());
-    sc.setAttribute("keystore_password",
-        ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
+        @Override
+        protected String getKeyStorePath() {
+          return ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PATH);
+        }
+      };
+
+      sc.setAttribute("keyresolver", resolver);
+      sc.setAttribute("keystore", resolver.getKeyStore());
+      sc.setAttribute("keystore_password",
+                ResellerConfigLoader.loadConfig(ResellerAppConstants.KEYSTORE_PWD));
+    } catch (Exception e) {
+      logger.error("Invalid keystore loaded. Exiting application");
+      System.exit(-1);
+    }
 
     ResellerDbManager dbManager = new ResellerDbManager();
     dbManager.createTables(ds);
