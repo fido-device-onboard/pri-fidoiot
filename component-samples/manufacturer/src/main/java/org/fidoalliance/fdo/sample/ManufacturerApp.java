@@ -197,7 +197,7 @@ public class ManufacturerApp {
         httpsConnector.setProperty("SSLEnabled", "true");
         service.addConnector(httpsConnector);
       } catch (Exception e) {
-        logger.error("Error while loading keystore file");
+        logger.error("Error while starting server in SSL mode. HTTPS service won't be available.");
       }
     }
 

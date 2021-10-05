@@ -54,7 +54,7 @@ public class Device {
   private static final String PROPERTY_DI_URL = "fidoalliance.fdo.url.di";
   private static final String PROPERTY_RANDOMS = "fidoalliance.fdo.randoms";
   private static final String PROPERTY_SERVICE_INFO_MTU =
-          "fidoalliance.fdo.device.service.info.mtu";
+      "fidoalliance.fdo.device.service.info.mtu";
   private static final String PROPERTY_CRED_REUSE_SUPPORT = "fidoalliance.fdo.device.cred.reuse";
   private static final String PROPERTY_CIPHER_SUITE = "fidoalliance.fdo.cipher";
 
@@ -72,7 +72,7 @@ public class Device {
     Properties p = System.getProperties();
 
     myCredStore =
-            new CredentialStorage(Paths.get(p.getProperty(PROPERTY_CREDENTIAL, "credential.bin")));
+        new CredentialStorage(Paths.get(p.getProperty(PROPERTY_CREDENTIAL, "credential.bin")));
 
     String randoms = p.getProperty(PROPERTY_RANDOMS, "NativePRNG,Windows-PRNG");
     myCryptoService = new CryptoService(randoms.split(","));
@@ -118,13 +118,13 @@ public class Device {
 
     PKCS10CertificationRequestBuilder csrBuilder;
     csrBuilder = new JcaPKCS10CertificationRequestBuilder(
-            new X500NameBuilder().build(), myKeys.getPublic());
+        new X500NameBuilder().build(), myKeys.getPublic());
 
     try {
       String signatureAlg = myCryptoService.getSignatureAlgorithm(
-              myCryptoService.getCoseAlgorithm(myKeys.getPublic()));
+          myCryptoService.getCoseAlgorithm(myKeys.getPublic()));
       ContentSigner signer = new JcaContentSignerBuilder(signatureAlg)
-              .build(Objects.requireNonNull(myKeys.getPrivate(), "privateKey must be non-null"));
+          .build(Objects.requireNonNull(myKeys.getPrivate(), "privateKey must be non-null"));
       PKCS10CertificationRequest pkcs10 = csrBuilder.build(signer);
       return pkcs10.getEncoded();
 
@@ -145,8 +145,8 @@ public class Device {
 
   Composite buildSigInfoA() {
     return Composite.newArray()
-            .set(Const.SG_TYPE, myCryptoService.getCoseAlgorithm(myKeys.getPublic()))
-            .set(Const.SG_INFO, new byte[0]);
+        .set(Const.SG_TYPE, myCryptoService.getCoseAlgorithm(myKeys.getPublic()))
+        .set(Const.SG_INFO, new byte[0]);
   }
 
   byte[] createSecret() {
@@ -157,13 +157,13 @@ public class Device {
 
     // Start with 'blank' credentials.  The protocol library will overwrite them as it goes.
     Composite credentials = Composite.newArray()
-            .set(Const.DC_ACTIVE, true)
-            .set(Const.DC_PROTVER, Const.PROTOCOL_VERSION_100)
-            .set(Const.DC_HMAC_SECRET, createSecret())
-            .set(Const.DC_DEVICE_INFO, "")
-            .set(Const.DC_GUID, new UUID(0, 0))
-            .set(Const.DC_RENDEZVOUS_INFO, Composite.newMap())
-            .set(Const.DC_PUBLIC_KEY_HASH, Composite.newArray());
+        .set(Const.DC_ACTIVE, true)
+        .set(Const.DC_PROTVER, Const.PROTOCOL_VERSION_100)
+        .set(Const.DC_HMAC_SECRET, createSecret())
+        .set(Const.DC_DEVICE_INFO, "")
+        .set(Const.DC_GUID, new UUID(0, 0))
+        .set(Const.DC_RENDEZVOUS_INFO, Composite.newMap())
+        .set(Const.DC_PUBLIC_KEY_HASH, Composite.newArray());
 
     DiClientStorage storage = new DiClientStorage() {
       @Override
@@ -189,10 +189,10 @@ public class Device {
       @Override
       public Object getDeviceMfgInfo() {
         return Composite.newArray()
-                .set(Const.FIRST_KEY, myCryptoService.getPublicKeyType(myKeys.getPublic()))
-                .set(Const.SECOND_KEY, getSerial())
-                .set(Const.THIRD_KEY, getModel())
-                .set(Const.FOURTH_KEY, buildCsr());
+            .set(Const.FIRST_KEY, myCryptoService.getPublicKeyType(myKeys.getPublic()))
+            .set(Const.SECOND_KEY, getSerial())
+            .set(Const.THIRD_KEY, getModel())
+            .set(Const.FOURTH_KEY, buildCsr());
       }
 
       @Override
@@ -248,7 +248,7 @@ public class Device {
     try {
       myCredStore.load();
     } catch (Exception e) {
-      logger.error("DI failed. Exiting application");
+      logger.error("DI failed. Exiting application.");
       System.exit(-1);
     }
   }
@@ -360,7 +360,7 @@ public class Device {
 
         // Each directive can produce more than one URL.
         List<String> to1Urls =
-                RendezvousInfoDecoder.getHttpInstructions(rviDirective, Const.RV_DEV_ONLY);
+            RendezvousInfoDecoder.getHttpInstructions(rviDirective, Const.RV_DEV_ONLY);
         delaySec = RendezvousInfoDecoder.getDelaySec(rviDirective);
 
         for (String url : to1Urls) {
@@ -422,7 +422,7 @@ public class Device {
       @Override
       public String getCipherSuiteName() {
         return System.getProperties().getProperty(
-                PROPERTY_CIPHER_SUITE, Const.AES128_CTR_HMAC256_ALG_NAME);
+            PROPERTY_CIPHER_SUITE, Const.AES128_CTR_HMAC256_ALG_NAME);
       }
 
       @Override
@@ -453,7 +453,7 @@ public class Device {
       @Override
       public boolean isDeviceCredReuseSupported() {
         String credReuseProperty =
-                System.getProperties().getProperty(PROPERTY_CRED_REUSE_SUPPORT);
+            System.getProperties().getProperty(PROPERTY_CRED_REUSE_SUPPORT);
         if (credReuseProperty == null || credReuseProperty.equalsIgnoreCase("true")) {
           return true;
         }

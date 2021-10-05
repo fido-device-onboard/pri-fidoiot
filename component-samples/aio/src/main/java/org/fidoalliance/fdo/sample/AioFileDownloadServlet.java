@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.channels.ScatteringByteChannel;
 import java.nio.file.Path;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServlet;

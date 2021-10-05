@@ -178,7 +178,7 @@ public class DiClientApp {
       logger.info("Device Credentials: " + deviceCredentials);
 
     } catch (Exception e) {
-      logger.error(e.getMessage());
+      logger.error("DI failed. Exiting application.");
     }
 
   }

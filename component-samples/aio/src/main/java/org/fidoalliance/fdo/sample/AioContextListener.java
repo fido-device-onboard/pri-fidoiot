@@ -102,7 +102,6 @@ public class AioContextListener implements ServletContextListener {
           + EpidUtils.getEpidOnlineUrl().toString());
     }
 
-
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);
 
@@ -137,16 +136,20 @@ public class AioContextListener implements ServletContextListener {
     }
     final OnDieService ods = initialOds;
 
-    ownResolver = new AioOwnerKeyResolver(
-        sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE),
-        sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE_TYPE),
-        sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE_PWD));
+    try {
+      ownResolver = new AioOwnerKeyResolver(
+              sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE),
+              sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE_TYPE),
+              sc.getInitParameter(AioAppSettings.OWNER_KEYSTORE_PWD));
 
-    certResolver = new AioCertificateResolver(cs,
-        sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE),
-        sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE_TYPE),
-        sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE_PWD)
-    );
+      certResolver = new AioCertificateResolver(cs,
+              sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE),
+              sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE_TYPE),
+              sc.getInitParameter(AioAppSettings.MANUFACTURER_KEYSTORE_PWD)
+      );
+    } catch (Exception e) {
+      logger.error("Invalid keystore credentials or path.");
+    }
 
     newDevicePath = sc.getInitParameter(AioAppSettings.DB_NEW_DEVICE_SQL);
     autoInjectBlob = Boolean.parseBoolean(sc.getInitParameter(AioAppSettings.AUTO_INJECT_BLOB));
@@ -225,35 +228,43 @@ public class AioContextListener implements ServletContextListener {
 
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
     // create tables
-    OwnerDbManager ownManager = new OwnerDbManager();
-    ownManager.createTables(ds);
+    try {
+      OwnerDbManager ownManager = new OwnerDbManager();
+      ownManager.createTables(ds);
 
-    ownManager.loadTo2Settings(ds);
-    RvsDbManager rvsManager = new RvsDbManager();
-    rvsManager.createTables(ds);
-    DiDbManager disManager = new DiDbManager();
+      ownManager.loadTo2Settings(ds);
+      RvsDbManager rvsManager = new RvsDbManager();
+      rvsManager.createTables(ds);
+      DiDbManager disManager = new DiDbManager();
 
-    disManager.createTables(ds);
-    AioDbManager aioDbManager = new AioDbManager();
-    aioDbManager.createTables(ds);
-    aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
-    aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
+      disManager.createTables(ds);
+      AioDbManager aioDbManager = new AioDbManager();
+      aioDbManager.createTables(ds);
+      aioDbManager.loadInitScript(ds, sc.getInitParameter(AioAppSettings.DB_INIT_SQL));
+      aioDbManager.updateTo0RvBlob(ds, sc.getInitParameter(AioAppSettings.TO0_RV_BLOB));
+    } catch (Exception e) {
+      logger.error("Unable to create required Databases.");
+    }
 
     Consumer<String> injector = a -> newDevice(a, ds, cs, certResolver);
     sc.setAttribute(AioRegisterBlobServlet.BLOB_INJECTOR, injector);
 
-    // schedule session cleanup scheduler
-    scheduler.scheduleWithFixedDelay(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          new AioDbManager().removeSessions(ds);
-        } catch (Exception e) {
-          logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
+    try {
+      // schedule session cleanup scheduler
+      scheduler.scheduleWithFixedDelay(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            new AioDbManager().removeSessions(ds);
+          } catch (Exception e) {
+            logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
+          }
         }
-      }
-    }, 5, Integer.parseInt(
-        sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
+      }, 5, Integer.parseInt(
+              sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
+    } catch (Exception e) {
+      logger.error("Unable to schedule session cleaner.");
+    }
   }
 
 

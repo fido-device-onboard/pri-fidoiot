@@ -71,8 +71,8 @@ public class DiApiServlet extends HttpServlet {
 
       Composite result = queryVoucher(ds, serialNo);
       if (result.size() == 0) {
-        logger.warn("Request failed because of device with given serial was not found.");
-        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        logger.warn("Invalid Serial number.");
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
 
