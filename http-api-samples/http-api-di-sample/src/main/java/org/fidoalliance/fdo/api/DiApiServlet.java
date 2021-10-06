@@ -108,6 +108,7 @@ public class DiApiServlet extends HttpServlet {
       resp.setContentLength(voucherBytes.length);
       resp.getOutputStream().write(voucherBytes);
     } catch (Exception e) {
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       logger.error("Unable to extend voucher.");
     }
   }
