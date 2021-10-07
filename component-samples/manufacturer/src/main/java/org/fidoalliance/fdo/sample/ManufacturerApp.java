@@ -133,6 +133,8 @@ public class ManufacturerApp {
     ctx.addApplicationListener(ManufacturerContextListener.class.getName());
     ctx.setParentClassLoader(ctx.getClass().getClassLoader());
 
+    ctx.addParameter(ManufacturerAppSettings.DB_SESSION_CHECK_INTERVAL,
+            ManufacturerConfigLoader.loadConfig(ManufacturerAppSettings.DB_SESSION_CHECK_INTERVAL));
     //setup digest auth
     LoginConfig config = new LoginConfig();
     config.setAuthMethod(ManufacturerAppSettings.AUTH_METHOD);
