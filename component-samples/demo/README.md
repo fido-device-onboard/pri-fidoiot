@@ -1,21 +1,22 @@
 # Table of Contents
 1. [System Requirements](#system-requirements)
 2. [Docker Commands](#docker-commands)
-3. [Running Demo](#running-demo)
-4. [Running Demo using Reseller](#running-demo-using-reseller)
-5. [ServiceInfo Setup](#serviceinfo-setup-between-fdo-pri-http-java-device-sample-and-fdo-pri-owner-sample)
-6. [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer)
-7. [Working with Keystore](#working-with-keystore)
+3. [Podman Commands](#podman-commands)
+4. [Running Demo](#running-demo)
+5. [Running Demo using Reseller](#running-demo-using-reseller)
+6. [ServiceInfo Setup](#serviceinfo-setup-between-fdo-pri-http-java-device-sample-and-fdo-pri-owner-sample)
+7. [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer)
+8. [Working with Keystore](#working-with-keystore)
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04.
+* Operating System: Ubuntu 20.04 / RHEL 8.4
 
 * Linux* packages:
 
-  - Docker engine (minimum version 18.09, Supported till version 20.10.7)
+  - Docker engine (minimum version 18.09, Supported till version 20.10.7) / Podman engine (For RHEL)
 
-  - Docker-compose (minimum version 1.21.2)
+  - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
 
   - Haveged
 
@@ -30,44 +31,98 @@
 ## Start Docker
 * Use the following command to start the docker container.
 ```
-$ sudo docker-compose up -d --build
+sudo docker-compose up -d --build
 ```
 
 ## Stop Docker
 
 * Use the following command to stop a specific docker container.
 ```
-$ sudo docker stop <container-name>
+sudo docker stop <container-name>
+```
 OR
-$ sudo docker stop <container-id>
+```
+sudo docker stop <container-id>
 ```
 
 * Use the following command to stop all running docker containers.
 ```
-$ sudo docker stop $(sudo docker ps -a -q)
+sudo docker stop $(sudo docker ps -a -q)
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-$ sudo docker rm <container-name>
+sudo docker rm <container-name>
+```
 OR
-$ sudo docker rm <container-id>
+```
+sudo docker rm <container-id>
 ```
 
 * Use the following command to remove the docker image.
 ```
-$ sudo docker rmi <image-name>
+sudo docker rmi <image-name>
+```
 OR
-$ sudo docker rmi <image-id>
+```
+sudo docker rmi <image-id>
 ```
 
 * Use the following command to delete all the docker artifacts. (**Note:** Docker containers must be stopped before deleting them)
 ```
-$ sudo docker system prune -a
+sudo docker system prune -a
 ```
 
+# Podman Commands
+
+## Start Podman
+* Use the following command to start the podman container.
+```
+podman-compose up -d --build
+```
+
+## Stop Podman
+
+* Use the following command to stop a specific podman container.
+```
+podman stop <container-name>
+```
+OR
+```
+podman stop <container-id>
+```
+
+* Use the following command to stop all running podman containers.
+```
+podman stop -a
+```
+
+## Clean up Containers
+
+* Use the following command to remove a specific container.
+```
+podman rm <container-name>
+```
+OR
+```
+podman rm <container-id>
+```
+
+* Use the following command to remove the podman image.
+```
+podman rmi <image-name>
+```
+OR
+```
+podman rmi <image-id>
+```
+
+* Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
+```
+podman system prune -a
+```
 # Configuring Proxies
 Update the proxy information in `_JAVA_OPTIONS` as
 
@@ -97,7 +152,7 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries in the .env files.
 
-OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the [onDieCache.py script](scripts/onDieCache.py). They can also be downloaded directly during runtime if the `ondie_autoupdate` property is set to true. These certificates and CRLs need to be copied to the Docker container in case OnDie is supported.
+OnDie requires several certificates and CRLs. These artifacts can be downloaded from the cloud with the [onDieCache.py script](scripts/onDieCache.py). They can also be downloaded directly during runtime if the `ondie_autoupdate` property is set to true. These certificates and CRLs need to be copied to the Docker/Podman container in case OnDie is supported.
 
 ***NOTE***: If you are using pre-production devices or an emulated device then certain debug certificates are required. In such cases, it is recommended that the ondie_cache value be set to the <fdo-pri-src>/protocol-samples/ondiecache directory which contains these debug certificates.
 
@@ -114,7 +169,7 @@ python3 scripts/onDieCache.py --cachedir <path-to-ondie_cache-directory>
 ```
 *Requires internet access for the component.
 
-Finally, the `ondie_cache` directory needs to be copied into the docker container, uncomment the following line in `Dockerfile` of Manufacturer and Owner.
+Finally, the `ondie_cache` directory needs to be copied into the docker/podman container, uncomment the following line in `Dockerfile/Podmanfile` of Manufacturer and Owner.
 ```
 COPY ./ondie_cache ./ondie_cache/
 ```
@@ -138,10 +193,17 @@ are printed in the log file.
 
 Use the following command to extract the log file from a running container.
 ```
-$ docker container cp <container-id>:/home/fdo/log .
+docker container cp <container-id>:/home/fdo/log .
 ```
 
 # Running Demo
+
+***NOTE***: Use the following commands to enbale FDO support on RHEL.
+```
+bash scripts/enable_rhel_support.sh
+echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
+source ~/.bashrc
+```
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
@@ -241,8 +303,8 @@ The instructions below assume that the current working directory is the root of 
 Use the following command to generate the credentials and copy them for the respective components.
 
 ```
-$ bash scripts/keys_gen.sh .
-$ cp -r creds/* .
+bash scripts/keys_gen.sh .
+cp -r creds/* .
 ```
 
 This would generate all necessary credentails in a folder named 'creds' in current working
@@ -295,7 +357,7 @@ creds
 Run the script with '-h' flag to print the syntax.
 
 ```
-$ bash scripts/keys_gen.sh -h
+bash scripts/keys_gen.sh -h
 ```
 
 ## Customize for Multi-machineSsetup

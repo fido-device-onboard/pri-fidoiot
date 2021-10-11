@@ -1,10 +1,15 @@
-***NOTE***: This is a preliminary implementation of the [FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/) published by the FIDO Alliance. The implementation is experimental and incomplete, and is not ready for use in any production capacity. Some cryptographic algorithms and encoding formats have not been implemented, and any aspect of this implementation is subject to change.
-
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
+
+This is a reference implementation of the
+[FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/)
+published by the FIDO Alliance. It provides production-ready implementation for the protocol defined
+by the specification. It also provides example implementation for different components to
+demonstrate end-to-end execution of the protocol. Appropriate security measures should be taken while
+deploying the example implementation for these components.
 
 ## System Requirements:
 
-* **Ubuntu 20.04**.
+* **Ubuntu 20.04 / RHEL 8.4**.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
@@ -61,6 +66,13 @@ $ mvn clean install
 The build creates artifacts which will be used in the rest of this guide.
 
 ## Using Protocol Samples
+
+Protocol samples can run directly without any configuration. There is only one
+option and that is to set EPID test mode. By default this is set to false. To enable 
+test mode set the following variable to true in the application.properties file:
+epid_test_mode=true
+Place a copy of the file in both the protocol-samples\http-server-to0-to1-sample and 
+protocol-samples\http-server-to2-sample directories before starting the servers.
 
 ### Starting FDO PRI HTTP Servers
 

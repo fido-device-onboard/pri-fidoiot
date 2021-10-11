@@ -356,7 +356,7 @@ generate_tls_keystore()
     pass_update_env_files $CREDS_PATH/$comp "${comp}_ssl_keystore-password=${SSL_PASS}"
   done
 
-  for comp in "owner" "aio"; do
+  for comp in "device" "owner" "aio"; do
     mkdir -p $CREDS_PATH/$comp/certs
     cp truststore $CREDS_PATH/$comp/certs/
     pass_update_env_files $CREDS_PATH/$comp "ssl_truststore_password=${SSL_PASS}"
