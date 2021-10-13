@@ -55,7 +55,7 @@ node('ubuntu18.04-OnDemand'){
   finally
   {
     // Remove the files
-    print "Removing the files"
+    print "Removing the  files"
     sh'''
       rm -f test-fidoiot/credential.bin
       rm -f test-fidoiot/ext_voucher
