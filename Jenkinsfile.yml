@@ -65,7 +65,7 @@ node('ubuntu18.04-OnDemand'){
       rm -f test-fidoiot/result.txt
     '''
 
-    print "Pruning docker containers"
+    print "Pruning the docker containers"
     sh'''
       docker system prune -a -f
     '''
