@@ -131,6 +131,16 @@ public abstract class To2ServerService extends MessagingService {
       Composite payload = Composite.fromObject(
           body.getAsBytes(Const.COSE_SIGN1_PAYLOAD));
 
+      UUID ueGuid = getCryptoService().getGuidFromUeid(
+              payload.getAsBytes(Const.EAT_UEID));
+      UUID deviceId = getStorage().getGuid();
+      if (deviceId.compareTo(ueGuid) != 0) {
+        throw new InvalidMessageException("Error parsing message payload.");
+      }
+
+      byte[] nonceTo2ProveDv = payload.getAsBytes(Const.EAT_NONCE);
+      getCryptoService().verifyBytes(nonceTo2ProveDv, getStorage().getNonceTo2ProveDv());
+
       Composite iotClaim = payload.getAsComposite(Const.EAT_FDO);
       byte[] kexB = iotClaim.getAsBytes(Const.FIRST_KEY);
 
