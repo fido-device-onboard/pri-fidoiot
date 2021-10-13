@@ -237,6 +237,9 @@ public class To2Ccm256Test extends BaseTemplate {
       }
 
       @Override
+      public UUID getGuid() { return storedGuid; }
+
+      @Override
       public Composite getVoucher() {
         assertTrue(storedGuid != null);
         return voucher;
