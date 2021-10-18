@@ -185,9 +185,9 @@ public class DiDbStorage implements DiServerStorage {
 
         chainHash = cryptoService.hash(hashType, chain.toBytes());
 
-        publicKey = cryptoService.encode(certPath.getCertificates().get(0).getPublicKey(),
-                cryptoService.getCompatibleEncoding(
-                        certPath.getCertificates().get(0).getPublicKey()));
+        Certificate[] issuerChain = resolver.getCertChain(keyType);
+        publicKey = cryptoService.encode(issuerChain[0].getPublicKey(),
+                cryptoService.getCompatibleEncoding(issuerChain[0].getPublicKey()));
       } catch (Exception ex) {
         throw new InvalidMessageException(ex.getMessage());
       }
