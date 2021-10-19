@@ -114,7 +114,7 @@ public class OwnerDbStorage implements To2ServerStorage {
     loadVoucher(guid);
   }
 
-  private UUID getGuid() {
+  public UUID getGuid() {
     return voucher.getAsComposite(Const.OV_HEADER).getAsUuid(Const.OVH_GUID);
   }
 

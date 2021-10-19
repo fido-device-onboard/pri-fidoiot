@@ -391,6 +391,9 @@ public class To2EcRsaTest extends BaseTemplate {
       }
 
       @Override
+      public UUID getGuid() { return storedGuid; }
+
+      @Override
       public void setServiceInfo(Composite info, boolean isMore) {
         fromDeviceInfo = info;
       }
