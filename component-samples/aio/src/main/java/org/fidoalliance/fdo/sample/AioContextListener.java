@@ -205,10 +205,10 @@ public class AioContextListener implements ServletContextListener {
       @Override
       protected void dispatched(Composite request, Composite reply) {
         if (reply.getAsNumber(Const.SM_MSG_ID).intValue() == Const.DI_DONE) {
-          String guid = request.getAsComposite(Const.SM_PROTOCOL_INFO)
+          String sessionID = request.getAsComposite(Const.SM_PROTOCOL_INFO)
               .getAsString(Const.PI_TOKEN);
           if (autoInjectBlob) {
-            newDevice(guid, ds, cs, certResolver);
+            newDevice(sessionID, ds, cs, certResolver);
           }
         }
       }
@@ -339,24 +339,27 @@ public class AioContextListener implements ServletContextListener {
   }
 
 
-  private void newDevice(String guid, DataSource ds,
+  private void newDevice(String sessionId, DataSource ds,
       CryptoService cs, CertificateResolver resolver) {
 
     Composite voucher = Const.EMPTY_MESSAGE;
     String ownerKeys = "";
-    String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS "
+    String guid = "";
+    String sql = "SELECT MT_DEVICES.VOUCHER, MT_CUSTOMERS.KEYS , MT_DEVICES.GUID "
         + "FROM MT_DEVICES "
         + "LEFT JOIN MT_CUSTOMERS "
         + "ON MT_CUSTOMERS.CUSTOMER_ID=MT_DEVICES.CUSTOMER_ID "
-        + "WHERE MT_DEVICES.GUID = ?";
+        + "WHERE MT_DEVICES.GUID = (SELECT GUID FROM "
+        + "DI_SESSIONS WHERE SESSION_ID = ?);";
 
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-      pstmt.setString(1, guid);
+      pstmt.setString(1, sessionId);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           voucher = Composite.fromObject(rs.getBytes(1));
           ownerKeys = rs.getString(2);
+          guid = rs.getString(3);
         }
       }
     } catch (SQLException e) {

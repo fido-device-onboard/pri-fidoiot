@@ -34,6 +34,8 @@ public interface To2ServerStorage extends StorageEvents {
 
   void setGuid(UUID guid);
 
+  UUID getGuid();
+
   void storeVoucher(Composite voucher);
 
   Composite getVoucher();

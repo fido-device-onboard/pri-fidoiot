@@ -28,6 +28,16 @@ public class DiDbManager {
         Statement stmt = conn.createStatement()) {
 
       String sql = "CREATE TABLE IF NOT EXISTS "
+              + "DI_SESSIONS ("
+              + "SESSION_ID CHAR(36) PRIMARY KEY, "
+              + "GUID CHAR(36), "
+              + "CREATED TIMESTAMP,"
+              + "UPDATED TIMESTAMP"
+              + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
           + "MT_SETTINGS ("
           + "ID INT NOT NULL, "
           + "CERTIFICATE_VALIDITY_DAYS INT, "
