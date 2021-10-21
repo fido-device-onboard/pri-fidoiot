@@ -142,6 +142,7 @@ public class ManufacturerContextListener implements ServletContextListener {
             break;
           case Const.PK_SECP256R1:
           case Const.PK_SECP384R1:
+          case Const.PK_ONDIE_ECDSA_384:
             algName = Const.EC_ALG_NAME;
             break;
           default:
