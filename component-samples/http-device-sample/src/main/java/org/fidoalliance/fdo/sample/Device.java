@@ -244,6 +244,18 @@ public class Device {
     return false;
   }
 
+  void delay(long delaySec) throws InterruptedException {
+    if (0 != delaySec) {
+      long delayMs = delaySec * 1000;
+      long jitterMs = delayMs / 4; // jitter is +-25%
+      // Jitter doesn't require a secure random source, so let's use a fast one.
+      jitterMs = ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs);
+      logger.info("DelaySec set.  Delay: " + delayMs + "ms, jitter: " + jitterMs + "ms");
+      logger.info("Delaying for " + (delayMs + jitterMs) + " ms...");
+      Thread.sleep(delayMs + jitterMs);
+    }
+  }
+
   void doTransferOwnership(Composite credentials) throws Exception {
 
     Composite rvi = credentials.getAsComposite(Const.DC_RENDEZVOUS_INFO);
@@ -327,15 +339,7 @@ public class Device {
         } else {
           // we haven't received a signedBlob yet, so we must try the next entry after the previous
           // delaySec.
-          if (0 != delaySec) {
-            long delayMs = delaySec * 1000;
-            long jitterMs = delayMs / 4; // jitter is +-25%
-            // Jitter doesn't require a secure random source, so let's use a fast one.
-            jitterMs = ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs);
-            logger.info("DelaySec set.  Delay: " + delayMs + "ms, jitter: " + jitterMs + "ms");
-            logger.info("Delaying for " + (delayMs + jitterMs) + " ms...");
-            Thread.sleep(delayMs + jitterMs);
-          }
+          delay(delaySec);
         }
 
         // Each directive can produce more than one URL.
@@ -510,9 +514,11 @@ public class Device {
     };
 
     List<String> to2Urls = null;
+    long delaySec = 0;
     if (rvBypass) {
       to2Service.setRvBypass(true); // to skip rendezvous blob verification
       to2Urls = RendezvousInfoDecoder.getHttpDirectives(rvi, Const.RV_DEV_ONLY);
+      delaySec = RendezvousInfoDecoder.getDelaySec(rvi);
     } else {
       to2Urls = RendezvousBlobDecoder.getHttpDirectives(signedBlob.get());
       to2Service.setTo1d(signedBlob.get());
@@ -554,6 +560,10 @@ public class Device {
         }
       } catch (IOException e) {
         logger.warn("Unable to contact Owner at " + url + ": " + e.getMessage());
+      }
+
+      if (delaySec != 0 && !isTo2Done.get()) {
+        delay(delaySec);
       }
     }
 
