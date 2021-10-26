@@ -191,4 +191,20 @@ public class DiDbManager {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Remove expired sessions.
+   *
+   * @param ds A SQL Datasource
+   */
+  public void removeSessions(DataSource ds) {
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      String sql = "DELETE FROM DI_SESSIONS WHERE  CREATED < NOW() - INTERVAL 60 SECOND";
+      stmt.executeUpdate(sql);
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
