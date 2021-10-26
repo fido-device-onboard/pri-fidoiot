@@ -49,4 +49,7 @@ public class ManufacturerAppSettings {
   // Owner & Reseller key files
   public static final String OWNER_PUB_KEY_PATH = "owner_pub_key_path";
   public static final String RESELLER_PUB_KEY_PATH = "reseller_pub_key_path";
+
+  // To set cleanup scheduler interval
+  public static final String DB_SESSION_CHECK_INTERVAL = "manufacturer_session_check_interval";
 }

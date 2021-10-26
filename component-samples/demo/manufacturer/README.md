@@ -95,6 +95,12 @@ Manufacturer runtime arguments:
 
   Default keystore password: fdo123
 
+- `manufacturer_session_check_interval`
+
+   To set the scheduled DI session cleaner interval. DI session cleaner will be automatically invoked in the specified time interval.
+
+   Default value: 60
+
 ## Support for OnDie Devices
 
 Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure manufacturer to support OnDie devices.
