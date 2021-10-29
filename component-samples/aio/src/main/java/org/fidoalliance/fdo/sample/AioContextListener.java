@@ -245,6 +245,7 @@ public class AioContextListener implements ServletContextListener {
       public void run() {
         try {
           new AioDbManager().removeSessions(ds);
+          new DiDbManager().removeSessions(ds);
         } catch (Exception e) {
           logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
         }
