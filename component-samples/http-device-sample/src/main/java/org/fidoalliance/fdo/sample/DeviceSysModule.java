@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -16,9 +18,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +27,6 @@ import java.util.function.Predicate;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
-import org.fidoalliance.fdo.protocol.ServiceInfoEncoder;
-import org.fidoalliance.fdo.serviceinfo.DevMod;
 import org.fidoalliance.fdo.serviceinfo.FdoSys;
 import org.fidoalliance.fdo.serviceinfo.Module;
 
@@ -43,6 +41,8 @@ public class DeviceSysModule implements Module {
   private static final String LOG_INFO_FILE_CREATED =
       DeviceSysModule.class.getName() + ".LOG_INFO_FILE_CREATED";
 
+  private static final int DEFAULT_STATUS_TIMEOUT = 5; //seconds
+
 
   private ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
   private Duration execTimeout = Duration.ofHours(2);
@@ -51,6 +51,15 @@ public class DeviceSysModule implements Module {
   private Path currentFile;
   private boolean isActive;
   private int listIndex = 0;
+
+  private Process execProcess;
+  private int statusTimeout = DEFAULT_STATUS_TIMEOUT;
+  private Composite statusMessage;
+
+  private String fetchFileName;
+  private long fetchOffset;
+  private int mtu;
+
 
   @Override
   public String getName() {
@@ -65,7 +74,7 @@ public class DeviceSysModule implements Module {
 
   @Override
   public void setMtu(int mtu) {
-
+    this.mtu = mtu;
   }
 
   @Override
@@ -106,6 +115,38 @@ public class DeviceSysModule implements Module {
           logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
         }
         break;
+      case FdoSys.KEY_EXEC_CB:
+        if (isActive) {
+          exec_cb(kvPair.getAsComposite(Const.SECOND_KEY));
+        } else {
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
+        }
+        break;
+      case FdoSys.KEY_STATUS_CB:
+        if (isActive) {
+          Composite status = kvPair.getAsComposite(Const.SECOND_KEY);
+          //update the timeout
+          statusTimeout = status.getAsNumber(Const.THIRD_KEY).intValue();
+          //kill the process if requested by owner
+          if (status.getAsBoolean(Const.FIRST_KEY) && execProcess != null) {
+            execProcess.destroyForcibly();
+            execProcess = null;
+            statusMessage = null;
+          } else {
+            checkStatus();
+          }
+        } else {
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
+        }
+        break;
+      case FdoSys.KEY_FETCH:
+        if (isActive) {
+          fetchFileName = kvPair.getAsString(Const.SECOND_KEY);
+          fetchOffset = 0;
+        } else {
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:exec.");
+        }
+        break;
       default:
         break;
     }
@@ -117,7 +158,7 @@ public class DeviceSysModule implements Module {
 
   @Override
   public boolean hasMore() {
-    return false;
+    return (statusMessage != null || fetchFileName != null);
   }
 
   @Override
@@ -127,7 +168,14 @@ public class DeviceSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
-    return Composite.newArray();
+    Composite result = null;
+    if (statusMessage != null) {
+      result = statusMessage;
+      statusMessage = null;
+    } else if (fetchFileName != null) {
+      result = fetch();
+    }
+    return result;
   }
 
   private void setPath(Path path) {
@@ -201,6 +249,69 @@ public class DeviceSysModule implements Module {
     return builder.toString();
   }
 
+  private Composite fetch() {
+    try (FileInputStream in = new FileInputStream(fetchFileName)) {
+
+      long skipped = 0;
+      while (skipped < fetchOffset) {
+        long r = in.skip(fetchOffset);
+        skipped += r;
+      }
+      fetchOffset = skipped;
+      byte[] data = new byte[mtu - 100];
+      int br = in.read(data);
+      fetchOffset = skipped + br;
+      if (br < data.length && br >= 0) {
+        //adjust buffer
+        byte[] temp = new byte[br];
+        System.arraycopy(data, 0, temp, 0, br);
+        data = temp;
+      }
+
+      if (br >= 0) {
+        return Composite.newArray()
+            .set(Const.FIRST_KEY, FdoSys.KEY_DATA)
+            .set(Const.SECOND_KEY, data);
+      } else {
+        fetchOffset = 0;
+        fetchFileName = null;
+        return Composite.newArray()
+            .set(Const.FIRST_KEY, FdoSys.KEY_EOT)
+            .set(Const.SECOND_KEY, Composite.newArray().set(0, 0));
+      }
+
+    } catch (FileNotFoundException e) {
+      logger.debug("fetch file not found");
+    } catch (IOException e) {
+      logger.debug("error reading fetch file");
+    }
+    fetchOffset = 0;
+    fetchFileName = null;
+    return Composite.newArray()
+        .set(Const.FIRST_KEY, FdoSys.KEY_EOT)
+        .set(Const.SECOND_KEY, Composite.newArray().set(0, 1));
+  }
+
+  private void checkStatus() {
+    //check if finished
+    if (execProcess != null) {
+      if (!execProcess.isAlive()) {
+        statusMessage = createStatus(true, execProcess.exitValue(), statusTimeout);
+        execProcess = null;
+        return;
+      }
+    }
+
+    //process still running
+    if (execProcess != null) {
+      try {
+        execProcess.waitFor(statusTimeout, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        logger.warn("timer interrupted");
+      }
+      statusMessage = createStatus(false, 0, statusTimeout);
+    }
+  }
 
   private void exec(Composite args) {
 
@@ -243,6 +354,27 @@ public class DeviceSysModule implements Module {
     }
   }
 
+
+  private void exec_cb(Composite args) {
+
+    List<String> argList = new ArrayList<>();
+    for (int i = 0; i < args.size(); i++) {
+      argList.add(args.getAsString(i));
+    }
+
+    try {
+      ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.redirectErrorStream(true);
+      builder.redirectOutput(getExecOutputRedirect());
+      execProcess = builder.start();
+      statusTimeout = DEFAULT_STATUS_TIMEOUT;
+      //set the first status check
+      statusMessage = createStatus(false, 0, statusTimeout);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private ProcessBuilder.Redirect getExecOutputRedirect() {
     return execOutputRedirect;
   }
@@ -253,6 +385,16 @@ public class DeviceSysModule implements Module {
 
   private Predicate<Integer> getExitValueTest() {
     return exitValueTest;
+  }
+
+  private Composite createStatus(boolean completed, int retCode, int timeout) {
+    Composite status = Composite.newArray()
+        .set(Const.FIRST_KEY, completed)
+        .set(Const.SECOND_KEY, retCode)
+        .set(Const.THIRD_KEY, timeout);
+    return Composite.newArray()
+        .set(Const.FIRST_KEY, FdoSys.KEY_STATUS_CB)
+        .set(Const.SECOND_KEY, status);
   }
 
 }
