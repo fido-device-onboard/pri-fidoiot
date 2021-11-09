@@ -72,9 +72,8 @@ Owner runtime arguments:
 
 - `owner_keystore_password`
 
-  Keystore password for owner_keystore.p12 and the internal softHSM's PKCS11 keystore.
-
-  Default value: OnrKstr1
+  Keystore password for owner_keystore.p12 and the internal softHSM's PKCS11 keystore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
 - `owner_to0_scheduling_enabled`
 
@@ -102,9 +101,9 @@ Owner runtime arguments:
 
 - `owner_api_password`
 
-  Password for the database REST API calls.
+  Password for the database REST API calls. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
-  Default value: OwnerApiPass123
 
 - `owner_protocol_scheme`
 
@@ -134,10 +133,9 @@ Owner runtime arguments:
 
 - `owner_ssl_keystore_password`
 
-  Provides password for the specified keystore.
+  Provides password for the specified keystore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
   ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default keystore password: fdo123
 
 - `ssl_truststore`
 
@@ -148,10 +146,9 @@ Owner runtime arguments:
 
 - `ssl_truststore_password`
 
-  Provides password for the specified truststore.
+  Provides password for the specified truststore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
   ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default keystore password: fdo123
 
 - `ssl_truststore_type`
 

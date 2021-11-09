@@ -52,9 +52,8 @@ Manufacturer runtime arguments:
 
 - `manufacturer_keystore_password`
 
-  Keystore password for manufacturer_keystore.p12 and the internal softHSM's PKCS11 keystore.
-
-  Default value: MfgKs@3er
+  Keystore password for manufacturer_keystore.p12 and the internal softHSM's PKCS11 keystore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
 - `manufacturer_api_user`
 
@@ -64,9 +63,8 @@ Manufacturer runtime arguments:
 
 - `manufacturer_api_password`
 
-  Password for the database REST API calls.
-
-  Default value: MfgApiPass123
+  Password for the database REST API calls. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
 - `manufacturer_protocol_scheme`
 
@@ -90,10 +88,10 @@ Manufacturer runtime arguments:
 
 - `manufacturer_ssl_keystore-password`
 
-  Provides password for the specified keystore.
-  ***NOTE***: This property is not required if service is running in `http` mode.
+  Provides password for the specified keystore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
-  Default keystore password: fdo123
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `manufacturer_session_check_interval`
 

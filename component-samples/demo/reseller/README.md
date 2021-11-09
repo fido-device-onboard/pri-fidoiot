@@ -58,9 +58,8 @@ Some required runtime arguments
 
 - `reseller_api_password`
 
-  Reseller API password.
-
-  Default value: test
+  Reseller API password. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
 - `reseller_home`
 
@@ -76,9 +75,8 @@ Some required runtime arguments
 
 - `reseller_keystore_password`
 
-  Reseller keystore password
-
-  Default value: 123456
+  Reseller keystore password. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
 
 - `user.dir`
 
@@ -106,10 +104,9 @@ Some required runtime arguments
 
 - `reseller_ssl_keystore_password`
 
-  Provides password for the specified keystore.
+  Provides password for the specified keystore. The value for this property is auto generated
+  using the keys_gen.sh script and is stored in creds.env file.
   ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default keystore password: fdo123
 
 # Enabling Remote Access to DB
 
