@@ -85,6 +85,9 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
           logger.warn("Request failed because replacement voucher is not found.");
           resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
+      } else {
+        logger.error("Invalid GUID value.");
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       }
     } catch (Exception exp) {
       logger.warn("Request failed because of internal server error.");
