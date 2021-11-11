@@ -238,6 +238,11 @@ public class To2Test extends BaseTemplate {
       }
 
       @Override
+      public UUID getGuid() {
+        return storedGuid;
+      }
+
+      @Override
       public Composite getVoucher() {
         assertTrue(storedGuid != null);
         return voucher;

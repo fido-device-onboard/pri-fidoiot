@@ -21,6 +21,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -49,6 +52,7 @@ public class ManufacturerContextListener implements ServletContextListener {
   CertificateResolver keyResolver;
   private static KeyStore mfgKeyStore;
   private static final LoggerService logger = new LoggerService(ManufacturerContextListener.class);
+  private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -144,6 +148,7 @@ public class ManufacturerContextListener implements ServletContextListener {
               break;
             case Const.PK_SECP256R1:
             case Const.PK_SECP384R1:
+            case Const.PK_ONDIE_ECDSA_384:
               algName = Const.EC_ALG_NAME;
               break;
             default:
@@ -155,11 +160,16 @@ public class ManufacturerContextListener implements ServletContextListener {
               while (aliases.hasNext()) {
                 String alias = aliases.next();
                 Certificate[] certificateChain = mfgKeyStore.getCertificateChain(alias);
-                if (certificateChain != null && certificateChain.length > 0
-                        && certificateChain[0].getPublicKey().getAlgorithm().equals(algName)
-                        && publicKeyType == cs.getPublicKeyType(certificateChain[0]
-                        .getPublicKey())) {
-                  return certificateChain;
+                if (certificateChain != null && certificateChain.length > 0) {
+                  int pubKeyTypeFromCertChain =
+                          cs.getPublicKeyType(certificateChain[0].getPublicKey());
+
+                  if (certificateChain[0].getPublicKey().getAlgorithm().equals(algName)
+                          && (publicKeyType == pubKeyTypeFromCertChain)
+                          || (publicKeyType == Const.PK_ONDIE_ECDSA_384
+                          && Const.PK_SECP384R1 == pubKeyTypeFromCertChain)) {
+                    return certificateChain;
+                  }
                 }
               }
             } catch (KeyStoreException e) {
@@ -219,6 +229,25 @@ public class ManufacturerContextListener implements ServletContextListener {
       }
     } catch (Exception e) {
       logger.error("Error while adding customer key.");
+    }
+
+    try {
+      // schedule session cleanup scheduler
+      scheduler.scheduleWithFixedDelay(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            logger.debug("DI Session cleaner invoked.");
+            new DiDbManager().removeSessions(ds);
+          } catch (Exception e) {
+            logger.warn("Failed to setup scheduled DI Session cleaner.");
+          }
+        }
+      }, 5, Integer.parseInt(
+              sc.getInitParameter(ManufacturerAppSettings.DB_SESSION_CHECK_INTERVAL)),
+              TimeUnit.SECONDS);
+    } catch (Exception e) {
+      logger.error("Unable to create scheduled cleaner DI sessions.");
     }
 
   }

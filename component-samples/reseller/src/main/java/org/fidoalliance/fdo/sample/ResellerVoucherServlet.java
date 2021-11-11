@@ -75,8 +75,8 @@ public class ResellerVoucherServlet extends HttpServlet {
 
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
-      logger.warn("Request failed because of incorrect credentials.");
-      resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      logger.warn("Request failed because of incorrect Serial number.");
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 

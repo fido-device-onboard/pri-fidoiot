@@ -67,25 +67,31 @@ public class DiApiServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
       CryptoService cs = (CryptoService) getServletContext().getAttribute("cryptoservice");
       CertificateResolver resolver =
-              (CertificateResolver) getServletContext().getAttribute("resolver");
+                (CertificateResolver) getServletContext().getAttribute("resolver");
 
       Composite result = queryVoucher(ds, serialNo);
       if (result.size() == 0) {
-        logger.warn("Invalid Serial number.");
+        logger.warn("Request failed because of device with given serial was not found.");
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return;
       }
 
       Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-      List<PublicKey> certs =
-              PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
+      List<PublicKey> certs;
+      try {
+        certs = PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
+      } catch (Exception e) {
+        logger.error("Invalid customer key in DB.");
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return;
+      }
 
       Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
       Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);
 
       int keyType = mfgPub.getAsNumber(Const.PK_TYPE).intValue();
       Certificate[] issuerChain =
-              resolver.getCertChain(keyType);
+                resolver.getCertChain(keyType);
 
       PublicKey ownerPub = null;
       for (PublicKey pub : certs) {

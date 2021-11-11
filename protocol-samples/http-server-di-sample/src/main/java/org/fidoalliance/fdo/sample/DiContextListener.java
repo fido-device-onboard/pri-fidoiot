@@ -58,29 +58,29 @@ public class DiContextListener implements ServletContextListener {
       + "-----END EC PRIVATE KEY-----\n";
 
   private static final String mfgKeyPemEC384 = "-----BEGIN CERTIFICATE-----\n"
-      + "MIICHDCCAaKgAwIBAgIUWFemvHRHaQMjL7pUa6O0m6nLCJswCgYIKoZIzj0EAwIw\n"
+      + "MIICHDCCAaKgAwIBAgIUYeUxVbuTfFgas1Sgh9jSOQt6zX4wCgYIKoZIzj0EAwIw\n"
       + "RTELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGElu\n"
-      + "dGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMDExMDYxODU5MDJaFw0yMTExMDYx\n"
-      + "ODU5MDJaMEUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYD\n"
+      + "dGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMTEwMTQxNzUzMDRaFw0yNDA3MTAx\n"
+      + "NzUzMDRaMEUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYD\n"
       + "VQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwdjAQBgcqhkjOPQIBBgUrgQQA\n"
-      + "IgNiAATwVq+vfPRpGg6GaTrWtT3gDk+f+b/861IvZ6DZtF2xuVXbzVCmSt4zXPwc\n"
-      + "CfLOa5U/RKePzOzOH4nwnVRvnlcie4QqQcwIFRdPtvZpwdaR0whaTv1mTG+piAhQ\n"
-      + "cBRtEdqjUzBRMB0GA1UdDgQWBBTbsRA6kh4ji3vDUleohZtNxfBbJDAfBgNVHSME\n"
-      + "GDAWgBTbsRA6kh4ji3vDUleohZtNxfBbJDAPBgNVHRMBAf8EBTADAQH/MAoGCCqG\n"
-      + "SM49BAMCA2gAMGUCMQC/1cS9hVM15cdvNii2tdIKEgxDd/syDdfq8/MRF6HPU+9R\n"
-      + "Nv4sYaXKsITgy2X3IdwCMDiYE5ZMwPZjZXX9psCmEaPYGlPfZqAKQ2eYJtaCT0Ij\n"
-      + "1mbcId5bouuxIxnxhQQYUA==\n"
+      + "IgNiAASWQK3xZZeDeJ2AfhYUEpv7zsGeOSE0vjwPqUPFfhbYktpjWPqtO3Swxtvk\n"
+      + "eYKBlmnOzWvSFfWFtaZrSg/y9WBM38bCa7hzVb1m7QEQUb7vaqR09JlEDPinK5Sk\n"
+      + "5kV7Q3ijUzBRMB0GA1UdDgQWBBTslYJJYW7ItUdwRIQKAGHOzwYgxzAfBgNVHSME\n"
+      + "GDAWgBTslYJJYW7ItUdwRIQKAGHOzwYgxzAPBgNVHRMBAf8EBTADAQH/MAoGCCqG\n"
+      + "SM49BAMCA2gAMGUCMQDROIgcJZKgGeH1zmKyChqVHV9ed2vm7lmo8yDtRSHdeUVr\n"
+      + "Qiwqh5qPE900pARaGqoCMDS4/E8v7HH9GVgFgh2BRQnt7GXphjuhbfIShhsyzgnN\n"
+      + "QKSyYAG18iONZE9AdkLyTQ==\n"
       + "-----END CERTIFICATE-----\n"
-      + "-----BEGIN PRIVATE KEY-----\n"
-      + "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDCJYJLPaStXFLy2G/+w\n"
-      + "LgIqSkBXxGKBwDi7GZcbFBtpv0XNALlPm2Vb7OYbifOKBpehZANiAATwVq+vfPRp\n"
-      + "Gg6GaTrWtT3gDk+f+b/861IvZ6DZtF2xuVXbzVCmSt4zXPwcCfLOa5U/RKePzOzO\n"
-      + "H4nwnVRvnlcie4QqQcwIFRdPtvZpwdaR0whaTv1mTG+piAhQcBRtEdo=\n"
-      + "-----END PRIVATE KEY-----\n"
+      + "-----BEGIN EC PRIVATE KEY-----\n"
+      + "MIGkAgEBBDCfCT11Ea/EyDGpLfFG+SmgmFljxlihwE/jZtGbAAIV1HfzGLiRegWa\n"
+      + "mEK03XhgRsigBwYFK4EEACKhZANiAASWQK3xZZeDeJ2AfhYUEpv7zsGeOSE0vjwP\n"
+      + "qUPFfhbYktpjWPqtO3SwxtvkeYKBlmnOzWvSFfWFtaZrSg/y9WBM38bCa7hzVb1m\n"
+      + "7QEQUb7vaqR09JlEDPinK5Sk5kV7Q3g=\n"
+      + "-----END EC PRIVATE KEY-----\n"
       + "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8Favr3z0aRoOhmk61rU94A5Pn/m//OtS\n"
-      + "L2eg2bRdsblV281QpkreM1z8HAnyzmuVP0Snj8zszh+J8J1Ub55XInuEKkHMCBUX\n"
-      + "T7b2acHWkdMIWk79ZkxvqYgIUHAUbRHa\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAElkCt8WWXg3idgH4WFBKb+87BnjkhNL48\n"
+      + "D6lDxX4W2JLaY1j6rTt0sMbb5HmCgZZpzs1r0hX1hbWma0oP8vVgTN/Gwmu4c1W9\n"
+      + "Zu0BEFG+72qkdPSZRAz4pyuUpOZFe0N4\n"
       + "-----END PUBLIC KEY-----\n";
 
   private static final String mfgKeyPemRSA = "-----BEGIN CERTIFICATE-----\n"
@@ -245,6 +245,8 @@ public class DiContextListener implements ServletContextListener {
         } else if (publicKeyType == Const.PK_SECP256R1) {
           pemValue = mfgKeyPemEC256;
         } else if (publicKeyType == Const.PK_SECP384R1) {
+          pemValue = mfgKeyPemEC384;
+        } else if (publicKeyType == Const.PK_ONDIE_ECDSA_384) {
           pemValue = mfgKeyPemEC384;
         } else {
           return new Certificate[0];

@@ -3,8 +3,11 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Properties;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -13,6 +16,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.fidoalliance.fdo.protocol.Const;
 import org.h2.server.web.DbStarter;
 import org.h2.server.web.WebServlet;
+
 
 public class To0To1ServerApp {
   private static final int RV_PORT = 8040;
@@ -47,6 +51,17 @@ public class To0To1ServerApp {
         "jdbc:h2:tcp://" + DB_HOST + ":" + DB_PORT + "/" + DB_PATH);
     ctx.addParameter("db.user", DB_USER);
     ctx.addParameter("db.password", DB_PASSWORD);
+
+    try {
+      Properties properties = new Properties();
+      try (InputStream is = new FileInputStream("application.properties")) {
+        properties.load(is);
+      }
+      ctx.addParameter("epid_test_mode", properties.getProperty("epid_test_mode"));
+    } catch (IOException ex) {
+      // set default
+      ctx.addParameter("epid_test_mode", "false");
+    }
 
     // To enable remote connections to the DB set
     // db.tcpServer=-tcp -tcpAllowOthers -ifNotExists -tcpPort

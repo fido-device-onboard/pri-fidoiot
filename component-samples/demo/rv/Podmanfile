@@ -1,0 +1,28 @@
+# Copyright 2021 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+FROM registry.access.redhat.com/ubi8/ubi
+ARG _JAVA_OPTIONS
+ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+RUN yum -y install java-11-openjdk-devel opensc.x86_64 haveged.x86_64
+RUN yum clean all
+
+RUN useradd -ms /bin/bash fdo
+RUN mkdir -p /home/fdo/lib
+WORKDIR /home/fdo/
+
+# Setup rv dependencies
+COPY ./lib ./lib/
+COPY ./certs ./certs/
+COPY log4j2.xml .
+COPY config.properties .
+COPY rv.jar .
+COPY rv-entrypoint.sh .
+
+RUN chown -R fdo:fdo /home/fdo
+USER fdo
+
+# Configure and start rv
+CMD ["bash", "rv-entrypoint.sh"]
+

@@ -28,6 +28,16 @@ public class DiDbManager {
         Statement stmt = conn.createStatement()) {
 
       String sql = "CREATE TABLE IF NOT EXISTS "
+              + "DI_SESSIONS ("
+              + "SESSION_ID CHAR(36) PRIMARY KEY, "
+              + "GUID CHAR(36), "
+              + "CREATED TIMESTAMP,"
+              + "UPDATED TIMESTAMP"
+              + ");";
+
+      stmt.executeUpdate(sql);
+
+      sql = "CREATE TABLE IF NOT EXISTS "
           + "MT_SETTINGS ("
           + "ID INT NOT NULL, "
           + "CERTIFICATE_VALIDITY_DAYS INT, "
@@ -176,6 +186,22 @@ public class DiDbManager {
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, rvInfo);
       pstmt.executeUpdate();
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Remove expired sessions.
+   *
+   * @param ds A SQL Datasource
+   */
+  public void removeSessions(DataSource ds) {
+    try (Connection conn = ds.getConnection();
+         Statement stmt = conn.createStatement()) {
+      String sql = "DELETE FROM DI_SESSIONS WHERE  CREATED < NOW() - INTERVAL 60 SECOND";
+      stmt.executeUpdate(sql);
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
