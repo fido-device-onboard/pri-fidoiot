@@ -45,7 +45,7 @@ public class Ec384Test {
     Composite header = Composite.newMap();
     header.set(Const.COSE_ALG, Const.COSE_ES384);
 
-    Composite pub = service.encode(publicKey, Const.PK_ENC_COSEEC);
+    Composite pub = service.encode(publicKey, Const.PK_ENC_X509);
     String km = Base64.getEncoder().encodeToString(pub.getAsByteBuffer(Const.PK_BODY).array());
 
     PublicKey p2 = service.decode(pub);

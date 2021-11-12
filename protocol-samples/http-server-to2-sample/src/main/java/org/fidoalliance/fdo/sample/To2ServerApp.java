@@ -86,7 +86,7 @@ public class To2ServerApp {
     // To enable remote connections to the DB set webAllowOthers=true
     // This creates a security hole in the system.
     // Not recommended to use especially on production system
-    ctx.addParameter("webAllowOthers", "false");
+    ctx.addParameter("webAllowOthers", "true");
     ctx.addParameter("trace", "");
 
     // OnDie cert cache is included with the protocol samples.

@@ -37,7 +37,7 @@ public class Ec256Test {
     Composite header = Composite.newMap();
     header.set(Const.COSE_ALG, Const.COSE_ES256);
 
-    Composite pub = service.encode(publicKey, Const.PK_ENC_COSEEC);
+    Composite pub = service.encode(publicKey, Const.PK_ENC_X509);
     PublicKey p2 = service.decode(pub);
     assertTrue(service.compare(publicKey, p2) == 0);
 

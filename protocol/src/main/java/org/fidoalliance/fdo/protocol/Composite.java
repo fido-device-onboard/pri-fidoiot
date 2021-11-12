@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.fidoalliance.fdo.protocol.cbor.CoseEncrypt0;
+import org.fidoalliance.fdo.protocol.cbor.CoseMac0;
+import org.fidoalliance.fdo.protocol.cbor.CoseSign1;
 import org.fidoalliance.fdo.protocol.cbor.Decoder;
 import org.fidoalliance.fdo.protocol.cbor.Decoder.Builder;
 import org.fidoalliance.fdo.protocol.cbor.Encoder;
@@ -509,6 +512,40 @@ public class Composite {
 
   public Composite clone() {
     return Composite.fromObject(toBytes());
+  }
+
+
+  /**
+   * Converts Composite to Wrapped CoseSign1.
+   * @return The Wrapped CoseSign1 Object.
+   */
+  public Composite toCoseSign1() {
+    if (get() instanceof CoseSign1) {
+      return this;
+    }
+    return new Composite(new CoseSign1(get()));
+  }
+
+  /**
+   * Converts Composite to Wrapped CoseEncrypt0.
+   * @return The Wrapped CoseEncrypt0 Object.
+   */
+  public Composite toCoseEncrypt0() {
+    if (get() instanceof CoseEncrypt0) {
+      return this;
+    }
+    return new Composite(new CoseEncrypt0(get()));
+  }
+
+  /**
+   * Converts Composite to Wrapped CoseMac0.
+   * @return The Wrapped CoseMac0 Object.
+   */
+  public Composite toCoseMac0() {
+    if (get() instanceof CoseMac0) {
+      return this;
+    }
+    return new Composite(new CoseMac0(get()));
   }
 
   /**

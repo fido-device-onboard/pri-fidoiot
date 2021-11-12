@@ -9,4 +9,7 @@ package org.fidoalliance.fdo.protocol.cbor;
 abstract class Tag {
   static final int POSITIVE_BIGNUM = 2;
   static final int NEGATIVE_BIGNUM = 3;
+  static final int COSE_ENCRYPT0 = 16;
+  static final int COSE_MAC0 = 17;
+  static final int COSE_SIGN1 = 18;
 }

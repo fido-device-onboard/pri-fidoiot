@@ -67,8 +67,7 @@ public class ServletTest {
     byte[] body = Composite.newArray().toBytes();
     reqBuilder.setHeader("Content-Type", Const.HTTP_APPLICATION_CBOR);
     reqBuilder
-        .setHeader(Const.HTTP_AUTHORIZATION,
-            Const.HTTP_BEARER + " " + TestListener.BEARER_TOKEN);
+        .setHeader(Const.HTTP_AUTHORIZATION, TestListener.BEARER_TOKEN);
     reqBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body));
 
     HttpClient hc = HttpClient.newBuilder()
@@ -86,15 +85,7 @@ public class ServletTest {
 
     //get bearer token from http
     for (String value : hr.headers().allValues(Const.HTTP_AUTHORIZATION)) {
-      int start = 0;
-      int end = value.indexOf(' ');
-      if (end > start) {
-        String authType = value.substring(start, end);
-        if (authType.compareToIgnoreCase(Const.HTTP_BEARER) == 0) {
-          String token = value.substring(end + 1);
-          assertTrue(token.equals(TestListener.BEARER_TOKEN));
-        }
-      }
+      assertTrue(value.equals(TestListener.BEARER_TOKEN));
     }
 
     tomcat.stop();

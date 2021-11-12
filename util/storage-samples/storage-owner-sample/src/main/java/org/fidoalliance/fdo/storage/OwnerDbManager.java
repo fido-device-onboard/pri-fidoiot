@@ -114,7 +114,7 @@ public class OwnerDbManager {
           + "OS_ARCH VARCHAR(255) NOT NULL , "
           + "DEVICE_TYPE VARCHAR(255) NOT NULL, "
           + "SERIAL_NUMBER VARCHAR(255) NULL DEFAULT NULL, "
-          + "PATH_SEPARATOR VARCHAR(2) NOT NULL, "
+          + "PATH_SEPARATOR VARCHAR(2) NULL DEFAULT NULL, "
           + "FILE_NAME_SEPARATOR VARCHAR(2) NULL DEFAULT NULL,"
           + "NEW_LINE_SEQUENCE VARCHAR(4) NULL DEFAULT NULL,"
           + "TMP_DIR VARCHAR(512) NULL DEFAULT NULL,"
@@ -594,7 +594,7 @@ public class OwnerDbManager {
         + "CONTENT "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT SELECT CONTENT_RESOURCE_TAG FORM SYSTEM_MODULE_RESOURCE WHERE "
+        + "(RESOURCE_ID = (SELECT SELECT CONTENT_RESOURCE_TAG FROM SYSTEM_MODULE_RESOURCE WHERE "
         + "RESOURCE_ID = ?))";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {

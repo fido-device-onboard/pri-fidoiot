@@ -203,6 +203,12 @@ public class Decoder implements Iterator<Object> {
               return readBigNum(1);
             case Tag.NEGATIVE_BIGNUM:
               return readBigNum(-1);
+            case Tag.COSE_SIGN1:
+              return new CoseSign1(readItem());
+            case Tag.COSE_ENCRYPT0:
+              return new CoseEncrypt0(readItem());
+            case Tag.COSE_MAC0:
+              return new CoseMac0(readItem());
             default:
               throw new IllegalArgumentException("unsupported tag: " + val);
           }

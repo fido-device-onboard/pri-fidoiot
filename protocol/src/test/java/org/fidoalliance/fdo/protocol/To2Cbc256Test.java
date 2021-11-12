@@ -71,7 +71,7 @@ public class To2Cbc256Test extends BaseTemplate {
 
       @Override
       public String getKexSuiteName() {
-        return Const.ECDH_ALG_NAME;
+        return Const.ECDH256_ALG_NAME;
       }
 
       @Override

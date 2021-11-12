@@ -111,8 +111,8 @@ public final class Const {
   public static final int COSEAESCCM_64_128_128 = 32;
   public static final int COSEAESCCM_64_128_256 = 33;
 
-  public static final String AES128_GCM_ALG_NAME = "AES128GCM";
-  public static final String AES256_GCM_ALG_NAME = "AES256GCM";
+  public static final String AES128_GCM_ALG_NAME = "A128GCM";
+  public static final String AES256_GCM_ALG_NAME = "A256GCM";
   public static final String AES_CCM_64_128_128_ALG_NAME = "AES-CCM-64-128-128";
   public static final String AES_CCM_64_128_256_ALG_NAME = "AES-CCM-64-128-256";
 
@@ -158,8 +158,15 @@ public final class Const {
   // Public Key encodings
   public static final int PK_ENC_CRYPTO = 0; // crypto with its own encoding (e.g., EPID)
   public static final int PK_ENC_X509 = 1; // X509 DER encoding, applies to RSA and ECDSA
-  public static final int PK_ENC_COSEEC = 2; // COSE EC2 encoding, applies to ECDSA
-  public static final int PK_ENC_COSEKEY = 3;
+  public static final int PK_ENC_COSEX5CHAIN = 2; // COSE X509 Chain
+  public static final int PK_ENC_COSEKEY = 3; //COSE KEY TYPE MAP
+
+  //COSE key curves and value
+  public static final int PK_COSEKEY_CRV = -1;
+  public static final int PK_COSEKEY_EC2_256 = 1;
+  public static final int PK_COSEKEY_EC2_384 = 2;
+  public static final int PK_COSEKEY_EC2_X = -2;
+  public static final int PK_COSEKEY_EC2_Y = -3;
 
   //Key factory algorithms
   public static final String EC_ALG_NAME = "EC";
@@ -365,7 +372,6 @@ public final class Const {
   public static final String DISPATCHER_ATTRIBUTE = "ProtocolDispatcher";
 
   //HTTP constants
-  public static final String HTTP_BEARER = "Bearer";
   public static final String HTTP_AUTHORIZATION = "Authorization";
   public static final String HTTP_APPLICATION_CBOR = "application/cbor";
   public static final String HTTP_MESSAGE_TYPE = "Message-Type";
@@ -382,7 +388,7 @@ public final class Const {
       6, 8, 42, -122, 72, -50, 61, 3, 1, 7, 3, 66, 0, 4};
 
   //Key agreement algorithms
-  public static final String ECDH_ALG_NAME = "ECDH";
+  public static final String ECDH256_ALG_NAME = "ECDH256";
   public static final String ECDH384_ALG_NAME = "ECDH384";
   public static final int ECDH_256_RANDOM_SIZE = 128 / 8;
   public static final int ECDH_384_RANDOM_SIZE = 384 / 8;

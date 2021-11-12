@@ -122,6 +122,15 @@ public class Encoder {
       return writeBytes((ByteBuffer) o);
     } else if (o instanceof CharSequence) {
       return writeText(CharBuffer.wrap((CharSequence) o));
+    } else if (o instanceof CoseSign1) {
+      writeTag(Tag.COSE_SIGN1);
+      return writeArray((Collection<?>) o);
+    } else if (o instanceof CoseEncrypt0) {
+      writeTag(Tag.COSE_ENCRYPT0);
+      return writeArray((Collection<?>) o);
+    } else if (o instanceof CoseMac0) {
+      writeTag(Tag.COSE_MAC0);
+      return writeArray((Collection<?>) o);
     } else if (o instanceof Collection) {
       return writeArray((Collection<?>) o);
     } else if (o instanceof Map) {

@@ -48,6 +48,7 @@ public class WebClient implements Callable<Void> {
   private String sslAlgorithm = "TLS";
   private SSLParameters sslParameters;
   private DispatchResult helloMessage;
+  private String authTokenCache;
   private ExecutorService executor;
   private final Duration httpClientTimeout = Duration.ofSeconds(15);
   private static final LoggerService logger = new LoggerService(WebClient.class);
@@ -101,7 +102,7 @@ public class WebClient implements Callable<Void> {
       if (sslMode.toLowerCase().equals("test")) {
 
         // Validity of certificate is not checked.
-        TrustManager[] trustAllCerts = new TrustManager[] {
+        TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
               public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[0];
@@ -123,9 +124,9 @@ public class WebClient implements Callable<Void> {
         return sslContext;
       } else if (sslMode.toLowerCase().equals("prod")) {
 
-        String trustStoreFile = System.getProperty("ssl_truststore","truststore");
-        String trustStorePwd = System.getProperty("ssl_truststore_password"," ");
-        String trustStoreType = System.getProperty("ssl_truststore_type","PKCS12");
+        String trustStoreFile = System.getProperty("ssl_truststore", "truststore");
+        String trustStorePwd = System.getProperty("ssl_truststore_password", " ");
+        String trustStoreType = System.getProperty("ssl_truststore_type", "PKCS12");
 
         final KeyStore trustKeyStore = KeyStore.getInstance(trustStoreType);
         final File truststoreFile = new File(trustStoreFile);
@@ -221,8 +222,10 @@ public class WebClient implements Callable<Void> {
 
       Composite info = message.getAsComposite(Const.SM_PROTOCOL_INFO);
       if (info.containsKey(Const.PI_TOKEN)) {
-        reqBuilder.setHeader(Const.HTTP_AUTHORIZATION,
-            Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
+        authTokenCache = info.getAsString(Const.PI_TOKEN);
+      }
+      if (authTokenCache != null) {
+        reqBuilder.setHeader(Const.HTTP_AUTHORIZATION, authTokenCache);
       }
 
       String msgId = message.getAsNumber(Const.SM_MSG_ID).toString();
@@ -240,14 +243,7 @@ public class WebClient implements Callable<Void> {
         Optional<String> msgType = hr.headers().firstValue(Const.HTTP_MESSAGE_TYPE);
         Optional<String> authToken = hr.headers().firstValue(Const.HTTP_AUTHORIZATION);
         if (authToken.isPresent()) {
-          String[] authArray = authToken.get().split("\\s+");
-          if (authArray.length > 1) {
-            if (authArray[0].compareToIgnoreCase(Const.HTTP_BEARER) == 0) {
-              authInfo.set(Const.PI_TOKEN, authArray[1]);
-            }
-          }
-
-
+          authInfo.set(Const.PI_TOKEN, authToken);
         }
         Composite reply = Composite.newArray()
             .set(Const.SM_LENGTH, Const.DEFAULT)

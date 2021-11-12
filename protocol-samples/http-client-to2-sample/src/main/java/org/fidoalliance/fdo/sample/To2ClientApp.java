@@ -53,15 +53,14 @@ public class To2ClientApp {
 
   private static final String deviceCreds = ""
       + "87f51864582054686973206973206120534841323536206b657920666f7220686d616320616c6a44656d6f446"
-      + "576696365506d955aaa8fb142c18e1123465357a41c81858205696c6f63616c686f73748203191f68820c0182"
-      + "02447f00000182041920fb822f58209172fd0feaa577bb039d321d9011fe4f10959becbf5adab1d4cbcbb6fce"
-      + "67877";
+      + "5766963655086a8f055ac1d4a5cb491e250f4fec1b081858205696c6f63616c686f73748203191f68820c0182"
+      + "02447f0000018204191f69822f582032f840822e21d4b8a5ee1bf66bb3a08ead5f5f7e4a086576945447e46cb"
+      + "fae8f";
 
   private static final String rendezvousBlob = ""
-      + "8443a10126a0583a828184447f000001696c6f63616c686f7374191f6a03822f582085e90844a4036baec3e47"
-      + "d4437ff26ebfcb2505d637750afafb23b16288887f5584730450220131862998e09793245bcd8a8ead601525d"
-      + "a13b4bf1bd8ea5fc3898a925636880022100bb2c17e368d3a9c7249c24acc754fabd79b5fd6edddc88a8ccf9c"
-      + "3ce40a43f0d";
+      + "d28443a10126a0583a828184447f000001696c6f63616c686f7374191f6a03822f5820e77fae3bd6a1f592442"
+      + "ffe9ee54274d69fb2aea7fa277694a5db4065b07aca0158400c92a4cb4e04a65f122d1319b8c43b4ef6a49e85"
+      + "7c9f88c38e1c145b99afbf9da553dbb123ece759c844b51eee0a724dc812817f8a004be3a8cc6960e84e63b0";
 
   private CryptoService cryptoService;
   private Composite to1dBlob = Composite.fromObject(rendezvousBlob);
@@ -159,7 +158,7 @@ public class To2ClientApp {
 
     @Override
     public String getKexSuiteName() {
-      return Const.ECDH_ALG_NAME;
+      return Const.ECDH256_ALG_NAME;
     }
 
     @Override

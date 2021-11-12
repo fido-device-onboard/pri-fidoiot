@@ -24,9 +24,9 @@ public class EcdhTest {
     CryptoService cryptoService = new CryptoService();
 
     Composite ownerState = cryptoService
-        .getKeyExchangeMessage(Const.ECDH_ALG_NAME, Const.KEY_EXCHANGE_A, null);
+        .getKeyExchangeMessage(Const.ECDH256_ALG_NAME, Const.KEY_EXCHANGE_A, null);
     Composite deviceState = cryptoService
-        .getKeyExchangeMessage(Const.ECDH_ALG_NAME, Const.KEY_EXCHANGE_B, null);
+        .getKeyExchangeMessage(Const.ECDH256_ALG_NAME, Const.KEY_EXCHANGE_B, null);
 
     byte[] kexA = ownerState.getAsBytes(Const.FIRST_KEY);
     byte[] kexB = deviceState.getAsBytes(Const.FIRST_KEY);

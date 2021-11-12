@@ -66,13 +66,7 @@ public class ProtocolHandler implements Runnable {
     //get Authorization token
     Enumeration<String> values = request.getHeaders(Const.HTTP_AUTHORIZATION);
     while (values.hasMoreElements()) {
-      String authHeader = values.nextElement();
-      parts = authHeader.split(" ");
-      if (parts.length > 0) {
-        if (parts[0].compareToIgnoreCase(Const.HTTP_BEARER) == 0) {
-          token.set(Const.PI_TOKEN, parts[1]);
-        }
-      }
+      token.set(Const.PI_TOKEN, values.nextElement());
     }
 
     byte[] body = request.getInputStream().readNBytes(request.getContentLength());
@@ -128,7 +122,7 @@ public class ProtocolHandler implements Runnable {
       Composite info = reply.getAsComposite(Const.SM_PROTOCOL_INFO);
       if (info.containsKey(Const.PI_TOKEN)) {
         response.setHeader(Const.HTTP_AUTHORIZATION,
-            Const.HTTP_BEARER + " " + info.getAsString(Const.PI_TOKEN));
+             info.getAsString(Const.PI_TOKEN));
       }
 
       //send the body

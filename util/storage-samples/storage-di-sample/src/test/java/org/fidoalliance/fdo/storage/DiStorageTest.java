@@ -93,8 +93,9 @@ public class DiStorageTest {
 
   protected static String deviceCreds = ""
       + "87f51864582054686973206973206120534841323536206b657920666f7220686d616320616c6a44656d6f446"
-      + "57669636550f0956089c0df4c349c61f460457e87eb8184447f000001696c6f63616c686f7374191f68038208"
-      + "58205603b28472872ecbb5d4981fbaa91664ec8627ea395d2bbee7a85e0f99a7ed34";
+      + "5766963655086a8f055ac1d4a5cb491e250f4fec1b081858205696c6f63616c686f73748203191f68820c0182"
+      + "02447f0000018204191f69822f582032f840822e21d4b8a5ee1bf66bb3a08ead5f5f7e4a086576945447e46cb"
+      + "fae8f";
 
   static BasicDataSource ds = new BasicDataSource();
   static {
@@ -309,7 +310,8 @@ public class DiStorageTest {
 
       DiDbManager manager = new DiDbManager();
       manager.createTables(ds);
-      manager.addRvInfo(ds,"http://localhost:8090?ipaddress=127.0.0.1&ownerport=8090");
+      manager.addRvInfo(ds,
+          "81858205696C6F63616C686F73748203191F9A820C018202447F0000018204191F9A");
     } catch (Exception e) {
         throw new RuntimeException(e);
     } finally {

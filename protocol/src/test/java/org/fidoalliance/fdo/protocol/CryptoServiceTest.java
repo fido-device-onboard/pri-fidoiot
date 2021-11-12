@@ -134,16 +134,11 @@ public class CryptoServiceTest {
     CryptoService cs = new CryptoService();
     PublicKey validKey = generatePublicKey(ecKey, "EC");
     int res = cs.getCompatibleEncoding(validKey);
-    assertTrue(res == Const.PK_ENC_COSEEC);
+    assertTrue(res == Const.PK_ENC_X509);
 
     PublicKey validRsaKey = generatePublicKey(rsakey, "RSA");
     res = cs.getCompatibleEncoding(validRsaKey);
     assertTrue(res == Const.PK_ENC_X509);
-
-    //Checking the invalid Key scenario
-    assertThrows(java.lang.RuntimeException.class, ()-> {
-      cs.getCompatibleEncoding(invalidKey);
-    });
 
   }
 
@@ -167,7 +162,7 @@ public class CryptoServiceTest {
 
     CryptoService cs = new CryptoService();
     PublicKey validKey = generatePublicKey(rsakey, "RSA");
-    Composite res = cs.encode(validKey,Const.PK_ENC_CRYPTO);
+    Composite res = cs.encode(validKey,Const.PK_ENC_X509);
     assertTrue(res.size() > 0 );
 
   }
@@ -177,7 +172,7 @@ public class CryptoServiceTest {
 
     CryptoService cs = new CryptoService();
     PublicKey validKey = generatePublicKey(rsakey, "RSA");
-    Composite encode = cs.encode(validKey,Const.PK_ENC_CRYPTO);
+    Composite encode = cs.encode(validKey,Const.PK_ENC_X509);
     PublicKey key =  cs.decode(encode);
     assertTrue(key.getAlgorithm().equals("RSA"));
 
