@@ -36,7 +36,7 @@ Some required runtime arguments
 
   Reseller database password.
 
-  Default value: <no-password>
+  Default value: `<no-password>`
 
 - `reseller_database_port`
 
@@ -54,18 +54,26 @@ Some required runtime arguments
 
   Reseller API username.
 
-  Default value: admin
+  Default value: apiUser
 
 - `reseller_api_password`
 
-  Reseller API password. The value for this property is auto generated
-  using the keys_gen.sh script and is stored in creds.env file.
+  Reseller API password.
+
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
 - `reseller_home`
 
   Tomcat configuration for catalina home.
 
   Default value: catalina.home
+
+- `reseller_keystore`
+
+  Path to the reseller keystore file containing the Reseller's keys.
+
+  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
 
 - `reseller_keystore_type`
 
@@ -75,8 +83,9 @@ Some required runtime arguments
 
 - `reseller_keystore_password`
 
-  Reseller keystore password. The value for this property is auto generated
-  using the keys_gen.sh script and is stored in creds.env file.
+  Reseller keystore password.
+
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
 - `user.dir`
 
@@ -91,6 +100,7 @@ Some required runtime arguments
 - `reseller_https_port`
 
   Allows enduser to select a port for accepting HTTPS requests.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
@@ -98,14 +108,17 @@ Some required runtime arguments
 - `reseller_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default value: <fdo-pri-src>/component-samples/demo/reseller/certs/ssl.p12
+  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `reseller_ssl_keystore_password`
 
-  Provides password for the specified keystore. The value for this property is auto generated
-  using the keys_gen.sh script and is stored in creds.env file.
+  Provides password for the specified keystore.
+
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
 # Enabling Remote Access to DB
@@ -143,7 +156,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](.
 
 # Inserting Keys into Reseller Keystore
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/reseller/reseller_keystore.p12 contains the default reseller keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default reseller_keystore.p12 is generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
