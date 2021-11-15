@@ -267,7 +267,7 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) / [Podman 
 
 # Inserting Keys into Owner & Manufacturer Keystore in AIO
 
-The PKCS12 keystore files \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 and \<fdo-pri-src\>/component-samples/demo/owner/manufacturer_keystore.p12 contain the default Owner & Manufacturer keys. These keystores contain 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default keystore.p12 files are generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
+The PKCS12 keystore files \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 and \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contain the default Owner & Manufacturer keys. These keystores          contain 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default keystore.p12 files are generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 

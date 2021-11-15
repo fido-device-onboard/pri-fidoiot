@@ -68,7 +68,7 @@ Owner runtime arguments:
 
   Path to the Owner keystore file containing the owner's keys.
 
-  The owner keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
 
 - `owner_keystore_password`
 
@@ -131,7 +131,7 @@ Owner runtime arguments:
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
 
-  The Owner ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
 
   ***NOTE***: This property is not required if service is running in `http` mode.
 
