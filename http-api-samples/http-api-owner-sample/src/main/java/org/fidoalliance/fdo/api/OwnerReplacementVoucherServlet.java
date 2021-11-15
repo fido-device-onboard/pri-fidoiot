@@ -74,7 +74,7 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
 
       String id = req.getParameter("id");
-      if (id != null) {
+      if (id != null && !id.isEmpty()) {
 
         byte[] result = getVoucher(ds, UUID.fromString(id));
         if (result.length > 0) {
