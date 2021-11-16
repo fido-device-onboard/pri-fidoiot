@@ -53,34 +53,32 @@ public class To1ClientApp {
   private void run(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
 
-    try {
-      final MessageDispatcher dispatcher = getDispatcher();
 
-      List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
-              clientStorage.getDeviceCredentials().getAsComposite(Const.DC_RENDEZVOUS_INFO),
-              Const.RV_DEV_ONLY);
+    final MessageDispatcher dispatcher = getDispatcher();
 
-      // Setting epid test mode enables epid signatures from debug and test
-      // devices to pass validation. In production, this should never be used.
-      cryptoService.setEpidTestMode();
+    List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
+            clientStorage.getDeviceCredentials().getAsComposite(Const.DC_RENDEZVOUS_INFO),
+            Const.RV_DEV_ONLY);
 
-      signedTo1Blob = null;
-      for (String path : paths) {
+    // Setting epid test mode enables epid signatures from debug and test
+    // devices to pass validation. In production, this should never be used.
+    cryptoService.setEpidTestMode();
 
-        try {
-          WebClient client = new WebClient(path, clientService.getHelloMessage(), dispatcher);
-          client.call();
-          if (signedTo1Blob != null) {
-            break;
-          }
-        } catch (Exception e) {
-          logger.error("Unable to contact RV at " + path);
+    signedTo1Blob = null;
+
+    for (String path : paths) {
+
+      try {
+        WebClient client = new WebClient(path, clientService.getHelloMessage(), dispatcher);
+        client.call();
+        if (signedTo1Blob != null) {
+          break;
         }
+      } catch (Exception e) {
+        logger.error("T01 failed. Exiting application.");
+        logger.debug(e.getMessage());
       }
-    } catch (Exception e) {
-      logger.error("T01 failed. Exiting application.");
     }
-
   }
 
   private To1ClientStorage clientStorage = new To1ClientStorage() {

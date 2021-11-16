@@ -179,6 +179,7 @@ public class DiClientApp {
 
     } catch (Exception e) {
       logger.error("DI failed. Exiting application.");
+      logger.debug(e.getMessage());
     }
 
   }

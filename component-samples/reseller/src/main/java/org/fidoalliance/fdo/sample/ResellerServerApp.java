@@ -142,7 +142,10 @@ public class ResellerServerApp {
         httpsConnector.setProperty("SSLEnabled", "true");
         service.addConnector(httpsConnector);
       } catch (Exception e) {
+        // Considering the service robustness, its better to continue with the service startup
+        // in http mode if https mode is having some configuration errors.
         logger.error("Error while starting server in SSL mode. HTTPS service won't be available.");
+        logger.debug(e.getMessage());
       }
 
     }

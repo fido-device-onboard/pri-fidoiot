@@ -90,7 +90,6 @@ public class ProtocolHandler implements Runnable {
     HttpServletRequest request = (HttpServletRequest) asyncCtx.getRequest();
     HttpServletResponse response = (HttpServletResponse) asyncCtx.getResponse();
 
-    try {
       if (request.getContentType() == null
               || request.getContentType().compareToIgnoreCase(Const.HTTP_APPLICATION_CBOR) != 0) {
         response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
@@ -142,10 +141,5 @@ public class ProtocolHandler implements Runnable {
       } finally {
         asyncCtx.complete();
       }
-    } catch (Exception e) {
-      logger.error("Error while sending response.");
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
-    }
   }
 }

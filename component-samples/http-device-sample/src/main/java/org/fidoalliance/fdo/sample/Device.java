@@ -612,6 +612,8 @@ public class Device {
         throw new RuntimeException(cause);
       }
     } catch (Exception e) {
+      //
+      logger.debug(e.getMessage());
       logger.error("Device Onboarding Failed. Exiting application.");
     }
   }

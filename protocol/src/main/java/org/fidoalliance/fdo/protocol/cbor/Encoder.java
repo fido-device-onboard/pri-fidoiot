@@ -30,16 +30,11 @@ public class Encoder {
    * Encode a java Collection as a CBOR array.
    */
   public <T> Encoder writeArray(Collection<T> val) throws IOException {
-    try {
-      startArray(val.size());
-      for (T t : val) {
-        writeObject(t);
-      }
-      endArray();
-    } catch (Exception e) {
-      logger.error("Error writing CBOR array.");
-      throw new RuntimeException(e);
+    startArray(val.size());
+    for (T t : val) {
+      writeObject(t);
     }
+    endArray();
     return this;
   }
 
@@ -47,17 +42,12 @@ public class Encoder {
    * Encode a java BigInteger as a CBOR BigNum.
    */
   public Encoder writeBigNum(BigInteger val) throws IOException {
-    try {
-      if (0 <= val.compareTo(BigInteger.ZERO)) {
-        writeTag(Tag.POSITIVE_BIGNUM);
-        writeBytes(ByteBuffer.wrap(val.toByteArray()));
-      } else {
-        writeTag(Tag.NEGATIVE_BIGNUM);
-        writeBytes(ByteBuffer.wrap(BigInteger.valueOf(-1).subtract(val).toByteArray()));
-      }
-    } catch (Exception e) {
-      logger.error("Error writing CBOR BigNum.");
-      throw new RuntimeException(e);
+    if (0 <= val.compareTo(BigInteger.ZERO)) {
+      writeTag(Tag.POSITIVE_BIGNUM);
+      writeBytes(ByteBuffer.wrap(val.toByteArray()));
+    } else {
+      writeTag(Tag.NEGATIVE_BIGNUM);
+      writeBytes(ByteBuffer.wrap(BigInteger.valueOf(-1).subtract(val).toByteArray()));
     }
     return this;
   }
@@ -88,17 +78,12 @@ public class Encoder {
    * Encode a java Map as a CBOR map.
    */
   public <K, V> Encoder writeMap(Map<K, V> val) throws IOException {
-    try {
-      startMap(val.size());
-      for (Map.Entry<K, V> e : val.entrySet()) {
-        writeObject(e.getKey());
-        writeObject(e.getValue());
-      }
-      endMap();
-    } catch (Exception e) {
-      logger.error("Error writing CBOR map.");
-      throw new RuntimeException(e);
+    startMap(val.size());
+    for (Map.Entry<K, V> e : val.entrySet()) {
+      writeObject(e.getKey());
+      writeObject(e.getValue());
     }
+    endMap();
     return this;
   }
 

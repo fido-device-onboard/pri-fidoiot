@@ -288,46 +288,41 @@ public class To0ClientApp {
   private void run(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
 
-    try {
-      cryptoService = new CryptoService();
+    cryptoService = new CryptoService();
 
-      MessageDispatcher dispatcher = createDispatcher();
+    MessageDispatcher dispatcher = createDispatcher();
 
-      DispatchResult dr = clientService.getHelloMessage();
+    DispatchResult dr = clientService.getHelloMessage();
 
-      Composite ovh = clientStorage.getVoucher().getAsComposite(Const.OV_HEADER);
+    Composite ovh = clientStorage.getVoucher().getAsComposite(Const.OV_HEADER);
 
-      UUID guid = ovh.getAsUuid(Const.OVH_GUID);
-      logger.info("TO0 with guid " + guid.toString());
+    UUID guid = ovh.getAsUuid(Const.OVH_GUID);
+    logger.info("TO0 with guid " + guid.toString());
 
-      Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
+    Composite rvi = ovh.getAsComposite(Const.OVH_RENDEZVOUS_INFO);
 
 
       // Protocol to0_to1_server (rv) only support http so we
       // want to select the RV_DEV_ONLY filter here so the directive
       // returned is http.
-      List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
-              rvi,
-              Const.RV_DEV_ONLY);
+    List<String> paths = RendezvousInfoDecoder.getHttpDirectives(
+            rvi,
+            Const.RV_DEV_ONLY);
 
+    for (String path : paths) {
 
-      for (String path : paths) {
-
-        responseWait = null;
-        try {
-          WebClient client = new WebClient(path, dr, dispatcher);
-          client.call();
-          if (responseWait != null) {
-            break;
-          }
-        } catch (Exception e) {
-          logger.error("Unable to contact RV at " + path);
+      responseWait = null;
+      try {
+        WebClient client = new WebClient(path, dr, dispatcher);
+        client.call();
+        if (responseWait != null) {
+          break;
         }
+      } catch (Exception e) {
+        logger.error("TO0 failed. Exiting application.");
+        logger.debug(e.getMessage());
       }
-    } catch (Exception e) {
-      logger.error("TO0 failed. Exiting application.");
     }
-
   }
 
   /**

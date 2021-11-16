@@ -205,30 +205,26 @@ public class ManufacturerContextListener implements ServletContextListener {
     sc.setAttribute(Const.DISPATCHER_ATTRIBUTE, dispatcher);
     sc.setAttribute("resolver", keyResolver);
 
+    //create tables
+    DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
+    DiDbManager manager = new DiDbManager();
+    manager.createTables(ds);
     try {
-      //create tables
-      DiDbStorage db = new DiDbStorage(cs, ds, keyResolver, ods);
-      DiDbManager manager = new DiDbManager();
-      manager.createTables(ds);
-      try {
-        final String ownerKeysPem = Files.readString(Paths.get(
-                sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
-        manager.addCustomer(ds, 1, "owner", ownerKeysPem);
-        manager.setAutoEnroll(ds, 1);
-        logger.info("Registered public keys for customer 'owner'");
-      } catch (IOException e) {
-        logger.info("No default public keys found for customer 'owner'");
-      }
-      try {
-        final String resellerKeysPem = Files.readString(Paths.get(
-                sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
-        manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
-        logger.info("Registered public keys for customer 'reseller'");
-      } catch (IOException e) {
-        logger.info("No default public keys found for customer 'reseller'");
-      }
-    } catch (Exception e) {
-      logger.error("Error while adding customer key.");
+      final String ownerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(ManufacturerAppSettings.OWNER_PUB_KEY_PATH)));
+      manager.addCustomer(ds, 1, "owner", ownerKeysPem);
+      manager.setAutoEnroll(ds, 1);
+      logger.info("Registered public keys for customer 'owner'");
+    } catch (IOException e) {
+      logger.info("No default public keys found for customer 'owner'");
+    }
+    try {
+      final String resellerKeysPem = Files.readString(Paths.get(
+              sc.getInitParameter(ManufacturerAppSettings.RESELLER_PUB_KEY_PATH)));
+      manager.addCustomer(ds, 2, "reseller", resellerKeysPem);
+      logger.info("Registered public keys for customer 'reseller'");
+    } catch (IOException e) {
+      logger.info("No default public keys found for customer 'reseller'");
     }
 
     try {

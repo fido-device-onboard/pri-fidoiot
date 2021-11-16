@@ -23,7 +23,7 @@ public class OwnerCustomerServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    try {
+
       String id = req.getParameter("id");
       String name = req.getParameter("name");
       String contentType = req.getContentType();
@@ -43,8 +43,15 @@ public class OwnerCustomerServlet extends HttpServlet {
         }
       }
 
-      String keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
-      PemLoader.loadPublicKeys(keySet);
+    String keySet = "";
+      try {
+        keySet = new String(req.getInputStream().readAllBytes(), StandardCharsets.US_ASCII);
+        PemLoader.loadPublicKeys(keySet);
+      } catch (IOException e) {
+        logger.error("Invalid keyset found.");
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
 
       try {
         DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
@@ -56,12 +63,7 @@ public class OwnerCustomerServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return;
       }
-    } catch (Exception e) {
-      logger.error("Unable to add new customer.");
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      return;
     }
-  }
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp)

@@ -69,30 +69,26 @@ public class To2ClientApp {
   private void run(String[] args)
       throws NoSuchAlgorithmException, IOException, InterruptedException {
 
-    try {
-      cryptoService = new CryptoService();
+    cryptoService = new CryptoService();
 
-      MessageDispatcher dispatcher = getDispatcher();
+    MessageDispatcher dispatcher = getDispatcher();
 
-      DispatchResult dr = clientService.getHelloMessage();
+    DispatchResult dr = clientService.getHelloMessage();
 
-      clientService.setTo1d(to1dBlob);
+    clientService.setTo1d(to1dBlob);
 
-      List<String> paths = RendezvousBlobDecoder.getHttpDirectives(to1dBlob);
+    List<String> paths = RendezvousBlobDecoder.getHttpDirectives(to1dBlob);
 
-      for (String path : paths) {
-
-        try {
-          WebClient client = new WebClient(path, dr, dispatcher);
-          client.call();
-          // break here since no exception is thrown, so TO2 is successful.
-          break;
-        } catch (Exception e) {
-          logger.error("Unable to contact Owner at " + path);
-        }
+    for (String path : paths) {
+      try {
+        WebClient client = new WebClient(path, dr, dispatcher);
+        client.call();
+        // break here since no exception is thrown, so TO2 is successful.
+        break;
+      } catch (Exception e) {
+        logger.error("T02 failed. Exiting application.");
+        logger.debug(e.getMessage());
       }
-    } catch (Exception e) {
-      logger.error("T02 failed. Exiting application.");
     }
   }
 
