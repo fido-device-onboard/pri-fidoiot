@@ -4,6 +4,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,11 +12,16 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.sql.DataSource;
 
+import javax.transaction.Transaction;
 import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
@@ -31,6 +37,8 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
   private static final LoggerService logger =
       new LoggerService(To0AllowListDenyListDbStorage.class);
 
+  private final EntityManagerFactory entityManagerFactory;
+
   /**
    * Constructs a To0DbStorage instance.
    *
@@ -40,6 +48,12 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
   public To0AllowListDenyListDbStorage(CryptoService cryptoService,
                                        DataSource dataSource) {
     super(cryptoService, dataSource);
+
+    entityManagerFactory = new EntityManagerFactoryFactory("org.fidoalliance.fdo.storage")
+        .withEntity(RvRedirects.class)
+        .withProperty("hibernate.hbm2ddl.auto", "update")
+        .withProperty("hibernate.connection.datasource", dataSource)
+        .build();
   }
 
   /**
@@ -106,40 +120,30 @@ public class To0AllowListDenyListDbStorage extends To0DbStorage {
       deviceX509 = getCryptoService().encode(pubKey, Const.PK_ENC_X509);
     }
 
-    String sql = "" + "MERGE INTO RV_REDIRECTS  " + "KEY (GUID) " + "VALUES (?,?,?,?,?,?,?); ";
+    long now = Calendar.getInstance().getTimeInMillis();
+    long expiresAt = now + requestedWait * 1000;
+    RvRedirects entity = new RvRedirects(
+        guid.toString(),
+        signedBlob,
+        ownerX509String,
+        deviceX509.toBytes(),
+        Long.valueOf(requestedWait).intValue(),
+        new Timestamp(now),
+        new Timestamp(expiresAt));
 
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    try {
+      EntityTransaction transaction = entityManager.getTransaction();
 
-      pstmt.setString(1, guid.toString());
-      pstmt.setBytes(2, signedBlob);
-      pstmt.setString(3, ownerX509String);
-      pstmt.setBytes(4, deviceX509.toBytes());
-      pstmt.setInt(5, Long.valueOf(requestedWait).intValue());
-      Timestamp created = new Timestamp(Calendar.getInstance().getTimeInMillis());
-      pstmt.setTimestamp(6, created);
-      Timestamp expiresAt = new Timestamp(
-          Calendar.getInstance().getTimeInMillis() + requestedWait * 1000);
-      pstmt.setTimestamp(7, expiresAt);
+      transaction.begin();
+      entityManager.merge(entity);
+      transaction.commit();
 
-      pstmt.executeUpdate();
-
-      sql = "SELECT WAIT_SECONDS_RESPONSE FROM RV_REDIRECTS WHERE GUID = ?";
-      try (PreparedStatement pstmt2 = conn.prepareStatement(sql)) {
-
-        pstmt2.setString(1, guid.toString());
-        try (ResultSet rs = pstmt2.executeQuery()) {
-          while (rs.next()) {
-            return rs.getInt(1);
-          }
-        }
-      }
-
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    } finally {
+      entityManager.close();
     }
 
-    throw new ResourceNotFoundException(guid.toString());
+    return requestedWait;
   }
 
   /**
