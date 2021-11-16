@@ -104,6 +104,7 @@ public class OwnerSysModule implements Module {
           echo.set(Const.THIRD_KEY, status.get(Const.THIRD_KEY));
           state.set(Const.SEVENTH_KEY, true); //hasMessage
         }
+        state.set(NAME_INDEX, "");
         notifyStatus(guid,
             state.getAsString(NAME_INDEX),
             status.getAsBoolean(Const.FIRST_KEY),

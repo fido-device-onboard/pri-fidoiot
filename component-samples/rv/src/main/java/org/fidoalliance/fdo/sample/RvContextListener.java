@@ -62,8 +62,8 @@ public class RvContextListener implements ServletContextListener {
         EpidUtils.setEpidOnlineUrl(epidUrl);
       }
     } catch (IllegalArgumentException e) {
-        logger.info("EPID URL not set. Default URL will be used: "
-                + EpidUtils.getEpidOnlineUrl().toString());
+      logger.info("EPID URL not set. Default URL will be used: "
+              + EpidUtils.getEpidOnlineUrl().toString());
     }
 
     sc.setAttribute("datasource", ds);

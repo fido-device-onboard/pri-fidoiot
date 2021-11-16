@@ -256,14 +256,17 @@ public class AioContextListener implements ServletContextListener {
         public void run() {
           try {
             new AioDbManager().removeSessions(ds);
+            new DiDbManager().removeSessions(ds);
           } catch (Exception e) {
             logger.warn("Failed to setup AIO. Reason: " + e.getMessage());
           }
         }
       }, 5, Integer.parseInt(
               sc.getInitParameter(AioAppSettings.DB_SESSION_CHECK_INTERVAL)), TimeUnit.SECONDS);
+    } catch (NumberFormatException e) {
+      logger.error("Invalid value provided for aio_session_check_interval.");
     } catch (Exception e) {
-      logger.error("Unable to schedule session cleaner.");
+      logger.error("Unable to initiate scheduled AIO session cleaner.");
     }
   }
 
