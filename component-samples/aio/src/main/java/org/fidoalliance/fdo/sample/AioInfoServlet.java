@@ -79,6 +79,7 @@ public class AioInfoServlet extends HttpServlet {
       try {
         int pollTime = Integer.parseInt(list.get(3));
         if (pollTime < 0) {
+          logger.warn("Received negative poll time. Defaulting to 20 seconds.");
           pollTime = 20;
         }
         res.setContentType("application/json");
@@ -87,8 +88,12 @@ public class AioInfoServlet extends HttpServlet {
         out.print(db.getDevicesInfoWithTime(ds, pollTime));
       } catch (NumberFormatException e) {
         logger.error("Invalid poll time. Couldn't fetch device information.");
+        res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
       } catch (Exception e) {
         logger.error("Unable to retrieve Device Information.");
+        res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
       }
     } else {
       try {
@@ -98,6 +103,8 @@ public class AioInfoServlet extends HttpServlet {
         out.print(db.getDevicesInfo(ds));
       } catch (Exception e) {
         logger.error("Unable to retrieve Device Information.");
+        res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return;
       }
     }
     asyncCtx.complete();

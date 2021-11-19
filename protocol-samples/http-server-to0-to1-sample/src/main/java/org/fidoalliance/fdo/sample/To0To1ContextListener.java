@@ -21,6 +21,7 @@ import org.fidoalliance.fdo.protocol.To0ServerService;
 import org.fidoalliance.fdo.protocol.To0ServerStorage;
 import org.fidoalliance.fdo.protocol.To1ServerService;
 import org.fidoalliance.fdo.protocol.To1ServerStorage;
+import org.fidoalliance.fdo.protocol.epid.EpidUtils;
 import org.fidoalliance.fdo.protocol.ondie.OnDieCache;
 import org.fidoalliance.fdo.protocol.ondie.OnDieService;
 import org.fidoalliance.fdo.storage.RvsDbManager;
@@ -59,6 +60,10 @@ public class To0To1ContextListener implements ServletContextListener {
         logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
       } else {
         logger.info("*** EPID test mode disabled. ***");
+      }
+      String epidUrl = sc.getInitParameter("epid_online_url");
+      if (null != epidUrl) {
+        EpidUtils.setEpidOnlineUrl(epidUrl);
       }
     } catch (Exception ex) {
       // intentional fall-through

@@ -18,6 +18,6 @@
 default_diagnostic="[[[5, \"localhost\"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8041]]]"
 diagnostic=${1:-$default_diagnostic}
 parameterized_diagnostic=`echo $diagnostic | sed 's/ /%20/g' | sed 's/"/%22/g' | sed "s/'/%27/g"`
-result=`curl http://cbor.me/?diag=${parameterized_diagnostic} --globoff `
+result=`curl https://cbor.me/?diag=${parameterized_diagnostic} --globoff `
 echo -n "Byte Value : "
 echo $result | grep -o "bytes=.*>Bytes" | sed 's/bytes=//g' | sed 's/>Bytes//g' | sed 's/[^A-F0-9]//g'

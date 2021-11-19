@@ -57,10 +57,18 @@ public class To0To1ServerApp {
       try (InputStream is = new FileInputStream("application.properties")) {
         properties.load(is);
       }
-      ctx.addParameter("epid_test_mode", properties.getProperty("epid_test_mode"));
+      String epidTestMode = properties.getProperty("epid_test_mode");
+      if (epidTestMode != null) {
+        ctx.addParameter("epid_test_mode", properties.getProperty("epid_test_mode"));
+      }
+      String epidUrl = properties.getProperty("epid_online_url");
+      if (epidUrl != null) {
+        ctx.addParameter("epid_online_url", properties.getProperty("epid_online_url"));
+      }
     } catch (IOException ex) {
       // set default
       ctx.addParameter("epid_test_mode", "false");
+
     }
 
     // To enable remote connections to the DB set
