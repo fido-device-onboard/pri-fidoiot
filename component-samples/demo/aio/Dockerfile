@@ -4,8 +4,8 @@
 FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y openjdk-11-jdk libsofthsm2 softhsm softhsm-common opensc wget haveged
-
+RUN apt-get update && apt-get install -y openjdk-11-jdk wget haveged
+RUN apt-get install -y libsofthsm2 softhsm softhsm-common opensc
 RUN useradd -ms /bin/bash fdo
 
 RUN mkdir -p /home/fdo/lib
