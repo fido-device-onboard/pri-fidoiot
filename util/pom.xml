@@ -11,7 +11,7 @@
   <parent>
     <artifactId>fdo</artifactId>
     <groupId>org.fidoalliance</groupId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
 
   <name>shared sample utilities</name>
