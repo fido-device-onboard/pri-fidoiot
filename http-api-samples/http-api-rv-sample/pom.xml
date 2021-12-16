@@ -11,7 +11,7 @@
   <parent>
     <artifactId>http-api-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
 
   <name>HTTP RV API</name>
