@@ -341,8 +341,8 @@ public class OwnerDbManager {
         mtu = Const.DEFAULT_SERVICE_INFO_MTU_SIZE;
       } else if (mtu > Const.OWNER_THRESHOLD_MAX_MTU_SIZE) {
         logger.info("MTU size greater than maximum allowed. "
-            +  "Updating MTU size to maximum limit of "
-            +  Const.OWNER_THRESHOLD_MAX_MTU_SIZE);
+            + "Updating MTU size to maximum limit of "
+            + Const.OWNER_THRESHOLD_MAX_MTU_SIZE);
         mtu = Const.OWNER_THRESHOLD_MAX_MTU_SIZE;
       }
     }
@@ -552,7 +552,9 @@ public class OwnerDbManager {
         + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
         + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec_cb' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:active' "
+        + "OR CONTENT_TYPE_TAG = 'fdo_sys:fetch' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:ismore' "
         + "OR CONTENT_TYPE_TAG = 'fdo_sys:isdone') "
         + "ORDER BY PRIORITY ASC";
@@ -592,7 +594,8 @@ public class OwnerDbManager {
         + "CONTENT "
         + "FROM SYSTEM_MODULE_RESOURCE "
         + "WHERE (RESOURCE_ID = ? AND CONTENT IS NOT NULL) OR "
-        + "(RESOURCE_ID = (SELECT CONTENT_RESOURCE_TAG WHERE RESOURCE_ID = ?))";
+        + "(RESOURCE_ID = (SELECT SELECT CONTENT_RESOURCE_TAG FORM SYSTEM_MODULE_RESOURCE WHERE "
+        + "RESOURCE_ID = ?))";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
       pstmt.setString(1, resourceId);

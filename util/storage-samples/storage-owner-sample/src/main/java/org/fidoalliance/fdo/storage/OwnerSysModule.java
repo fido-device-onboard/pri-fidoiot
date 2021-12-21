@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.storage;
 
 import java.util.UUID;
 import javax.sql.DataSource;
+import org.fidoalliance.fdo.loggingutils.LoggerService;
 import org.fidoalliance.fdo.protocol.Composite;
 import org.fidoalliance.fdo.protocol.Const;
 import org.fidoalliance.fdo.protocol.InvalidMessageException;
@@ -21,7 +22,12 @@ public class OwnerSysModule implements Module {
   private final DataSource dataSource;
   private static final byte CBOR_TRUE = (byte) 0xF5;
   private static final byte CBOR_FALSE = (byte) 0xF4;
+  private final LoggerService logger = new LoggerService(OwnerSysModule.class);
   private int maxMtu = 0;
+  private static final int STATUS_INDEX = Const.SEVENTH_KEY + 1;
+  private static final int NAME_INDEX = STATUS_INDEX + 1;
+  private static final int WAIT_INDEX = NAME_INDEX + 1;
+
 
   /**
    * Constructs the OwnerSysModule.
@@ -47,6 +53,9 @@ public class OwnerSysModule implements Module {
     state.set(Const.FIFTH_KEY, false);//is more flag
     state.set(Const.SIXTH_KEY, false);//is done flag
     state.set(Const.SEVENTH_KEY, false); // has message to send
+    state.set(STATUS_INDEX, Composite.newArray());//status state
+    state.set(NAME_INDEX, "");//waiting filename
+    state.set(WAIT_INDEX, false);//waiting
   }
 
   @Override
@@ -67,6 +76,8 @@ public class OwnerSysModule implements Module {
 
   @Override
   public void setServiceInfo(Composite kvPair, boolean isMore) {
+
+    String guid = state.getAsString(Const.FIRST_KEY);
     String key = kvPair.getAsString(Const.FIRST_KEY);
     Object value = kvPair.get(Const.SECOND_KEY);
 
@@ -83,8 +94,42 @@ public class OwnerSysModule implements Module {
         }
 
         break;
-      case FdoSys.KEY_KEEP_ALIVE:
-      case FdoSys.KEY_RET_CODE:
+      case FdoSys.KEY_STATUS_CB: {
+        Composite status = kvPair.getAsComposite(Const.SECOND_KEY);
+        Composite echo = state.getAsComposite(STATUS_INDEX);
+
+        if (echo.size() > 0) {
+          echo.set(Const.FIRST_KEY, status.get(Const.FIRST_KEY));
+          echo.set(Const.SECOND_KEY, status.get(Const.SECOND_KEY));
+          echo.set(Const.THIRD_KEY, status.get(Const.THIRD_KEY));
+          state.set(Const.SEVENTH_KEY, true); //hasMessage
+        }
+        state.set(NAME_INDEX, "");
+        notifyStatus(guid,
+            state.getAsString(NAME_INDEX),
+            status.getAsBoolean(Const.FIRST_KEY),
+            status.getAsNumber(Const.SECOND_KEY).intValue(),
+            status.getAsNumber(Const.THIRD_KEY).intValue());
+      }
+      break;
+      case FdoSys.KEY_DATA: {
+        byte[] data = kvPair.getAsBytes(Const.SECOND_KEY);
+        String fileName = state.getAsString(NAME_INDEX);
+        notifyFetchData(guid, fileName, data);
+      }
+      break;
+      case FdoSys.KEY_EOT: {
+
+        state.set(NAME_INDEX, "");
+        state.set(WAIT_INDEX, false);
+
+        incrementIndex();
+        int status = kvPair.getAsComposite(Const.SECOND_KEY).getAsNumber(Const.FIRST_KEY)
+            .intValue();
+        String fileName = state.getAsString(NAME_INDEX);
+        notifyEot(guid, fileName, status);
+      }
+      break;
       default:
         break;
     }
@@ -92,13 +137,24 @@ public class OwnerSysModule implements Module {
 
   @Override
   public boolean isMore() {
-    return state.getAsBoolean(Const.FIFTH_KEY)
-        || state.getAsBoolean(Const.SEVENTH_KEY);
+    return state.getAsBoolean(Const.FIFTH_KEY);
   }
 
   @Override
   public boolean hasMore() {
 
+    //check if we are waiting for status callback
+    Composite status = state.getAsComposite(STATUS_INDEX);
+    if (status.size() > 0) {
+      return state.getAsBoolean(Const.SEVENTH_KEY); //hasMessage
+    }
+
+    //checking if waiting for fetch results
+    if (state.getAsBoolean(WAIT_INDEX)) {
+      return false;
+    }
+
+    //now check if we are process resources
     String guid = state.getAsString(Const.FIRST_KEY);
     int resIndex = state.getAsNumber(Const.SECOND_KEY).intValue();
 
@@ -132,6 +188,26 @@ public class OwnerSysModule implements Module {
 
   @Override
   public Composite nextMessage() {
+
+    //check if we are waiting for status callback
+    Composite status = state.getAsComposite(STATUS_INDEX);
+    if (status.size() > 0) {
+
+      if (status.getAsBoolean(Const.FIRST_KEY)) {
+        incrementIndex();
+
+        state.set(STATUS_INDEX, Composite.newArray());
+
+      }
+      state.set(Const.SEVENTH_KEY, false);
+      // send the waiting status message
+      return Composite.newArray()
+          .set(Const.FIRST_KEY, FdoSys.KEY_STATUS_CB)
+          .set(Const.SECOND_KEY, status);
+
+    }
+
+    // normal message processing
     int resIndex = state.getAsNumber(Const.SECOND_KEY).intValue();
     Composite resList = state.getAsComposite(Const.THIRD_KEY);
     if (resIndex < 0) {
@@ -163,9 +239,56 @@ public class OwnerSysModule implements Module {
     return false;
   }
 
-  private void incrementIndex() {
+  protected void incrementIndex() {
     int resIndex = state.getAsNumber(Const.SECOND_KEY).intValue();
     state.set(Const.SECOND_KEY, resIndex + 1);
+  }
+
+  protected void decrementIndex() {
+    int resIndex = state.getAsNumber(Const.SECOND_KEY).intValue();
+    if (resIndex > 0) {
+      state.set(Const.SECOND_KEY, resIndex - 1);
+    }
+  }
+
+  protected void notifyStatus(String guid, String name, boolean completed, int retCode,
+      int timeout) {
+    logger.info(
+        FdoSys.KEY_STATUS_CB
+            + " completed: " + completed
+            + " return code: "
+            + retCode
+            + " wait time: "
+            + timeout
+            + " guid: "
+            + guid
+            + " command: " + name);
+    //to replay use decrementIndex();
+
+  }
+
+  protected void notifyEot(String guid, String name, int status) {
+
+    logger.info(
+        FdoSys.KEY_EOT
+            + " status: " + status
+            + " guid: "
+            + guid
+            + " fetch: " + name);
+  }
+
+  protected void notifyFetchData(String guid, String name, byte[] data) {
+    logger.info(
+        FdoSys.KEY_DATA
+            + " data: bytes of length(" + data.length + ")"
+            + " guid: "
+            + guid
+            + " fetch: " + name);
+    logger.warn(Composite.toString(data));
+  }
+
+  protected void notifyFetchStart(String guid, String name) {
+    logger.warn("Do not fetch sensitive data unless overriding notifications");
   }
 
   private void checkMessage() {
@@ -190,8 +313,10 @@ public class OwnerSysModule implements Module {
           state.set(Const.SEVENTH_KEY, true); //has message to send
           break;
         case FdoSys.KEY_FILEDESC:
+        case FdoSys.KEY_FETCH:
         case FdoSys.KEY_WRITE:
         case FdoSys.KEY_EXEC:
+        case FdoSys.KEY_EXEC_CB:
           state.set(Const.FIFTH_KEY, false); //ismore
           state.set(Const.SIXTH_KEY, false);//isdone - device not active
           state.set(Const.SEVENTH_KEY, true); //has message to send
@@ -240,6 +365,7 @@ public class OwnerSysModule implements Module {
 
   private Composite getNextMessage(Composite resource) {
     Composite message = Composite.newArray();
+
     String resId = resource.getAsString(Const.FIRST_KEY);
     String contentType = resource.getAsString(Const.SECOND_KEY);
 
@@ -291,11 +417,51 @@ public class OwnerSysModule implements Module {
         incrementIndex();
       }
       break;
+      case FdoSys.KEY_EXEC_CB: {
+        byte[] cmd = new OwnerDbManager().getSystemResourceContent(dataSource, resId);
+        Composite composite = Composite
+            .fromObject(cmd);
+
+        message.set(Const.SECOND_KEY, composite);
+        state.set(Const.SEVENTH_KEY, false); // has message to send
+        state.set(STATUS_INDEX, createStatus(false, 0, 0));
+
+        String fileName =
+            new OwnerDbManager().getSystemResourcesFileName(dataSource, resId);
+        state.set(NAME_INDEX, fileName);
+
+        //don't increment until status_cb[true..]
+        //incrementIndex();
+      }
+      break;
+      case FdoSys.KEY_FETCH: {
+
+        String fileName =
+            new OwnerDbManager().getSystemResourcesFileName(dataSource, resId);
+        message.set(Const.SECOND_KEY, fileName);
+        state.set(NAME_INDEX, fileName);
+        state.set(WAIT_INDEX, true);
+
+        notifyFetchStart(state.getAsString(Const.FIRST_KEY), fileName);
+        //don't increment until eof or error
+        //incrementIndex();
+      }
+      break;
       default:
         throw new UnsupportedOperationException();
     }
 
     return message;
+  }
+
+  private Composite createStatus(boolean completed, int retCode, int timeout) {
+    Composite status = Composite.newArray()
+        .set(Const.FIRST_KEY, completed)
+        .set(Const.SECOND_KEY, retCode)
+        .set(Const.THIRD_KEY, timeout);
+    return Composite.newArray()
+        .set(Const.FIRST_KEY, FdoSys.KEY_STATUS_CB)
+        .set(Const.SECOND_KEY, status);
   }
 
 }
