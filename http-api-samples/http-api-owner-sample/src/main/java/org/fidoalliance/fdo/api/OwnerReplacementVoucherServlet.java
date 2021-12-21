@@ -74,7 +74,7 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
       DataSource ds = (DataSource) getServletContext().getAttribute("datasource");
 
       String id = req.getParameter("id");
-      if (id != null) {
+      if (id != null && !id.isEmpty()) {
 
         byte[] result = getVoucher(ds, UUID.fromString(id));
         if (result.length > 0) {
@@ -85,6 +85,9 @@ public class OwnerReplacementVoucherServlet extends HttpServlet {
           logger.warn("Request failed because replacement voucher is not found.");
           resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
+      } else {
+        logger.error("Invalid GUID value.");
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       }
     } catch (Exception exp) {
       logger.warn("Request failed because of internal server error.");

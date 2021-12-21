@@ -296,6 +296,9 @@ public class To2KeyExchangeTest extends BaseTemplate {
       }
 
       @Override
+      public UUID getGuid() { return storedGuid; }
+
+      @Override
       public Composite getSigInfoA() {
         return null;
       }

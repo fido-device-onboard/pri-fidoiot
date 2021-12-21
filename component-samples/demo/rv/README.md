@@ -36,7 +36,7 @@ RV runtime arguments:
 
   RV database password.
 
-  Default value: <no-password>
+  Default value: `<no-password>`
 
 - `rv_database_port`
 
@@ -83,17 +83,18 @@ RV runtime arguments:
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
 
-  ***NOTE***: This property is not required if service is running in `http` mode.
+  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
 
-  Default value: <fdo-pri-src>/component-samples/demo/rv/certs/ssl.p12
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `rv_ssl_keystore_password`
 
   Provides password for the specified keystore.
 
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default keystore password: fdo123
 
 ## Support for OnDie Devices
 
@@ -114,7 +115,7 @@ webAllowOthers = true
 
 # Starting the RV Service
 
-Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
+Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
 
 # Allowlist and Denylist Configuration
 

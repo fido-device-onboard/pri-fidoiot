@@ -59,17 +59,32 @@ public class To2ContextListener implements ServletContextListener {
       + "1ek15IbeCI5z7BHea2GZGgaK63cyD15gNA==\n"
       + "-----END EC PRIVATE KEY-----";
 
-  private static String ownerKeyPemEC384 = "-----BEGIN PUBLIC KEY-----\n"
-      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
-      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
-      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
-      + "-----END PUBLIC KEY-----\n"
+
+  private static String ownerKeyPemEC384 = "-----BEGIN CERTIFICATE-----\n"
+      + "MIICHDCCAaKgAwIBAgIUPW1WfX6InwNaW6L0DbFSf6OPRtgwCgYIKoZIzj0EAwIw\n"
+      + "RTELMAkGA1UEBhMCVVMxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGElu\n"
+      + "dGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMTEwMTQyMDE0MDBaFw0yNDA3MTAy\n"
+      + "MDE0MDBaMEUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYD\n"
+      + "VQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwdjAQBgcqhkjOPQIBBgUrgQQA\n"
+      + "IgNiAASLamoOtJCRo4kRpSCwLms7MZT9w/4LFCIQsQHi0JDgFEwSw+StE9WTZosR\n"
+      + "2eonKPKyjRLygx0MndlKU7UTymvSj5BDXurnMk3yB9iTGzgAKZP0UuVm5kx8hDjC\n"
+      + "8U6BJWCjUzBRMB0GA1UdDgQWBBSy4cwGeutuiL2THukkH24dW9fvVzAfBgNVHSME\n"
+      + "GDAWgBSy4cwGeutuiL2THukkH24dW9fvVzAPBgNVHRMBAf8EBTADAQH/MAoGCCqG\n"
+      + "SM49BAMCA2gAMGUCMAS25UtMjKBWSUoeFa84JEsTKVUiKBTFgDnfm9+g8PjGR9w9\n"
+      + "H7ELq/KSSArbbuJ4HAIxAI2AhnL8X+Y/q1iEhGqhDSKMF7tC82DFXtgaXOKhJdBg\n"
+      + "2YHtcc4Nr5kLVpHUbyNogw==\n"
+      + "-----END CERTIFICATE-----\n"
       + "-----BEGIN PRIVATE KEY-----\n"
       + "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDA1SeyFqosrLr1hCgzs\n"
       + "B0G3Hi5y1YhWKo/Rz3dVeRnKPwysEMIGIcdt2meTkr5dJs2hZANiAAQw0wcHe3Y+\n"
       + "jvrcLxC14rv9JMlF/oXVJ+TKLZNiYZZ2eVeAj7mzt86SsnN5sca+DrW9+lJnepys\n"
       + "ompToSRZC/L5+ocfrT1TTRaE3AtgqOIaq1WUGsGzRD288FlUE+I3cmI=\n"
-      + "-----END PRIVATE KEY-----\n";
+      + "-----END PRIVATE KEY-----\n"
+      + "-----BEGIN PUBLIC KEY-----\n"
+      + "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMNMHB3t2Po763C8QteK7/STJRf6F1Sfk\n"
+      + "yi2TYmGWdnlXgI+5s7fOkrJzebHGvg61vfpSZ3qcrKJqU6EkWQvy+fqHH609U00W\n"
+      + "hNwLYKjiGqtVlBrBs0Q9vPBZVBPiN3Ji\n"
+      + "-----END PUBLIC KEY-----\n";
 
   private static String ownerKeyPemRsa = "-----BEGIN CERTIFICATE-----\n"
       + "MIIDazCCAlOgAwIBAgIUIK/VIIEW6iqeu34vJ2pi0gGVGiEwDQYJKoZIhvcNAQEL\n"
@@ -196,9 +211,17 @@ public class To2ContextListener implements ServletContextListener {
     CryptoService cs = new CryptoService();
     // Setting epid test mode enables epid signatures from debug and test
     // devices to pass validation. In production, this should never be used.
-    cs.setEpidTestMode();
-    logger.warn("*** WARNING ***");
-    logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
+    try {
+      if (Boolean.valueOf(sc.getInitParameter("epid_test_mode"))) {
+        cs.setEpidTestMode();
+        logger.warn("*** WARNING ***");
+        logger.warn("EPID Test mode enabled. This should NOT be enabled in production deployment.");
+      } else {
+        logger.info("*** EPID test mode disabled. ***");
+      }
+    } catch (Exception ex) {
+      // intentional fall-through
+    }
 
     sc.setAttribute("datasource", ds);
     sc.setAttribute("cryptoservice", cs);

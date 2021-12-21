@@ -50,11 +50,17 @@ Manufacturer runtime arguments:
 
   Docker default: ./target/tomcat
 
+- `manufacturer_keystore`
+
+  Path to the Manufacturer keystore file containing the Manufacturer's keys.
+
+  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
 - `manufacturer_keystore_password`
 
   Keystore password for manufacturer_keystore.p12 and the internal softHSM's PKCS11 keystore.
 
-  Default value: MfgKs@3er
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
 - `manufacturer_api_user`
 
@@ -66,7 +72,7 @@ Manufacturer runtime arguments:
 
   Password for the database REST API calls.
 
-  Default value: MfgApiPass123
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
 - `manufacturer_protocol_scheme`
 
@@ -77,6 +83,7 @@ Manufacturer runtime arguments:
 - `manufacturer_https_port`
 
   Allows end user to select a port for accepting HTTPS requests.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
@@ -84,16 +91,24 @@ Manufacturer runtime arguments:
 - `manufacturer_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default value: <fdo-pri-src>/component-samples/demo/manufacturer/certs/ssl.p12
+  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `manufacturer_ssl_keystore-password`
 
   Provides password for the specified keystore.
+
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default keystore password: fdo123
+- `manufacturer_session_check_interval`
+
+   To set the scheduled DI session cleaner interval. DI session cleaner will be automatically invoked in the specified time interval.
+
+   Default value: 60
 
 ## Support for OnDie Devices
 
@@ -114,7 +129,7 @@ webAllowOthers = true
 
 # Starting the Manufacturer Service
 
-Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
+Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
@@ -130,7 +145,7 @@ Refer the [Docker Commands](../README.md/#docker-commands) to start the service.
 
 # Inserting Keys into Manufacturer Keystore
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. Refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert/replace a PrivateKeyEntry of any particular algorithm in \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default manufacturer_keystore.p12 is generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
@@ -157,8 +172,8 @@ By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. 
     Avoid using the default keystore available for production deployment.
 
 # Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configurations of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]` which points to localhost over the port 8443 for Owner during TO0 and localhost over the port 8040 for device during TO1
-and the equivalent bytes representation is `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
+Commonly referred as RvInfo, is one of the most important configurations of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8041]]]` which points to localhost over the port 8041 for Owner during TO0 and localhost over the port 8040 for device during TO1
+and the equivalent bytes representation is `81858205696C6F63616C686F73748203191F68820C018202447F0000018204191F69`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
 
 ## Generating CBOR RVInfo
 

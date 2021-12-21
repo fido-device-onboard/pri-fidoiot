@@ -72,13 +72,19 @@ public class DiApiServlet extends HttpServlet {
     Composite result = queryVoucher(ds, serialNo);
     if (result.size() == 0) {
       logger.warn("Request failed because of device with given serial was not found.");
-      resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return;
     }
 
     Composite voucher = result.getAsComposite(Const.FIRST_KEY);
-    List<PublicKey> certs =
-        PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
+    List<PublicKey> certs;
+    try {
+      certs = PemLoader.loadPublicKeys(result.getAsString(Const.SECOND_KEY));
+    } catch (Exception e) {
+      logger.error("Invalid customer key in DB.");
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      return;
+    }
 
     Composite ovh = voucher.getAsComposite(Const.OV_HEADER);
     Composite mfgPub = ovh.getAsComposite(Const.OVH_PUB_KEY);

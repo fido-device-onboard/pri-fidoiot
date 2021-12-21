@@ -35,7 +35,7 @@ Owner runtime arguments:
 
   Owner database password.
 
-  Default value: <no-password>
+  Default value: `<no-password>`
 
 - `owner_database_port`
 
@@ -68,13 +68,13 @@ Owner runtime arguments:
 
   Path to the Owner keystore file containing the owner's keys.
 
-  Default value: ./owner_keystore.p12
+  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
 
 - `owner_keystore_password`
 
   Keystore password for owner_keystore.p12 and the internal softHSM's PKCS11 keystore.
 
-  Default value: OnrKstr1
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
 - `owner_to0_scheduling_enabled`
 
@@ -104,7 +104,8 @@ Owner runtime arguments:
 
   Password for the database REST API calls.
 
-  Default value: OwnerApiPass123
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
+
 
 - `owner_protocol_scheme`
 
@@ -115,6 +116,7 @@ Owner runtime arguments:
 - `owner_https_port`
 
    Allows enduser to select a port for accepting HTTPS requests.
+
   ***NOTE***: This property is not required if service is running in `http` mode.
 
   Default value: 443
@@ -128,30 +130,34 @@ Owner runtime arguments:
 - `owner_ssl_keystore`
 
   Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default value: <fdo-pri-src>/component-samples/demo/owner/certs/ssl.p12
+  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `owner_ssl_keystore_password`
 
   Provides password for the specified keystore.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default keystore password: fdo123
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `ssl_truststore`
 
   Provides path for SSL truststore to be used by the service.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default value: <fdo-pri-src>/component-samples/demo/owner/certs/truststore
+  The truststore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `ssl_truststore_password`
 
   Provides password for the specified truststore.
-  ***NOTE***: This property is not required if service is running in `http` mode.
 
-  Default keystore password: fdo123
+  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
+
+  ***NOTE***: This property is not required if service is running in `http` mode.
 
 - `ssl_truststore_type`
 
@@ -178,7 +184,7 @@ webAllowOthers = true
 
 # Starting the Owner Service
 
-Refer to the section [Docker Commands](../README.md/#docker-commands) to start the service.
+Refer to the section [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands)  to start the service.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
@@ -204,7 +210,7 @@ Refer to the section [Docker Commands](../README.md/#docker-commands) to start t
 
 # Inserting Keys into Owner Keystore
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. To insert/replace an existing PrivateKeyEntry of any particular algorithm, refer to section [Inserting Keys into Keystore](../README.md/#inserting-keys-into-keystore) to insert new certificate/private-key pair into \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12.
+The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default owner_keystore.p12 is generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
 
 **IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
 
