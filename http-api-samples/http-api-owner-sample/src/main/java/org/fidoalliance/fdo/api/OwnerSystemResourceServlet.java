@@ -319,18 +319,18 @@ public class OwnerSystemResourceServlet extends HttpServlet {
       return;
     }
 
-    String byteString = req.getParameter(BYTES_TAG);
-    String rid = req.getParameter(CRID_TAG);
-    String guid = req.getParameter(GUID_TAG);
-    String device = req.getParameter(DEVICE_TAG);
-    String os = req.getParameter(OS_TAG);
-    String version = req.getParameter(VERSION_TAG);
-    String arch = req.getParameter(ARCH_TAG);
-    String fileName = req.getParameter(FILENAME_TAG);
-    String priority = req.getParameter(PRIORITY_TAG);
-    String hash = req.getParameter(HASH_TAG);
-    String module = req.getParameter(MODULE_TAG);
-    String varName = req.getParameter(VAR_TAG);
+    String byteString = req.getParameter(BYTES_TAG) == "" ? null : req.getParameter(BYTES_TAG);
+    String rid = req.getParameter(CRID_TAG) == "" ? null : req.getParameter(CRID_TAG);
+    String guid = req.getParameter(GUID_TAG) == "" ? null : req.getParameter(GUID_TAG);
+    String device = req.getParameter(DEVICE_TAG) == "" ? null : req.getParameter(DEVICE_TAG);
+    String os = req.getParameter(OS_TAG) == "" ? null : req.getParameter(OS_TAG);
+    String version = req.getParameter(VERSION_TAG) == "" ? null : req.getParameter(VERSION_TAG);
+    String arch = req.getParameter(ARCH_TAG) == "" ? null : req.getParameter(ARCH_TAG);
+    String fileName = req.getParameter(FILENAME_TAG) == "" ? null : req.getParameter(FILENAME_TAG);
+    String priority = req.getParameter(PRIORITY_TAG) == "" ? null : req.getParameter(PRIORITY_TAG);
+    String hash = req.getParameter(HASH_TAG) == "" ? null : req.getParameter(HASH_TAG);
+    String module = req.getParameter(MODULE_TAG) == "" ? null : req.getParameter(MODULE_TAG);
+    String varName = req.getParameter(VAR_TAG) == "" ? null : req.getParameter(VAR_TAG);
     String contentType = null;
 
     if (module != null && varName != null) {
