@@ -1,0 +1,27 @@
+
+http-server:
+  http_port: 8080
+  https_port: "8443"
+  http_schemes:
+  - http
+  #- https
+  http_timeout: "20000"
+  https_keystore:
+    path: "./creds/ssl.p12"
+    password: "changeit"
+  context_parameters:
+    password: $(SESSIONNAME)
+    user: "sa"
+
+server_storage:
+  providers:
+    - 
+
+system_properties:
+  log4j.configurationFile: 
+
+to0-client:
+
+device-initialization:
+  url: http://localhost:8080
+  

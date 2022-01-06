@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+     version="2.5">
+
+
+   <context-param>
+       <param-name>db.tcpServer</param-name>
+       <param-value>-tcp -ifNotExists -tcpPort 9123</param-value>
+       <description>the database server startup paramaters. use -tcpAllowOthers in dev env only</description>
+   </context-param>
+<!--
+   <listener>
+      <listener-class>org.h2.server.web.DbStarter</listener-class>
+   </listener>
+
+  <servlet>
+      <servlet-name>H2Console</servlet-name>
+      <servlet-class>org.h2.server.web.WebServlet</servlet-class>
+      <init-param>
+         <param-name>webAllowOthers</param-name> 
+         <param-value>false</param-value> 
+      </init-param>
+      <load-on-startup>1</load-on-startup>
+   </servlet>
+
+   <servlet-mapping> 
+      <servlet-name>H2Console</servlet-name>
+      <url-pattern>/console/*</url-pattern>
+   </servlet-mapping>
+-->
+
+ <servlet>
+      <servlet-name>fdoServlet</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.ProtocolServlet</servlet-class>
+   </servlet>
+
+   <servlet-mapping> 
+      <servlet-name>fdoServlet</servlet-name>
+      <url-pattern>/fdo/101/msg/10</url-pattern>
+      <url-pattern>/fdo/101/msg/12</url-pattern>
+      <url-pattern>/fdo/101/msg/20</url-pattern>
+      <url-pattern>/fdo/101/msg/22</url-pattern>
+      <url-pattern>/fdo/101/msg/30</url-pattern>
+      <url-pattern>/fdo/101/msg/32</url-pattern>
+      <url-pattern>/fdo/101/msg/60</url-pattern>
+      <url-pattern>/fdo/101/msg/62</url-pattern>
+      <url-pattern>/fdo/101/msg/64</url-pattern>
+      <url-pattern>/fdo/101/msg/66</url-pattern>
+      <url-pattern>/fdo/101/msg/68</url-pattern>
+      <url-pattern>/fdo/101/msg/70</url-pattern>
+      <url-pattern>/fdo/101/msg/255</url-pattern>
+   </servlet-mapping>
+
+   
+</web-app>

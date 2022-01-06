@@ -1,0 +1,98 @@
+# This is the service config for a sample device
+
+
+device:
+
+  di-url: http://localhost:8080
+
+  credential-file: credentials.bin
+ 
+  keystore: 
+     path: device.p12
+     store-type: PKCS12
+     password: ''
+
+  # +---------------------------------------------------------------+
+  # |key-type - normative profile                                   |
+  # +---------------------------------------------------------------+
+  # | Name         | Value | Description                            |
+  # +---------------------------------------------------------------+
+  # | SECP256R1    | 10    | ECDSA secp256r1 NIST-P-256 prime256v1  |
+  # | SECP384R1    | 11    | ECDSA secp384r1  NIST-P-384            |
+  # +--------------+-------+----------------------------------------+
+  
+  key-type: SECP256R1
+
+  
+  # +---------------------------------------------------------------+
+  # |key-enc values                                                 |
+  # +---------------------------------------------------------------+
+  # | Name         | Value | Description                            |
+  # +---------------------------------------------------------------+
+  # | X509         | 5     | RSA key, PKCS1, v1.5                   |
+  # | X5CHAIN      | 10    | ECDSA secp256r1 NIST-P-256 prime256v1  |
+  # | COSEKEY      | 11    | ECDSA secp384r1 NIST-P-384             |
+  # +--------------+-------+----------------------------------------+
+  
+  key-enc: X509
+
+
+  # +------------------------------------------------------------+
+  # |cipher-suites values supported from rfc 8152                |
+  # +---------+-------+------------------------------------------+
+  # | Name    | Value | Description                              |
+  # +---------+-------+------------------------------------------+
+  # | A128GCM | 1     | AES-GCM mode w/ 128-bit key, 128-bit tag |
+  # | A256GCM | 3     | AES-GCM mode w/ 256-bit key, 128-bit tag |
+  # +---------+-------+------------------------------------------+
+  # +--------------------+-------+----+-----+-----+---------------------+
+  # | Name               | Value | L  | M   | k   | Description         |
+  # +--------------------+-------+----+-----+-----+---------------------+
+  # | AES-CCM-16-128-128 | 30    | 16 | 128 | 128 | AES-CCM mode        |
+  # |                    |       |    |     |     | 128-bit key,        |
+  # |                    |       |    |     |     | 128-bit tag,        |
+  # |                    |       |    |     |     | 13-byte nonce       |
+  # | AES-CCM-16-128-256 | 31    | 16 | 128 | 256 | AES-CCM mode        |
+  # |                    |       |    |     |     | 256-bit key,        |
+  # |                    |       |    |     |     | 128-bit tag,        |
+  # |                    |       |    |     |     | 13-byte nonce       |
+  # +--------------------+-------+----+-----+-----+---------------------+
+
+  cipher-suite: A256GCM
+  
+  # +-------------+--------------------------------------------------+
+  # | VALUE       | Description                                      |
+  # +-------------+--------------------------------------------------+
+  # | DHKEXid14   |                                                  |
+  # | DHKEXid15   |                                                  |
+  # | ASYMKEX2048 |                                                  |
+  # | ASYMKEX3072 |                                                  |
+  # | ECDH256     |  String 1.1 suppored                             |
+  # | ECDH384     |  String 1.1 suppored                             |
+  # +-------------+--------------------------------------------------+
+
+  key-exchange-suite: ECDH256  
+
+  max-message-size: 1300
+  service-info-mtu: 1300
+  credential-reuse: false
+
+
+
+# The worker items the device will use when handling requests
+workers:
+  - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
+  - org.fidoalliance.fdo.protocol.StandardCryptoService
+  - org.fidoalliance.fdo.sample.MemoryResidentSessionManager
+  - org.fidoalliance.fdo.sample.FileCredentialConsumer
+  - org.fidoalliance.fdo.sample.FileCredentialSupplier 
+  - org.fidoalliance.fdo.sample.FileKeyStoreInputStream
+  - org.fidoalliance.fdo.sample.FileKeyStoreOutputStream 
+  - org.fidoalliance.fdo.sample.DeviceValidityDays
+  - org.fidoalliance.fdo.sample.StandardDeviceKeySupplier 
+  - org.fidoalliance.fdo.sample.StandardHmacFunction
+
+system-properties:
+  log4j.configurationFile: log4j2.xml
+
