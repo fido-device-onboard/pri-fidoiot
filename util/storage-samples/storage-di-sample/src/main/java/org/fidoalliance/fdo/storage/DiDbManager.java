@@ -200,7 +200,7 @@ public class DiDbManager {
   public void removeSessions(DataSource ds) {
     try (Connection conn = ds.getConnection();
          Statement stmt = conn.createStatement()) {
-      String sql = "DELETE FROM DI_SESSIONS WHERE  CREATED < NOW() - INTERVAL 60 SECOND";
+      String sql = "DELETE FROM DI_SESSIONS WHERE  CREATED < NOW() - INTERVAL '60' SECOND";
       stmt.executeUpdate(sql);
 
     } catch (SQLException e) {
