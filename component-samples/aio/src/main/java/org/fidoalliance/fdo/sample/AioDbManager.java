@@ -195,7 +195,7 @@ public class AioDbManager {
   public void removeSessions(DataSource ds) {
     try (Connection conn = ds.getConnection();
         Statement stmt = conn.createStatement()) {
-      String sql = "DELETE FROM TO0_SESSIONS WHERE  CREATED < NOW() - INTERVAL 60 SECOND";
+      String sql = "DELETE FROM TO0_SESSIONS WHERE  CREATED < NOW() - INTERVAL '60' SECOND";
       stmt.executeUpdate(sql);
 
       sql = "DELETE FROM TO2_SESSIONS WHERE  CREATED < NOW() - INTERVAL '60' SECOND";

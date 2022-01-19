@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -542,6 +543,14 @@ public class OwnerDbManager {
     String osName = devInfo.getAsString(DevMod.KEY_OS);
     String osVersion = devInfo.getAsString(DevMod.KEY_VERSION);
     String archType = devInfo.getAsString(DevMod.KEY_ARCH);
+    ArrayList<String> allowedContentTypeTag = new ArrayList<String>();
+    allowedContentTypeTag.add("fdo_sys:filedesc");
+    allowedContentTypeTag.add("fdo_sys:active");
+    allowedContentTypeTag.add("fdo_sys:exec");
+    allowedContentTypeTag.add("fdo_sys:exec_cb");
+    allowedContentTypeTag.add("fdo_sys:fetch");
+    allowedContentTypeTag.add("fdo_sys:ismore");
+    allowedContentTypeTag.add("fdo_sys:isdone");
 
     String sql = "SELECT RESOURCE_ID, CONTENT_TYPE_TAG, UPDATED "
         + "FROM SYSTEM_MODULE_RESOURCE "
@@ -549,12 +558,7 @@ public class OwnerDbManager {
         + "(DEVICE_TYPE_TAG = ? OR DEVICE_TYPE_TAG IS NULL ) AND "
         + "(OS_NAME_TAG  = ? OR OS_NAME_TAG IS NULL ) AND "
         + "(OS_VERSION_TAG = ? OR OS_VERSION_TAG IS NULL ) AND "
-        + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) AND "
-        + "(CONTENT_TYPE_TAG = 'fdo_sys:filedesc' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:exec' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:active' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:ismore' "
-        + "OR CONTENT_TYPE_TAG = 'fdo_sys:isdone') "
+        + "(ARCHITECTURE_TAG = ? OR ARCHITECTURE_TAG IS NULL ) "
         + "ORDER BY PRIORITY ASC";
     try (Connection conn = ds.getConnection();
         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -565,11 +569,14 @@ public class OwnerDbManager {
       pstmt.setString(5, archType);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          Composite resItem = Composite.newArray();
-          resItem.set(Const.FIRST_KEY, rs.getString(1));
-          resItem.set(Const.SECOND_KEY, rs.getString(2));
-          resItem.set(Const.THIRD_KEY, rs.getString(3));
-          resList.set(resList.size(), resItem);
+          String contentType = rs.getString(2).trim();
+          if (allowedContentTypeTag.contains(contentType)) {
+            Composite resItem = Composite.newArray();
+            resItem.set(Const.FIRST_KEY, rs.getString(1));
+            resItem.set(Const.SECOND_KEY, contentType);
+            resItem.set(Const.THIRD_KEY, rs.getString(3));
+            resList.set(resList.size(), resItem);
+          }
         }
       }
     } catch (SQLException e) {
