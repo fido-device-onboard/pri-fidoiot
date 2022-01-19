@@ -547,8 +547,6 @@ public class OwnerDbManager {
     allowedContentTypeTag.add("fdo_sys:filedesc");
     allowedContentTypeTag.add("fdo_sys:active");
     allowedContentTypeTag.add("fdo_sys:exec");
-    allowedContentTypeTag.add("fdo_sys:exec_cb");
-    allowedContentTypeTag.add("fdo_sys:fetch");
     allowedContentTypeTag.add("fdo_sys:ismore");
     allowedContentTypeTag.add("fdo_sys:isdone");
 
