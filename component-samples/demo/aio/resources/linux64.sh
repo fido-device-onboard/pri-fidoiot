@@ -3,8 +3,8 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-filename=payload.bin
-cksum_tx=1088928820
+filename=payload.txt
+cksum_tx=1982833504
 cksum_rx=$(cksum $filename | cut -d ' ' -f 1)
 if [ $cksum_tx -eq $cksum_rx  ]; then
   echo "Device onboarded successfully."
