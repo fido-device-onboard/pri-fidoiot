@@ -331,7 +331,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(hmac.getHashType());
     credential.setPubKeyHash(cs.hash(hashType, publicKey.getEncoded()));
 
-    SessionManager manager = getWorker(SessionManager.class);
     SimpleStorage storage = request.getExtra();
     storage.put(DeviceCredential.class, credential);
 
@@ -355,7 +354,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
   protected void doDiDone(DispatchMessage request, DispatchMessage response) throws IOException {
 
-    SessionManager manager = getWorker(SessionManager.class);
     SimpleStorage storage = request.getExtra();
     DeviceCredential credential = storage.get(DeviceCredential.class);
     DeviceCredentialConsumer consumer = getWorker(DeviceCredentialConsumer.class);

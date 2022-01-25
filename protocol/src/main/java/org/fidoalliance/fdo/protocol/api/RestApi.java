@@ -112,12 +112,12 @@ public class RestApi implements AutoCloseable {
 
   protected String getLastSegment() throws NotFoundException {
     if (uriSegments.size() > 0) {
-      return uriSegments.get(uriSegments.size()-1);
+      return uriSegments.get(0);
     }
     throw new NotFoundException(getRequest().getRequestURI());
   }
 
-  protected void doDelete() {
+  protected void doDelete() throws Exception  {
   }
 
   protected void doPut() throws Exception {

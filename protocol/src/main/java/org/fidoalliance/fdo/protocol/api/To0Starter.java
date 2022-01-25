@@ -18,11 +18,12 @@ public class To0Starter extends RestApi {
   @Override
   public void doGet() throws Exception {
 
+    String guid = getLastSegment();
     Thread thread = new Thread(){
       public void run(){
         try {
           OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(
-              "e2307b0e-e505-4090-9924-2ec8ff2fe79f");
+              guid);
           StandardTo0Client to0Client = new StandardTo0Client();
           To0OwnerSign ownerSign = new To0OwnerSign();
           To0d to0d = new To0d();
@@ -38,6 +39,7 @@ public class To0Starter extends RestApi {
           to0Client.setTo0d(to0d);
           to0Client.run();
         } catch (IOException e ) {
+
 
         }
 

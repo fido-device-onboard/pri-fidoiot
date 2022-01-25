@@ -180,7 +180,9 @@ public class DeviceApp extends HttpClient {
     AnyType mfgInfoItem = AnyType.fromObject(mfgInfo);
     mfgInfoItem.wrap();
     appStart.setManufacturingInfo(mfgInfoItem);
+
     setRequest(new DispatchMessage());
+    getRequest().setExtra(new SimpleStorage());
     getRequest().setMsgType(MsgType.DI_APP_START);
     getRequest().setMessage(AnyType.fromObject(appStart));
 

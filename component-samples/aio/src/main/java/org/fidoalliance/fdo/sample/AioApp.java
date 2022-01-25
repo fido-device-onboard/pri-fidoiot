@@ -25,7 +25,7 @@ public class AioApp {
 
   public static void main(String args[]) {
     HibernateUtil.getSessionFactory();
-    
+
     Config.getWorker(HttpServer.class).run();
   }
 }
