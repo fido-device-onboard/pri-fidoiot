@@ -13,7 +13,7 @@
   <parent>
     <artifactId>util</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
 
   <name>ServiceInfo</name>
