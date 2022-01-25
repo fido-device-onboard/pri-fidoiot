@@ -39,7 +39,7 @@
     <dependency>
       <groupId>com.augustcellars.cose</groupId>
       <artifactId>cose-java</artifactId>
-      <version>1.1.0</version>
+      <version>${cose-java.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
-      <version>1.7.32</version>
+      <version>${slf4j.version}</version>
     </dependency>
 
     <dependency>
@@ -72,21 +72,21 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.15</version>
+      <version>${commons-codec.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
+      <version>${commons-lang3.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.9</version>
+      <version>${commons-text.version}</version>
     </dependency>
 
 
@@ -94,7 +94,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
     </dependency>
 
 
@@ -102,14 +102,14 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
     </dependency>
 
 
@@ -117,7 +117,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformats-binary</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
       <type>pom</type>
     </dependency>
 
@@ -126,20 +126,20 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-cbor</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>2.13.0</version>
+      <version>${jackson-dataformat.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.29</version>
+      <version>${snakeyaml.version}</version>
     </dependency>
 
 
@@ -147,7 +147,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
+      <version>${apache-httpcomponents.version}</version>
     </dependency>
 
 
@@ -163,12 +163,13 @@
       <version>${bcpkix.version}</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>5.6.1.Final</version>
-      <scope>provided</scope>
+      <version>${hibernate.version}</version>
     </dependency>
+
 
 
     <dependency>
@@ -182,7 +183,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>10.1.0-M7</version>
+      <version>${tomcat.version}</version>
       <scope>provided</scope>
     </dependency>
 

@@ -11,25 +11,21 @@ public class StandardValidityDaysSupplier implements ValidityDaysSupplier {
   @Override
   public Integer get() throws IOException {
 
-    Session session = HibernateUtil.getSessionFactory().openSession();
-    Transaction trans = null;
+    final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
-      trans = session.beginTransaction();
+      final Transaction trans = session.beginTransaction();
 
       CertificateValidity validityDays = session.get(CertificateValidity.class, Long.valueOf(1));
       if (validityDays == null) {
         validityDays = new CertificateValidity();
-        validityDays.setId(Long.valueOf(1));
         validityDays.setDays(360*30);
 
         session.persist(validityDays);
       }
+      trans.commit();
       return validityDays.getDays();
 
     } finally {
-      if(trans != null) {
-        trans.commit();
-      }
       session.close();
     }
   }

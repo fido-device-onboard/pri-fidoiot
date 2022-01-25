@@ -1,6 +1,8 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.entity;
 
-import java.sql.Blob;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,24 +16,23 @@ import javax.persistence.TemporalType;
 @Table(name = "protocol_session")
 public class ProtocolSession {
 
-  private String id;
+  @Id
+  @Column(name = "name")
+  private String name;
 
   @Lob
-  private Blob data;
+  @Column(name = "data")
+  private byte[] data;
 
   @Column(name = "created_on")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdOn;
 
-  @Id
-  @Column(name = "id")
-  public String getId() {
-    return id;
+  public String getName() {
+    return name;
   }
 
-  @Lob
-  @Column(name = "data")
-  public Blob getData() {
+  public byte[] getData() {
     return data;
   }
 
@@ -39,11 +40,11 @@ public class ProtocolSession {
     return createdOn;
   }
 
-  public void setId(String name) {
-    this.id = name;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public void setData(Blob data) {
+  public void setData(byte[] data) {
     this.data = data;
   }
 

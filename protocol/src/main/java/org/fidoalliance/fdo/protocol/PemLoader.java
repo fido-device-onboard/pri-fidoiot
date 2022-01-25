@@ -80,6 +80,7 @@ public class PemLoader {
    * Loads a private key from a PEM formatted String.
    *
    * @param pemString A String containing PEM information.
+   * @param password A Pem password or null.
    * @return The PrivateKey found in the PEM String.
    */
   public static PrivateKey loadPrivateKey(String pemString, String password) {

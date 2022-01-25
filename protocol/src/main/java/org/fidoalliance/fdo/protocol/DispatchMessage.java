@@ -10,6 +10,7 @@ import org.fidoalliance.fdo.protocol.message.ErrorMessage;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ProtocolInfo;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
+import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.StreamMessage;
 
 
@@ -19,6 +20,7 @@ public class DispatchMessage {
   private ProtocolVersion protocolVersion;
   private MsgType msgType;
   private String authToken;
+  private SimpleStorage extra;
 
   public Optional<String> getAuthToken() {
     return Optional.ofNullable(authToken);
@@ -45,6 +47,10 @@ public class DispatchMessage {
     }
   }
 
+  public SimpleStorage getExtra() {
+    return extra;
+  }
+
   public void setMessage(byte[] message) {
     this.message = message;
   }
@@ -63,6 +69,10 @@ public class DispatchMessage {
 
   public void setAuthToken(String authToken) {
     this.authToken = authToken;
+  }
+
+  public void setExtra(SimpleStorage extra) {
+    this.extra = extra;
   }
 
   public StreamMessage toStreamMessage() throws IOException {

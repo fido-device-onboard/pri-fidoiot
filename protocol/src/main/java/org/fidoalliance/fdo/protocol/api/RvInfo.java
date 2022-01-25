@@ -1,24 +1,23 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
-import java.sql.Blob;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.RvData;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
-import org.hibernate.Transaction;
 
 public class RvInfo extends RestApi {
 
   @Override
   public void doPost() throws Exception {
 
+
     String body = getStringBody();
+    getTransaction();
 
     RendezvousInfo info =
-          Mapper.INSTANCE.readValue(body, RendezvousInfo.class);
-
-    byte[] data = Mapper.INSTANCE.writeValue(info);
-    getTransaction();
-    Blob blob = getSession().getLobHelper().createBlob(data);
+        Mapper.INSTANCE.readValue(body, RendezvousInfo.class);
 
 
     RvData rviData =
@@ -26,12 +25,11 @@ public class RvInfo extends RestApi {
 
     if (rviData == null) {
       rviData = new RvData();
-      rviData.setId(Long.valueOf(1));
-
-      rviData.setData(blob);
-      getSession().persist(rviData);
+      rviData.setData(Mapper.INSTANCE.writeValue(info));
+      getSession().save(rviData);
 
     } else {
+      rviData.setData(Mapper.INSTANCE.writeValue(info));
       getSession().update(rviData);
     }
   }

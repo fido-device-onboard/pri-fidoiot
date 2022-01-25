@@ -15,11 +15,9 @@
     </RollingFile>
   </Appenders>
   <Loggers>
-    <Logger name="org.apache.log4j.xml" level="debug">
-    </Logger>
+    <Logger name="org.hibernate.SQL" level="info"/>
     <Root level="info">
       <AppenderRef ref="STDOUT"/>
-      <AppenderRef ref="RollingFile"/>
     </Root>
   </Loggers>
 </Configuration>

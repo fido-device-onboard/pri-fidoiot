@@ -16,4 +16,13 @@ public class InternalServerErrorException extends IOException {
   public InternalServerErrorException(Exception cause) {
     super(cause);
   }
+
+  /**
+   * Constructs an InternalServerErrorException.
+   *
+   * @param cause The cause of the exception.
+   */
+  public InternalServerErrorException(String cause) {
+    super(cause);
+  }
 }

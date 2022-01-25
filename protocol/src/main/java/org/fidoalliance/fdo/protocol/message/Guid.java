@@ -35,10 +35,6 @@ public class Guid {
     }
   }
 
-  public static Guid fromRandomUUID() {
-    return fromUUID(UUID.randomUUID());
-  }
-
   public UUID toUuid() {
     return uuid;
   }
@@ -49,6 +45,11 @@ public class Guid {
     buffer.putLong(uuid.getMostSignificantBits());
     buffer.putLong(uuid.getLeastSignificantBits());
     return data;
+  }
+
+
+  public static Guid fromRandomUUID() {
+    return fromUUID(UUID.randomUUID());
   }
 
   @Override

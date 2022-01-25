@@ -73,7 +73,7 @@ public enum Mapper {
     } else if (node.isTextual()) {
       output.append("\"");
 
-      StringEscapeUtils.escapeJson(node.asText());
+      output.append(StringEscapeUtils.escapeJson(node.asText()));
       output.append("\"");
     } else if (node.isNumber()) {
       output.append(Long.toString(node.asLong()));

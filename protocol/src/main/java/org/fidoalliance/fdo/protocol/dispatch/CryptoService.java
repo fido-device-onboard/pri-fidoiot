@@ -1,38 +1,32 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.dispatch;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
+import java.security.Key;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
 import javax.crypto.SecretKey;
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.fidoalliance.fdo.protocol.InvalidMessageException;
+import org.fidoalliance.fdo.protocol.KeyExchangeResult;
+import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.CipherSuiteType;
+import org.fidoalliance.fdo.protocol.message.CoseSign1;
+import org.fidoalliance.fdo.protocol.message.EncryptionState;
 import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.HashType;
+import org.fidoalliance.fdo.protocol.message.KexMessage;
+import org.fidoalliance.fdo.protocol.message.KexParty;
 import org.fidoalliance.fdo.protocol.message.KeySizeType;
 import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
+import org.fidoalliance.fdo.protocol.message.SigInfo;
 
 public interface CryptoService {
   /**
@@ -113,6 +107,96 @@ public interface CryptoService {
    * @return The Java public key.
    */
   PublicKey decodeKey(OwnerPublicKey ownerPublicKey) throws IOException;
+
+  /**
+   * Returns actual signature.
+   *
+   * @param sigInfoA initial device based information.
+   * @return signature.
+   */
+  SigInfo getSigInfoB(SigInfo sigInfoA) throws IOException;
+
+
+  /**
+   * Creates a cose-sign1 Signature.
+   * @param payload The palyoad to sign.
+   * @param signingKey The owners private key.
+   * @param ownerPublicKey The owners public key.
+   * @return The Cose-Sign1 message.
+   */
+  CoseSign1 sign(byte[] payload, PrivateKey signingKey, OwnerPublicKey ownerPublicKey)
+      throws IOException;
+
+  /**
+   * Verifies a cose message.
+   * @param message The cose Message to be verified.
+   * @param ownerKey The owner key.
+   * @return True if the message can be verified by owner key.
+   */
+  boolean verify(CoseSign1 message,OwnerPublicKey ownerKey) throws IOException;
+
+
+
+  /**
+   * Verifies a cose message.
+   * @param message The cose Message to be verified.
+   * @param sigInfo SignInfo
+   * @return True if the message can be verified by owner key.
+   */
+  boolean verify(CoseSign1 message,SigInfo sigInfo) throws IOException;
+
+  /**
+   * Gets the Key Exchange message.
+   * <p>Creates ExchangeA if called on the server</p>
+   * <p>Creates ExchangeB if called on the device</p>
+   *
+   * @param kexSuiteName The name of the Key Exchange Suite.
+   * @param party        The party to the Key Ecxhange (A or B)
+   * @param ownerKey     The owner key, required for some asymmetric exchanges
+   * @return A KexMessage.
+   */
+  public KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party,
+      OwnerPublicKey ownerKey) throws IOException;
+
+  /**
+   * Gets the key exchange shared secret.
+   *
+   * @param suiteName     The name of the keyexchange.
+   * @param message       The key exchange message.
+   * @param ownState      The state of the key exchange.
+   * @param decryptionKey The decryption key for use in asymmetric exchanges
+   * @return The shared secret based on the state and message.
+   */
+  public KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState,
+      OwnerPublicKey decryptionKey) throws IOException;
+
+  /**
+   * gets the encryption state.
+   *
+   * @param kxResult    Shared secret and contextRandom.
+   * @param cipherType The cipher suite to use.
+   * @return A Composite encryption state.
+   */
+  EncryptionState getEncryptionState(KeyExchangeResult kxResult, CipherSuiteType cipherType)
+      throws IOException;
+
+  /**
+   * Encrypts a message.
+   *
+   * @param payload The payload to encrypt.
+   * @param state   The saved crypto state.
+   * @return The encrypted message and state.
+   */
+  AnyType encrypt(byte[] payload, EncryptionState state) throws IOException;
+
+  /**
+   * Decrypts a message.
+   *
+   * @param message The ciphered message.
+   * @param state   The crypto state.
+   * @return The decrypted message.
+   */
+  public byte[] decrypt(AnyType message, EncryptionState state) throws IOException;
 
   /**
    * Destroys the private key in the keypair.

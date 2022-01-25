@@ -21,13 +21,6 @@ public class VoucherTest {
     header.setGuid(Guid.fromRandomUUID());
     AnyType wrappedHeader = AnyType.fromObject(header);
     wrappedHeader.wrap();
-    voucher.setHeader(wrappedHeader);
-
-    //AnyType wrappedHeader = voucher.getHeader();
-    //OwnershipVoucherHeader header = wrappedHeader.unwrap(OwnershipVoucherHeader.class);
-
-    //String diag = Mapper.INSTANCE.writeValueAsDiagnostic(voucher);
-
 
     byte[] data = Mapper.INSTANCE.writeValue(voucher);
     String str = Hex.encodeHexString(data);

@@ -18,39 +18,34 @@ import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
 
-
   private static LoggerService logger;
 
-
   private static class RootConfig {
+
     @JsonProperty("hibernate-properties")
     private Map<String, String> hibernateProperties = new HashMap<>();
-  }
-
-
-  private static void checkEmDb() {
 
   }
+
   private static final SessionFactory sessionFactory = buildSessionFactory();
 
   private static SessionFactory buildSessionFactory() {
     try {
 
-
-      File file = Path.of(Config.getPath(),"hibernate.cfg.xml").toFile();
-      Configuration cfg = new Configuration();
+      final File file = Path.of(Config.getPath(),"hibernate.cfg.xml").toFile();
+      final Configuration cfg = new Configuration();
       logger = new LoggerService(HibernateUtil.class);
       cfg.configure(file);
 
-      Map<String, String> map = Config.getConfig(RootConfig.class).hibernateProperties;
+      final Map<String, String> map = Config.getConfig(RootConfig.class).hibernateProperties;
       for (Map.Entry<String, String> entry : map.entrySet()) {
         cfg.setProperty(entry.getKey(),Config.resolve(entry.getValue()));
       }
 
-      DatabaseServer server = Config.getWorker(DatabaseServer.class);
+      final DatabaseServer server = Config.getWorker(DatabaseServer.class);
       server.start();
 
-      SessionFactory factory = cfg.buildSessionFactory();
+      final SessionFactory factory = cfg.buildSessionFactory();
 
 
       return factory;

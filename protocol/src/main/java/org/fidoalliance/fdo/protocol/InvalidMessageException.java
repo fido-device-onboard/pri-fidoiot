@@ -15,4 +15,13 @@ public class InvalidMessageException extends IOException {
   public InvalidMessageException(Exception cause) {
     super(cause);
   }
+
+  /**
+   * Constructs an InvalidMessageException.
+   *
+   * @param cause The cause of the exception.
+   */
+  public InvalidMessageException(String cause) {
+    super(cause);
+  }
 }

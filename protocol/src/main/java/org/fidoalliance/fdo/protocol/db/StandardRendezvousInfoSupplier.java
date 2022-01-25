@@ -1,8 +1,9 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
-import java.sql.Blob;
-import java.sql.SQLException;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -16,16 +17,14 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
 
   @Override
   public RendezvousInfo get() throws IOException {
-    Session session = HibernateUtil.getSessionFactory().openSession();
-    Transaction trans = null;
+    final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
-      trans = session.beginTransaction();
+      final Transaction trans = session.beginTransaction();
       RvData rvData =
-          session.get(RvData.class,Long.valueOf(1));
+          session.find(RvData.class, Long.valueOf(1));
 
       if (rvData == null) {
         rvData = new RvData();
-        rvData.setId(Long.valueOf(1));
 
         final String defaultRvi = "- - - 5\n"
             + "    - \"localhost\"\n"
@@ -39,22 +38,18 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
             + "    - %s";
 
         String defaultPort = Config.getWorker(HttpServer.class).getPort();
-        String rviString = String.format(defaultRvi, defaultPort,defaultPort);
-        RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString,RendezvousInfo.class);
+        String rviString = String.format(defaultRvi, defaultPort, defaultPort);
+        RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
-        Blob blob = session.getLobHelper().createBlob(Mapper.INSTANCE.writeValue(rvi));
-        rvData.setData(blob);
+        rvData.setData(Mapper.INSTANCE.writeValue(rvi));
+
         session.persist(rvData);
-
       }
+      trans.commit();
 
-      byte[] data = HibernateUtil.unwrap(rvData.getData());
-      return Mapper.INSTANCE.readValue(data,RendezvousInfo.class);
+      return Mapper.INSTANCE.readValue(rvData.getData(), RendezvousInfo.class);
 
     } finally {
-      if (trans != null) {
-        trans.commit();
-      }
       session.close();
     }
   }

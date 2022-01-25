@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Blob;
 import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
 import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import org.hibernate.Session;
@@ -17,10 +16,12 @@ public class StandardKeyStoreOutputStream implements KeyStoreOutputStreamFunctio
 
     private final CertificateData certStore;
     private final Session session;
+    private final Transaction trans;
 
-    public StoreOutputStream(Session session, CertificateData certStore) {
+    public StoreOutputStream(Session session, Transaction trans, CertificateData certStore) {
       this.session = session;
       this.certStore = certStore;
+      this.trans = trans;
 
     }
 
@@ -28,9 +29,10 @@ public class StandardKeyStoreOutputStream implements KeyStoreOutputStreamFunctio
     public void close() throws IOException {
 
       try {
-        Transaction trans = session.beginTransaction();
-        Blob blob = session.getLobHelper().createBlob(toByteArray());
-        certStore.setData(blob);
+        certStore.setData(toByteArray());
+        //Blob blob = session.getLobHelper().createBlob(toByteArray());
+        //certStore.setData(data);
+        //blob.
         session.persist(certStore);
         trans.commit();
       } finally {
@@ -44,18 +46,24 @@ public class StandardKeyStoreOutputStream implements KeyStoreOutputStreamFunctio
   @Override
   public OutputStream apply(String s) throws IOException {
     Session session = HibernateUtil.getSessionFactory().openSession();
+    Transaction trans = null;
     try {
 
-      final String storeName = new File(s).getName();
-      CertificateData certStore = session.get(CertificateData.class, storeName);
+      final String name = new File(s).getName();
+      trans = session.beginTransaction();
+      CertificateData certStore = session.find(CertificateData.class, name);
       if (certStore == null) {
         certStore = new CertificateData();
-        certStore.setId(storeName);
+        certStore.setName(name);
       }
-      OutputStream out = new StoreOutputStream(session, certStore);
+      OutputStream out = new StoreOutputStream(session, trans, certStore);
       session = null;
+      trans = null;
       return out;
     } finally {
+      if (trans != null) {
+        trans.commit();
+      }
       if (session != null) {
         session.close();
       }

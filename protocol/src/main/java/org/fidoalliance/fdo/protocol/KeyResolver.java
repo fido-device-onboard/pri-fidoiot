@@ -12,7 +12,9 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -21,6 +23,8 @@ import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ValidityDaysSupplier;
 import org.fidoalliance.fdo.protocol.message.KeySizeType;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
+import org.fidoalliance.fdo.protocol.message.SigInfo;
+import org.fidoalliance.fdo.protocol.message.SigInfoType;
 
 public class KeyResolver {
 
@@ -48,7 +52,7 @@ public class KeyResolver {
     try {
 
       final String sigAlgorithm =
-          new AlgorithmFinder().getSignatureAlgorithm(keyType,sizeType);
+          new AlgorithmFinder().getSignatureAlgorithm(keyType, sizeType);
 
       Certificate[] chain = new CertChainBuilder()
           .setPrivateKey(keyPair.getPrivate())
@@ -59,15 +63,14 @@ public class KeyResolver {
           .setValidityDays(Config.getWorker(ValidityDaysSupplier.class).get())
           .build();
 
-      keyStore.setKeyEntry(KeyResolver.getAlias(keyType,sizeType),
+      keyStore.setKeyEntry(KeyResolver.getAlias(keyType, sizeType),
           keyPair.getPrivate(),
           getPasswordArray(),
           chain);
 
     } catch (KeyStoreException e) {
       throw new IOException(e);
-    }
-    finally {
+    } finally {
       cs.destroyKey(keyPair);
     }
   }
@@ -97,7 +100,7 @@ public class KeyResolver {
     }
   }
 
-  public void store() throws IOException{
+  public void store() throws IOException {
     if (keyStore == null || config == null) {
       throw new IOException(new IllegalStateException("key store not loaded"));
     }
@@ -153,12 +156,26 @@ public class KeyResolver {
     }
   }
 
+  public Certificate[] getCertificateChain() throws IOException {
+    try {
+      Enumeration<String> aliases = keyStore.aliases();
+      while (aliases.hasMoreElements()) {
+        String alias = aliases.nextElement();
+        return getCertificateChain(alias);
+      }
+      throw new IOException(new NoSuchElementException("private key for public key"));
+    } catch (KeyStoreException e) {
+      throw new IOException(e);
+    }
+  }
+
   public PrivateKey getPrivateKey(PublicKey publicKey) throws IOException {
     try {
       Enumeration<String> aliases = keyStore.aliases();
       while (aliases.hasMoreElements()) {
         String alias = aliases.nextElement();
-        if (keyStore.getCertificate(alias).getPublicKey().equals(publicKey)) {
+        PublicKey findKey = keyStore.getCertificate(alias).getPublicKey();
+        if (findKey.equals(publicKey)) {
           return getPrivateKey(alias);
         }
       }
@@ -168,14 +185,33 @@ public class KeyResolver {
     }
   }
 
+
   public PrivateKey getPrivateKey(String alias) throws IOException {
     try {
-      return (PrivateKey) keyStore.getKey(alias,getPasswordArray());
+      return (PrivateKey) keyStore.getKey(alias, getPasswordArray());
     } catch (KeyStoreException e) {
       throw new IOException(e);
     } catch (NoSuchAlgorithmException e) {
       throw new IOException(e);
     } catch (UnrecoverableKeyException e) {
+      throw new IOException(e);
+    }
+  }
+
+  public void setAlias(String defAlias) throws IOException {
+    try {
+      Enumeration<String> aliases = keyStore.aliases();
+      List<String> removeList = new ArrayList<>();
+      while (aliases.hasMoreElements()) {
+        String alias = aliases.nextElement();
+        if (alias.compareToIgnoreCase(defAlias) != 0) {
+          removeList.add(alias);
+        }
+      }
+      for (String alias : removeList) {
+        keyStore.deleteEntry(alias);
+      }
+    } catch (KeyStoreException e) {
       throw new IOException(e);
     }
   }
@@ -187,7 +223,16 @@ public class KeyResolver {
     return keyType.name();
   }
 
-
+  public static String getAlias(SigInfoType sigInfoType) throws IOException {
+    switch (sigInfoType) {
+      case SECP256R1:
+        return PublicKeyType.SECP256R1.name();
+      case SECP384R1:
+        return PublicKeyType.SECP384R1.name();
+      default:
+        throw new InternalServerErrorException(new IllegalArgumentException());
+    }
+  }
 
 
 }

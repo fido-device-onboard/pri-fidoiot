@@ -1,15 +1,11 @@
 package org.fidoalliance.fdo.protocol;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -19,17 +15,18 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.MsgType;
-import org.fidoalliance.fdo.protocol.message.ProtocolInfo;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
-import org.fidoalliance.fdo.protocol.message.StreamMessage;
+import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 
 
 public abstract class HttpClient implements Runnable {
 
   private DispatchMessage request;
   private DispatchMessage response;
-  private String serverUri;
+  private List<HttpInstruction> httpInst;
   private String tokenCache;
+
+  protected static LoggerService logger = new LoggerService(HttpClient.class);
 
   protected DispatchMessage getRequest() {
     return request;
@@ -39,14 +36,19 @@ public abstract class HttpClient implements Runnable {
     return response;
   }
 
-  protected static LoggerService logger = new LoggerService(HttpClient.class);
-
-  protected String getServerUri() {
-    return serverUri;
+  protected List<HttpInstruction> getInstructions() {
+    return httpInst;
   }
 
-  protected void setServerUri(String serverUri) {
-    this.serverUri = serverUri;
+  protected boolean isRepeatable(String uri) {
+    if (uri.endsWith("/30")) {
+      return true;
+    }
+    return false;
+  }
+
+  protected void setInstructions(List<HttpInstruction> httpInst) {
+    this.httpInst = httpInst;
   }
 
   protected void setRequest(DispatchMessage request) {
@@ -57,8 +59,12 @@ public abstract class HttpClient implements Runnable {
     this.response = response;
   }
 
+  protected abstract void generateHello() throws IOException;
 
-  public abstract void generateHello() throws IOException;
+  protected void initializeSession() throws IOException {
+    setRequest(new DispatchMessage());
+    getRequest().setExtra(new SimpleStorage());
+  }
 
   protected void logMessage(DispatchMessage msg) {
     StringBuilder builder = new StringBuilder();
@@ -76,59 +82,77 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected void sendMessage() throws IOException {
+    int index = 0;
+    URI requestUri = null;
+    int delay = 0;
+    for (; ; ) {
 
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-      URIBuilder uriBuilder = new URIBuilder(getServerUri());
-      List<String> segments = new ArrayList<>();
-      segments.add(HttpUtils.FDO_COMPONENT);
-      segments.add(ProtocolVersion.current().toString());
-      segments.add(HttpUtils.MSG_COMPONENT);
-      segments.add(Integer.toString(getRequest().getMsgType().toInteger()));
-      uriBuilder.setPathSegments(segments);
+        URIBuilder uriBuilder = new URIBuilder(
+            getInstructions().get(index++).getAddress());
+        List<String> segments = new ArrayList<>();
+        segments.add(HttpUtils.FDO_COMPONENT);
+        segments.add(ProtocolVersion.current().toString());
+        segments.add(HttpUtils.MSG_COMPONENT);
+        segments.add(Integer.toString(getRequest().getMsgType().toInteger()));
+        uriBuilder.setPathSegments(segments);
 
-      HttpPost httpRequest = new HttpPost(uriBuilder.build());
+        requestUri = uriBuilder.build();
 
-      ByteArrayEntity bae = new ByteArrayEntity(getRequest().getMessage());
-      httpRequest.setEntity(bae);
+        HttpPost httpRequest = new HttpPost(requestUri);
 
-      httpRequest.addHeader(HttpUtils.HTTP_CONTENT_TYPE, HttpUtils.HTTP_APPLICATION_CBOR);
-      if (tokenCache != null) {
-        httpRequest.addHeader(HttpUtils.HTTP_AUTHORIZATION, tokenCache);
-      }
+        ByteArrayEntity bae = new ByteArrayEntity(getRequest().getMessage());
+        httpRequest.setEntity(bae);
 
-      try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
-        HttpEntity entity = httpResponse.getEntity();
-        if (entity != null) {
-          setResponse(new DispatchMessage());
-          getResponse().setProtocolVersion(getRequest().getProtocolVersion());
-
-          if (entity.getContentLength() > BufferUtils.getMaxBufferSize()) {
-            throw new MessageBodyException("Message too large.");
-          }
-          getResponse().setMessage(EntityUtils.toByteArray(entity));
-
-          if (httpResponse.containsHeader(HttpUtils.HTTP_MESSAGE_TYPE)) {
-            getResponse().setMsgType(MsgType.fromNumber(
-                Integer.valueOf(
-                    httpResponse.getFirstHeader(HttpUtils.HTTP_MESSAGE_TYPE).getValue())));
-          }
-
-          if (httpResponse.containsHeader(HttpUtils.HTTP_AUTHORIZATION)) {
-            tokenCache = httpResponse.getFirstHeader(HttpUtils.HTTP_AUTHORIZATION).getValue();
-          }
-          getResponse().setAuthToken(tokenCache);
-        } else {
-          throw new IOException(httpResponse.getStatusLine().toString());
+        httpRequest.addHeader(HttpUtils.HTTP_CONTENT_TYPE, HttpUtils.HTTP_APPLICATION_CBOR);
+        if (tokenCache != null) {
+          httpRequest.addHeader(HttpUtils.HTTP_AUTHORIZATION, tokenCache);
         }
+
+        try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
+          HttpEntity entity = httpResponse.getEntity();
+          if (entity != null) {
+            setResponse(new DispatchMessage());
+            getResponse().setProtocolVersion(getRequest().getProtocolVersion());
+
+            if (entity.getContentLength() > BufferUtils.getMaxBufferSize()) {
+              throw new MessageBodyException("Message too large.");
+            }
+            getResponse().setMessage(EntityUtils.toByteArray(entity));
+
+            if (httpResponse.containsHeader(HttpUtils.HTTP_MESSAGE_TYPE)) {
+              getResponse().setMsgType(MsgType.fromNumber(
+                  Integer.valueOf(
+                      httpResponse.getFirstHeader(HttpUtils.HTTP_MESSAGE_TYPE).getValue())));
+            }
+
+            if (httpResponse.containsHeader(HttpUtils.HTTP_AUTHORIZATION)) {
+              tokenCache = httpResponse.getFirstHeader(HttpUtils.HTTP_AUTHORIZATION).getValue();
+            }
+            getResponse().setAuthToken(tokenCache);
+          } else {
+            throw new IOException(httpResponse.getStatusLine().toString());
+          }
+        }
+        break; // success
+
+      } catch (Exception e) {
+        if (getInstructions().size() > 1
+            && index < getInstructions().size()) {
+          continue;
+        }
+        /*if (isRepeatable(requestUri.getPath())) {
+          try {
+            Thread.sleep(Duration.ofSeconds(delay).toMillis());
+          } catch (InterruptedException ex) {
+            throw new IOException(ex);
+          }
+          index =0;
+        }*/
+        throw new IOException(e);
       }
 
-    } catch (ClientProtocolException e) {
-      throw new IOException(e);
-    } catch (IOException e) {
-      throw new IOException(e);
-    } catch (URISyntaxException e) {
-      throw new IOException(e);
     }
 
   }
@@ -141,6 +165,7 @@ public abstract class HttpClient implements Runnable {
     try {
       StandardMessageDispatcher dispatcher = Config.getWorker(StandardMessageDispatcher.class);
 
+      initializeSession();
       generateHello();
       for (; ; ) {
 
@@ -149,17 +174,19 @@ public abstract class HttpClient implements Runnable {
         sendMessage();
 
         logMessage(getResponse());
+        getResponse().setExtra(getRequest().getExtra());
 
         Optional<DispatchMessage> nextMsg = dispatcher.dispatch(getResponse());
         if (nextMsg.isPresent()) {
           DispatchMessage msg = nextMsg.get();
-
-          if (msg.getMsgType() == MsgType.ERROR) {
-            break;
-          }
+          msg.setExtra(response.getExtra());
           setRequest(msg);
         } else {
-          break;
+          if (getResponse().getMsgType() == MsgType.TO1_RV_REDIRECT) {
+            generateHello();
+          } else {
+            break;
+          }
         }
 
       }
@@ -174,6 +201,7 @@ public abstract class HttpClient implements Runnable {
           logger.error("failed to send error");
         }
       }
+
     }
 
   }

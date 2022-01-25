@@ -20,11 +20,18 @@ public interface SessionManager {
   SimpleStorage getSession(String name) throws IOException;
 
   /**
-   * Saves a new session
+   * Saves a new session.
    * @param name The name of the new session
    * @param storage A simple storage Object.
    */
   void saveSession(String name,SimpleStorage storage) throws IOException;
+
+  /**
+   * Updates an existing session.
+   * @param name The name of the new session.
+   * @param storage A simple storage Object.
+   */
+  void updateSession(String name,SimpleStorage storage) throws IOException;
 
 
   /**

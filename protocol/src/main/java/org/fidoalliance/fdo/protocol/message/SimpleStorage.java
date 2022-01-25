@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -56,4 +59,6 @@ public class SimpleStorage {
   public Collection<Object> values() {
     return  map.values();
   }
+
+
 }

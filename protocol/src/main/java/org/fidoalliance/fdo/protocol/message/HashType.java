@@ -10,8 +10,8 @@ import java.util.NoSuchElementException;
 public enum HashType {
   SHA256(-16),
   SHA384(-43),
-  HMAC_SHA256(-5),
-  HMAC_SHA384(-6);
+  HMAC_SHA256(5),
+  HMAC_SHA384(6);
 
 
   private int id;

@@ -33,6 +33,7 @@ public class CoseKeySerializer extends StdSerializer<CoseKey> {
     } else {
       gen.writeStartObject(value,ELEMENT_COUNT);
     }
+
     //write the curve
     gen.writeFieldId(COSEKEY_CRV);
     gen.writeNumber(value.getCrv().toInteger());

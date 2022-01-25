@@ -1,70 +1,63 @@
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
-
-
+import org.fidoalliance.fdo.protocol.serialization.TaggedItem;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"protectedHeader", "unprotectedHeader", "payload", "signature"})
+@JsonPropertyOrder({"protectedHeader", "unprotectedHeader", "payload", "tagValue"})
 @JsonSerialize(using = GenericArraySerializer.class)
-public class CoseItem {
+public class Mac0  implements TaggedItem {
 
   @JsonProperty("protectedHeader")
-  byte[] protectedHeader;
+  private byte[] protectedHeader;
 
   @JsonProperty("unprotectedHeader")
-  GenericMap unprotectedHeader;
+  private CoseUnprotectedHeader unprotectedHeader;
 
   @JsonProperty("payload")
-  byte[] payload;
+  private byte[] payload;
 
-  @JsonProperty("signature")
-  byte[] signature;
+  @JsonProperty("tagValue")
+  private byte[] tagValue;
 
-  @JsonIgnore
   public byte[] getProtectedHeader() {
     return protectedHeader;
   }
 
-  @JsonIgnore
-  public GenericMap getUnprotectedHeader() {
+  public CoseUnprotectedHeader getUnprotectedHeader() {
     return unprotectedHeader;
   }
 
-  @JsonIgnore
   public byte[] getPayload() {
     return payload;
   }
 
-  @JsonIgnore
-  public byte[] getSignature() {
-    return signature;
+  public byte[] getTagValue() {
+    return tagValue;
   }
 
-  @JsonIgnore
   public void setProtectedHeader(byte[] protectedHeader) {
     this.protectedHeader = protectedHeader;
   }
 
-  @JsonIgnore
-  public void setUnprotectedHeader(GenericMap unprotectedHeader) {
+  public void setUnprotectedHeader(CoseUnprotectedHeader unprotectedHeader) {
     this.unprotectedHeader = unprotectedHeader;
   }
 
-  @JsonIgnore
   public void setPayload(byte[] payload) {
     this.payload = payload;
   }
 
-  @JsonIgnore
-  public void setSignature(byte[] signature) {
-    this.signature = signature;
+  public void setTagValue(byte[] tagValue) {
+    this.tagValue = tagValue;
   }
 
-
+  @Override
+  public CborTags getTag() {
+    return CborTags.COSE_MAC_0;
+  }
 }

@@ -34,8 +34,10 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
       case WIFI_SSID:
       case WIFI_PW:
       case DNS:
+
         return AnyType.fromObject(subNode.textValue());
       case IP_ADDRESS:
+
          return AnyType.fromObject(
               InetAddress.getByName(subNode.textValue()).getAddress());
       case OWNER_PORT:

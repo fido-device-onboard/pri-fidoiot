@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.NullValue;
 
 public class AnyTypeDeserializer extends StdDeserializer<AnyType> {
 
@@ -23,6 +24,9 @@ public class AnyTypeDeserializer extends StdDeserializer<AnyType> {
   public AnyType deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException, JsonProcessingException {
     final JsonNode node = jp.getCodec().readTree(jp);
+    if (node.isNull()) {
+      return AnyType.fromObject(new NullValue());
+    }
     return AnyType.fromObject(node);
   }
 

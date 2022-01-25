@@ -15,59 +15,59 @@ node('ubuntu18.04-OnDemand'){
     archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
 
-  try
-  {
-    // Run the smoke test
-    stage('Run Smoke test')
-    {
-
-      // Checking out the smoke test code
-      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'test-fidoiot']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard/test-fidoiot']]])
-
-      // Creating the required directories
-      sh '''
-        mkdir -p test-fidoiot/binaries
-        mkdir -p test-fidoiot/binaries/pri-fidoiot
-      '''
-
-      // Extract and copy the demo.tar content to the location
-      sh '''
-        cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
-        cd test-fidoiot/binaries/pri-fidoiot
-        bash scripts/keys_gen.sh .
-        cp -r creds/* .
-      '''
-
-      // Updating the TO0 scheduling time interval
-      sh '''
-        cd test-fidoiot/binaries/pri-fidoiot/owner
-        sed -i 's/300/30/g' owner.env
-      '''
-
-      // Setting the TEST_DIR and executing smoke test
-      sh'''
-        cd test-fidoiot
-        export TEST_DIR=`pwd`
-        mvn clean test -Dgroups=fdo_pri_smoketest
-      '''
-    }
-  }
-  finally
-  {
-    // Remove the files
-    print "Removing the files"
-    sh'''
-      rm -f test-fidoiot/credential.bin
-      rm -f test-fidoiot/ext_voucher
-      rm -f test-fidoiot/guid
-      rm -f test-fidoiot/linux64.sh
-      rm -f test-fidoiot/payload.bin
-      rm -f test-fidoiot/result.txt
-    '''
-
-    print "Pruning docker containers"
-    sh'''
-      docker system prune -a -f
-    '''
-  }
+//  try
+//  {
+//    // Run the smoke test
+//    stage('Run Smoke test')
+//    {
+//
+//      // Checking out the smoke test code
+//      checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'test-fidoiot']], userRemoteConfigs: [[credentialsId: 'sdo-automationgithubtoken', url: 'https://github.com/secure-device-onboard/test-fidoiot']]])
+//
+//      // Creating the required directories
+//      sh '''
+//        mkdir -p test-fidoiot/binaries
+//        mkdir -p test-fidoiot/binaries/pri-fidoiot
+//      '''
+//
+//      // Extract and copy the demo.tar content to the location
+//      sh '''
+//        cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
+//        cd test-fidoiot/binaries/pri-fidoiot
+//        bash scripts/keys_gen.sh .
+//        cp -r creds/* .
+//      '''
+//
+//      // Updating the TO0 scheduling time interval
+//      sh '''
+//        cd test-fidoiot/binaries/pri-fidoiot/owner
+//        sed -i 's/300/30/g' owner.env
+//      '''
+//
+//      // Setting the TEST_DIR and executing smoke test
+//      sh'''
+//        cd test-fidoiot
+//        export TEST_DIR=`pwd`
+//        mvn clean test -Dgroups=fdo_pri_smoketest
+//      '''
+//    }
+//  }
+//  finally
+//  {
+//    // Remove the files
+//    print "Removing the files"
+//    sh'''
+//      rm -f test-fidoiot/credential.bin
+//      rm -f test-fidoiot/ext_voucher
+//      rm -f test-fidoiot/guid
+//      rm -f test-fidoiot/linux64.sh
+//      rm -f test-fidoiot/payload.bin
+//      rm -f test-fidoiot/result.txt
+//    '''
+//
+//    print "Pruning docker containers"
+//    sh'''
+//      docker system prune -a -f
+//    '''
+//  }
 }

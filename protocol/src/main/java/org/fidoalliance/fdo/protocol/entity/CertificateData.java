@@ -1,37 +1,43 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.entity;
 
 
-import java.sql.Blob;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+
 @Entity
 @Table(name = "certificate_data")
-public class CertificateData {
+public class CertificateData  {
+
   @Id
-  @Column(name = "id", nullable = false)
+  @Column(name = "name", nullable = false)
   private String name;
 
   @Lob
   @Column(name = "data")
-   private Blob data;
+  private byte[] data;
 
-  public String getId() {
+  public String getName() {
     return name;
   }
 
-  public Blob getData() {
+  public byte[] getData() {
     return data;
   }
 
-  public void setId(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
-  public void setData(Blob blob) {
+
+  public void setData(byte[] blob) {
     this.data = blob;
   }
+
 }

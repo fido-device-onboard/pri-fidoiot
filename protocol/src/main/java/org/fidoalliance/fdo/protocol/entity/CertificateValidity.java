@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.entity;
 
 import javax.persistence.Column;
@@ -11,21 +14,13 @@ public class CertificateValidity {
 
   @Id
   @Column(name = "id")
-  private long id;
+  private long id = 1;
   @Column(name = "days")
   private int days;
 
-  public long getId() {
-    return id;
-  }
 
   public int getDays() {
     return days;
-  }
-
-
-  public void setId(long id) {
-    this.id = id;
   }
 
   public void setDays(int days) {

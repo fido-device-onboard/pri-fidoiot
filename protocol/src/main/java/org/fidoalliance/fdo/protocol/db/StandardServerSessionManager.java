@@ -1,14 +1,12 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
-import java.sql.Blob;
 import java.time.Instant;
 import java.util.Date;
 import org.fidoalliance.fdo.protocol.InvalidJwtTokenException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.SessionManager;
 import org.fidoalliance.fdo.protocol.entity.ProtocolSession;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -22,14 +20,12 @@ public class StandardServerSessionManager implements SessionManager {
     Transaction trans = null;
     try {
       trans = session.beginTransaction();
-      ProtocolSession protocolSession = session.get(ProtocolSession.class, name);
+      ProtocolSession protocolSession = session.find(ProtocolSession.class, name);
       if (protocolSession == null) {
         throw new InvalidJwtTokenException(name);
       }
-      Blob blob = protocolSession.getData();
-      byte[] data = HibernateUtil.unwrap(blob);
 
-      return Mapper.INSTANCE.readValue(data,SimpleStorage.class);
+      return Mapper.INSTANCE.readValue(protocolSession.getData(),SimpleStorage.class);
 
 
     } finally {
@@ -44,20 +40,31 @@ public class StandardServerSessionManager implements SessionManager {
   @Override
   public void saveSession(String name, SimpleStorage storage) throws IOException {
 
-    Session session = HibernateUtil.getSessionFactory().openSession();
+    final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
-      ProtocolSession protocolSession = new ProtocolSession();
-      protocolSession.setId(name);
+      final Transaction trans = session.beginTransaction();
+      final ProtocolSession protocolSession = new ProtocolSession();
+      protocolSession.setName(name);
       protocolSession.setCreatedOn(Date.from(Instant.now()));
+      protocolSession.setData(Mapper.INSTANCE.writeValue(storage));
+      session.save(protocolSession);
+      trans.commit();
+    } finally {
+      session.close();
+    }
+  }
 
-      Blob blob = session.getLobHelper().createBlob(
-          Mapper.INSTANCE.writeValue(storage)
-      );
-      protocolSession.setData(blob);
-      Transaction trans = session.beginTransaction();
-      session.persist(protocolSession);
-      trans.commit();;
-
+  @Override
+  public void updateSession(String name, SimpleStorage storage) throws IOException {
+    final Session session = HibernateUtil.getSessionFactory().openSession();
+    try {
+      final Transaction trans = session.beginTransaction();
+      final ProtocolSession protocolSession = new ProtocolSession();
+      protocolSession.setName(name);
+      protocolSession.setCreatedOn(Date.from(Instant.now()));
+      protocolSession.setData(Mapper.INSTANCE.writeValue(storage));
+      session.update(protocolSession);
+      trans.commit();
     } finally {
       session.close();
     }

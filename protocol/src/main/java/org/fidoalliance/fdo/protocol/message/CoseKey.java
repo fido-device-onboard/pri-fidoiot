@@ -15,41 +15,40 @@ import org.fidoalliance.fdo.protocol.serialization.CoseKeySerializer;
 @JsonDeserialize(using = CoseKeyDeserializer.class)
 public class CoseKey {
 
-  @JsonProperty("crv")
+
   private CoseKeyCurveType crv;
 
-  @JsonProperty("x")
+
   private byte[] x;
 
-  @JsonProperty("y")
+
   private byte[] y;
 
-  @JsonIgnore
+
   public CoseKeyCurveType getCrv() {
     return crv;
   }
 
-  @JsonIgnore
+
   public byte[] getX() {
     return x;
   }
 
-  @JsonIgnore
+
   public byte[] getY() {
     return y;
   }
 
-  @JsonIgnore
+
   public void setCurve(CoseKeyCurveType crv) {
     this.crv = crv;
   }
 
-  @JsonIgnore
+
   public void setX(byte[] x) {
     this.x = x;
   }
 
-  @JsonIgnore
   public void setY(byte[] y) {
     this.y = y;
   }

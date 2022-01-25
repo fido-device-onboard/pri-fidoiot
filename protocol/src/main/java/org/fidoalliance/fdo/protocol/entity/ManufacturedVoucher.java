@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.entity;
 
 import java.sql.Blob;
@@ -11,39 +14,40 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "resell_voucher")
-public class ResellVoucher {
-
-  private String id;
-  private Blob data;
+@Table(name = "manufactured_voucher")
+public class ManufacturedVoucher {
 
   @Id
-  @Column(name = "id")
-  public String getId() {
-    return id;
-  }
+  @Column(name = "serial_no")
+  private String serialNo;
+
+  @Lob
+  @Column(name = "data", nullable = false)
+  private byte[] data;
 
   @Column(name = "created_on")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdOn;
 
-  @Lob
-  @Column(name = "data")
-  public Blob getData() {
+  public String getSerialNo() {
+    return serialNo;
+  }
+
+  public byte[] getData() {
     return data;
   }
 
   public Date getCreatedOn() { return createdOn; }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setSerialNo(String id) {
+    this.serialNo = id;
   }
 
   public void setCreatedOn(Date date ) {
     this.createdOn = date;
   }
 
-  public void setData(Blob data) {
+  public void setData(byte[] data) {
     this.data = data;
   }
 

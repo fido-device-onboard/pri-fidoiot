@@ -1,5 +1,7 @@
-package org.fidoalliance.fdo.protocol;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
@@ -22,7 +24,6 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.hibernate.Session;
-
 
 public class Config {
 
@@ -99,11 +100,7 @@ public class Config {
     }
 
 
-
-
-
     public void store(KeyStore keyStore) throws IOException {
-
 
     }
 
@@ -192,6 +189,7 @@ public class Config {
 
   /**
    * Resolve environment variables in value.
+   *
    * @param value The value to resolve.
    * @return The resolves value.
    */
@@ -250,6 +248,7 @@ public class Config {
 
   /**
    * Loads an object by its class name.
+   *
    * @param name The class name of the object to load.
    * @return A new instance of the class.
    */
@@ -320,10 +319,10 @@ public class Config {
    * @return An instance of the config object.
    * @throws IOException
    */
-  public static <T> T getConfig(Class<T> clazz)  {
+  public static <T> T getConfig(Class<T> clazz) {
     for (Object cfg : configs) {
       if (cfg.getClass().isAssignableFrom(clazz)) {
-        return (T)cfg;
+        return (T) cfg;
       }
     }
     try {
@@ -339,12 +338,18 @@ public class Config {
     List<Object> list = getWorkers();
     for (Object item : list) {
 
+
+
       if (clazz.isInterface()) {
-        Type[] interfaces = item.getClass().getInterfaces();
-        for (Type type : interfaces) {
-          if (type.equals((Type) clazz)) {
-            return (T) item;
+        Class currentClass = item.getClass();
+        while (currentClass != null) {
+          Type[] interfaces = currentClass.getInterfaces();
+          for (Type type : interfaces) {
+            if (type.equals((Type) clazz)) {
+              return (T) item;
+            }
           }
+          currentClass = currentClass.getSuperclass();
         }
       } else if (item.getClass().isAssignableFrom(clazz)) {
         return (T) item;
@@ -354,10 +359,10 @@ public class Config {
     throw new NoSuchElementException(clazz.getName());
   }
 
-  public static <T> T getEntity(Class<T> clazz,int id) {
+  public static <T> T getEntity(Class<T> clazz, int id) {
 
-     Session session = HibernateUtil.getSessionFactory().openSession();
-     return (T)session.get(clazz,id);
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    return (T) session.get(clazz, id);
   }
 
 
