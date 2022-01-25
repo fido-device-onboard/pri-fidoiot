@@ -13,7 +13,7 @@ export _JAVA_OPTIONS="-Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_p
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 REMOTE_URL=https://github.com/secure-device-onboard/pri-fidoiot.git
-REMOTE_BRANCH=master
+REMOTE_BRANCH=1.10-rel
 
 # The PGP signature verification requires additional proxy configuration in
 # ~/.m2/settings.xml. For simplicity and easier out of box experience, the PGP
