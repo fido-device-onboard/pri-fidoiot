@@ -21,45 +21,11 @@ import org.hibernate.Transaction;
 public class AioApp {
 
 
-  private static void test() {
 
-
-    final Session session = HibernateUtil.getSessionFactory().openSession();
-    try {
-      final Transaction trans = session.beginTransaction();
-
-      SystemResource sr = session.get(SystemResource.class, "text.txt");
-      if (sr == null) {
-        sr = new SystemResource();
-        sr.setName("text.txt");
-        Blob blob =
-            session.getLobHelper().createBlob("hello word".getBytes(StandardCharsets.UTF_8));
-
-        sr.setData(blob);
-
-        session.persist(sr);
-      } else {
-
-        Blob blob = sr.getData();
-        InputStream is =  blob.getBinaryStream();
-        is.readAllBytes();
-
-      }
-      trans.commit();
-
-
-    } catch (SQLException | IOException throwables) {
-      throwables.printStackTrace();
-    } finally {
-      session.close();
-    }
-
-  }
 
   public static void main(String args[]) {
     HibernateUtil.getSessionFactory();
-
-    test();
+    
     Config.getWorker(HttpServer.class).run();
   }
 }
