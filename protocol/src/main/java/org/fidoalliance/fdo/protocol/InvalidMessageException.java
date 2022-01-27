@@ -1,19 +1,11 @@
-// Copyright 2020 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
 package org.fidoalliance.fdo.protocol;
+
+import java.io.IOException;
 
 /**
  * Represents an InvalidMessageException.
  */
-public class InvalidMessageException extends DispatchException {
-
-  /**
-   * Constructs an InvalidMessageException.
-   */
-  public InvalidMessageException() {
-    super();
-  }
+public class InvalidMessageException extends IOException {
 
   /**
    * Constructs an InvalidMessageException.
@@ -31,10 +23,5 @@ public class InvalidMessageException extends DispatchException {
    */
   public InvalidMessageException(String cause) {
     super(cause);
-  }
-
-  @Override
-  protected int getErrorCode() {
-    return Const.INVALID_MESSAGE_ERROR;
   }
 }

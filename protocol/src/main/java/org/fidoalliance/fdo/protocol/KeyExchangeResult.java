@@ -1,8 +1,11 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.util.Arrays;
 
-class KeyExchangeResult {
+public class KeyExchangeResult {
 
   final byte[] shSe;
   final byte[] contextRand;
@@ -12,3 +15,5 @@ class KeyExchangeResult {
     this.contextRand = Arrays.copyOf(contextRand, contextRand.length);
   }
 }
+
+

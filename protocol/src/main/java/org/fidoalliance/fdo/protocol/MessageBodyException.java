@@ -1,19 +1,11 @@
-// Copyright 2020 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
 package org.fidoalliance.fdo.protocol;
 
-/**
- * Represents a MessageBodyException.
- */
-public class MessageBodyException extends DispatchException {
+import java.io.IOException;
 
-  /**
-   * Constructs an MessageBodyException.
-   */
-  public MessageBodyException() {
-    super();
-  }
+/**
+ * Represents an MessageBodyException.
+ */
+public class MessageBodyException extends IOException {
 
   /**
    * Constructs an MessageBodyException.
@@ -24,8 +16,12 @@ public class MessageBodyException extends DispatchException {
     super(cause);
   }
 
-  @Override
-  protected int getErrorCode() {
-    return Const.MESSAGE_BODY_ERROR;
+  /**
+   * Constructs an MessageBodyException.
+   *
+   * @param message The cause of the exception.
+   */
+  public MessageBodyException(String message) {
+    super(message);
   }
 }
