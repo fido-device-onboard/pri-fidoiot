@@ -29,7 +29,7 @@ public class OwnerServiceInfo {
 
   @JsonIgnore
   public boolean isDone() {
-    return more;
+    return done;
   }
 
   @JsonIgnore
@@ -44,7 +44,7 @@ public class OwnerServiceInfo {
 
   @JsonIgnore
   public void setDone(boolean done) {
-    this.more = done;
+    this.done = done;
   }
 
   @JsonIgnore

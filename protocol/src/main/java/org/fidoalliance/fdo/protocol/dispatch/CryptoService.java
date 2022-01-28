@@ -185,9 +185,9 @@ public interface CryptoService {
    *
    * @param payload The payload to encrypt.
    * @param state   The saved crypto state.
-   * @return The encrypted message and state.
+   * @return The encrypted message.
    */
-  AnyType encrypt(byte[] payload, EncryptionState state) throws IOException;
+  byte[] encrypt(byte[] payload, EncryptionState state) throws IOException;
 
   /**
    * Decrypts a message.
@@ -196,7 +196,7 @@ public interface CryptoService {
    * @param state   The crypto state.
    * @return The decrypted message.
    */
-  public byte[] decrypt(AnyType message, EncryptionState state) throws IOException;
+  public byte[] decrypt(byte[] message, EncryptionState state) throws IOException;
 
   /**
    * Destroys the private key in the keypair.

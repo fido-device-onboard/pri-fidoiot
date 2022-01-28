@@ -24,6 +24,7 @@ import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
+import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobStorageFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
@@ -94,7 +95,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction
 
 public class StandardMessageDispatcher implements MessageDispatcher {
 
-  protected StandardCryptoService getCryptoService() {
+   protected StandardCryptoService getCryptoService() {
     return Config.getWorker(StandardCryptoService.class);
   }
 
@@ -201,13 +202,12 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     return cwtToken;
   }
 
-  protected SimpleStorage createVoucher(AnyType mfgInfo, ProtocolVersion version)
+  protected SimpleStorage createVoucher(ManufacturingInfo diInfo, ProtocolVersion version)
       throws IOException {
 
     final OwnershipVoucher voucher = new OwnershipVoucher();
     final OwnershipVoucherHeader header = new OwnershipVoucherHeader();
     final CryptoService cs = getCryptoService();
-    final ManufacturingInfo diInfo = mfgInfo.unwrap(ManufacturingInfo.class);
     final Guid guid = Guid.fromRandomUUID();
 
     header.setVersion(version);
@@ -275,9 +275,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     );
 
     voucher.setEntries(new OwnershipVoucherEntries());
-    final AnyType headerTag = AnyType.fromObject(header);
-    headerTag.wrap();
-    voucher.setHeader(headerTag);
+    voucher.setHeader(Mapper.INSTANCE.writeValue(header));
 
     SimpleStorage storage = new SimpleStorage();
     storage.put(OwnershipVoucher.class, voucher);
@@ -287,17 +285,19 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
   protected void doAppStart(DispatchMessage request, DispatchMessage response) throws IOException {
     AppStart appStart = request.getMessage(AppStart.class);
-    AnyType mfgInfo = appStart.getManufacturingInfo();
+
+    ManufacturingInfo mfgInfo = Mapper.INSTANCE.readValue(appStart.getManufacturingInfo(),
+        ManufacturingInfo.class);
     SimpleStorage storage = createVoucher(mfgInfo, request.getProtocolVersion());
 
     SessionManager manager = getWorker(SessionManager.class);
 
     OwnershipVoucher voucher = storage.get(OwnershipVoucher.class);
 
-    AnyType headerTag = voucher.getHeader();
+    byte[] headerTag = voucher.getHeader();
     SetCredentials setCredentials = new SetCredentials();
     setCredentials.setVoucherHeader(headerTag);
-    response.setMessage(AnyType.fromObject(setCredentials));
+    response.setMessage(Mapper.INSTANCE.writeValue(setCredentials));
 
     manager.saveSession(response.getAuthToken().get(),
         storage);
@@ -309,8 +309,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     CryptoService cs = getCryptoService();
     SetCredentials setCredentials = request.getMessage(SetCredentials.class);
-    AnyType headerTag = setCredentials.getVoucherHeader();
-    OwnershipVoucherHeader header = headerTag.unwrap(OwnershipVoucherHeader.class);
+    byte[] headerTag = setCredentials.getVoucherHeader();
+    OwnershipVoucherHeader header =
+        Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
 
     DeviceCredential credential = new DeviceCredential();
 
@@ -319,7 +320,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     SetHmac setHmac = new SetHmac();
     setHmac.setHmac(hmac);
-    response.setMessage(AnyType.fromObject(setHmac));
+    response.setMessage(Mapper.INSTANCE.writeValue(setHmac));
 
     credential.setActive(true);
     credential.setGuid(header.getGuid());
@@ -349,7 +350,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     storageFunction.apply(info.getSerialNumber(), voucher);
 
     //save the voucher
-    response.setMessage(AnyType.fromObject(new DiDone()));
+    response.setMessage(Mapper.INSTANCE.writeValue(new DiDone()));
   }
 
   protected void doDiDone(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -367,7 +368,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To0HelloAck helloAck = new To0HelloAck();
     helloAck.setNonce(nonceTO0Sign);
-    response.setMessage(AnyType.fromObject(helloAck));
+    response.setMessage(Mapper.INSTANCE.writeValue(helloAck));
   }
 
   protected void doTo0HelloAck(DispatchMessage request, DispatchMessage response)
@@ -406,7 +407,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       cs.destroyKey(privateKey);
     }
 
-    response.setMessage(AnyType.fromObject(ownerSign));
+    response.setMessage(Mapper.INSTANCE.writeValue(ownerSign));
   }
 
   protected void doTo0OwnerSign(DispatchMessage request, DispatchMessage response)
@@ -442,7 +443,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     //get wait seconds response
     acceptOwner.setWaitSeconds(waitSeconds);
 
-    response.setMessage(AnyType.fromObject(acceptOwner));
+    response.setMessage(Mapper.INSTANCE.writeValue(acceptOwner));
   }
 
   protected void doTo0AcceptOwner(DispatchMessage request, DispatchMessage response)
@@ -468,7 +469,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     cwtTo1Id.setHelloRv(request.getMessage(HelloRv.class));
     cwtTo1Id.setNonce(nonce);
     response.setAuthToken(createCwtSession(cwtTo1Id));
-    response.setMessage(AnyType.fromObject(helloRvAck));
+    response.setMessage(Mapper.INSTANCE.writeValue(helloRvAck));
   }
 
   protected void doTo1HelloAck(DispatchMessage request, DispatchMessage response)
@@ -492,7 +493,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     try {
       byte[] payload = Mapper.INSTANCE.writeValue(eat);
       CoseSign1 sign1 = getCryptoService().sign(payload, privateKey, pubKey);
-      response.setMessage(AnyType.fromObject(sign1));
+      response.setMessage(Mapper.INSTANCE.writeValue(sign1));
     } finally {
       getCryptoService().destroyKey(privateKey);
     }
@@ -535,7 +536,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
 
     CoseSign1 to1d = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
-    response.setMessage(AnyType.fromObject(to1d));
+    response.setMessage(Mapper.INSTANCE.writeValue(to1d));
   }
 
   protected void doTo1Redirect(DispatchMessage request, DispatchMessage response)
@@ -558,7 +559,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("too many voucher entries");
     }
     To2ProveHeaderPayload hdrPayload = new To2ProveHeaderPayload();
-    byte[] data = voucher.getHeader().covertValue(byte[].class);
+
     hdrPayload.setHeader(voucher.getHeader());
     hdrPayload.setNumEntries(voucher.getEntries().size());
     hdrPayload.setHmac(voucher.getHmac());
@@ -580,7 +581,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
     Nonce deviceNonce = Nonce.fromRandomUUID();
-    uph.setNonce(deviceNonce); //NonceTO2ProveDv
+    uph.setCupNonce(deviceNonce); //NonceTO2ProveDv
 
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
     KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
@@ -601,7 +602,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       byte[] payload = Mapper.INSTANCE.writeValue(hdrPayload);
       CoseSign1 sign1 = cs.sign(payload, privateKey, ownerPublicKey);
       sign1.setUnprotectedHeader(uph);
-      response.setMessage(AnyType.fromObject(sign1));
+      response.setMessage(Mapper.INSTANCE.writeValue(sign1));
     } finally {
       cs.destroyKey(privateKey);
     }
@@ -645,7 +646,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     DeviceCredential cred = getWorker(DeviceCredentialSupplier.class).get();
     Hash hmac = cs.hash(hrdPayload.getHmac().getHashType(), cred.getHmacSecret(),
-        hrdPayload.getHeader().covertValue(byte[].class));
+        hrdPayload.getHeader());
     if (!hmac.equals(hrdPayload.getHmac())) {
       throw new InvalidMessageException("header hmac does not match");
     }
@@ -658,14 +659,14 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     To2GetNextEntry reqEntry = new To2GetNextEntry();
     reqEntry.setEntryNum(0);
-    response.setMessage(AnyType.fromObject(reqEntry));
+    response.setMessage(Mapper.INSTANCE.writeValue(reqEntry));
 
     storage.put(To2ProveHeaderPayload.class, hrdPayload);
     storage.put(OwnerPublicKey.class, ownerPublicKey);
 
     //store device nonce as to2 done
     To2Done to2Done = new To2Done();
-    to2Done.setNonce(sign1.getUnprotectedHeader().getNonce());
+    to2Done.setNonce(sign1.getUnprotectedHeader().getCupNonce());
     storage.put(To2Done.class, to2Done);
 
 
@@ -685,7 +686,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2NextEntry nextEntry = new To2NextEntry();
     nextEntry.setEntryNum(reqEntry.getEntryNum());
     nextEntry.setEntry(voucher.getEntries().get(reqEntry.getEntryNum()));
-    response.setMessage(AnyType.fromObject(nextEntry));
+    response.setMessage(Mapper.INSTANCE.writeValue(nextEntry));
   }
 
   protected void doNextEntry(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -701,7 +702,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
     OwnershipVoucherHeader header =
-        hdrPayload.getHeader().unwrap(OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
 
     HashType hashType =
         new AlgorithmFinder().getCompatibleHashType(hdrPayload.getHmac().getHashType());
@@ -712,7 +713,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (nextEntry.getEntryNum() == 0) {
       prevOwnerKey = header.getPublicKey();
       prevHdrHash = VoucherUtils.getEntryHash(hdrPayload.getHmac(),
-          hdrPayload.getHeader().covertValue(byte[].class));
+          hdrPayload.getHeader());
     } else {
       prevOwnerKey = storage.get(OwnerPublicKey.class);
       prevHdrHash = storage.get(Hash.class);
@@ -745,7 +746,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
       To2GetNextEntry reqEntry = new To2GetNextEntry();
       reqEntry.setEntryNum(nextEntry.getEntryNum() + 1);
-      response.setMessage(AnyType.fromObject(reqEntry));
+      response.setMessage(Mapper.INSTANCE.writeValue(reqEntry));
     }
 
   }
@@ -760,7 +761,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     Nonce setupNonce = Nonce.fromRandomUUID();
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
-    uph.setNonce(setupNonce); //NonceTO2SetupDv
+    uph.setEatNone(setupNonce); //NonceTO2SetupDv
     To2ProveDevicePayload fdoPayload = new To2ProveDevicePayload();
     CryptoService cs = getCryptoService();
 
@@ -782,7 +783,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     eat.setNonce(deviceNonce);
 
     OwnershipVoucherHeader header =
-        hdrPayload.getHeader().unwrap(OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
     eat.setGuid(header.getGuid());
 
     KeyResolver resolver = Config.getWorker(DeviceKeySupplier.class).get();
@@ -797,7 +798,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       byte[] payload = Mapper.INSTANCE.writeValue(eat);
       CoseSign1 sign1 = getCryptoService().sign(payload, privateKey, pubKey);
       sign1.setUnprotectedHeader(uph);
-      response.setMessage(AnyType.fromObject(sign1));
+      response.setMessage(Mapper.INSTANCE.writeValue(sign1));
     } finally {
       cs.destroyKey(privateKey);
     }
@@ -848,6 +849,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
+
+
     EatPayloadBase eatPayload = Mapper.INSTANCE.readValue(sign1.getPayload(), EatPayloadBase.class);
     if (!eatPayload.getGuid().equals(helloDevice.getGuid())) {
       throw new InvalidMessageException("EUID does not match");
@@ -860,7 +863,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
 
     //gets setup nonce
-    Nonce setupNonce = sign1.getUnprotectedHeader().getNonce();
+    Nonce setupNonce = sign1.getUnprotectedHeader().getEatNonce();
     //store setup nonce for later
     To2Done2 done2 = new To2Done2();
     done2.setNonce(setupNonce);
@@ -872,6 +875,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2SetupDevicePayload setupDevice = new To2SetupDevicePayload();
     setupDevice.setNonce(setupNonce);
 
+
     OwnershipVoucherHeader replacedHeader =
         getWorker(VoucherReplacementFunction.class).apply(voucher);
     storage.put(OwnershipVoucherHeader.class, replacedHeader);
@@ -880,15 +884,15 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     setupDevice.setRendezvousInfo(replacedHeader.getRendezvousInfo());
     setupDevice.setOwner2Key(replacedHeader.getPublicKey());
 
+
     CryptoService cs = getCryptoService();
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
-    KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
-    PrivateKey privateKey = resolver.getPrivateKey(cs.decodeKey(ownerPublicKey));
+    KeyResolver resolver = getWorker(ReplacementKeySupplier.class).get();
+    PrivateKey privateKey = resolver.getPrivateKey(cs.decodeKey(setupDevice.getOwner2Key()));
     sign1 = null;
     try {
       byte[] payload = Mapper.INSTANCE.writeValue(setupDevice);
       sign1 = cs.sign(payload, privateKey, ownerPublicKey);
-      response.setMessage(AnyType.fromObject(sign1));
     } finally {
       cs.destroyKey(privateKey);
     }
@@ -917,23 +921,24 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = request.getExtra();
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
     CoseSign1 sign1 = Mapper.INSTANCE.readValue(cipherText, CoseSign1.class);
+    To2SetupDevicePayload payload =
+        Mapper.INSTANCE.readValue(sign1.getPayload(), To2SetupDevicePayload.class);
 
     CryptoService cs = getCryptoService();
-    OwnerPublicKey ownerPublicKey = storage.get(OwnerPublicKey.class);
+    OwnerPublicKey ownerPublicKey = payload.getOwner2Key();
     boolean verify = cs.verify(sign1, ownerPublicKey);
     if (!verify) {
       throw new InvalidMessageException("signature failure");
     }
 
-    To2SetupDevicePayload payload =
-        Mapper.INSTANCE.readValue(sign1.getPayload(), To2SetupDevicePayload.class);
+
 
     To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
-    OwnershipVoucherHeader oldHeader = hdrPayload.getHeader().unwrap(OwnershipVoucherHeader.class);
+    OwnershipVoucherHeader oldHeader =
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
     OwnershipVoucherHeader newHeader = new OwnershipVoucherHeader();
     newHeader.setVersion(oldHeader.getVersion());
     newHeader.setDeviceInfo(oldHeader.getDeviceInfo());
@@ -958,8 +963,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     //todo: get from config
     devInfoReady.setMaxMessageSize(null);
 
-
-
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
     response.setMessage(cs.encrypt(cipherText, es));
 
@@ -977,8 +980,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = manager.getSession(request.getAuthToken().get());
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
+
     To2DeviceInfoReady devInfoReady = Mapper.INSTANCE.readValue(cipherText,
         To2DeviceInfoReady.class);
 
@@ -1015,7 +1018,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     storage.put(ServiceInfoModuleList.class,moduleList);
 
-
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
     storage.put(OwnerServiceInfo.class,lastInfo);
@@ -1030,8 +1032,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = request.getExtra();
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
+
     To2OwnerInfoReady ownerInfoReady = Mapper.INSTANCE.readValue(cipherText,
         To2OwnerInfoReady.class);
 
@@ -1046,7 +1048,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2DeviceInfoReady deviceInfoReady = storage.get(To2DeviceInfoReady.class);
     To2ProveHeaderPayload ownerPayload = storage.get(To2ProveHeaderPayload.class);
-    OwnershipVoucherHeader header = ownerPayload.getHeader().unwrap(OwnershipVoucherHeader.class);
+    OwnershipVoucherHeader header =
+        Mapper.INSTANCE.readValue(ownerPayload.getHeader(),OwnershipVoucherHeader.class);
 
     List<Object> workers = getWorkers();
     ServiceInfoModuleList moduleList = new ServiceInfoModuleList();
@@ -1083,8 +1086,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = manager.getSession(request.getAuthToken().get());
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
     DeviceServiceInfo devInfo = Mapper.INSTANCE.readValue(cipherText,
         DeviceServiceInfo.class);
@@ -1139,8 +1141,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = request.getExtra();
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
+
 
     OwnerServiceInfo ownerInfo = Mapper.INSTANCE.readValue(cipherText,
         OwnerServiceInfo.class);
@@ -1193,8 +1195,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = manager.getSession(request.getAuthToken().get());
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
+
 
     To2Done done = Mapper.INSTANCE.readValue(cipherText,
         To2Done.class);
@@ -1217,8 +1219,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SimpleStorage storage = request.getExtra();
     EncryptionState es = storage.get(EncryptionState.class);
 
-    AnyType cipherMsg = request.getMessage(AnyType.class);
-    byte[] cipherText = getCryptoService().decrypt(cipherMsg, es);
+    byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
+
 
     To2Done2 done2 = Mapper.INSTANCE.readValue(cipherText,
         To2Done2.class);
@@ -1302,7 +1304,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         doGetNextEntry(request, response);
         break;
       case TO2_OV_NEXT_ENTRY:
-        response.setMsgType(MsgType.TO2_OV_NEXT_ENTRY);
+        response.setMsgType(MsgType.TO2_GET_OV_NEXT_ENTRY);
         doNextEntry(request, response);
         break;
       case TO2_PROVE_DEVICE:

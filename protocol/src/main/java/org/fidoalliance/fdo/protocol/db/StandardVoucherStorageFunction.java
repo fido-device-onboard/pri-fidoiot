@@ -31,7 +31,7 @@ public class StandardVoucherStorageFunction implements VoucherStorageFunction {
       mfgVoucher.setSerialNo(serialNo);
 
       OwnershipVoucherHeader header =
-          ownershipVoucher.getHeader().unwrap(OwnershipVoucherHeader.class);
+          Mapper.INSTANCE.readValue(ownershipVoucher.getHeader(), OwnershipVoucherHeader.class);
 
       mfgVoucher.setCreatedOn(new Date(System.currentTimeMillis()));
 

@@ -30,20 +30,6 @@ public class AnyType {
     return new AnyType(object);
   }
 
-  @JsonIgnore
-  public void wrap() throws IOException {
-    Object o = covertValue(Object.class);
-    byte[] data = Mapper.INSTANCE.writeValue(o);
-    this.node =  Mapper.INSTANCE.valueToTree(data);
-  }
-
-  @JsonIgnore
-  public <T> T unwrap(final Class<T> t) throws IOException {
-    byte[] wrapped = Mapper.INSTANCE.covertValue(node, byte[].class);
-    return Mapper.INSTANCE.readValue(wrapped, t);
-
-  }
-
 
   @JsonIgnore
   public <T> T covertValue(final Class<T> t) {

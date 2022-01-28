@@ -36,13 +36,14 @@ public class StandardTo0Client extends HttpClient {
   @Override
   protected void generateHello() throws IOException {
 
+    byte[] headerTag = getTo0d().getVoucher().getHeader();
     OwnershipVoucherHeader header =
-        getTo0d().getVoucher().getHeader().unwrap(OwnershipVoucherHeader.class);
+      Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
     setInstructions(HttpUtils.getInstructions(header.getRendezvousInfo(), false));
 
     setRequest(new DispatchMessage());
     getRequest().setMsgType(MsgType.TO0_HELLO);
-    getRequest().setMessage(AnyType.fromObject(new To0Hello()));
+    getRequest().setMessage(Mapper.INSTANCE.writeValue(new To0Hello()));
     SimpleStorage storage = new SimpleStorage();
     storage.put(To0d.class, getTo0d());
     storage.put(To2AddressEntries.class,getAddressEntries());

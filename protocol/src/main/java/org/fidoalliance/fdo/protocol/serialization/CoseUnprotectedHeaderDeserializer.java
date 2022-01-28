@@ -19,6 +19,8 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
   private static final String CUPH_NONCE = "256";
   private static final String CUPH_OWNER_PUBKEY = "257";
   private static final String EAT_MAROE_PREFIX = "-258";
+  private static final String EAT_UPH_NONCE = "-259";
+
 
   public CoseUnprotectedHeaderDeserializer() {
     this(null);
@@ -35,11 +37,16 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
 
-    JsonNode subNode = node.get(CUPH_NONCE);
+    JsonNode subNode = node.get(EAT_ETM_AES_IV);
+    if (subNode != null) {
+      uph.setIv(subNode.binaryValue());
+    }
+
+    subNode = node.get(CUPH_NONCE);
     if (subNode != null) {
       Nonce nonce = new Nonce();
       nonce.setNonce(subNode.binaryValue());
-      uph.setNonce(nonce);
+      uph.setCupNonce(nonce);
     }
 
     subNode = node.get(CUPH_OWNER_PUBKEY);
@@ -53,10 +60,14 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
       uph.setMaroPrefix(subNode.binaryValue());
     }
 
-    subNode = node.get(EAT_ETM_AES_IV);
+    subNode = node.get(EAT_UPH_NONCE);
     if (subNode != null) {
-      uph.setIv(subNode.binaryValue());
+      Nonce nonce = new Nonce();
+      nonce.setNonce(subNode.binaryValue());
+      uph.setEatNone(nonce);
     }
+
+
 
     return uph;
   }

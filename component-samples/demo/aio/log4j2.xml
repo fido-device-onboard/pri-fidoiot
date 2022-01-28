@@ -18,6 +18,7 @@
     <Logger name="org.hibernate.SQL" level="info"/>
     <Root level="info">
       <AppenderRef ref="STDOUT"/>
+      <AppenderRef ref="RollingFile"/>
     </Root>
   </Loggers>
 </Configuration>

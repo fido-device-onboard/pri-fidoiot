@@ -43,6 +43,19 @@
       <url-pattern>/api/v1/rvinfo</url-pattern>
    </servlet-mapping>
 
+  <servlet>
+      <servlet-name>Redirect</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.To2Blob</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Redirect</servlet-name>
+      <url-pattern>/api/v1/owner/redirect</url-pattern>
+   </servlet-mapping>
+
    <servlet>
       <servlet-name>To0Starter</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
@@ -53,8 +66,47 @@
    </servlet>
    <servlet-mapping> 
       <servlet-name>To0Starter</servlet-name>
-      <url-pattern>/api/v1/to0</url-pattern>
+      <url-pattern>/api/v1/to0/*</url-pattern>
    </servlet-mapping>
 
+  <servlet>
+      <servlet-name>OwnerVoucher</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.OwnerVoucher</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>OwnerVoucher</servlet-name>
+      <url-pattern>/api/v1/owner/vouchers/*</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>Logs</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.Logs</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Logs</servlet-name>
+      <url-pattern>/api/v1/logs</url-pattern>
+   </servlet-mapping>
    
+
+  <servlet>
+      <servlet-name>Interop</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.InteropVoucher</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Interop</servlet-name>
+      <url-pattern>/api/v1/interop/vouchers/*</url-pattern>
+   </servlet-mapping>
+
 </web-app>

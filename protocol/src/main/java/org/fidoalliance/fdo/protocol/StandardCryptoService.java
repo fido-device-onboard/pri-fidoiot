@@ -20,7 +20,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
@@ -508,7 +507,16 @@ public class StandardCryptoService implements CryptoService {
     final ECPublicKey publicKey = (ECPublicKey) kp.getPublic();
     final int bitLength = publicKey.getParams().getCurve().getField().getFieldSize();
     final int byteLength = bitLength / Byte.SIZE;
-    final byte[] randomBytes = getRandomBytes(sizeType.toInteger() / Long.BYTES);
+
+    int ramdomLength;
+    if (keyType.equals(PublicKeyType.SECP256R1)) {
+      ramdomLength = 16;
+    } else if (keyType.equals(PublicKeyType.SECP384R1)) {
+      ramdomLength = 48;
+    } else {
+      throw new InvalidMessageException("");
+    }
+    final byte[] randomBytes = getRandomBytes(ramdomLength);
 
     //bstr[blen(x), x, blen(y), y, blen(Random), Random]
     final byte[] x = BufferUtils.adjustBigBuffer(publicKey.getW().getAffineX().toByteArray(),
@@ -869,6 +877,7 @@ public class StandardCryptoService implements CryptoService {
       prf.update(kxResult.contextRand);                                      // Context (part 2)
       prf.update((byte) ((l >> 8) & 0xff)); // [L]2, upper byte
       prf.update((byte) (l & 0xff));        // [L]2, lower byte
+
       result.write(prf.doFinal());  // append K(i) to the cumulative result
     }
 
@@ -877,7 +886,7 @@ public class StandardCryptoService implements CryptoService {
 
 
   @Override
-  public AnyType encrypt(byte[] payload, EncryptionState state) throws IOException {
+  public byte[] encrypt(byte[] payload, EncryptionState state) throws IOException {
     try {
       final CipherSuiteType cipherType = state.getCipherSuite();
 
@@ -951,7 +960,7 @@ public class StandardCryptoService implements CryptoService {
 
       }
 
-      AnyType message = encryptThenMac(sev, ciphered, iv, cipherType);
+      byte[] message = encryptThenMac(sev, ciphered, iv, cipherType);
 
       if (isCtrCipher(cipherType)) {
         updateIv(ciphered.length, state);
@@ -974,7 +983,7 @@ public class StandardCryptoService implements CryptoService {
 
 
   @Override
-  public byte[] decrypt(AnyType message, EncryptionState state) throws IOException {
+  public byte[] decrypt(byte[] message, EncryptionState state) throws IOException {
     try {
 
       final byte[] sek = state.getSek();
@@ -987,7 +996,7 @@ public class StandardCryptoService implements CryptoService {
 
       if (isSimpleEncryptedMessage(cipherType)) {
 
-        encrypt0 = message.covertValue(Encrypt0.class);
+        encrypt0 = Mapper.INSTANCE.readValue(message,Encrypt0.class);
         EncStructure encStructure = new EncStructure();
         encStructure.setContext("Encrypt0");
         encStructure.setProtectedHeader(encrypt0.getProtectedHeader());
@@ -996,7 +1005,7 @@ public class StandardCryptoService implements CryptoService {
 
       } else { // legacy (composed) message
 
-        Mac0 mac0 = message.covertValue(Mac0.class);
+        Mac0 mac0 = Mapper.INSTANCE.readValue(message,Mac0.class);
         encrypt0 = Mapper.INSTANCE.readValue(mac0.getPayload(),Encrypt0.class);
 
         aad = new byte[0];
@@ -1102,7 +1111,7 @@ public class StandardCryptoService implements CryptoService {
     return outputText;
   }
 
-  protected AnyType encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv,
+  protected byte[] encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv,
       CipherSuiteType cipherType) throws IOException {
 
     CoseProtectedHeader cph = new CoseProtectedHeader();
@@ -1117,7 +1126,7 @@ public class StandardCryptoService implements CryptoService {
     encrypt0.setCipherText(ciphered);
 
     if (isSimpleEncryptedMessage(cipherType)) { // not all encrypted messages use the 'composed' type
-      return AnyType.fromObject(encrypt0);
+      return Mapper.INSTANCE.writeValue(encrypt0);
     }
 
     HashType hmacType;
@@ -1142,7 +1151,7 @@ public class StandardCryptoService implements CryptoService {
     mac0.setPayload(payload);
     mac0.setTagValue(mac.getHashValue());
 
-    return AnyType.fromObject(mac0);
+    return Mapper.INSTANCE.writeValue(mac0);
   }
 
   protected Cipher aesTypeToCipher(CipherSuiteType cipherType) throws IOException {

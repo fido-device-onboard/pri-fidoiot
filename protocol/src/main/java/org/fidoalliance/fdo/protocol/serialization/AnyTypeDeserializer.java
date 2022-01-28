@@ -27,7 +27,8 @@ public class AnyTypeDeserializer extends StdDeserializer<AnyType> {
     if (node.isNull()) {
       return AnyType.fromObject(new NullValue());
     }
-    return AnyType.fromObject(node);
+    Object object = Mapper.INSTANCE.covertValue(node,Object.class);
+    return AnyType.fromObject(object);
   }
 
 

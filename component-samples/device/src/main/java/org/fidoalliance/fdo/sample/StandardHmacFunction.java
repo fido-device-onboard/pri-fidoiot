@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import org.fidoalliance.fdo.protocol.AlgorithmFinder;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
+import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.message.AnyType;
@@ -19,12 +20,13 @@ public class StandardHmacFunction implements HmacFunction {
 
 
   @Override
-  public Hash apply(DeviceCredential credential, AnyType headerTag) throws IOException {
+  public Hash apply(DeviceCredential credential, byte[] headerTag) throws IOException {
 
     DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
     HashType hmacType = HashType.SHA384;
     if (config.getKeyType().equals(PublicKeyType.SECP256R1)) {
-      OwnershipVoucherHeader header = headerTag.unwrap(OwnershipVoucherHeader.class);
+      OwnershipVoucherHeader header =
+          Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
       CryptoService cs = Config.getWorker(CryptoService.class);
       PublicKey ownerKey = cs.decodeKey(header.getPublicKey());
       KeySizeType ownerSize = new AlgorithmFinder().getKeySizeType(ownerKey);
@@ -36,7 +38,6 @@ public class StandardHmacFunction implements HmacFunction {
     CryptoService cs = Config.getWorker(CryptoService.class);
     credential.setHmacSecret(cs.createHmacKey(hmacType));
 
-    return cs.hash(hmacType, credential.getHmacSecret(),
-        headerTag.covertValue(byte[].class));
+    return cs.hash(hmacType, credential.getHmacSecret(), headerTag);
   }
 }

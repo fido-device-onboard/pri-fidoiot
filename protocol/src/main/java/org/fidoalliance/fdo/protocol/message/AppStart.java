@@ -14,15 +14,15 @@ import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 public class AppStart {
 
   @JsonProperty("manufacturingInfo")
-  private AnyType manufacturingInfo;
+  private byte[] manufacturingInfo;
 
   @JsonIgnore
-  public AnyType getManufacturingInfo() {
+  public byte[] getManufacturingInfo() {
     return manufacturingInfo;
   }
 
   @JsonIgnore
-  public void setManufacturingInfo(AnyType mfgInfo) {
+  public void setManufacturingInfo(byte[] mfgInfo) {
     this.manufacturingInfo = mfgInfo;
   }
 }

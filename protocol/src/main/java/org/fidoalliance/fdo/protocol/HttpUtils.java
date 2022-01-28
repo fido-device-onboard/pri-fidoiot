@@ -23,6 +23,7 @@ import org.fidoalliance.fdo.protocol.message.RendezvousProtocol;
 import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntry;
+import org.fidoalliance.fdo.protocol.message.TransportProtocol;
 import org.hibernate.type.AnyType;
 
 public class HttpUtils {
@@ -102,11 +103,11 @@ public class HttpUtils {
 
         switch (variable) {
           case DNS:
-            dns = instruction.getValue().unwrap(String.class);
+            dns = Mapper.INSTANCE.readValue(instruction.getValue(), String.class);
             break;
           case IP_ADDRESS:
             try {
-              byte[] ipData = instruction.getValue().unwrap(byte[].class);
+              byte[] ipData = Mapper.INSTANCE.readValue(instruction.getValue(), byte[].class);
               ipAddress = InetAddress.getByAddress(
                   ipData
               ).toString();
@@ -119,10 +120,10 @@ public class HttpUtils {
             }
             break;
           case DEV_PORT:
-            port = instruction.getValue().unwrap(Integer.class);
+            port = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
             break;
           case PROTOCOL: {
-            RendezvousProtocol rvp = instruction.getValue().unwrap(
+            RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
                 RendezvousProtocol.class);
             if (rvp.equals(RendezvousProtocol.PROT_HTTPS)) {
               schemes.add("https");
@@ -141,7 +142,7 @@ public class HttpUtils {
             devOnly = true;
             break;
           case DELAYSEC:
-            delaySec = instruction.getValue().covertValue(Long.class);
+            delaySec = Mapper.INSTANCE.readValue(instruction.getValue(),Long.class);
             break;
           case BYPASS:
             bypass = true;
@@ -202,6 +203,7 @@ public class HttpUtils {
 
   /**
    * Get Http Instructions from To2Address Entries.
+   *
    * @param entries An Instance of To2 Address Entries.
    * @return A list of Http Instructions.
    * @throws IOException An Error occurred.
@@ -213,13 +215,12 @@ public class HttpUtils {
 
     for (To2AddressEntry entry : entries) {
 
-      if (entry.getProtocol() == RendezvousProtocol.PROT_HTTP) {
+      if (entry.getProtocol() == TransportProtocol.PROT_HTTP) {
         schemes.add("http");
-      } else if (entry.getProtocol() != RendezvousProtocol.PROT_HTTPS) {
+      } else if (entry.getProtocol() == TransportProtocol.PROT_HTTPS) {
         schemes.add("https");
-      } else if (entry.getProtocol() != RendezvousProtocol.PROT_REST) {
-        schemes.add("https");
-        schemes.add("http");
+      } else {
+        continue;
       }
 
       for (String scheme : schemes) {

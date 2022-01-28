@@ -9,6 +9,6 @@ import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 
-public interface HmacFunction extends FailableBiFunction<DeviceCredential, AnyType,
+public interface HmacFunction extends FailableBiFunction<DeviceCredential, byte[],
     Hash, IOException> {
 }

@@ -109,7 +109,7 @@ public class DeviceApp extends HttpClient {
     setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
 
     getRequest().setMsgType(MsgType.TO1_HELLO_RV);
-    getRequest().setMessage(AnyType.fromObject(helloRv));
+    getRequest().setMessage(Mapper.INSTANCE.writeValue(helloRv));
 
   }
 
@@ -131,7 +131,7 @@ public class DeviceApp extends HttpClient {
     setInstructions(HttpUtils.getInstructions(to1dPayload.getAddressEntries()));
 
     getRequest().setMsgType(MsgType.TO2_HELLO_DEVICE);
-    getRequest().setMessage(AnyType.fromObject(helloDevice));
+    getRequest().setMessage(Mapper.INSTANCE.writeValue(helloDevice));
 
 
     SimpleStorage storage = getRequest().getExtra();
@@ -177,14 +177,12 @@ public class DeviceApp extends HttpClient {
     mfgInfo.setDeviceInfo("DemoDevice");
 
     AppStart appStart = new AppStart();
-    AnyType mfgInfoItem = AnyType.fromObject(mfgInfo);
-    mfgInfoItem.wrap();
-    appStart.setManufacturingInfo(mfgInfoItem);
+    appStart.setManufacturingInfo(Mapper.INSTANCE.writeValue(mfgInfo));
 
     setRequest(new DispatchMessage());
     getRequest().setExtra(new SimpleStorage());
     getRequest().setMsgType(MsgType.DI_APP_START);
-    getRequest().setMessage(AnyType.fromObject(appStart));
+    getRequest().setMessage(Mapper.INSTANCE.writeValue(appStart));
 
 
   }

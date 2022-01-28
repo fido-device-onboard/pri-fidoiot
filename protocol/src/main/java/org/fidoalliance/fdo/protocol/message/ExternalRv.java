@@ -8,20 +8,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"voucherHeader"})
+@JsonPropertyOrder({"mechanism"} )
 @JsonSerialize(using = GenericArraySerializer.class)
-public class SetCredentials {
+public class ExternalRv {
 
-  @JsonProperty("voucherHeader")
-  private byte[] voucherHeader;
+  @JsonProperty("mechanism")
+  private String mechanism;
 
   @JsonIgnore
-  public byte[] getVoucherHeader() {
-    return voucherHeader;
+  public String getMechanism() {
+    return mechanism;
   }
 
   @JsonIgnore
-  public void setVoucherHeader(byte[] voucherHeader) {
-    this.voucherHeader = voucherHeader;
+  public void setMechanism(String mechanism) {
+    this.mechanism = mechanism;
   }
 }

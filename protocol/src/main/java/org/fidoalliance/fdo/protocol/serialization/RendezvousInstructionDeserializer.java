@@ -9,9 +9,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.fidoalliance.fdo.protocol.InvalidMessageException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.ExternalRv;
 import org.fidoalliance.fdo.protocol.message.Hash;
+import org.fidoalliance.fdo.protocol.message.HashType;
 import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
 import org.fidoalliance.fdo.protocol.message.RendezvousMedium;
 import org.fidoalliance.fdo.protocol.message.RendezvousProtocol;
@@ -28,30 +31,44 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
     super(t);
   }
 
-  private AnyType getSubValue(RendezvousVariable variable,JsonNode subNode)
-      throws UnknownHostException {
+  private byte[] getSubValue(RendezvousVariable variable,JsonNode subNode)
+      throws IOException {
     switch (variable) {
       case WIFI_SSID:
       case WIFI_PW:
       case DNS:
-
-        return AnyType.fromObject(subNode.textValue());
+        return Mapper.INSTANCE.writeValue(subNode.textValue());
       case IP_ADDRESS:
 
-         return AnyType.fromObject(
+         return Mapper.INSTANCE.writeValue(
               InetAddress.getByName(subNode.textValue()).getAddress());
       case OWNER_PORT:
       case DEV_PORT:
       case PROTOCOL:
       case MEDIUM:
       case DELAYSEC:
-        return AnyType.fromObject(subNode.intValue());
+        return Mapper.INSTANCE.writeValue(subNode.intValue());
       case CL_CERT_HASH:
       case SV_CERT_HASH:
+        if (subNode.isArray()) {
+          Hash hash = new Hash();
+          hash.setHashType(
+              HashType.fromNumber(
+                  subNode.get(0).numberValue().intValue()));
+          hash.setHashValue(subNode.get(1).binaryValue());
+
+          return Mapper.INSTANCE.writeValue(hash);
+        }
+        throw new InvalidMessageException("expecting rvinfo hash array");
       case EXT_RV:
-        return AnyType.fromObject(subNode);
+        if (subNode.isArray()) {
+          ExternalRv externalRv = new ExternalRv();
+          externalRv.setMechanism(subNode.get(0).textValue());
+          Mapper.INSTANCE.writeValue(externalRv);
+        }
+        throw new InvalidMessageException("expecting external rv array");
       case USER_INPUT:
-        return AnyType.fromObject(subNode.booleanValue());
+        return Mapper.INSTANCE.writeValue(subNode.booleanValue());
      default:
         return null;
     }
@@ -72,14 +89,9 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
     if (node.size() > 1) {
       JsonNode subNode = node.get(1);
       if (subNode.isBinary()) {
-        rvi.setValue(AnyType.fromObject(subNode.binaryValue()));
+        rvi.setValue(subNode.binaryValue());
       } else {
-        AnyType any = getSubValue(variable,subNode);
-        if (any == null) {
-          throw new JsonParseException(jp,"invalid rv variable " + variable.toString());
-        }
-        any.wrap();
-        rvi.setValue(any);
+        rvi.setValue(getSubValue(variable,subNode));
       }
     }
     //now check

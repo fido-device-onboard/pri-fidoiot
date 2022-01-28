@@ -17,7 +17,7 @@ import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 public class To2ProveHeaderPayload {
 
   @JsonProperty("header")
-  private AnyType header;
+  private byte[] header;
 
   @JsonProperty("numEntries")
   private int numEntries;
@@ -41,7 +41,7 @@ public class To2ProveHeaderPayload {
   private int maxMessageSize;
 
   @JsonIgnore
-  public AnyType getHeader() {
+  public byte[] getHeader() {
     return header;
   }
 
@@ -81,7 +81,7 @@ public class To2ProveHeaderPayload {
   }
 
   @JsonIgnore
-  public void setHeader(AnyType header) {
+  public void setHeader(byte[] header) {
     this.header = header;
   }
 

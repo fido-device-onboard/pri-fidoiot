@@ -38,7 +38,7 @@ public class OnboardConfigSupplier
             + "- - \"127.0.0.1\"\n"
             + "  - \"localhost\"\n"
             + "  - %s\n"
-            + "  - 1\n";
+            + "  - 3\n";
 
         final String defaultPort = Config.getWorker(HttpServer.class).getPort();
         final String rviString = String.format(defaultBob, defaultPort);

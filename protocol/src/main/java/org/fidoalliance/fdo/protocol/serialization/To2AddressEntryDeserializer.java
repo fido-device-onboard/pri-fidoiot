@@ -8,8 +8,10 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.net.InetAddress;
 import org.fidoalliance.fdo.protocol.InvalidIpAddressException;
+import org.fidoalliance.fdo.protocol.InvalidMessageException;
 import org.fidoalliance.fdo.protocol.message.RendezvousProtocol;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntry;
+import org.fidoalliance.fdo.protocol.message.TransportProtocol;
 
 public class To2AddressEntryDeserializer extends StdDeserializer<To2AddressEntry> {
 
@@ -35,15 +37,24 @@ public class To2AddressEntryDeserializer extends StdDeserializer<To2AddressEntry
       entry.setIpAddress(subNode.binaryValue());
     } else if (subNode.isTextual()) {
       entry.setIpAddress(InetAddress.getByName(subNode.textValue()).getAddress());
+    } else if (subNode.isNull()) {
+      entry.setIpAddress(null);
     } else {
       throw new InvalidIpAddressException(new IllegalArgumentException());
     }
 
-    entry.setDnsAddress(node.get(index++).textValue());
+    subNode = node.get(index++);
+    if (subNode.isTextual()) {
+      entry.setDnsAddress(subNode.textValue());
+    } else if (subNode.isNull()) {
+      entry.setDnsAddress(null);
+    } else {
+      throw new InvalidMessageException("invalid dns");
+    }
 
     entry.setPort(node.get(index++).intValue());
     entry.setProtocol(
-        RendezvousProtocol.fromNumber(node.get(index++).intValue())
+        TransportProtocol.fromNumber(node.get(index++).intValue())
     );
 
     return entry;

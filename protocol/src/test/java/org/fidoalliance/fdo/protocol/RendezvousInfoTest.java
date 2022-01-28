@@ -24,7 +24,7 @@ public class RendezvousInfoTest {
     hash.setHashType(HashType.SHA256);
     hash.setHashValue(new byte[] {1,2,3});
     ins1.setVariable(RendezvousVariable.CL_CERT_HASH);
-    ins1.setValue(AnyType.fromObject(hash));
+    ins1.setValue(Mapper.INSTANCE.writeValue(hash));
     dir.add(ins1);
     info.add(dir);
 

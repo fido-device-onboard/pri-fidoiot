@@ -25,6 +25,9 @@ public class StandardDatabaseServer implements DatabaseServer {
 
       logger.info("database tcp port " + server.getPort());
       list.clear();
+      list.add("-webAllowOthers");
+      list.add("-webExternalNames");
+      list.add("fdo10.westus.cloudapp.azure.com");
       list.add("-ifNotExists");
       Server web = Server.createWebServer(list.toArray(String[]::new)).start();
       logger.info("database web port " + web.getPort());

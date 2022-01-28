@@ -16,7 +16,7 @@ public class ServiceInfoKeyValuePair {
   private String key;
 
   @JsonProperty("value")
-  private AnyType value;
+  private byte[] value;
 
   @JsonIgnore
   public String getKey() {
@@ -24,7 +24,7 @@ public class ServiceInfoKeyValuePair {
   }
 
   @JsonIgnore
-  public AnyType getValue() {
+  public byte[] getValue() {
     return value;
   }
 
@@ -34,7 +34,7 @@ public class ServiceInfoKeyValuePair {
   }
 
   @JsonIgnore
-  public void setValue(AnyType value) {
+  public void setValue(byte[] value) {
     this.value = value;
   }
 

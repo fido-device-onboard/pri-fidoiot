@@ -55,9 +55,9 @@ public class DispatchMessage {
     this.message = message;
   }
 
-  public void setMessage(AnyType anyType) throws IOException {
-    message = Mapper.INSTANCE.writeValue(anyType);
-  }
+ // public void setMessage(AnyType anyType) throws IOException {
+ //   message = Mapper.INSTANCE.writeValue(anyType);
+  //}
 
   public void setProtocolVersion(ProtocolVersion protocolVersion) {
     this.protocolVersion = protocolVersion;
@@ -119,7 +119,7 @@ public class DispatchMessage {
     }
 
     try {
-      resultMsg.setMessage(AnyType.fromObject(error));
+      resultMsg.setMessage(Mapper.INSTANCE.writeValue(error));
     } catch (IOException e) {
       resultMsg.setMessage(new byte[0]);
     }

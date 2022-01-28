@@ -38,16 +38,15 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
       throws IOException {
     switch (kvPair.getKey()) {
       case DevMod.KEY_MODULES: {
-        DevModList list = kvPair.getValue().unwrap(DevModList.class);
+        DevModList list =
+            Mapper.INSTANCE.readValue(kvPair.getValue(),DevModList.class);
         for (int i = 2; i < list.size(); i++) {
           if (list.get(i).covertValue(String.class).equals(FidoAlliance.NAME)) {
             state.setActive(true);
             ServiceInfo info = state.getExtra().covertValue(ServiceInfo.class);
             ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
             activePair.setKeyName(FidoAlliance.ACTIVE);
-            AnyType value = AnyType.fromObject(true);
-            value.wrap();
-            activePair.setValue(value);
+            activePair.setValue(Mapper.INSTANCE.writeValue(true));
             info.add(activePair);
             getConformance(state.getGuid(),info);
             state.setExtra(AnyType.fromObject(info));
@@ -92,9 +91,7 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
 
         ServiceInfoKeyValuePair keyValuePair = new ServiceInfoKeyValuePair();
         keyValuePair.setKeyName(FidoAlliance.DEV_CONFORMANCE);
-        AnyType value = AnyType.fromObject(confData.getData());
-        value.wrap();
-        keyValuePair.setValue(value);
+        keyValuePair.setValue(Mapper.INSTANCE.writeValue(confData.getData()));
         serviceInfo.add(keyValuePair);
       }
       trans.commit();

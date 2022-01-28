@@ -2,6 +2,7 @@ package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
@@ -28,13 +29,13 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
     switch (kvPair.getKey()) {
       case FidoAlliance.ACTIVE:
         logger.info(FidoAlliance.ACTIVE+ " = "
-            + kvPair.getValue().unwrap(Boolean.class));
+            + Mapper.INSTANCE.readValue(kvPair.getValue(),Boolean.class));
         state.setActive(true);
         break;
       case FidoAlliance.DEV_CONFORMANCE:
         if (state.isActive()) {
           logger.info(FidoAlliance.DEV_CONFORMANCE + " = "
-              + kvPair.getValue().unwrap(String.class));
+              + Mapper.INSTANCE.readValue(kvPair.getValue(),String.class));
           break;
         }
     }

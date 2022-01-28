@@ -17,7 +17,7 @@ public class OwnershipVoucher {
   ProtocolVersion version = ProtocolVersion.current();
 
   @JsonProperty("header")
-  AnyType header;
+  byte[] header;
 
   @JsonProperty("hmac")
   Hash hmac;
@@ -34,7 +34,7 @@ public class OwnershipVoucher {
   }
 
   @JsonIgnore
-  public AnyType getHeader() {
+  public byte[] getHeader() {
     return header;
   }
 
@@ -59,7 +59,7 @@ public class OwnershipVoucher {
   }
 
   @JsonIgnore
-  public void setHeader(AnyType header) {
+  public void setHeader(byte[] header) {
     this.header = header;
   }
 

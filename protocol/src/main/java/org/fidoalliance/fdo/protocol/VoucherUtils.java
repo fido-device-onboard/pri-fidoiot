@@ -74,8 +74,9 @@ public class VoucherUtils {
 
     Hash mac = voucher.getHmac();
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(mac.getHashType());
-    AnyType headerTag = voucher.getHeader();
-    OwnershipVoucherHeader header = headerTag.unwrap(OwnershipVoucherHeader.class);
+    byte[] headerTag = voucher.getHeader();
+    OwnershipVoucherHeader header =
+        Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
 
     CryptoService cs = Config.getWorker(CryptoService.class);
     Hash hdrHash = getHeaderHash(hashType, header);
@@ -84,7 +85,7 @@ public class VoucherUtils {
 
     OwnershipVoucherEntries entries = voucher.getEntries();
     if (entries.size() == 0) {
-      prevHash = getEntryHash(mac,headerTag.covertValue(byte[].class));
+      prevHash = getEntryHash(mac,headerTag);
       prevOwnerPubKey = header.getPublicKey();
     } else {
       CoseSign1 entry = entries.getLast();
@@ -116,8 +117,6 @@ public class VoucherUtils {
       CoseSign1 nextEntry = cs.sign(payload, signingKey, prevOwnerPubKey);
       entries.add(nextEntry);
       boolean bok = cs.verify(nextEntry, prevOwnerPubKey);
-
-      "".length();
     } finally {
       cs.destroyKey(signingKey);
     }
@@ -202,7 +201,7 @@ public class VoucherUtils {
    */
   public static Guid getGuid(OwnershipVoucher voucher) throws IOException {
     OwnershipVoucherHeader header =
-        voucher.getHeader().unwrap(OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
 
     return header.getGuid();
   }
@@ -219,7 +218,7 @@ public class VoucherUtils {
     OwnershipVoucherEntries entries = voucher.getEntries();
     if (entries.size() == 0) {
       OwnershipVoucherHeader header =
-          voucher.getHeader().unwrap(OwnershipVoucherHeader.class);
+          Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
       return header.getPublicKey();
     }
     CoseSign1 entry = entries.getLast();
@@ -239,7 +238,7 @@ public class VoucherUtils {
    * @throws IOException An error occurred.
    */
   public static OwnershipVoucherHeader getHeader(OwnershipVoucher voucher) throws IOException {
-    return voucher.getHeader().unwrap(OwnershipVoucherHeader.class);
+    return Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
   }
 
 

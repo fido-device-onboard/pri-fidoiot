@@ -13,6 +13,7 @@ public class CoseUnprotectedHeaderSerializer extends StdSerializer<CoseUnprotect
   private static final int CUPH_NONCE = 256;
   private static final int CUPH_OWNER_PUBKEY = 257;
   private static final int EAT_MAROE_PREFIX = -258;
+  private static final int EAT_NONCE = -259;
 
 
   public CoseUnprotectedHeaderSerializer() {
@@ -28,7 +29,11 @@ public class CoseUnprotectedHeaderSerializer extends StdSerializer<CoseUnprotect
       throws IOException {
 
     int count = 0;
-    if (value.getNonce() != null) {
+    if (value.getCupNonce() != null) {
+      count++;
+    }
+
+    if (value.getEatNonce() != null) {
       count++;
     }
     if (value.getOwnerPublicKey() != null) {
@@ -53,9 +58,9 @@ public class CoseUnprotectedHeaderSerializer extends StdSerializer<CoseUnprotect
       gen.writeFieldId(EAT_ETM_AES_IV);
       gen.writeBinary(value.getIv());
     }
-    if (value.getNonce() != null) {
+    if (value.getCupNonce() != null) {
       gen.writeFieldId(CUPH_NONCE);
-      gen.writeBinary(value.getNonce().getNonce());
+      gen.writeBinary(value.getCupNonce().getNonce());
     }
 
     if (value.getOwnerPublicKey() != null) {
@@ -66,6 +71,11 @@ public class CoseUnprotectedHeaderSerializer extends StdSerializer<CoseUnprotect
     if (value.getMaroPrefix() != null) {
       gen.writeFieldId(EAT_MAROE_PREFIX);
       gen.writeObject(value.getMaroPrefix());
+    }
+
+    if (value.getEatNonce() != null) {
+      gen.writeFieldId(EAT_NONCE);
+      gen.writeBinary(value.getEatNonce().getNonce());
     }
     gen.writeEndObject();
 

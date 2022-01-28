@@ -13,7 +13,7 @@ public class RendezvousInstruction {
   private RendezvousVariable variable = RendezvousVariable.DEV_ONLY;
 
 
-  private AnyType value;
+  private byte[] value;
 
 
   public RendezvousVariable getVariable() {
@@ -21,7 +21,7 @@ public class RendezvousInstruction {
   }
 
 
-  public AnyType getValue() {
+  public byte[] getValue() {
     return value;
   }
 
@@ -31,7 +31,7 @@ public class RendezvousInstruction {
   }
 
 
-  public void setValue(AnyType value) {
+  public void setValue(byte[] value) {
     this.value = value;
   }
 

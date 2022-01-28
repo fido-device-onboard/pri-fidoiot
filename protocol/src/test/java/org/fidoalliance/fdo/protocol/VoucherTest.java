@@ -19,8 +19,7 @@ public class VoucherTest {
     header.setDeviceInfo("sample");
     header.setVersion(ProtocolVersion.current());
     header.setGuid(Guid.fromRandomUUID());
-    AnyType wrappedHeader = AnyType.fromObject(header);
-    wrappedHeader.wrap();
+    voucher.setHeader(Mapper.INSTANCE.writeValue(header));
 
     byte[] data = Mapper.INSTANCE.writeValue(voucher);
     String str = Hex.encodeHexString(data);

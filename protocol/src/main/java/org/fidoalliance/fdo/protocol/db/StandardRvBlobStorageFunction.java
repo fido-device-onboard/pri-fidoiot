@@ -26,8 +26,8 @@ public class StandardRvBlobStorageFunction implements RvBlobStorageFunction {
 
       //todo: test owner public key and guid deniy list
 
-      final OwnershipVoucherHeader header = to0d.getVoucher().getHeader()
-          .unwrap(OwnershipVoucherHeader.class);
+      final OwnershipVoucherHeader header =
+          Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(), OwnershipVoucherHeader.class);
 
       final byte[] data = Mapper.INSTANCE.writeValue(coseSign1);
       RvRedirect redirect = session.get(RvRedirect.class, header.getGuid().toString());
@@ -41,12 +41,11 @@ public class StandardRvBlobStorageFunction implements RvBlobStorageFunction {
         redirect.setCreatedOn(new Date(System.currentTimeMillis()));
 
         session.save(redirect);
-      }
-      else {
+      } else {
         redirect.setData(data);
         redirect.setExpiry(
-                new Date(System.currentTimeMillis()
-                    + Duration.ofSeconds(waitSeconds).toMillis()));
+            new Date(System.currentTimeMillis()
+                + Duration.ofSeconds(waitSeconds).toMillis()));
         session.update(redirect);
       }
       trans.commit();

@@ -3,19 +3,20 @@
 
 package org.fidoalliance.fdo.protocol.message;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.UUID;
-import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
+import org.fidoalliance.fdo.protocol.serialization.NonceDeserializer;
+import org.fidoalliance.fdo.protocol.serialization.NonceSerializer;
 
-@JsonFormat(shape = JsonFormat.Shape.ARRAY)
+
 @JsonPropertyOrder({"nonce"})
-@JsonSerialize(using = GenericArraySerializer.class)
+@JsonSerialize(using = NonceSerializer.class)
+@JsonDeserialize(using = NonceDeserializer.class)
 public class Nonce {
 
   @JsonProperty("nonce")
@@ -55,6 +56,7 @@ public class Nonce {
     return super.equals(o);
   }
 
+  @JsonIgnore
   public static Nonce fromRandomUUID() {
     Nonce nonce = new Nonce();
     nonce.setNonce(Guid.fromRandomUUID().toBytes());

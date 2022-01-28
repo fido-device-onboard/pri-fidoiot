@@ -28,7 +28,7 @@ public class To2AddressEntry {
   private int port;
 
   @JsonProperty("protocol")
-  private RendezvousProtocol protocol;
+  private TransportProtocol protocol;
 
   @JsonIgnore
   public byte[] getIpAddress() {
@@ -46,7 +46,7 @@ public class To2AddressEntry {
   }
 
   @JsonIgnore
-  public RendezvousProtocol getProtocol() {
+  public TransportProtocol getProtocol() {
     return protocol;
   }
 
@@ -66,7 +66,7 @@ public class To2AddressEntry {
   }
 
   @JsonIgnore
-  public void setProtocol(RendezvousProtocol protocol) {
+  public void setProtocol(TransportProtocol protocol) {
     this.protocol = protocol;
   }
 }
