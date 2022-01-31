@@ -8,6 +8,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -16,56 +17,16 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
 
-  <name>Component HTTP AIO Server Sample</name>
   <artifactId>aio</artifactId>
+  <groupId>org.fidoalliance.fdo</groupId>
   <packaging>jar</packaging>
+  <name>All In One Server</name>
 
   <properties>
-    <exec.mainClass>org.fidoalliance.fdo.sample.AioServerApp</exec.mainClass>
+    <exec.mainClass>org.fidoalliance.fdo.sample.AioApp</exec.mainClass>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-dbcp2</artifactId>
-      <version>${dbcp2.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>${h2.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>${bcpkix.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-configuration2</artifactId>
-      <version>${commons-configuration2.version}</version>
-    </dependency>
-
-    <dependency>
-       <groupId>commons-beanutils</groupId>
-       <artifactId>commons-beanutils</artifactId>
-       <version>${commons-beanutils.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
@@ -73,11 +34,37 @@
       <version>${tomcat.version}</version>
     </dependency>
 
+
     <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>cert-utils</artifactId>
-      <version>${fdo.version}</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <version>${bcpkix.version}</version>
+
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bcprov.version}</version></dependency>
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
@@ -85,60 +72,65 @@
       <version>${fdo.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-client-dispatcher</artifactId>
-      <version>${fdo.version}</version>
-    </dependency>
 
     <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-server-dispatcher</artifactId>
-      <version>${fdo.version}</version>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api
     <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-api-di-sample</artifactId>
-      <version>${fdo.version}</version>
-      <scope>compile</scope>
-    </dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>-->
+
+    <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+      <version>2.7.4</version>
+    </dependency>-->
+
 
     <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>http-api-owner-sample</artifactId>
-      <version>${fdo.version}</version>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${hibernate.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>storage-di-sample</artifactId>
-      <version>${fdo.version}</version>
-    </dependency>
 
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>storage-rv-sample</artifactId>
-      <version>${fdo.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>storage-owner-sample</artifactId>
-      <version>${fdo.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>logging-utils</artifactId>
-      <version>${fdo.version}</version>
-      <scope>compile</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>${exec.mainClass}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>${maven-dependency-plugin.version}</version>
@@ -165,7 +157,7 @@
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
                   <artifactId>${project.artifactId}</artifactId>
-                  <version>${project.version}</version>
+                  <version>${fdo.version}</version>
                   <type>${project.packaging}</type>
                   <outputDirectory>${project-demo-directory}/${project.artifactId}</outputDirectory>
                   <destFileName>${project.artifactId}.${project.packaging}</destFileName>
@@ -178,7 +170,7 @@
 
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
+        <version>${maven-resources-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-lib</id>
@@ -197,24 +189,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <goals>
-             <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-           <executable>java</executable>
-          <includeProjectDependencies>true</includeProjectDependencies>
-           <workingDirectory>target/classes</workingDirectory>
-          <cleanupDaemonThreads>false</cleanupDaemonThreads>
-        </configuration>
-      </plugin>
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -227,21 +201,36 @@
                 <include>**</include>
               </includes>
             </fileset>
+            <fileset>
+              <directory>${project-demo-directory}/${project.artifactId}</directory>
+              <includes>
+                <include>device.jar</include>
+              </includes>
+            </fileset>
           </filesets>
         </configuration>
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>${exec.mainClass}</mainClass>
-              <classpathPrefix>lib</classpathPrefix>
-            </manifest>
-          </archive>
+          <executable>java</executable>
+          <includeProjectDependencies>true</includeProjectDependencies>
+          <systemProperties>
+            <systemProperty>
+              <key>fdo.config.home</key>
+              <value>${project-demo-directory}/${project.artifactId}</value>
+            </systemProperty>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>
