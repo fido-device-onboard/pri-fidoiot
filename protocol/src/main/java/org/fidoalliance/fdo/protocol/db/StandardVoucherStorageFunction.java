@@ -39,7 +39,7 @@ public class StandardVoucherStorageFunction implements VoucherStorageFunction {
       Transaction trans = session.beginTransaction();
 
       mfgVoucher.setData(data);
-      session.persist(mfgVoucher);
+      session.saveOrUpdate(mfgVoucher);
       trans.commit();
 
       return header.getGuid().toUuid();

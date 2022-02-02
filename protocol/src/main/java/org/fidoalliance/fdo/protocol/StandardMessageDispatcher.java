@@ -35,6 +35,7 @@ import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.message.CertChain;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
+import org.fidoalliance.fdo.protocol.message.CoseProtectedHeader;
 import org.fidoalliance.fdo.protocol.message.CoseUnprotectedHeader;
 import org.fidoalliance.fdo.protocol.message.CwtTo1Id;
 import org.fidoalliance.fdo.protocol.message.CwtToken;
@@ -214,13 +215,58 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     header.setGuid(guid);
     header.setDeviceInfo(diInfo.getDeviceInfo());
 
-    //todo: handle Ondie ECDSA and EPID
-
     final AnyType certInfo = diInfo.getCertInfo();
-    if (certInfo != null) {
+    if (certInfo != null || diInfo.getOnDieDeviceCertChain() != null) {
       try {
 
-        final Certificate[] chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        Certificate[] chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        if (diInfo.getOnDieDeviceCertChain() != null) {
+          // OnDie ECDSA type device
+          chain = getWorker(OnDieCertSignatureFunction.class).apply(diInfo);
+
+          // verify ondie revocations
+          if (!getWorker(OnDieCertSignatureFunction.class).checkRevocations(chain)) {
+            throw new IOException("OnDie revocation failure");
+          }
+
+          // verify test signature
+          // First, create proper signed data format
+          // Note: value in third_key is empty since
+          // we have no nonce with the test signature.
+          AlgorithmFinder finder = new AlgorithmFinder();
+          CoseProtectedHeader cph = new CoseProtectedHeader();
+          cph.setAlgId( finder.getCoseAlgorithm(PublicKeyType.SECP384R1,
+                  KeySizeType.SIZE_384));
+          byte[] cphData = Mapper.INSTANCE.writeValue(cph);
+
+          CoseUnprotectedHeader cuh = new CoseUnprotectedHeader();
+          cuh.setMaroPrefix(diInfo.getTestSigMaroePrefix());
+
+          // TODO
+          EatPayloadBase eat = new EatPayloadBase();
+          AnyType sn = AnyType.fromObject(diInfo.getSerialNumber().getBytes());
+          eat.setFdoClaim(sn);
+
+          CoseSign1 coseSign = new CoseSign1();
+          coseSign.setProtectedHeader(cphData);
+          //coseSign.setPayload(Mapper.INSTANCE.writeValue(eat));
+          coseSign.setPayload(diInfo.getSerialNumber().getBytes());
+          coseSign.setSignature(diInfo.getTestSignature());
+          coseSign.setUnprotectedHeader(cuh);
+
+          OwnerPublicKey ownerKey = new OwnerPublicKey();
+          ownerKey.setBody(AnyType.fromObject(chain[0].getPublicKey().getEncoded()));
+          ownerKey.setEnc(PublicKeyEncoding.X509);
+          ownerKey.setType(PublicKeyType.SECP384R1);
+
+          if (!cs.verify(coseSign, ownerKey)) {
+            throw new InvalidMessageException("OnDie test signature failure.");
+          }
+
+        } else {
+          // ECDSA type device
+          chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        }
 
         int totalBytes = 0;
         for (Certificate cert : chain) {
@@ -261,7 +307,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         throw new IOException(e);
       }
     } else {
-      // no certInfo provided so assume epid and not cert chain or hash
+      // no certInfo provided so assume EPID
       final KeyResolver keyResolver = getWorker(ManufacturerKeySupplier.class).get();
 
       final String alias = KeyResolver.getAlias(diInfo.getKeyType(), KeySizeType.SIZE_2048);

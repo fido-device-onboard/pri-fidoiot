@@ -6,11 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
-import org.fidoalliance.fdo.protocol.Mapper;
+
 import org.fidoalliance.fdo.protocol.message.AnyType;
-import org.fidoalliance.fdo.protocol.message.CertChain;
-import org.fidoalliance.fdo.protocol.message.HashType;
-import org.fidoalliance.fdo.protocol.message.KeySizeType;
 import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
@@ -46,7 +43,13 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
       }
     }
     if (index < node.size()) {
+      info.setOnDieDeviceCertChain(node.get(index++).binaryValue());
+    }
+    if (index < node.size()) {
       info.setTestSignature(node.get(index++).binaryValue());
+    }
+    if (index < node.size()) {
+      info.setTestSigMaroePrefix(node.get(index++).binaryValue());
     }
 
     return info;

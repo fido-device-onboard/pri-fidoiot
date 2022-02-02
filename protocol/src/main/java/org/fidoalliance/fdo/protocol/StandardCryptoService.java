@@ -103,6 +103,8 @@ import org.fidoalliance.fdo.protocol.message.SigStructure;
 
 public class StandardCryptoService implements CryptoService {
 
+
+  public static final String X509_ALG_NAME = "X.509";
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
 
@@ -1197,21 +1199,49 @@ public class StandardCryptoService implements CryptoService {
 
     byte[] sigData = Mapper.INSTANCE.writeValue(sigStructure);
     byte[] derSig = message.getSignature();
+    byte[] maroePrefix = message.getUnprotectedHeader().getMaroPrefix();
 
     PublicKey publicKey = decodeKey(ownerKey);
     if (publicKey instanceof ECKey) {
       // The encoded signature is fixed-width r|s concatenated, we must convert it to DER.
       int size = message.getSignature().length / 2;
-      ASN1Integer r =
-          new ASN1Integer(new BigInteger(1, message.getSignature(), 0, size));
-      ASN1Integer s =
-          new ASN1Integer(new BigInteger(1, message.getSignature(), size, size));
+      ASN1Integer r;
+      if ((message.getSignature()[0] & 0x80) != 0) {
+        byte[] zeroPrefix = new byte[size + 1];
+        System.arraycopy(message.getSignature(), 0, zeroPrefix, 1, size);
+        r = new ASN1Integer(new BigInteger(1, zeroPrefix, 0, zeroPrefix.length));
+      } else {
+        r = new ASN1Integer(new BigInteger(1, message.getSignature(), 0, size));
+      }
+
+      ASN1Integer s;
+      if ((message.getSignature()[size] & 0x80) != 0) {
+        byte[] zeroPrefix = new byte[size + 1];
+        System.arraycopy(message.getSignature(), size, zeroPrefix, 1, size);
+        s = new ASN1Integer(new BigInteger(1, zeroPrefix, 0, zeroPrefix.length));
+      } else {
+        s = new ASN1Integer(new BigInteger(1, message.getSignature(), size, size));
+      }
+
       DLSequence sequence = new DLSequence(new ASN1Encodable[]{r, s});
       ByteArrayOutputStream sigBytes = new ByteArrayOutputStream();
       ASN1OutputStream asn1out = ASN1OutputStream.create(sigBytes);
       asn1out.writeObject(sequence);
       byte[] b = sigBytes.toByteArray();
       derSig = Arrays.copyOf(b, b.length);
+
+      // if MAROE based signature - prefix signature data with maroe prefix
+      if (maroePrefix != null && maroePrefix.length > 0) {
+        try {
+          ByteArrayOutputStream bas = new ByteArrayOutputStream();
+          bas.write(maroePrefix);
+          bas.write(sigData);
+          sigData = bas.toByteArray();
+        } catch (IOException ex) {
+          // should never get here
+          return false;
+        }
+      }
     }
 
     try {

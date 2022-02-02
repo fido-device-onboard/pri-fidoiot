@@ -45,6 +45,7 @@ cwt:
      password: Secret
 
 workers:
+  - org.fidoalliance.fdo.protocol.OnDieCertSignatureFunction
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
@@ -55,6 +56,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
+  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
@@ -70,7 +72,8 @@ workers:
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
 
 modules:
-  -
+  - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
+  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
 
 
 
