@@ -3,7 +3,7 @@
 
 device:
 
-  di-url: http://fdo10.westus.cloudapp.azure.com:80
+  di-url: http://localhost:8080
 
   credential-file: credentials.bin
  

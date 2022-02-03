@@ -7,6 +7,7 @@ hibernate-properties:
 
 system-properties:
   log4j.configurationFile: log4j2.xml
+  application.version: 1.1-SNAPSHOT
   
 
 http-server:
