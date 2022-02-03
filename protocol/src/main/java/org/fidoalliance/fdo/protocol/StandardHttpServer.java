@@ -1,17 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.util.Enumeration;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -85,6 +74,7 @@ public class StandardHttpServer implements HttpServer {
 
     public KeyStoreConfig getHttpsKeyStore() {
       return httpsKeyStore;
+
     }
 
 
@@ -119,8 +109,6 @@ public class StandardHttpServer implements HttpServer {
     if (ctx.getJarScanner() instanceof StandardJarScanner) {
       ((StandardJarScanner) ctx.getJarScanner()).setScanManifest(false);
     }
-
-
 
 
     Service service = tomcat.getService();

@@ -8,7 +8,6 @@ import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
@@ -42,7 +41,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_ACTIVE);
     kv.setValue(Mapper.INSTANCE.writeValue(true));
-
     queue.add(kv);
 
 
@@ -57,7 +55,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     kv.setKeyName(DevMod.KEY_ARCH);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.arch")));
     queue.add(kv);
-
 
     //devmod:version
     kv = new ServiceInfoKeyValuePair();
@@ -77,7 +74,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     kv.setKeyName(DevMod.KEY_SEP);
     kv.setValue(Mapper.INSTANCE.writeValue(":"));
     queue.add(kv);
-
 
     //devmod:bin
     kv = new ServiceInfoKeyValuePair();
@@ -117,10 +113,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
       queue.add(kv);
       moduleNames.add(name);
     }
-
-
-
-
   }
 
   @Override
@@ -156,15 +148,12 @@ public class StandardDeviceModule implements ServiceInfoModule {
       boolean sent = sendFunction.apply(queue.peek());
       if (sent) {
         queue.poll();
-
       } else {
         break;
       }
     }
 
     if (queue.size() == 0) {
-
-
       state.setDone(true);
     }
 

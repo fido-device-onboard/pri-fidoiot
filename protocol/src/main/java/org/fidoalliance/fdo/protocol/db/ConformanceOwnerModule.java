@@ -32,7 +32,6 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
   @Override
   public void prepare(ServiceInfoModuleState state) throws IOException {
     state.setExtra(AnyType.fromObject(new ServiceInfoQueue()));
-
   }
 
   @Override
@@ -52,7 +51,6 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
             queue.add(activePair);
             getConformance(state.getGuid(), queue);
             state.setExtra(AnyType.fromObject(queue));
-   
           }
         }
       }
@@ -85,7 +83,7 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
   }
 
 
-  private void getConformance(Guid guid,ServiceInfo serviceInfo) throws IOException {
+  private void getConformance(Guid guid, ServiceInfoQueue queue) throws IOException {
 
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
@@ -93,7 +91,6 @@ public class ConformanceOwnerModule implements ServiceInfoModule {
 
       ConformanceData confData =
           session.find(ConformanceData.class, guid.toString());
-
 
       if (confData != null) {
 
