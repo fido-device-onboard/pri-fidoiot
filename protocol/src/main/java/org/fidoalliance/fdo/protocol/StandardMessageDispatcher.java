@@ -1088,6 +1088,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
+    String hex = Hex.encodeHexString(cipherText);
     DeviceServiceInfo devInfo = Mapper.INSTANCE.readValue(cipherText,
         DeviceServiceInfo.class);
 

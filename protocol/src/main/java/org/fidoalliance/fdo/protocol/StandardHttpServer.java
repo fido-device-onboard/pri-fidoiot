@@ -1,8 +1,16 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Context;
@@ -12,6 +20,8 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.util.StandardSessionIdGenerator;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
 
@@ -38,8 +48,8 @@ public class StandardHttpServer implements HttpServer {
     private String[] httpSchemes;
     @JsonProperty("http_timeout")
     private String timeout;
-    @JsonProperty("server_keystore")
-    private KeyStoreConfig httpsKeyStore = new KeyStoreConfig();
+    @JsonProperty("keystore")
+    private KeyStoreConfig httpsKeyStore;
     @JsonProperty("context_parameters")
     private Map<String, String> additionalParameters = new HashMap<>();
 
@@ -71,6 +81,7 @@ public class StandardHttpServer implements HttpServer {
 
     public KeyStoreConfig getHttpsKeyStore() {
       return httpsKeyStore;
+
     }
 
 
@@ -107,24 +118,6 @@ public class StandardHttpServer implements HttpServer {
     }
 
 
-    //long theadId = Thread.currentThread().getId();
-
-    //set context manager
-
-    //set randome number gennerator
-
-    //String  sid = sig.generateSessionId();
-    //ctx.getManager().setSessionIdGenerator();
-
-    ///Context ctx = tomcat.addWebapp("", "./demo");
-    //ctx.setParentClassLoader(ctx.getClass().getClassLoader());
-
-    /*try {
-      File file = new File("context.xml");
-      ctx.setConfigFile(file.toURI().toURL());
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }*/
 
     Service service = tomcat.getService();
     //service.addExecutor(new StandardThreadExecutor());
@@ -140,19 +133,56 @@ public class StandardHttpServer implements HttpServer {
         httpsConnector.setSecure(true);
         httpsConnector.setScheme("https");
 
-        //keystoreFile
-        //This is an alias for the certificateKeystoreFile attribute of the first Certificate element nested in the SSLHostConfig element with the hostName of _default_. If this Certificate and/or SSLHostConfig element is not explicitly defined, they will be created.
-        //
-        //keystorePass
-        //This is an alias for the certificateKeystorePassword attribute of the first Certificate element nested in the SSLHostConfig element with the hostName of _default_. If this Certificate and/or SSLHostConfig element is not explicitly defined, they will be created.
-        //
-        //keystoreProvider
-        //This is an alias for the certificateKeystoreProvider attribute of the first Certificate element nested in the SSLHostConfig element with the hostName of _default_. If this Certificate and/or SSLHostConfig element is not explicitly defined, they will be created.
-        //
-        //keystoreType
-        //This is an alias for the certificateKeystoreType attribute of the first Certificate element nested in the SSLHostConfig element with the hostName of _default_. If this Certificate and/or SSLHostConfig element is not explicitly defined, they will be created.
+       /* String pass = config.getHttpsKeyStore().getPassword();
+        String path = config.getHttpsKeyStore().getPath();
+
+        httpsConnector.setProperty("keystorePass", "fdo123");
+        httpsConnector.setProperty("keystoreFile", "./ssl.p12");
+
         httpsConnector.setProperty("keystorePass", config.getHttpsKeyStore().getPassword());
         httpsConnector.setProperty("keystoreFile", config.getHttpsKeyStore().getPath());
+
+
+
+        httpsConnector.setProperty("certificateKeystoreFile", "ssl.p12");
+        httpsConnector.setProperty("certificateKeystorePassword", "fdo123");
+
+*/
+        /*
+        try (InputStream input = new  FileInputStream("ssl.p12")) {
+          KeyStore ks = KeyStore.getInstance("PKCS12");
+          ks.load(input,"fdo123".toCharArray());
+          Enumeration<String> strings = ks.aliases();
+          while (strings.hasMoreElements()) {
+            String alias = strings.nextElement();
+            String pem = PemFormatter.format(ks.getCertificate(alias));
+            "".length();
+          }
+
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }*/
+
+
+
+        SSLHostConfig sslHostConfig = new SSLHostConfig();
+
+        KeyStoreConfig storeConfig = config.getHttpsKeyStore();
+
+
+        SSLHostConfigCertificate certConfig = new SSLHostConfigCertificate(
+        sslHostConfig, SSLHostConfigCertificate.Type.RSA);
+
+        //certConfig.setCertificateKeystore();
+        //KeyResolver ks;
+        //ks.get
+        certConfig.setCertificateKeystoreFile("ssl.p12");
+        certConfig.setCertificateKeystorePassword("");
+        certConfig.setCertificateKeyAlias("ssl");
+
+        sslHostConfig.addCertificate(certConfig);
+        httpsConnector.addSslHostConfig(sslHostConfig);
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
         httpsConnector.setProperty("SSLEnabled", "true");

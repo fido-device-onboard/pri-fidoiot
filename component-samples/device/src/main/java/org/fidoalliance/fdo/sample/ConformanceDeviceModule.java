@@ -12,6 +12,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FidoAlliance;
 public class ConformanceDeviceModule implements ServiceInfoModule {
 
   private final LoggerService logger = new LoggerService(DeviceApp.class);;
+
   @Override
   public String getName() {
     return FidoAlliance.NAME;
@@ -38,6 +39,8 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
               + Mapper.INSTANCE.readValue(kvPair.getValue(),String.class));
           break;
         }
+      default:
+        break;
     }
   }
 

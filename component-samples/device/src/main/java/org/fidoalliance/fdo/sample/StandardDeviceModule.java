@@ -8,14 +8,18 @@ import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 
 public class StandardDeviceModule implements ServiceInfoModule {
+
+  private List<String> moduleNames = new ArrayList<>();
+  private List<String> unknownModules = new ArrayList<>();
+  private ServiceInfoQueue queue = new ServiceInfoQueue();
 
   @Override
   public String getName() {
@@ -25,51 +29,53 @@ public class StandardDeviceModule implements ServiceInfoModule {
   @Override
   public void prepare(ServiceInfoModuleState state) throws IOException {
 
+    queue.clear();
+    unknownModules.clear();
+    moduleNames.clear();
+
     ServiceInfo serviceInfo = new ServiceInfo();
 
     //active=true (required)
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_ACTIVE);
     kv.setValue(Mapper.INSTANCE.writeValue(true));
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //os=linux
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_OS);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.name")));
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:arch
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_ARCH);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.arch")));
-
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:version
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_VERSION);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.version")));
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:device
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_DEVICE);
     kv.setValue(Mapper.INSTANCE.writeValue("FDO-Pri-Device"));
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:sep
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_SEP);
     kv.setValue(Mapper.INSTANCE.writeValue(":"));
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:bin
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_BIN);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.arch")));
-
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //build module list
     List<Object> workers = Config.getWorkers();
@@ -86,50 +92,67 @@ public class StandardDeviceModule implements ServiceInfoModule {
     //devmod:nummodules
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_NUMMODULES);
-
     kv.setValue(Mapper.INSTANCE.writeValue(Long.valueOf(moduleList.size())));
-
-    serviceInfo.add(kv);
+    queue.add(kv);
 
     //devmod:modules
     for (String name : moduleList) {
       DevModList list = new DevModList();
-      list.add(AnyType.fromObject(Long.valueOf(0)));
-      list.add(AnyType.fromObject(Long.valueOf(1)));
-      list.add(AnyType.fromObject(name));
+      list.setIndex(0);
+      list.setCount(1);
+      list.setModulesNames(new String[]{name});
       kv = new ServiceInfoKeyValuePair();
       kv.setKeyName(DevMod.KEY_MODULES);
       kv.setValue(Mapper.INSTANCE.writeValue(list));
-      serviceInfo.add(kv);
-      String hex = Hex.encodeHexString(kv.getValue());
-      hex.length();
+      queue.add(kv);
+      moduleNames.add(name);
     }
 
-    state.setExtra(AnyType.fromObject(serviceInfo));
+
+
   }
 
   @Override
   public void receive(ServiceInfoModuleState state, ServiceInfoKeyValuePair kvPair)
       throws IOException {
 
+    // get the module name
+    String moduleName = kvPair.getKey();
+    int pos = moduleName.indexOf(':');
+    if (pos > 0) {
+      moduleName = moduleName.substring(0, pos);
+    }
+    //check if module is in the known list
+    if (moduleNames.indexOf(moduleName) < 0) {
+      //check if the module is in the unknown list
+      if (unknownModules.indexOf(moduleName) < 0) {
+        unknownModules.add(moduleName);
+        ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+        kv.setKeyName(moduleName + ":active");
+        kv.setValue(Mapper.INSTANCE.writeValue(false));
+        queue.add(kv);
+        state.setDone(false);
+      }
+    }
   }
 
   @Override
   public void send(ServiceInfoModuleState state, ServiceInfoSendFunction sendFunction)
       throws IOException {
-    ServiceInfo serviceInfo = state.getExtra().covertValue(ServiceInfo.class);
-    while (serviceInfo.size() > 0) {
-      boolean sent = sendFunction.apply(serviceInfo.getFirst());
+
+    while (queue.size() > 0) {
+      boolean sent = sendFunction.apply(queue.peek());
       if (sent) {
-        serviceInfo.removeFirst();
+        queue.poll();
       } else {
         break;
       }
     }
-    if (serviceInfo.size() == 0) {
+    if (queue.size() == 0) {
+
+
       state.setDone(true);
     }
-    state.setExtra(AnyType.fromObject(serviceInfo));
   }
 
 
