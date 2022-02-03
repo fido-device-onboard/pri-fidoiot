@@ -42,6 +42,7 @@
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.OnboardingVoucher"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.OnboardingConfig"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnDieCertificateData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.ProtocolSession"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.ManufacturedVoucher"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.RvRedirect"></mapping>

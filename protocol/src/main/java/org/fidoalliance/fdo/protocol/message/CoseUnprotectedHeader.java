@@ -11,7 +11,7 @@ import org.fidoalliance.fdo.protocol.serialization.CoseUnprotectedHeaderSerializ
 public class CoseUnprotectedHeader {
 
   private Nonce cupNonce;
-  private Nonce eatNone;
+  private Nonce eatNonce;
   private OwnerPublicKey ownerPublicKey;
   private byte[]  maroPrefix;
   private byte[] iv;
@@ -20,7 +20,7 @@ public class CoseUnprotectedHeader {
     return cupNonce;
   }
 
-  public Nonce getEatNonce() { return eatNone; }
+  public Nonce getEatNonce() { return eatNonce; }
 
   public OwnerPublicKey getOwnerPublicKey() {
     return ownerPublicKey;
@@ -38,8 +38,8 @@ public class CoseUnprotectedHeader {
     this.cupNonce = nonce;
   }
 
-  public void setEatNone(Nonce nonce) {
-    this.eatNone = nonce;
+  public void setEatNonce(Nonce nonce) {
+    this.eatNonce = nonce;
   }
 
   public void setOwnerPublicKey(OwnerPublicKey ownerPublicKey) {

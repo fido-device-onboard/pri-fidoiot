@@ -64,7 +64,7 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
     if (subNode != null) {
       Nonce nonce = new Nonce();
       nonce.setNonce(subNode.binaryValue());
-      uph.setEatNone(nonce);
+      uph.setEatNonce(nonce);
     }
 
 

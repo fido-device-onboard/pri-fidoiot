@@ -103,6 +103,7 @@ import org.fidoalliance.fdo.protocol.message.SigStructure;
 
 public class StandardCryptoService implements CryptoService {
 
+  public static final String X509_ALG_NAME = "X.509";
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
 
@@ -1197,6 +1198,7 @@ public class StandardCryptoService implements CryptoService {
 
     byte[] sigData = Mapper.INSTANCE.writeValue(sigStructure);
     byte[] derSig = message.getSignature();
+    byte[] maroePrefix = message.getUnprotectedHeader().getMaroPrefix();
 
     PublicKey publicKey = decodeKey(ownerKey);
     if (publicKey instanceof ECKey) {
@@ -1212,6 +1214,19 @@ public class StandardCryptoService implements CryptoService {
       asn1out.writeObject(sequence);
       byte[] b = sigBytes.toByteArray();
       derSig = Arrays.copyOf(b, b.length);
+
+      // if MAROE based signature - prefix signature data with maroe prefix
+      if (maroePrefix != null && maroePrefix.length > 0) {
+        try {
+          ByteArrayOutputStream bas = new ByteArrayOutputStream();
+          bas.write(maroePrefix);
+          bas.write(sigData);
+          sigData = bas.toByteArray();
+        } catch (IOException ex) {
+          // should never get here
+          return false;
+        }
+      }
     }
 
     try {
