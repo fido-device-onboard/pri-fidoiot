@@ -1,5 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -29,6 +30,7 @@ public enum Mapper {
   private final ObjectMapper cborMapper;
   private final ObjectMapper yamlMapper;
   private final ObjectMapper jsonMapper;
+
 
   private Mapper() {
     cborMapper = new ObjectMapper(new CBORFactory());
@@ -176,6 +178,7 @@ public enum Mapper {
     return reader.readValue(in, t);
   }
 
+
   /**
    * Reads a Json encoded value.
    * @param json Json String.
@@ -188,6 +191,7 @@ public enum Mapper {
     ObjectReader reader = jsonMapper.readerFor(t);
     return reader.readValue(json, t);
   }
+
 
   /**
    * Reads a value from binary (CBOR) encoding.

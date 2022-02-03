@@ -41,6 +41,7 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
         }
       default:
         break;
+
     }
   }
 

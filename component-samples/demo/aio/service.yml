@@ -21,6 +21,7 @@ http-server:
     store-type: PKCS12
     password: Secret
 
+
 manufacturer:
    keystore: 
      path: manufacturer.p12
@@ -37,6 +38,7 @@ owner:
        path: replacement.p12
        store-type: PKCS12
        password: Secret
+
 
 h2-database:
  

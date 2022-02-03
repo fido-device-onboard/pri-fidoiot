@@ -1,6 +1,7 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Context;
@@ -48,6 +51,7 @@ public class StandardHttpServer implements HttpServer {
     private String[] httpSchemes;
     @JsonProperty("http_timeout")
     private String timeout;
+
     @JsonProperty("keystore")
     private KeyStoreConfig httpsKeyStore;
     @JsonProperty("context_parameters")
@@ -81,7 +85,6 @@ public class StandardHttpServer implements HttpServer {
 
     public KeyStoreConfig getHttpsKeyStore() {
       return httpsKeyStore;
-
     }
 
 
@@ -119,6 +122,7 @@ public class StandardHttpServer implements HttpServer {
 
 
 
+
     Service service = tomcat.getService();
     //service.addExecutor(new StandardThreadExecutor());
 
@@ -132,37 +136,6 @@ public class StandardHttpServer implements HttpServer {
         httpsConnector.setPort(httpsPort);
         httpsConnector.setSecure(true);
         httpsConnector.setScheme("https");
-
-       /* String pass = config.getHttpsKeyStore().getPassword();
-        String path = config.getHttpsKeyStore().getPath();
-
-        httpsConnector.setProperty("keystorePass", "fdo123");
-        httpsConnector.setProperty("keystoreFile", "./ssl.p12");
-
-        httpsConnector.setProperty("keystorePass", config.getHttpsKeyStore().getPassword());
-        httpsConnector.setProperty("keystoreFile", config.getHttpsKeyStore().getPath());
-
-
-
-        httpsConnector.setProperty("certificateKeystoreFile", "ssl.p12");
-        httpsConnector.setProperty("certificateKeystorePassword", "fdo123");
-
-*/
-        /*
-        try (InputStream input = new  FileInputStream("ssl.p12")) {
-          KeyStore ks = KeyStore.getInstance("PKCS12");
-          ks.load(input,"fdo123".toCharArray());
-          Enumeration<String> strings = ks.aliases();
-          while (strings.hasMoreElements()) {
-            String alias = strings.nextElement();
-            String pem = PemFormatter.format(ks.getCertificate(alias));
-            "".length();
-          }
-
-
-        } catch (Exception e) {
-          e.printStackTrace();
-        }*/
 
 
 
@@ -183,6 +156,7 @@ public class StandardHttpServer implements HttpServer {
 
         sslHostConfig.addCertificate(certConfig);
         httpsConnector.addSslHostConfig(sslHostConfig);
+
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
         httpsConnector.setProperty("SSLEnabled", "true");

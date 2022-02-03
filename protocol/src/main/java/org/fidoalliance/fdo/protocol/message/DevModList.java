@@ -36,4 +36,5 @@ public class DevModList  {
   public void setModulesNames(String[] modulesNames) {
     this.modulesNames = modulesNames;
   }
+
 }

@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.RvData;
@@ -19,6 +20,7 @@ public class RvInfo extends RestApi {
 
 
     RendezvousInfo info = Mapper.INSTANCE.readJsonValue(body,RendezvousInfo.class);
+
 
 
     RvData rviData =
