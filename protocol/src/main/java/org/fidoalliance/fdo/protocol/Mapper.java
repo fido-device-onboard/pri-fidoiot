@@ -27,11 +27,13 @@ public enum Mapper {
   INSTANCE;
   private final ObjectMapper cborMapper;
   private final ObjectMapper yamlMapper;
+  private final ObjectMapper jsonMapper;
 
   private Mapper() {
     cborMapper = new ObjectMapper(new CBORFactory());
     yamlMapper = new ObjectMapper(new YAMLFactory());
     yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    jsonMapper = new ObjectMapper();
   }
 
 
@@ -172,6 +174,21 @@ public enum Mapper {
     ObjectReader reader = cborMapper.readerFor(t);
     return reader.readValue(in, t);
   }
+
+  /**
+   * Reads a Json encoded value.
+   * @param json Json String.
+   * @param t    The target class.
+   * @param <T>  The target Class type.
+   * @return The converted result.
+   * @throws IOException An error occurred when reading the content.
+   */
+  public <T> T readJsonValue(String json, Class<T> t) throws IOException {
+    ObjectReader reader = jsonMapper.readerFor(t);
+    return reader.readValue(json, t);
+  }
+
+
 
 
   /**
