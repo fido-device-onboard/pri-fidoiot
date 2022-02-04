@@ -17,9 +17,11 @@ http-server:
   - http
   #- https
   http_timeout: 20000
-  https_keystore:
-    path: "./creds/ssl.p12"
-    password: "changeit"
+  keystore: 
+    path: ssl.p12
+    store-type: PKCS12
+    password: Secret
+
 
 manufacturer:
    keystore: 
@@ -37,6 +39,10 @@ owner:
        path: replacement.p12
        store-type: PKCS12
        password: Secret
+
+
+h2-database:
+ 
 
 #cbor Web Token (cwt) used for to0 and to1 sessions
 cwt:
@@ -69,9 +75,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
-
-modules:
-  -
+  - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 
 
 
 

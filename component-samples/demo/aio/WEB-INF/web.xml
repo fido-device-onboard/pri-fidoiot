@@ -69,6 +69,21 @@
       <url-pattern>/api/v1/to0/*</url-pattern>
    </servlet-mapping>
 
+
+   <servlet>
+      <servlet-name>SviPackage</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.SviPackage</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>SviPackage</servlet-name>
+      <url-pattern>/api/v1/owner/svi</url-pattern>
+   </servlet-mapping>
+
+
   <servlet>
       <servlet-name>OwnerVoucher</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
