@@ -5,7 +5,6 @@ device:
 
   di-url: http://localhost:8080
 
-
   credential-file: credentials.bin
  
   keystore: 
