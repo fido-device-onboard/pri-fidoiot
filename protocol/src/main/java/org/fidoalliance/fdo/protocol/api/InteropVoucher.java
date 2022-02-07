@@ -140,7 +140,7 @@ public class InteropVoucher extends RestApi {
         getSession().update(dbVoucher);
       }
       //save the voucher
-      //todo: need to do TO0 mannually
+      //todo: need to do TO0 manually
 
       //write the guid response
       byte[] guidResponse = guid.toString().getBytes(StandardCharsets.UTF_8);

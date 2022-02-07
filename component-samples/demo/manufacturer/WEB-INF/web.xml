@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+     version="2.5">
+ 
+
+   <servlet>
+      <servlet-name>FdoProtocol</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.ProtocolServlet</servlet-class>
+   </servlet>
+
+
+
+   <servlet-mapping> 
+      <servlet-name>FdoProtocol</servlet-name>
+      <url-pattern>/fdo/101/msg/10</url-pattern>
+      <url-pattern>/fdo/101/msg/12</url-pattern>
+      <url-pattern>/fdo/101/msg/255</url-pattern>
+   </servlet-mapping>
+
+   
+   <servlet>
+      <servlet-name>RvInfo</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.RvInfo</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>RvInfo</servlet-name>
+      <url-pattern>/api/v1/rvinfo</url-pattern>
+   </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MfgVoucher</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MfgVoucher</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MfgVoucher</servlet-name>
+        <url-pattern>/api/v1/mfg/vouchers/*</url-pattern>
+    </servlet-mapping>
+
+  
+
+   <servlet>
+      <servlet-name>Logs</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.Logs</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Logs</servlet-name>
+      <url-pattern>/api/v1/logs</url-pattern>
+   </servlet-mapping>
+   
+
+  <security-constraint>
+    <web-resource-collection>
+        <web-resource-name>apis</web-resource-name>
+        <url-pattern>/api/v1/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+        <role-name>api</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-role>
+    <role-name>api</role-name>
+  </security-role>
+
+</web-app>

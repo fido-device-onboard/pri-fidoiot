@@ -24,12 +24,6 @@ http-server:
     password: $(encrypt_password)
 
 
-manufacturer:
-   keystore: 
-     path: manufacturer.p12
-     store-type: PKCS12
-     password: $(encrypt_password)
-
 owner:
    keystore: 
      path: owner.p12
@@ -45,34 +39,21 @@ owner:
 h2-database:
  
 
-#cbor Web Token (cwt) used for to0 and to1 sessions
-cwt:
-   keystore: 
-     path: ctw.p12
-     store-type: PKCS12
-     password: $(encrypt_password)
-
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.StandardHttpServer
   - org.fidoalliance.fdo.protocol.StandardDatabaseServer
-  - org.fidoalliance.fdo.protocol.StandardCertSignatureFunction
-  - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
-  - org.fidoalliance.fdo.protocol.db.StandardRendezvousInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
-  - org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
-  - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
-  - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
