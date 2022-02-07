@@ -16,8 +16,6 @@ public class To2Blob extends RestApi {
     To2AddressEntries entries =
         Mapper.INSTANCE.readJsonValue(body, To2AddressEntries.class);
 
-
-
     OnboardingConfig onboardingConfig =
         getSession().get(OnboardingConfig.class,Long.valueOf(1));
 

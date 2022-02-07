@@ -3,8 +3,6 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
-import java.sql.Blob;
-import java.sql.Clob;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +30,14 @@ public class OnboardingVoucher {
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdOn;
 
+  @Column(name = "to2_completed_on")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date to2CompletedOn;
+
+  @Column(name = "to0_expiry")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date to0Expiry;
+
 
   public String getGuid() {
     return guid;
@@ -43,6 +49,14 @@ public class OnboardingVoucher {
 
   public Date getCreatedOn() {
     return createdOn;
+  }
+
+  public Date getTo2CompletedOn() {
+    return to2CompletedOn;
+  }
+
+  public Date getTo0Expiry() {
+    return to0Expiry;
   }
 
   public void setGuid(String guid) {
@@ -57,4 +71,11 @@ public class OnboardingVoucher {
     this.createdOn = date;
   }
 
+  public void setTo2CompletedOn(Date to2CompletedOn) {
+    this.to2CompletedOn = to2CompletedOn;
+  }
+
+  public void setTo0Expiry(Date to0Expiry) {
+    this.to0Expiry = to0Expiry;
+  }
 }

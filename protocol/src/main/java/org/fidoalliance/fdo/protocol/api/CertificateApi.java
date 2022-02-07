@@ -1,7 +1,16 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.util.Arrays;
+import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.PemFormatter;
+import org.fidoalliance.fdo.protocol.PemLoader;
+import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import java.io.IOException;
 
@@ -19,7 +28,7 @@ import java.io.IOException;
  *
  *  RestApi Class provides a wrapper over the HttpServletRequest methods.
  *
-*/
+ */
 
 public class CertificateApi extends RestApi {
 
@@ -33,6 +42,18 @@ public class CertificateApi extends RestApi {
 
     // Collect parameter 'filename' from HttpRequest
     String fileName = getParamByValue("filename");
+    String alias = getParamByValue("alias");
+    if (alias != null) {
+
+      KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
+      Certificate[] chain = resolver.getCertificateChain(alias);
+      if (chain == null) {
+        throw new NotFoundException(alias);
+      }
+      String pem = PemFormatter.format(Arrays.asList(chain));
+      getResponse().getWriter().print(pem);
+      return;
+    }
 
     // Query database table CERTIFICATE_DATA for filename Key
     CertificateData certificateData = getSession().get(CertificateData.class, fileName);

@@ -176,6 +176,20 @@
         <url-pattern>/api/v1/deviceinfo/*</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>MfgVoucher</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MfgVoucher</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MfgVoucher</servlet-name>
+        <url-pattern>/api/v1/mfg/vouchers/*</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>CertificateApi</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>

@@ -83,6 +83,7 @@ import org.fidoalliance.fdo.protocol.message.To2DeviceInfoReady;
 import org.fidoalliance.fdo.protocol.message.To2Done;
 import org.fidoalliance.fdo.protocol.message.To2Done2;
 import org.fidoalliance.fdo.protocol.message.To2OwnerInfoReady;
+import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
 import org.fidoalliance.fdo.protocol.message.To2SetupDevicePayload;
 import org.fidoalliance.fdo.protocol.message.SigInfo;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
@@ -436,7 +437,11 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     //todo: verify device certificates revocations
     //todo: verify  voucher
 
-    long waitSeconds = getWorker(RvBlobStorageFunction.class).apply(to0d, sign1);
+    To2RedirectEntry redirectEntry = new To2RedirectEntry();
+    redirectEntry.setTo1d(sign1);
+    redirectEntry.setPublicKey(ownerPublicKey);
+
+    long waitSeconds = getWorker(RvBlobStorageFunction.class).apply(to0d, redirectEntry);
 
     To0AcceptOwner acceptOwner = new To0AcceptOwner();
 
@@ -508,6 +513,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CwtTo1Id cwtTo1Id = Mapper.INSTANCE.readValue(cwtToken.getCwtId(), CwtTo1Id.class);
     Guid guid = cwtTo1Id.getHelloRv().getGuid();
 
+    //todo fix: get owner key from blob
     OwnershipVoucher voucher = getWorker(VoucherQueryFunction.class).apply(guid.toString());
     OwnershipVoucherHeader header = VoucherUtils.getHeader(voucher);
 
@@ -535,8 +541,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("NonceTO1Proof noes not match");
     }
 
-    CoseSign1 to1d = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
-    response.setMessage(Mapper.INSTANCE.writeValue(to1d));
+    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
+    response.setMessage(Mapper.INSTANCE.writeValue(entry.getTo1d()));
   }
 
   protected void doTo1Redirect(DispatchMessage request, DispatchMessage response)

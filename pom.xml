@@ -78,7 +78,6 @@
   <modules>
     <module>component-samples</module>
     <module>protocol</module>
-    <module>services</module>
   </modules>
 
   <dependencyManagement>
