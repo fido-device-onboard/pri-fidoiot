@@ -70,4 +70,6 @@ node('ubuntu18.04-OnDemand'){
 //      docker system prune -a -f
 //    '''
 //  }
+//Clean workspace after build is successfull
+cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, notFailBuild: true
 }
