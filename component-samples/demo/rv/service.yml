@@ -9,11 +9,12 @@ system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
   application.version: 1.1-SNAPSHOT
+  service.name: "Rendezvous"
   
 
 http-server:
-  http_port: 8080
-  https_port: 8443
+  http_port: 8040
+  https_port: 8041
   http_schemes:
   - http
   #- https
@@ -51,17 +52,9 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
-   - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
+  - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
 
 
 
 
-
-
-
-
-
-
-
-  

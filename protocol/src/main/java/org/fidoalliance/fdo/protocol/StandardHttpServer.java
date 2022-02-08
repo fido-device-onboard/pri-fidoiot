@@ -265,11 +265,11 @@ public class StandardHttpServer implements HttpServer {
 
     tomcat.getConnector();
 
+    String serviceName = System.getProperty("service.name");
     try {
 
       tomcat.start();
-
-      logger.info("Started All-in-One Demo Service.");
+      logger.info("Started " + serviceName + " Service.");
     } catch (LifecycleException e) {
       logger.warn("Failed to start All-in-One Demo Service.");
       throw new RuntimeException(e);

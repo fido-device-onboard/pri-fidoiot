@@ -9,11 +9,12 @@ system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
   application.version: 1.1-SNAPSHOT
+  service.name: "Manufacturer"
   
 
 http-server:
-  http_port: 8080
-  https_port: 8443
+  http_port: 8039
+  https_port: 8038
   http_schemes:
   - http
   #- https
@@ -56,15 +57,3 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
   - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
-
-
-
-
-
-
-
-
-
-
-
-  
