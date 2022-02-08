@@ -9,9 +9,11 @@ services:
     image: pri-fdo-owner
     container_name: pri-fdo-owner
     expose:
-      - "8080"
+      - "8042"
+      - "8043"
     ports:
-      - "8080:8080"
+      - "8042:8042"
+      - "8043:8043"
     build:
       context: .
       dockerfile: Dockerfile

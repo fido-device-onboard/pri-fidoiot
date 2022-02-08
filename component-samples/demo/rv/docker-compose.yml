@@ -9,9 +9,11 @@ services:
     image: pri-fdo-rv
     container_name: pri-fdo-rv
     expose:
-      - "8080"
+      - "8040"
+      - "8041"
     ports:
-      - "8080:8080"
+      - "8040:8040"
+      - "8041:8041"
     build:
       context: .
       dockerfile: Dockerfile
