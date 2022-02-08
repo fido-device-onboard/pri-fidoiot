@@ -9,9 +9,11 @@ services:
     image: pri-fdo-mfg
     container_name: pri-fdo-mfg
     expose:
-      - "8080"
+      - "8039"
+      - "8038"
     ports:
-      - "8080:8080"
+      - "8039:8039"
+      - "8038:8038"
     build:
       context: .
       dockerfile: Dockerfile

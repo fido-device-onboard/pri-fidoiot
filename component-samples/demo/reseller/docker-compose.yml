@@ -9,9 +9,11 @@ services:
     image: pri-fdo-reseller
     container_name: pri-fdo-reseller
     expose:
-      - "8080"
+      - "8070"
+      - "8072"
     ports:
-      - "8080:8080"
+      - "8070:8070"
+      - "8072:8072"
     build:
       context: .
       dockerfile: Dockerfile
