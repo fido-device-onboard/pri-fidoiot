@@ -25,11 +25,11 @@ public class MfgVoucher extends RestApi {
   @Override
   public void doPost() throws Exception {
 
-    String path = getLastSegment();
+    String serialNo = getLastSegment();
 
-    ManufacturedVoucher mfgVoucher = getSession().get(ManufacturedVoucher.class, path);
+    ManufacturedVoucher mfgVoucher = getSession().get(ManufacturedVoucher.class, serialNo);
     if (mfgVoucher == null) {
-      throw new NotFoundException(path);
+      throw new NotFoundException(serialNo);
     }
     OwnershipVoucher voucher = Mapper.INSTANCE.readValue(mfgVoucher.getData(),
         OwnershipVoucher.class);
