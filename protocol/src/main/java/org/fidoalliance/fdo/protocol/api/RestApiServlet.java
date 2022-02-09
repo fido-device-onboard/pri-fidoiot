@@ -16,7 +16,7 @@ public class RestApiServlet extends HttpServlet {
 
     try (RestApi restApi = (RestApi) Config.loadObject(getInitParameter(API_CLASS))) {
       restApi.init(req,resp);
-      restApi.doPut();
+      restApi.doDelete();
     } catch (NotFoundException e) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } catch (UnsupportedMediaTypeException e) {

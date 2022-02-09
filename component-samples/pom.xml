@@ -20,10 +20,6 @@
     <packaging>pom</packaging>
 
     <modules>
-      <!--<module>manufacturer</module>
-      <module>owner</module>
-      <module>rv</module>
-      <module>reseller</module>-->
       <module>aio</module>
       <module>device</module>
     </modules>

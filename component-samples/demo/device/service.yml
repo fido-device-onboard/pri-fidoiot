@@ -3,7 +3,7 @@
 
 device:
 
-  di-url: http://fdo10.westus.cloudapp.azure.com:80
+  di-url: http://localhost:8080
 
   credential-file: credentials.bin
  
@@ -105,6 +105,8 @@ workers:
   - org.fidoalliance.fdo.sample.StandardHmacFunction
   - org.fidoalliance.fdo.sample.StandardDeviceModule
   - org.fidoalliance.fdo.sample.ConformanceDeviceModule
+  - org.fidoalliance.fdo.sample.FdoSysDeviceModule
+
 
 
 system-properties:

@@ -1,0 +1,61 @@
+hibernate-properties:
+  connection.driver_class: org.h2.Driver
+  hibernate.connection.username: $(db_user)
+  hibernate.connection.password: $(db_password)
+  hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./app-data/emdb
+  hibernate.dialect: org.hibernate.dialect.H2Dialect
+
+system-properties:
+  log4j.configurationFile: log4j2.xml
+  app-data.dir: ./app-data
+  application.version: 1.1-SNAPSHOT
+  service.name: "Owner"
+  
+
+http-server:
+  http_port: 8042
+  https_port: 8043
+  http_schemes:
+  - http
+  #- https
+  http_timeout: 20000
+  keystore: 
+    path: ssl.p12
+    store-type: PKCS12
+    password: $(encrypt_password)
+
+
+owner:
+   keystore: 
+     path: owner.p12
+     store-type: PKCS12
+     password: $(encrypt_password)
+   replacement:
+     keystore: 
+       path: replacement.p12
+       store-type: PKCS12
+       password: $(encrypt_password)
+
+
+h2-database:
+ 
+
+workers:
+  - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
+  - org.fidoalliance.fdo.protocol.StandardCryptoService
+  - org.fidoalliance.fdo.protocol.StandardHttpServer
+  - org.fidoalliance.fdo.protocol.StandardDatabaseServer
+  - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
+  - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
+  - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
+  - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
+  - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
+  - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
+  - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
+  - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
+  - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 

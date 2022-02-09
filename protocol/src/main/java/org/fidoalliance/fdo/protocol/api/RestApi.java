@@ -38,6 +38,10 @@ public class RestApi implements AutoCloseable {
     return request;
   }
 
+  protected String getParamByValue(String value) {
+    return request.getParameter(value);
+  }
+
   protected int getReadSize() {
     return READ_SIZE;
   }

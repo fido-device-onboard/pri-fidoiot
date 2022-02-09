@@ -169,6 +169,8 @@ public class DeviceApp extends HttpClient {
     String serialNo = Hex.encodeHexString(
         Config.getWorker(CryptoService.class).getRandomBytes(4), false);
 
+    logger.info("Device Serial No:" + serialNo);
+
     ManufacturingInfo mfgInfo = new ManufacturingInfo();
     mfgInfo.setKeyType(keyType);
     mfgInfo.setKeyEnc(config.getKeyEnc());

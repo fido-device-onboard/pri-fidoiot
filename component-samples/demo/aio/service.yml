@@ -1,12 +1,15 @@
 hibernate-properties:
   connection.driver_class: org.h2.Driver
-  hibernate.connection.username: sa
-  hibernate.connection.password: ''
-  hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./emdb
+  hibernate.connection.username: $(db_user)
+  hibernate.connection.password: $(db_password)
+  hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./app-data/emdb
   hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 system-properties:
   log4j.configurationFile: log4j2.xml
+  app-data.dir: ./app-data
+  application.version: 1.1-SNAPSHOT
+  service.name: "All-in-one demo"
   
 
 http-server:
@@ -16,33 +19,39 @@ http-server:
   - http
   #- https
   http_timeout: 20000
-  https_keystore:
-    path: "./creds/ssl.p12"
-    password: "changeit"
+  keystore: 
+    path: ssl.p12
+    store-type: PKCS12
+    password: $(encrypt_password)
+
 
 manufacturer:
    keystore: 
      path: manufacturer.p12
      store-type: PKCS12
-     password: Secret
+     password: $(encrypt_password)
 
 owner:
    keystore: 
-     path: owner.12
+     path: owner.p12
      store-type: PKCS12
-     password: Secret
+     password: $(encrypt_password)
    replacement:
      keystore: 
        path: replacement.p12
        store-type: PKCS12
-       password: Secret
+       password: $(encrypt_password)
+
+
+h2-database:
+ 
 
 #cbor Web Token (cwt) used for to0 and to1 sessions
 cwt:
    keystore: 
-     path: ctw.12
+     path: ctw.p12
      store-type: PKCS12
-     password: Secret
+     password: $(encrypt_password)
 
 workers:
   - org.fidoalliance.fdo.protocol.OnDieCertSignatureFunction
@@ -70,10 +79,12 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 
 
 modules:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
+
 
 
 

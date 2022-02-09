@@ -9,13 +9,14 @@ import org.fidoalliance.fdo.protocol.entity.RvRedirect;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.To0d;
+import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public class StandardRvBlobStorageFunction implements RvBlobStorageFunction {
 
   @Override
-  public Long apply(To0d to0d, CoseSign1 coseSign1) throws IOException {
+  public Long apply(To0d to0d, To2RedirectEntry blobEntry) throws IOException {
 
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
@@ -29,7 +30,7 @@ public class StandardRvBlobStorageFunction implements RvBlobStorageFunction {
       final OwnershipVoucherHeader header =
           Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(), OwnershipVoucherHeader.class);
 
-      final byte[] data = Mapper.INSTANCE.writeValue(coseSign1);
+      final byte[] data = Mapper.INSTANCE.writeValue(blobEntry);
       RvRedirect redirect = session.get(RvRedirect.class, header.getGuid().toString());
       if (redirect == null) {
         redirect = new RvRedirect();

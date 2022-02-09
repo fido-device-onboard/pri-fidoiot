@@ -49,6 +49,8 @@
         <mapping class="org.fidoalliance.fdo.protocol.entity.RvData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.ConformanceData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.SystemResource"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.SystemPackage"></mapping>
+
 
 </session-factory>
 </hibernate-configuration>

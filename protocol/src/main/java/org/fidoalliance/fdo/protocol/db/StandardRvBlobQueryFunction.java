@@ -6,13 +6,14 @@ import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.RvRedirect;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
+import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public class StandardRvBlobQueryFunction implements RvBlobQueryFunction {
 
   @Override
-  public CoseSign1 apply(String s) throws IOException {
+  public To2RedirectEntry apply(String s) throws IOException {
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
       final Transaction trans = session.beginTransaction();
@@ -24,7 +25,7 @@ public class StandardRvBlobQueryFunction implements RvBlobQueryFunction {
         throw new ResourceNotFoundException("guid: " + s);
       }
       return Mapper.INSTANCE.readValue(
-          rvBlob.getData(), CoseSign1.class);
+          rvBlob.getData(), To2RedirectEntry.class);
 
     } finally {
       session.close();
