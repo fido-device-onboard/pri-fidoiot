@@ -168,7 +168,7 @@ public interface CryptoService {
    * @return The shared secret based on the state and message.
    */
   public KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState,
-      OwnerPublicKey decryptionKey) throws IOException;
+      Key decryptionKey) throws IOException;
 
   /**
    * gets the encryption state.

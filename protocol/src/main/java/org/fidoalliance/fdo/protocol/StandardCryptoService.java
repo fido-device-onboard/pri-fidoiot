@@ -7,6 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
@@ -447,12 +450,6 @@ public class StandardCryptoService implements CryptoService {
     }
   }
 
-  @Override
-  public boolean verify(CoseSign1 message, SigInfo sigInfo) {
-    //todo: verify epid
-    return false;
-  }
-
   protected KexMessage getAsymkexMessage(int randomSize,
       KexParty party,
       OwnerPublicKey ownerKey) throws IOException {
@@ -470,7 +467,8 @@ public class StandardCryptoService implements CryptoService {
         kexMessage.setMessage(a);
 
         asymExchange.setRandomSize(randomSize);
-        asymExchange.setB(new byte[0]);
+        asymExchange.setB(a);
+        asymExchange.setParty(party);
         kexMessage.setState(AnyType.fromObject(asymExchange));
         return kexMessage;
 
@@ -704,7 +702,7 @@ public class StandardCryptoService implements CryptoService {
 
   @Override
   public KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState,
-      OwnerPublicKey decryptionKey) throws IOException {
+      Key decryptionKey) throws IOException {
 
     switch (suiteName) {
       case "ECDH256":
@@ -712,7 +710,7 @@ public class StandardCryptoService implements CryptoService {
         return getEcdhSharedSecret(message, ownState);
       case "ASYMKEX2048":
       case "ASYMKEX3072":
-        return getAsymkexSharedSecret(message, ownState, decodeKey(decryptionKey));
+        return getAsymkexSharedSecret(message, ownState, decryptionKey);
       case DiffieHellman.DH14_ALG_NAME:
       case DiffieHellman.DH15_ALG_NAME:
 
@@ -1188,6 +1186,34 @@ public class StandardCryptoService implements CryptoService {
   }
 
   @Override
+  public boolean verify(CoseSign1 message, SigInfo sigInfo) throws IOException {
+    SigStructure sigStructure = new SigStructure();
+    sigStructure.setContext("Signature1");
+    sigStructure.setProtectedBody(message.getProtectedHeader());
+    sigStructure.setExternalData(new byte[0]);
+    sigStructure.setPayload(message.getPayload());
+
+    byte[] signature = message.getSignature();
+    byte[] sigData = Mapper.INSTANCE.writeValue(sigStructure);
+    byte[] maroePrefix = message.getUnprotectedHeader().getMaroPrefix();
+
+    SigInfoType sigInfoType = sigInfo.getSigInfoType();
+    byte[] groupId = sigInfo.getInfo();
+
+    EpidService epidMaterialService = new EpidService();
+    if (!epidMaterialService.verifyEpidSignature(
+          signature,
+          maroePrefix,
+          message.getUnprotectedHeader().getEatNonce().getNonce(),
+          sigData,
+          groupId,
+          sigInfoType)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
   public boolean verify(CoseSign1 message, OwnerPublicKey ownerKey) throws IOException {
 
     SigStructure sigStructure = new SigStructure();
@@ -1250,14 +1276,13 @@ public class StandardCryptoService implements CryptoService {
     if (null != sigInfoA && sigInfoA.getInfo().length > 0
         && (sigInfoA.getSigInfoType().equals(SigInfoType.EPID10)
         || sigInfoA.getSigInfoType().equals(SigInfoType.EPID11))) {
-      //todo: add epid support
-      // EpidMaterialService epidMaterialService = new EpidMaterialService();
-      // try {
-      //   return epidMaterialService.getSigInfo(sigInfoA);
-      // } catch (IOException ioException) {
-      throw new InvalidMessageException(new IllegalArgumentException());
-      //   throw new RuntimeException(ioException);
-      // }
+
+      EpidService epidMaterialService = new EpidService();
+      try {
+         return epidMaterialService.getSigInfo(sigInfoA);
+      } catch (IOException ioException) {
+        throw new InvalidMessageException(new IllegalArgumentException());
+      }
     }
     return sigInfoA;
   }

@@ -608,7 +608,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CryptoService cs = getCryptoService();
 
     KexMessage kexMessage =
-        cs.getKeyExchangeMessage(helloDevice.getKexSuiteName(), KexParty.A, null);
+        cs.getKeyExchangeMessage(helloDevice.getKexSuiteName(),
+                KexParty.A,
+                null);
     hdrPayload.setKexA(kexMessage.getMessage());
 
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(
@@ -881,7 +883,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         throw new InvalidMessageException("signature failure");
       }
     } else {
-
       //we don't have the cert chain so the only way is to verify using sigInfo
       boolean verified = getCryptoService().verify(sign1, helloDevice.getSigInfo());
       if (!verified) {
@@ -915,7 +916,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2SetupDevicePayload setupDevice = new To2SetupDevicePayload();
     setupDevice.setNonce(setupNonce);
 
-
     OwnershipVoucherHeader replacedHeader =
         getWorker(VoucherReplacementFunction.class).apply(voucher);
     storage.put(OwnershipVoucherHeader.class, replacedHeader);
@@ -924,8 +924,30 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     setupDevice.setRendezvousInfo(replacedHeader.getRendezvousInfo());
     setupDevice.setOwner2Key(replacedHeader.getPublicKey());
 
+    // if ownerkey is RSA restricted type and Kex is ASYMKEX
+    // then extract the private key in order to determine the
+    // shared secret. Other key exchange types do not require
+    // the private key.
+    KeyResolver ownerKeyResolver = getWorker(OwnerKeySupplier.class).get();
+    PrivateKey originalPrivateKey = null;
+    String alias;
+    if (helloDevice.getKexSuiteName().equalsIgnoreCase("ASYMKEX2048")) {
+      alias = KeyResolver.getAlias(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_2048);
+      originalPrivateKey = ownerKeyResolver.getPrivateKey(alias);
+    } else if (helloDevice.getKexSuiteName().equalsIgnoreCase("ASYMKEX3072")) {
+      alias = KeyResolver.getAlias(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_3072);
+      originalPrivateKey = ownerKeyResolver.getPrivateKey(alias);
+    }
 
     CryptoService cs = getCryptoService();
+    KexMessage kexMessage = storage.get(KexMessage.class);
+
+    // determine the sharedsecret for KEX
+    KeyExchangeResult kxResult = cs
+            .getSharedSecret(helloDevice.getKexSuiteName(),
+                    fdoPayload.getKexB(), kexMessage, originalPrivateKey);
+
+
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
     KeyResolver resolver = getWorker(ReplacementKeySupplier.class).get();
     PrivateKey privateKey = resolver.getPrivateKey(cs.decodeKey(setupDevice.getOwner2Key()));
@@ -936,12 +958,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } finally {
       cs.destroyKey(privateKey);
     }
-
-    KexMessage kexMessage = storage.get(KexMessage.class);
-    OwnerPublicKey ownerKey = VoucherUtils.getLastOwner(voucher);
-    KeyExchangeResult kxResult = cs
-        .getSharedSecret(helloDevice.getKexSuiteName(),
-            fdoPayload.getKexB(), kexMessage, ownerKey);
 
     EncryptionState es =
         getCryptoService().getEncryptionState(kxResult, helloDevice.getCipherSuiteType());
