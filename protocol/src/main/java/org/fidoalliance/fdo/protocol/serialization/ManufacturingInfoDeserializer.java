@@ -46,7 +46,13 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
       }
     }
     if (index < node.size()) {
+      info.setOnDieDeviceCertChain(node.get(index++).binaryValue());
+    }
+    if (index < node.size()) {
       info.setTestSignature(node.get(index++).binaryValue());
+    }
+    if (index < node.size()) {
+      info.setTestSigMaroePrefix(node.get(index++).binaryValue());
     }
 
     return info;
