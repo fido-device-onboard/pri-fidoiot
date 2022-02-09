@@ -29,9 +29,11 @@ import org.fidoalliance.fdo.protocol.message.Nonce;
 import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
+import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To1dPayload;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
+import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -90,9 +92,6 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
         to1dPayload.setAddressEntries(to2Entries);
         to1dPayload.setTo1ToTo0Hash(to0dHash);
 
-        // the new extended last owner
-        // lastOwner = VoucherUtils.getLastOwner(ownershipVoucher);
-        //lastKey = Config.getWorker(CryptoService.class).decodeKey(lastOwner);
         PrivateKey privateKey = ownerResolver.getPrivateKey(newOwnerChain[0].getPublicKey());
         try {
           CoseSign1 sign1 = cs.sign(
@@ -102,7 +101,14 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
           );
           RvRedirect blob = new RvRedirect();
           blob.setGuid(header.getGuid().toString());
-          blob.setData(Mapper.INSTANCE.writeValue(sign1));
+
+          To2RedirectEntry redirectEntry = new To2RedirectEntry();
+          redirectEntry.setTo1d(sign1);
+          redirectEntry.setPublicKey(
+              cs.encodeKey(header.getPublicKey().getType(),
+                  PublicKeyEncoding.X509,
+                  newOwnerChain));
+          blob.setData(Mapper.INSTANCE.writeValue(redirectEntry));
 
           blob.setCreatedOn(new Date(System.currentTimeMillis()));
           blob.setExpiry(
