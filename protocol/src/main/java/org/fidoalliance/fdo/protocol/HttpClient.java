@@ -100,6 +100,8 @@ public abstract class HttpClient implements Runnable {
 
         requestUri = uriBuilder.build();
 
+        System.out.println(requestUri.toString());
+
         HttpPost httpRequest = new HttpPost(requestUri);
 
         ByteArrayEntity bae = new ByteArrayEntity(getRequest().getMessage());
