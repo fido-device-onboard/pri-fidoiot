@@ -23,6 +23,12 @@ http-server:
     path: ssl.p12
     store-type: PKCS12
     password: $(encrypt_password)
+  auth:
+    method: DIGEST
+    role: api
+    user_name: apiUser
+    user_password: $(api_password)
+
 
 
 manufacturer:
@@ -54,7 +60,6 @@ cwt:
      password: $(encrypt_password)
 
 workers:
-  - org.fidoalliance.fdo.protocol.OnDieCertSignatureFunction
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
@@ -80,11 +85,6 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 
-
-modules:
-  - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
-  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
-
 
 
 

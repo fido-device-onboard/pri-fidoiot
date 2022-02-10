@@ -29,6 +29,7 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
 
     final AnyType certInfo = info.getCertInfo();
 
+
     final Object certObject = certInfo.covertValue(Object.class);
     byte[] encoded = null;
     if (certObject instanceof byte[] )  {
