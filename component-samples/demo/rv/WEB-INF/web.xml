@@ -34,24 +34,6 @@
       <servlet-name>Logs</servlet-name>
       <url-pattern>/api/v1/logs</url-pattern>
    </servlet-mapping>
-   
 
-
-  <security-constraint>
-    <web-resource-collection>
-        <web-resource-name>apis</web-resource-name>
-        <url-pattern>/api/v1/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-        <role-name>api</role-name>
-    </auth-constraint>
-    <user-data-constraint>
-        <transport-guarantee>NONE</transport-guarantee>
-    </user-data-constraint>
-  </security-constraint>
-
-  <security-role>
-    <role-name>api</role-name>
-  </security-role>
 
 </web-app>
