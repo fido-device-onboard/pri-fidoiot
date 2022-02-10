@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"to1d","pubKey"})
+@JsonPropertyOrder({"to1d","chain"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class To2RedirectEntry {
   @JsonProperty("to1d")
   private CoseSign1 to1d;
-  @JsonProperty("pubKey")
-  private OwnerPublicKey publicKey;
+  @JsonProperty("chain")
+  private CertChain certChain;
 
   @JsonIgnore
   public CoseSign1 getTo1d() {
@@ -22,8 +22,8 @@ public class To2RedirectEntry {
   }
 
   @JsonIgnore
-  public OwnerPublicKey getPublicKey() {
-    return publicKey;
+  public CertChain getCertChain() {
+    return certChain;
   }
 
   @JsonIgnore
@@ -32,7 +32,7 @@ public class To2RedirectEntry {
   }
 
   @JsonIgnore
-  public void setPublicKey(OwnerPublicKey publicKey) {
-    this.publicKey = publicKey;
+  public void setCertChain(CertChain certChain) {
+    this.certChain= certChain;
   }
 }
