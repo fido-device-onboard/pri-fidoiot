@@ -104,10 +104,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
 
           To2RedirectEntry redirectEntry = new To2RedirectEntry();
           redirectEntry.setTo1d(sign1);
-          redirectEntry.setPublicKey(
-              cs.encodeKey(header.getPublicKey().getType(),
-                  PublicKeyEncoding.X509,
-                  newOwnerChain));
+          redirectEntry.setCertChain(ownershipVoucher.getCertChain());
           blob.setData(Mapper.INSTANCE.writeValue(redirectEntry));
 
           blob.setCreatedOn(new Date(System.currentTimeMillis()));

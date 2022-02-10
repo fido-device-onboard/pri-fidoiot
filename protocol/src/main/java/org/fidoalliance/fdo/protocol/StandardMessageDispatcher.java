@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.CwtKeySupplier;
@@ -35,6 +36,7 @@ import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.message.CertChain;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
+import org.fidoalliance.fdo.protocol.message.CoseProtectedHeader;
 import org.fidoalliance.fdo.protocol.message.CoseUnprotectedHeader;
 import org.fidoalliance.fdo.protocol.message.CwtTo1Id;
 import org.fidoalliance.fdo.protocol.message.CwtToken;
@@ -215,13 +217,52 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     header.setGuid(guid);
     header.setDeviceInfo(diInfo.getDeviceInfo());
 
-    //todo: handle Ondie ECDSA and EPID
-
     final AnyType certInfo = diInfo.getCertInfo();
-    if (certInfo != null) {
+    if (certInfo != null || diInfo.getOnDieDeviceCertChain() != null) {
       try {
+        Certificate[] chain = null;
+        if (diInfo.getOnDieDeviceCertChain() != null) {
+          OnDieCertSignatureFunction onDieSigFunction = new OnDieCertSignatureFunction();
+          // OnDie ECDSA type device
+          chain = onDieSigFunction.apply(diInfo);
 
-        final Certificate[] chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+          // verify ondie revocations
+          if (!onDieSigFunction.checkRevocations(chain)) {
+            throw new IOException("OnDie revocation failure");
+          }
+
+          // verify test signature
+          // First, create proper signed data format
+          // Note: value in third_key is empty since
+          // we have no nonce with the test signature.
+          AlgorithmFinder finder = new AlgorithmFinder();
+          CoseProtectedHeader cph = new CoseProtectedHeader();
+          cph.setAlgId( finder.getCoseAlgorithm(PublicKeyType.SECP384R1,
+                  KeySizeType.SIZE_384));
+          byte[] cphData = Mapper.INSTANCE.writeValue(cph);
+
+          CoseUnprotectedHeader cuh = new CoseUnprotectedHeader();
+          cuh.setMaroPrefix(diInfo.getTestSigMaroePrefix());
+
+          CoseSign1 coseSign = new CoseSign1();
+          coseSign.setProtectedHeader(cphData);
+          coseSign.setPayload(diInfo.getSerialNumber().getBytes());
+          coseSign.setSignature(diInfo.getTestSignature());
+          coseSign.setUnprotectedHeader(cuh);
+
+          OwnerPublicKey ownerKey = new OwnerPublicKey();
+          ownerKey.setBody(AnyType.fromObject(chain[0].getPublicKey().getEncoded()));
+          ownerKey.setEnc(PublicKeyEncoding.X509);
+          ownerKey.setType(PublicKeyType.SECP384R1);
+
+          if (!cs.verify(coseSign, ownerKey)) {
+            throw new InvalidMessageException("OnDie test signature failure.");
+          }
+
+        } else {
+          // ECDSA type device
+          chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        }
 
         int totalBytes = 0;
         for (Certificate cert : chain) {
@@ -262,7 +303,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         throw new IOException(e);
       }
     } else {
-      // no certInfo provided so assume epid and not cert chain or hash
+      // no certInfo provided so assume EPID
       final KeyResolver keyResolver = getWorker(ManufacturerKeySupplier.class).get();
 
       final String alias = KeyResolver.getAlias(diInfo.getKeyType(), KeySizeType.SIZE_2048);
@@ -439,8 +480,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);
-    redirectEntry.setPublicKey(ownerPublicKey);
-
+    CertChain deviceChain = to0d.getVoucher().getCertChain();
+    redirectEntry.setCertChain(deviceChain);
     long waitSeconds = getWorker(RvBlobStorageFunction.class).apply(to0d, redirectEntry);
 
     To0AcceptOwner acceptOwner = new To0AcceptOwner();
@@ -514,13 +555,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Guid guid = cwtTo1Id.getHelloRv().getGuid();
 
     //todo fix: get owner key from blob
-    OwnershipVoucher voucher = getWorker(VoucherQueryFunction.class).apply(guid.toString());
-    OwnershipVoucherHeader header = VoucherUtils.getHeader(voucher);
 
-    CertChain certChain = voucher.getCertChain();
+    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
+
+
     OwnerPublicKey pubKey = null;
+    CertChain certChain = entry.getCertChain();
     if (certChain != null) {
-      KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
       pubKey = getCryptoService().encodeKey(
           new AlgorithmFinder().getPublicKeyType(certChain.getChain().get(0).getPublicKey()),
           PublicKeyEncoding.X509,
@@ -540,8 +581,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!cwtTo1Id.getNonce().equals(eatPayload.getNonce())) {
       throw new InvalidMessageException("NonceTO1Proof noes not match");
     }
-
-    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
     response.setMessage(Mapper.INSTANCE.writeValue(entry.getTo1d()));
   }
 
@@ -574,7 +613,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CryptoService cs = getCryptoService();
 
     KexMessage kexMessage =
-        cs.getKeyExchangeMessage(helloDevice.getKexSuiteName(), KexParty.A, null);
+        cs.getKeyExchangeMessage(helloDevice.getKexSuiteName(),
+                KexParty.A,
+                null);
     hdrPayload.setKexA(kexMessage.getMessage());
 
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(
@@ -767,7 +808,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     Nonce setupNonce = Nonce.fromRandomUUID();
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
-    uph.setEatNone(setupNonce); //NonceTO2SetupDv
+    uph.setEatNonce(setupNonce); //NonceTO2SetupDv
     To2ProveDevicePayload fdoPayload = new To2ProveDevicePayload();
     CryptoService cs = getCryptoService();
 
@@ -847,7 +888,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         throw new InvalidMessageException("signature failure");
       }
     } else {
-
       //we don't have the cert chain so the only way is to verify using sigInfo
       boolean verified = getCryptoService().verify(sign1, helloDevice.getSigInfo());
       if (!verified) {
@@ -881,7 +921,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2SetupDevicePayload setupDevice = new To2SetupDevicePayload();
     setupDevice.setNonce(setupNonce);
 
-
     OwnershipVoucherHeader replacedHeader =
         getWorker(VoucherReplacementFunction.class).apply(voucher);
     storage.put(OwnershipVoucherHeader.class, replacedHeader);
@@ -890,8 +929,30 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     setupDevice.setRendezvousInfo(replacedHeader.getRendezvousInfo());
     setupDevice.setOwner2Key(replacedHeader.getPublicKey());
 
+    // if ownerkey is RSA restricted type and Kex is ASYMKEX
+    // then extract the private key in order to determine the
+    // shared secret. Other key exchange types do not require
+    // the private key.
+    KeyResolver ownerKeyResolver = getWorker(OwnerKeySupplier.class).get();
+    PrivateKey originalPrivateKey = null;
+    String alias;
+    if (helloDevice.getKexSuiteName().equalsIgnoreCase("ASYMKEX2048")) {
+      alias = KeyResolver.getAlias(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_2048);
+      originalPrivateKey = ownerKeyResolver.getPrivateKey(alias);
+    } else if (helloDevice.getKexSuiteName().equalsIgnoreCase("ASYMKEX3072")) {
+      alias = KeyResolver.getAlias(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_3072);
+      originalPrivateKey = ownerKeyResolver.getPrivateKey(alias);
+    }
 
     CryptoService cs = getCryptoService();
+    KexMessage kexMessage = storage.get(KexMessage.class);
+
+    // determine the sharedsecret for KEX
+    KeyExchangeResult kxResult = cs
+            .getSharedSecret(helloDevice.getKexSuiteName(),
+                    fdoPayload.getKexB(), kexMessage, originalPrivateKey);
+
+
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
     KeyResolver resolver = getWorker(ReplacementKeySupplier.class).get();
     PrivateKey privateKey = resolver.getPrivateKey(cs.decodeKey(setupDevice.getOwner2Key()));
@@ -902,12 +963,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } finally {
       cs.destroyKey(privateKey);
     }
-
-    KexMessage kexMessage = storage.get(KexMessage.class);
-    OwnerPublicKey ownerKey = VoucherUtils.getLastOwner(voucher);
-    KeyExchangeResult kxResult = cs
-        .getSharedSecret(helloDevice.getKexSuiteName(),
-            fdoPayload.getKexB(), kexMessage, ownerKey);
 
     EncryptionState es =
         getCryptoService().getEncryptionState(kxResult, helloDevice.getCipherSuiteType());

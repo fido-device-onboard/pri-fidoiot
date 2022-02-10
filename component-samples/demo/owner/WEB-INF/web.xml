@@ -108,6 +108,7 @@
    </servlet-mapping>
 
     <servlet>
+
         <servlet-name>SystemResourceAPI</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
         <init-param>
@@ -118,6 +119,19 @@
     <servlet-mapping>
         <servlet-name>SystemResourceAPI</servlet-name>
         <url-pattern>/api/v1/owner/sviresource/*</url-pattern>
+    </servlet-mapping>
+  
+   <servlet>
+          <servlet-name>CertificateApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateApi</servlet-name>
+        <url-pattern>/api/v1/certificate/*</url-pattern>
     </servlet-mapping>
 
   <security-constraint>

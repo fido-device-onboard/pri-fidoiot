@@ -123,6 +123,19 @@
       <servlet-name>Interop</servlet-name>
       <url-pattern>/api/v1/interop/vouchers/*</url-pattern>
    </servlet-mapping>
+   
+   <servlet>
+      <servlet-name>OnDie</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+         <param-name>Api-Class</param-name>
+         <param-value>org.fidoalliance.fdo.protocol.api.OnDie</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping>
+      <servlet-name>OnDie</servlet-name>
+      <url-pattern>/api/v1/ondie</url-pattern>
+   </servlet-mapping>
 
     <servlet>
         <servlet-name>AioRvInfo</servlet-name>

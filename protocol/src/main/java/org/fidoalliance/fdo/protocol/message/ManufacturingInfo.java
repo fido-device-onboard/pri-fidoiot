@@ -9,7 +9,8 @@ import org.fidoalliance.fdo.protocol.serialization.ManufacturingInfoDeserializer
 import org.fidoalliance.fdo.protocol.serialization.ManufacturingInfoSerializer;
 
 @JsonPropertyOrder(
-    {"keyType", "keyEnc", "serialNumber","deviceInfo","certInfo","testSignature"}
+    {"keyType", "keyEnc", "serialNumber","deviceInfo","certInfo",
+            "onDieDeviceCertChain","testSignature","testSigMaroePrefix"}
 )
 @JsonSerialize(using = ManufacturingInfoSerializer.class)
 @JsonDeserialize(using = ManufacturingInfoDeserializer.class)
@@ -32,8 +33,14 @@ public class ManufacturingInfo {
   @JsonProperty("certInfo")
   private AnyType certInfo;
 
+  @JsonProperty("onDieDeviceCertChain")
+  private byte[] onDieDeviceCertChain;
+
   @JsonProperty("testSignature")
   private byte[] testSignature;
+
+  @JsonProperty("testSigMaroePrefix")
+  private byte[] testSigMaroePrefix;
 
   @JsonIgnore
   public PublicKeyType getKeyType() {
@@ -61,8 +68,18 @@ public class ManufacturingInfo {
   }
 
   @JsonIgnore
+  public byte[] getOnDieDeviceCertChain() {
+    return onDieDeviceCertChain;
+  }
+
+  @JsonIgnore
   public byte[] getTestSignature() {
     return testSignature;
+  }
+
+  @JsonIgnore
+  public byte[] getTestSigMaroePrefix() {
+    return testSigMaroePrefix;
   }
 
   @JsonIgnore
@@ -91,7 +108,17 @@ public class ManufacturingInfo {
   }
 
   @JsonIgnore
+  public void setOnDieDeviceCertChain(byte[] onDieDeviceCertChain) {
+    this.onDieDeviceCertChain = onDieDeviceCertChain;
+  }
+
+  @JsonIgnore
   public void setTestSignature(byte[] testSignature) {
     this.testSignature = testSignature;
+  }
+
+  @JsonIgnore
+  public void setTestSigMaroePrefix(byte[] maroePrefix) {
+    this.testSigMaroePrefix = maroePrefix;
   }
 }
