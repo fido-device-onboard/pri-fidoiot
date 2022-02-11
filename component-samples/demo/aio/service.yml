@@ -45,6 +45,11 @@ owner:
 
 h2-database:
  
+epid:
+    # the url below is the used for production purposes
+    url: http://verify.epid-sbx.trustedservices.intel.com
+    # the url below is used for testing purposes only
+    url: http://verify.epid-sbx.trustedservices.intel.com
 
 #cbor Web Token (cwt) used for to0 and to1 sessions
 cwt:
@@ -81,18 +86,6 @@ workers:
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 
 
-modules:
-  - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
-  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
 
 
 
-
-
-
-
-
-
-
-
-  

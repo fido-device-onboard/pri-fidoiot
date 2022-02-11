@@ -12,6 +12,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import javax.crypto.SecretKey;
+
+import org.fidoalliance.fdo.protocol.EpidService;
 import org.fidoalliance.fdo.protocol.InvalidMessageException;
 import org.fidoalliance.fdo.protocol.KeyExchangeResult;
 import org.fidoalliance.fdo.protocol.message.AnyType;
@@ -143,7 +145,7 @@ public interface CryptoService {
    * @param sigInfo SignInfo
    * @return True if the message can be verified by owner key.
    */
-  boolean verify(CoseSign1 message,SigInfo sigInfo) throws IOException;
+  boolean verify(CoseSign1 message, SigInfo sigInfo) throws IOException;
 
   /**
    * Gets the Key Exchange message.

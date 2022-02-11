@@ -571,7 +571,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
-      boolean verified = getCryptoService().verify(sign1, cwtTo1Id.getHelloRv().getSigInfo());
+      boolean verified = getCryptoService().verify(
+              sign1,
+              cwtTo1Id.getHelloRv().getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
@@ -890,7 +892,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
-      boolean verified = getCryptoService().verify(sign1, helloDevice.getSigInfo());
+      boolean verified = getCryptoService().verify(
+              sign1,
+              helloDevice.getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
