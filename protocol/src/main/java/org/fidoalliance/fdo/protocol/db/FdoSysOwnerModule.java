@@ -1,8 +1,10 @@
 package org.fidoalliance.fdo.protocol.db;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
 import org.apache.http.HttpEntity;
@@ -21,6 +23,7 @@ import org.fidoalliance.fdo.protocol.MessageBodyException;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.entity.SystemPackage;
+import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
 import org.fidoalliance.fdo.protocol.message.MsgType;
@@ -30,8 +33,6 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.engine.jdbc.ClobProxy;
 
 public class FdoSysOwnerModule implements ServiceInfoModule {
 
@@ -163,7 +164,48 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
     extra.getQueue().add(kv);
   }
-  protected void getFileUrl(ServiceInfoModuleState state,
+
+  protected void getDbFile(ServiceInfoModuleState state,
+      FdoSysModuleExtra extra,
+      FdoSysInstruction instruction) throws IOException {
+    String resource = instruction.getResource();
+    final Session session = HibernateUtil.getSessionFactory().openSession();
+    try {
+      // Query database table SYSTEM_RESOURCE for filename Key
+      SystemResource sviResource = session.get(SystemResource.class, instruction.getResource());
+
+      if (sviResource != null) {
+        Blob blobData = sviResource.getData();
+        try (InputStream input = blobData.getBinaryStream()) {
+          for (;;) {
+            byte[] data = new byte[state.getMtu()-26];
+            int br = input.read(data);
+            if (br == -1 ) {
+              break;
+            }
+            ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(FdoSys.WRITE);
+
+            if (br < data.length) {
+              byte[] temp = data;
+              data = new byte[br];
+              System.arraycopy(temp,0,data,0,br);
+            }
+            kv.setValue(Mapper.INSTANCE.writeValue(data));
+            extra.getQueue().add(kv);
+          }
+        } catch (SQLException throwables) {
+          throw new IOException(throwables);
+        }
+      }
+
+    } finally {
+      session.close();
+    }
+
+  }
+
+  protected void getUrlFile(ServiceInfoModuleState state,
       FdoSysModuleExtra extra,
       FdoSysInstruction instruction) throws IOException {
     String resource = instruction.getResource();
@@ -214,9 +256,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
     String resource = instruction.getResource();
     if (resource.startsWith("https://") || resource.startsWith("http://")) {
-      getFileUrl(state, extra, instruction);
+      getUrlFile(state, extra, instruction);
     } else {
 
+      getDbFile(state,extra,instruction);
     }
   }
 }
