@@ -23,6 +23,12 @@ http-server:
     path: ssl.p12
     store-type: PKCS12
     password: $(encrypt_password)
+  auth:
+    method: DIGEST
+    role: api
+    user_name: apiUser
+    user_password: $(api_password)
+
 
 
 manufacturer:
@@ -46,7 +52,7 @@ owner:
 h2-database:
  
 epid:
-    # the url below is the used for production purposes
+    # TBD: the url below is the used for production purposes
     url: http://verify.epid-sbx.trustedservices.intel.com
     # the url below is used for testing purposes only
     url: http://verify.epid-sbx.trustedservices.intel.com
@@ -59,7 +65,6 @@ cwt:
      password: $(encrypt_password)
 
 workers:
-  - org.fidoalliance.fdo.protocol.OnDieCertSignatureFunction
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService

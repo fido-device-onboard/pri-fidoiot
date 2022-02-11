@@ -14,6 +14,7 @@ import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 public class RestApi implements AutoCloseable {
 
@@ -73,7 +74,9 @@ public class RestApi implements AutoCloseable {
 
   protected void commit() {
     if (transaction != null ) {
-      transaction.commit();
+      if (transaction.getStatus() == TransactionStatus.ACTIVE) {
+        transaction.commit();
+      }
       transaction = null;
     }
   }

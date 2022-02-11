@@ -57,7 +57,13 @@ public class GenericArraySerializer extends StdSerializer<Object> {
     gen.writeStartArray(value, list.size());
 
     for (Object o : list) {
-      gen.writeObject(o);
+      if (o == null) {
+        gen.writeNull();
+      } else {
+        gen.writeObject(o);
+
+      }
+
     }
 
     gen.writeEndArray();

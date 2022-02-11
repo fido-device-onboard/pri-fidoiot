@@ -45,10 +45,14 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
   * Constructor.
   *
   */
-  public OnDieCertSignatureFunction() throws CertificateException {
-    certFactory = CertificateFactory.getInstance(
-            "X.509", // TODO Const.X509_ALG_NAME,
-            new BouncyCastleProvider());
+  public OnDieCertSignatureFunction() throws IOException {
+    try {
+      certFactory = CertificateFactory.getInstance(
+              "X.509", // TODO Const.X509_ALG_NAME,
+              new BouncyCastleProvider());
+    } catch (CertificateException e) {
+      throw new IOException(e);
+    }
   }
 
     /**

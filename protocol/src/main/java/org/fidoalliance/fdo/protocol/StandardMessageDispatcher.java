@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.CwtKeySupplier;
@@ -219,14 +220,14 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     final AnyType certInfo = diInfo.getCertInfo();
     if (certInfo != null || diInfo.getOnDieDeviceCertChain() != null) {
       try {
-
-        Certificate[] chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        Certificate[] chain = null;
         if (diInfo.getOnDieDeviceCertChain() != null) {
+          OnDieCertSignatureFunction onDieSigFunction = new OnDieCertSignatureFunction();
           // OnDie ECDSA type device
-          chain = getWorker(OnDieCertSignatureFunction.class).apply(diInfo);
+          chain = onDieSigFunction.apply(diInfo);
 
           // verify ondie revocations
-          if (!getWorker(OnDieCertSignatureFunction.class).checkRevocations(chain)) {
+          if (!onDieSigFunction.checkRevocations(chain)) {
             throw new IOException("OnDie revocation failure");
           }
 
@@ -479,8 +480,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);
-    redirectEntry.setPublicKey(ownerPublicKey);
-
+    CertChain deviceChain = to0d.getVoucher().getCertChain();
+    redirectEntry.setCertChain(deviceChain);
     long waitSeconds = getWorker(RvBlobStorageFunction.class).apply(to0d, redirectEntry);
 
     To0AcceptOwner acceptOwner = new To0AcceptOwner();
@@ -554,13 +555,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Guid guid = cwtTo1Id.getHelloRv().getGuid();
 
     //todo fix: get owner key from blob
-    OwnershipVoucher voucher = getWorker(VoucherQueryFunction.class).apply(guid.toString());
-    OwnershipVoucherHeader header = VoucherUtils.getHeader(voucher);
 
-    CertChain certChain = voucher.getCertChain();
+    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
+
+
     OwnerPublicKey pubKey = null;
+    CertChain certChain = entry.getCertChain();
     if (certChain != null) {
-      KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
       pubKey = getCryptoService().encodeKey(
           new AlgorithmFinder().getPublicKeyType(certChain.getChain().get(0).getPublicKey()),
           PublicKeyEncoding.X509,
@@ -582,8 +583,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!cwtTo1Id.getNonce().equals(eatPayload.getNonce())) {
       throw new InvalidMessageException("NonceTO1Proof noes not match");
     }
-
-    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
     response.setMessage(Mapper.INSTANCE.writeValue(entry.getTo1d()));
   }
 
