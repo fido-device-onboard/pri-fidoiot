@@ -554,8 +554,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CwtTo1Id cwtTo1Id = Mapper.INSTANCE.readValue(cwtToken.getCwtId(), CwtTo1Id.class);
     Guid guid = cwtTo1Id.getHelloRv().getGuid();
 
-    //todo fix: get owner key from blob
-
     To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
 
 
