@@ -7,9 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
@@ -1015,7 +1012,7 @@ public class StandardCryptoService implements CryptoService {
         final byte[] mac1 = mac0.getTagValue();
 
         Hash mac2 = hash(macType, svk, mac0.getPayload());
-        if (!mac2.equals(mac1)) {
+        if (!Arrays.equals(mac2.getHashValue(), mac1)) {
           throw new InvalidMessageException("Mac0 hashes does not match");
         }
 
@@ -1186,7 +1183,8 @@ public class StandardCryptoService implements CryptoService {
   }
 
   @Override
-  public boolean verify(CoseSign1 message, SigInfo sigInfo) throws IOException {
+  public boolean verify(CoseSign1 message, SigInfo sigInfo)
+          throws IOException {
     SigStructure sigStructure = new SigStructure();
     sigStructure.setContext("Signature1");
     sigStructure.setProtectedBody(message.getProtectedHeader());
@@ -1200,8 +1198,8 @@ public class StandardCryptoService implements CryptoService {
     SigInfoType sigInfoType = sigInfo.getSigInfoType();
     byte[] groupId = sigInfo.getInfo();
 
-    EpidService epidMaterialService = new EpidService();
-    if (!epidMaterialService.verifyEpidSignature(
+    EpidService epidService = new EpidService();
+    if (!epidService.verifyEpidSignature(
           signature,
           maroePrefix,
           message.getUnprotectedHeader().getEatNonce().getNonce(),

@@ -1,7 +1,5 @@
 package org.fidoalliance.fdo.protocol.db;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.entity.OnDieCertificateData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -25,27 +23,6 @@ public class OnDieCertificateManager {
   protected static List<String> rootCaList = new ArrayList<String>(Arrays.asList(
           "OnDie_CA_RootCA_Certificate.cer",
           "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
-
-  protected static class RootConfig {
-    @JsonProperty("ondie")
-    private OnDieCertificateManager.OnDieConfig config;
-
-    protected OnDieCertificateManager.OnDieConfig getRoot() {
-      return config;
-    }
-  }
-
-  protected static class OnDieConfig {
-    @JsonProperty("path")
-    private String path;
-
-    protected String getPath() {
-      return path;
-    }
-  }
-
-  protected OnDieCertificateManager.RootConfig config =
-          Config.getConfig(OnDieCertificateManager.RootConfig.class);
 
   public boolean isOnDieRootCA(String certName) {
     for (String rootName : rootCaList) {
