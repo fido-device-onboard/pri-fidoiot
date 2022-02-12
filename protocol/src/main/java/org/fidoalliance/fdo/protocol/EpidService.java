@@ -51,25 +51,34 @@ public class EpidService {
   private static final String GROUPCERTSIGMA10 = "PUBKEY.CRT.BIN";
   private static final String GROUPCERTSIGMA11 = "PUBKEY.CRT";
 
+  // This is not defined in HttpUrlConnection
+  public static final int HTTP_EXPECTATION_FAILED = 417;
+
   private static final LoggerService logger = new LoggerService(EpidService.class);
 
   protected static class RootConfig {
     @JsonProperty("epid")
     private EpidService.EpidConfig root;
 
-      protected EpidService.EpidConfig getRoot() {
+    protected EpidService.EpidConfig getRoot() {
         return root;
-      }
-    }
+     }
+   }
 
-    protected static class EpidConfig {
-    @JsonProperty("url")
-    private String path;
+   protected static class EpidConfig {
+     @JsonProperty("url")
+     private String path;
+     @JsonProperty("testMode")
+     private Boolean testMode;
 
-      protected String getPath() {
+     protected String getPath() {
         return path;
       }
-    }
+     protected Boolean getTestMode() {
+       return testMode;
+     }
+   }
+
 
   protected EpidService.RootConfig config =
     Config.getConfig(EpidService.RootConfig.class);
@@ -235,6 +244,22 @@ public class EpidService {
 
       int response = doPost(url, msg);
       if (response != HttpURLConnection.HTTP_OK) {
+        if (config.getRoot().getTestMode() != null
+                && config.getRoot().getTestMode()) {
+          // in test mode return false only for non-signature issues
+          switch (response) {
+            case HttpURLConnection.HTTP_OK:
+              // valid signature
+            case HttpURLConnection.HTTP_FORBIDDEN:
+              // invalid signature
+            case HTTP_EXPECTATION_FAILED:
+              // outdated sigrl
+              return true;
+            default:
+              // malformed request or other reason
+              return false;
+          }
+        }
         return false;
       }
     } catch (Exception ex) {

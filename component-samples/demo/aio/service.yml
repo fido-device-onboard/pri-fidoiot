@@ -52,10 +52,14 @@ owner:
 h2-database:
  
 epid:
-    # TBD: the url below is the used for production purposes
-    url: http://verify.epid-sbx.trustedservices.intel.com
-    # the url below is used for testing purposes only
-    url: http://verify.epid-sbx.trustedservices.intel.com
+  # WARNING: do not set testmode to true in production environments
+  # if testmode is true, EPID signature verification will only
+  # fail for non-signature issues (i.e. malformed requests)
+  testMode: false
+  # TBD: the url below is the used for production purposes
+  # url: http://verify.epid-sbx.trustedservices.intel.com
+  # the url below is used for testing purposes only
+  url: http://verify.epid-sbx.trustedservices.intel.com
 
 #cbor Web Token (cwt) used for to0 and to1 sessions
 cwt:
@@ -89,7 +93,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
-  - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule 
+  - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
 
 
 
