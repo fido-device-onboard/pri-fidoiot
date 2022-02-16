@@ -14,15 +14,11 @@ import org.fidoalliance.fdo.protocol.serialization.AnyTypeSerializer;
 public class AnyType {
 
   @JsonIgnore
-  private JsonNode node;
+  private Object object;
 
   @JsonIgnore
   private AnyType(final Object object) {
-    if (object instanceof JsonNode) {
-      this.node = (JsonNode) object;
-    } else {
-      this.node = Mapper.INSTANCE.valueToTree(object);
-    }
+   this.object = object;
   }
 
   @JsonIgnore
@@ -30,9 +26,13 @@ public class AnyType {
     return new AnyType(object);
   }
 
+  public Object getObject() {
+    return object;
+  }
 
   @JsonIgnore
   public <T> T covertValue(final Class<T> t) {
+    JsonNode node = Mapper.INSTANCE.valueToTree(object);
     return Mapper.INSTANCE.covertValue(node, t);
   }
 
