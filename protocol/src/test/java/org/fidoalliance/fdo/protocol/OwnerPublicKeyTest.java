@@ -50,10 +50,17 @@ public class OwnerPublicKeyTest {
     key.setCurve(CoseKeyCurveType.P256EC2);
     key.setX(new byte[] {1,2,3});
     key.setY(new byte[] {3,2,1});
-    data = Mapper.INSTANCE.writeValue(key);
+
+    OwnerPublicKey key3 = new OwnerPublicKey();
+    key3.setType(PublicKeyType.SECP256R1);
+    key3.setEnc(PublicKeyEncoding.COSEKEY);
+    key3.setBody(AnyType.fromObject(key));
+    data = Mapper.INSTANCE.writeValue(key3);
+
+    str= Hex.encodeHexString(data);
 
 
-    CoseKey key3 = Mapper.INSTANCE.readValue(data,CoseKey.class);
+    OwnerPublicKey key4 = Mapper.INSTANCE.readValue(data,OwnerPublicKey.class);
 
     str.toString();
 

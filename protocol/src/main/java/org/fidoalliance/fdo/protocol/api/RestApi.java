@@ -101,9 +101,17 @@ public class RestApi implements AutoCloseable {
       throws UnsupportedMediaTypeException, NotFoundException {
     this.request = req;
     this.response = resp;
-    if (!request.getContentType().equals(getRequestContentType())) {
-      throw new UnsupportedMediaTypeException(req.getContentType());
+
+    if (request.getContentType() != null) {
+      if (!request.getContentType().equals(getRequestContentType())) {
+        throw new UnsupportedMediaTypeException(req.getContentType());
+      }
+    } else {
+      if (request.getContentLength() > 0) {
+        throw new UnsupportedMediaTypeException("unspecified content type");
+      }
     }
+
 
     File file = new File(req.getRequestURI());
 

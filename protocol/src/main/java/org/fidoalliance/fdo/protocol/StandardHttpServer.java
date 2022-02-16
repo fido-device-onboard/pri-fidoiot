@@ -3,16 +3,23 @@ package org.fidoalliance.fdo.protocol;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -28,7 +35,15 @@ import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate.Type;
 import org.apache.tomcat.util.scan.StandardJarScanner;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
+import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
+import org.fidoalliance.fdo.protocol.dispatch.KeyStoreInputStreamFunction;
+import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
+import org.fidoalliance.fdo.protocol.dispatch.ValidityDaysSupplier;
+import org.fidoalliance.fdo.protocol.message.KeySizeType;
+import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 
 
 /**
@@ -39,6 +54,7 @@ import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
 public class StandardHttpServer implements HttpServer {
 
   private static final LoggerService logger = new LoggerService(StandardHttpServer.class);
+
 
   private static class AuthConfig {
 
@@ -86,6 +102,8 @@ public class StandardHttpServer implements HttpServer {
     private String timeout;
     @JsonProperty("auth")
     private AuthConfig authConfig;
+    @JsonProperty("subject_names")
+    private String[] subjectNames;
     @JsonProperty("keystore")
     private KeyStoreConfig httpsKeyStore;
     @JsonProperty("context_parameters")
@@ -126,6 +144,9 @@ public class StandardHttpServer implements HttpServer {
       return httpsKeyStore;
     }
 
+    public String[] getSubjectNames() {
+      return Config.resolve(subjectNames);
+    }
 
     public Map<String, String> getAdditionalParameters() {
       return Config.resolve(additionalParameters);
@@ -203,6 +224,35 @@ public class StandardHttpServer implements HttpServer {
 
         KeyStoreConfig storeConfig = config.getHttpsKeyStore();
 
+        try {
+          KeyStore ks = loadKeystore();
+          SSLHostConfigCertificate certConfig = null;
+          Certificate cert = ks.getCertificate(storeConfig.getAlias());
+          if (cert != null) {
+            PublicKey publicKey = cert.getPublicKey();
+            if (publicKey instanceof RSAKey) {
+              sslHostConfig = new SSLHostConfig();
+              certConfig = new SSLHostConfigCertificate(
+                  sslHostConfig, SSLHostConfigCertificate.Type.RSA);
+            } else if (publicKey instanceof ECPublicKey) {
+              sslHostConfig = new SSLHostConfig();
+              certConfig = new SSLHostConfigCertificate(
+                  sslHostConfig, Type.EC);
+            }
+          }
+          if (certConfig != null) {
+            certConfig.setCertificateKeystore(ks);
+            certConfig.setCertificateKeyAlias(storeConfig.getAlias());
+            certConfig.setCertificateKeyPassword(storeConfig.getPassword());
+            sslHostConfig.addCertificate(certConfig);
+            httpsConnector.addSslHostConfig(sslHostConfig);
+          }
+        } catch (Exception e) {
+
+          logger.error(e.getMessage());
+        }
+
+        /*
         File sslFile = new File(config.getHttpsKeyStore().getPath());
         if (sslFile.exists()) {
           KeyStoreConfig keyStoreConfig = config.getHttpsKeyStore();
@@ -235,7 +285,7 @@ public class StandardHttpServer implements HttpServer {
           } catch (Exception e) {
             logger.error(e.getMessage());
           }
-        }
+        }*/
 
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
@@ -281,5 +331,107 @@ public class StandardHttpServer implements HttpServer {
     return config.getHttpPort();
   }
 
+
+  protected KeyStore loadKeystore() throws IOException {
+    try {
+
+      KeyStoreConfig storeConfig = config.getHttpsKeyStore();
+
+      String password = storeConfig.getPassword();
+      if (password == null) {
+        password = "";
+      }
+      KeyStore ks = KeyStore.getInstance(storeConfig.getStoreType());
+
+      String path = storeConfig.getPath();
+      if (path != null) { // we have a stream path to load from
+        try (InputStream input =
+            Config.getWorker(KeyStoreInputStreamFunction.class).apply(path)) {
+          ks.load(input, password.toCharArray());
+        }
+        if (!ks.aliases().hasMoreElements()) {
+          createCertificate(ks);
+        }
+      } else {
+        //assumed to be PKSC11/HSM store
+        ks.load(null, password.toCharArray());
+      }
+      return ks;
+    } catch (KeyStoreException e) {
+      throw new IOException(e);
+    } catch (CertificateException e) {
+      throw new IOException(e);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IOException(e);
+    }
+  }
+
+  protected void createCertificate(KeyStore ks)
+      throws IOException {
+    CryptoService cs = Config.getWorker(CryptoService.class);
+    KeyPair keyPair = cs.createKeyPair(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_2048);
+
+    KeyStoreConfig storeConfig = config.getHttpsKeyStore();
+    String password = storeConfig.getPassword();
+    if (password == null) {
+      password = "";
+    }
+
+    try {
+
+      List<GeneralName> namesList = new ArrayList<>();
+      for (String name : config.getSubjectNames()) {
+        if (name.startsWith("DNS:")) {
+          namesList.add(new GeneralName(GeneralName.dNSName, name.substring(4)));
+
+        } else if (name.startsWith("IP:")) {
+          namesList.add(new GeneralName(GeneralName.iPAddress, name.substring(3)));
+
+        }
+      }
+
+      GeneralNames subjectAltNames = new GeneralNames(namesList.toArray(new GeneralName[]{}));
+
+      final String sigAlgorithm =
+          new AlgorithmFinder().getSignatureAlgorithm(PublicKeyType.RSA2048RESTR,
+              KeySizeType.SIZE_2048);
+
+      Certificate[] chain = new CertChainBuilder()
+          .setPrivateKey(keyPair.getPrivate())
+          .setPublicKey(keyPair.getPublic())
+          .setProvider(cs.getProvider())
+          .setSignatureAlgorithm(sigAlgorithm)
+          .setSubject("CN=fdo")
+          .setValidityDays(Config.getWorker(ValidityDaysSupplier.class).get())
+          .setSubjectAlternateNames(subjectAltNames)
+          .build();
+
+      ks.setKeyEntry(storeConfig.getAlias(),
+          keyPair.getPrivate(),
+          password.toCharArray(),
+          chain);
+
+      String path = storeConfig.getPath();
+      if (path != null) { // we have a stream path to load from
+        try (OutputStream out =
+            Config.getWorker(KeyStoreOutputStreamFunction.class).apply(path)) {
+          ks.store(out, password.toCharArray());
+        }
+      } else {
+        //assumed to be PKSC11/HSM store
+        ks.store(null, password.toCharArray());
+      }
+
+
+    } catch (KeyStoreException e) {
+      throw new IOException(e);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IOException(e);
+    } catch (CertificateException e) {
+      throw new IOException(e);
+    } finally {
+      cs.destroyKey(keyPair);
+    }
+  }
 }
 
