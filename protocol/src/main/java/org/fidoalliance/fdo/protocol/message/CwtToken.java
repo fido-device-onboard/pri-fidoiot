@@ -3,8 +3,6 @@ package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.fidoalliance.fdo.protocol.serialization.CoseKeyDeserializer;
-import org.fidoalliance.fdo.protocol.serialization.CoseKeySerializer;
 import org.fidoalliance.fdo.protocol.serialization.CwtTokenDeserializer;
 import org.fidoalliance.fdo.protocol.serialization.CwtTokenSerializer;
 

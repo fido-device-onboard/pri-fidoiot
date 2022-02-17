@@ -35,7 +35,7 @@ public class BufferUtils {
    * @param destPos Position to write in destination buffer
    * @param length  The exact length to write (truncate or pad to fix).
    */
-  static void writeBigInteger(BigInteger src, byte[] dest, int destPos, int length) {
+  public static void writeBigInteger(BigInteger src, byte[] dest, int destPos, int length) {
     byte[] intbuf = src.toByteArray(); // min #bits, with one sign bit guaranteed!
     int byteLen = src.bitLength() / Byte.SIZE + 1;
 

@@ -1,35 +1,27 @@
 package org.fidoalliance.fdo.protocol.db;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.fidoalliance.fdo.protocol.BufferUtils;
-import org.fidoalliance.fdo.protocol.DispatchMessage;
-import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.MessageBodyException;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
-import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
+import org.fidoalliance.fdo.protocol.message.StatusCb;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 import org.hibernate.Session;
@@ -75,6 +67,20 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         extra.getFilter().put(kvPair.getKey(),
             Mapper.INSTANCE.readValue(kvPair.getValue(), String.class));
         break;
+      case FdoSys.STATUS_CB:
+        if (state.isActive()) {
+          StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
+          if (status.isCompleted()) {
+            extra.setWaiting(false);
+          } else {
+            //send notification of status
+            ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(FdoSys.STATUS_CB);
+            kv.setValue(Mapper.INSTANCE.writeValue(status));
+            extra.getQueue().add(kv);
+          }
+        }
+        break;
       default:
         break;
     }
@@ -86,15 +92,18 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       throws IOException {
 
     FdoSysModuleExtra extra = state.getExtra().covertValue(FdoSysModuleExtra.class);
+
+
     if (!extra.isLoaded() && infoReady(extra)) {
       load(state, extra);
       extra.setLoaded(true);
     }
+
     ServiceInfoQueue queue = extra.getQueue();
     while (queue.size() > 0) {
       boolean sent = sendFunction.apply(queue.peek());
       if (sent) {
-        queue.poll();
+        checkWaiting(queue.poll());
       } else {
         break;
       }
@@ -105,6 +114,14 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     state.setExtra(AnyType.fromObject(extra));
   }
 
+  protected void checkWaiting(ServiceInfoKeyValuePair kv) {
+    switch (kv.getKey()) {
+      case FdoSys.EXEC_CB:
+
+      default:
+        break;
+    }
+  }
 
   protected boolean infoReady(FdoSysModuleExtra extra) {
     return extra.getFilter().containsKey(DevMod.KEY_DEVICE)
@@ -113,7 +130,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         && extra.getFilter().containsKey(DevMod.KEY_ARCH);
   }
 
-  protected boolean checkFiler(Map<String, String> devMap, Map<String, String> filterMap) {
+  protected boolean checkFilter(Map<String, String> devMap, Map<String, String> filterMap) {
     return devMap.entrySet().containsAll(filterMap.entrySet());
   }
 
@@ -134,7 +151,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         boolean skip = false;
         for (FdoSysInstruction instruction : instructions) {
           if (instruction.getFilter() != null) {
-            skip = checkFiler(extra.getFilter(), instruction.getFilter());
+            skip = checkFilter(extra.getFilter(), instruction.getFilter());
           }
           if (skip) {
             continue;
@@ -143,8 +160,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           if (instruction.getFileDesc() != null) {
             getFile(state, extra, instruction);
           } else if (instruction.getExecArgs() != null) {
-
             getExec(state, extra, instruction);
+          } else if (instruction.getExecArgs() != null) {
+            getExecCb(state, extra, instruction);
           }
         }
 
@@ -165,14 +183,25 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     extra.getQueue().add(kv);
   }
 
+  protected void getExecCb(ServiceInfoModuleState state,
+      FdoSysModuleExtra extra,
+      FdoSysInstruction instruction) throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.EXEC);
+    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
+    extra.getQueue().add(kv);
+  }
+
   protected void getDbFile(ServiceInfoModuleState state,
       FdoSysModuleExtra extra,
       FdoSysInstruction instruction) throws IOException {
     String resource = instruction.getResource();
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
+      resource = resource.replace("$(guid)",state.getGuid().toString());
+
       // Query database table SYSTEM_RESOURCE for filename Key
-      SystemResource sviResource = session.get(SystemResource.class, instruction.getResource());
+      SystemResource sviResource = session.get(SystemResource.class, resource);
 
       if (sviResource != null) {
         Blob blobData = sviResource.getData();
@@ -209,6 +238,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       FdoSysModuleExtra extra,
       FdoSysInstruction instruction) throws IOException {
     String resource = instruction.getResource();
+    resource = resource.replace("$(guid)",state.getGuid().toString());
+
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
@@ -258,7 +289,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     if (resource.startsWith("https://") || resource.startsWith("http://")) {
       getUrlFile(state, extra, instruction);
     } else {
-
       getDbFile(state,extra,instruction);
     }
   }

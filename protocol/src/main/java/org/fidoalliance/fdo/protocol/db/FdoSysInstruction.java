@@ -12,6 +12,9 @@ public class FdoSysInstruction {
   @JsonProperty("exec")
   private String[] execArgs;
 
+  @JsonProperty("execCb")
+  private String[] execCbArgs;
+
   @JsonProperty("filedesc")
   private String fileDesc;
 
@@ -26,6 +29,11 @@ public class FdoSysInstruction {
   @JsonIgnore
   public String[] getExecArgs() {
     return execArgs;
+  }
+
+  @JsonIgnore
+  public String[] getExecCbArgs() {
+    return execCbArgs;
   }
 
   @JsonIgnore
