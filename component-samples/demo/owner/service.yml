@@ -22,8 +22,16 @@ http-server:
   keystore: 
     path: ssl.p12
     store-type: PKCS12
-    password: $(encrypt_password)
-
+    password: $(ssl_password)
+    alias: ssl
+  auth:
+    method: DIGEST
+    role: api
+    user_name: apiUser
+    user_password: $(api_password)
+  subject_names:
+    - DNS:localhost
+    - IP:127.0.0.1
 
 owner:
    keystore: 
