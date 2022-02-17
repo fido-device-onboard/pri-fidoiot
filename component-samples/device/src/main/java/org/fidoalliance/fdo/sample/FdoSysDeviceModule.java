@@ -1,5 +1,7 @@
 package org.fidoalliance.fdo.sample;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -37,7 +39,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 public class FdoSysDeviceModule implements ServiceInfoModule {
 
   private final LoggerService logger = new LoggerService(DeviceApp.class);
-  ;
+
 
   private ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
   private Duration execTimeout = Duration.ofHours(2);
@@ -47,7 +49,9 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private Path currentFile;
   private Process execProcess;
   private int statusTimeout = DEFAULT_STATUS_TIMEOUT;
-  ServiceInfoQueue queue = new ServiceInfoQueue();
+
+
+  private ServiceInfoQueue queue = new ServiceInfoQueue();
 
 
   @Override
@@ -95,7 +99,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
         break;
       case FdoSys.STATUS_CB:
         if (state.isActive()) {
-          StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(),StatusCb.class);
+          StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
           statusTimeout = status.getTimeout();
           if (status.isCompleted() && execProcess != null) {
             execProcess.destroyForcibly();
@@ -105,6 +109,13 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
           }
         }
         break;
+      case FdoSys.FETCH:
+        if (state.isActive()) {
+          String fetchFileName = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          fetch(fetchFileName, state.getMtu());
+        } else {
+          logger.warn("fdo_sys module not active. Ignoring fdo_sys:fetch.");
+        }
       default:
         break;
     }
@@ -280,6 +291,44 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     kv.setValue(Mapper.INSTANCE.writeValue(status));
     queue.add(kv);
 
+  }
+
+  private void fetch(String fetchFileName, int mtu) throws IOException {
+    Integer result = 0;
+    try (FileInputStream in = new FileInputStream(fetchFileName)) {
+
+      byte[] data = new byte[mtu - 100];
+
+      for (; ; ) {
+        int br = in.read(data);
+        if (br < 0) {
+          break;
+        }
+        if (br < data.length && br >= 0) {
+          //adjust buffer
+          byte[] temp = new byte[br];
+          System.arraycopy(data, 0, temp, 0, br);
+          data = temp;
+        }
+        ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+        kv.setKeyName(FdoSys.DATA);
+        kv.setValue(Mapper.INSTANCE.writeValue(data));
+        queue.add(kv);
+      }
+
+
+    } catch (FileNotFoundException e) {
+      result = 1;
+      logger.debug("fetch file not found");
+    } catch (IOException e) {
+      result = 1;
+      logger.debug("error reading fetch file");
+    }
+
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.EOT);
+    kv.setValue(Mapper.INSTANCE.writeValue(result));
+    queue.add(kv);
   }
 
   private ProcessBuilder.Redirect getExecOutputRedirect() {
