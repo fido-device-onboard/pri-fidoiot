@@ -12,7 +12,7 @@ public class FdoSysInstruction {
   @JsonProperty("exec")
   private String[] execArgs;
 
-  @JsonProperty("execCb")
+  @JsonProperty("exec_cb")
   private String[] execCbArgs;
 
   @JsonProperty("filedesc")
@@ -20,6 +20,9 @@ public class FdoSysInstruction {
 
   @JsonProperty("resource")
   private String resource;
+
+  @JsonProperty("fetch")
+  private String fetch;
 
   @JsonIgnore
   public Map<String, String> getFilter() {
@@ -46,4 +49,7 @@ public class FdoSysInstruction {
     return resource;
   }
 
+  public String getFetch() {
+    return fetch;
+  }
 }

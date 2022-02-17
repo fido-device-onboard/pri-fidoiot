@@ -13,6 +13,9 @@ public class FdoSysModuleExtra {
   @JsonProperty("queue")
   private ServiceInfoQueue queue = new ServiceInfoQueue();
 
+  @JsonProperty("waitQueue")
+  private ServiceInfoQueue waitQueue = new ServiceInfoQueue();
+
   @JsonProperty("loaded")
   private boolean loaded;
 
@@ -28,6 +31,11 @@ public class FdoSysModuleExtra {
   @JsonIgnore
   public ServiceInfoQueue getQueue() {
     return queue;
+  }
+
+  @JsonIgnore
+  public ServiceInfoQueue getWaitQueue() {
+    return waitQueue;
   }
 
   @JsonIgnore
@@ -48,5 +56,15 @@ public class FdoSysModuleExtra {
   @JsonIgnore
   public void setWaiting(boolean waiting) {
     this.waiting = waiting;
+  }
+
+  @JsonIgnore
+  public void setQueue(ServiceInfoQueue queue) {
+    this.queue = queue;
+  }
+
+  @JsonIgnore
+  public void setWaitQueue(ServiceInfoQueue waitQueue) {
+    this.waitQueue = waitQueue;
   }
 }

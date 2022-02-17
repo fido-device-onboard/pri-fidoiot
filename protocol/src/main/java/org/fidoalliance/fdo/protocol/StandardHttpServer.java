@@ -252,40 +252,6 @@ public class StandardHttpServer implements HttpServer {
           logger.error(e.getMessage());
         }
 
-        /*
-        File sslFile = new File(config.getHttpsKeyStore().getPath());
-        if (sslFile.exists()) {
-          KeyStoreConfig keyStoreConfig = config.getHttpsKeyStore();
-
-          try (InputStream input = new FileInputStream(sslFile)) {
-            KeyStore ks = KeyStore.getInstance(keyStoreConfig.getStoreType());
-            ks.load(input, keyStoreConfig.getPassword().toCharArray());
-
-            SSLHostConfigCertificate certConfig = null;
-            Certificate cert = ks.getCertificate(keyStoreConfig.getAlias());
-            if (cert != null) {
-              PublicKey publicKey = cert.getPublicKey();
-              if (publicKey instanceof RSAKey) {
-                sslHostConfig = new SSLHostConfig();
-                certConfig = new SSLHostConfigCertificate(
-                    sslHostConfig, SSLHostConfigCertificate.Type.RSA);
-              } else if (publicKey instanceof ECPublicKey) {
-                sslHostConfig = new SSLHostConfig();
-                certConfig = new SSLHostConfigCertificate(
-                    sslHostConfig, Type.EC);
-              }
-            }
-            if (certConfig != null) {
-              certConfig.setCertificateKeystore(ks);
-              certConfig.setCertificateKeyAlias(keyStoreConfig.getAlias());
-              certConfig.setCertificateKeyPassword(keyStoreConfig.getPassword());
-              sslHostConfig.addCertificate(certConfig);
-              httpsConnector.addSslHostConfig(sslHostConfig);
-            }
-          } catch (Exception e) {
-            logger.error(e.getMessage());
-          }
-        }*/
 
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
