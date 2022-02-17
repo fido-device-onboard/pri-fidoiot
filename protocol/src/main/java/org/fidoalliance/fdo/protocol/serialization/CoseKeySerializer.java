@@ -40,31 +40,22 @@ public class CoseKeySerializer extends StdSerializer<CoseKey> {
     gen.writeFieldId(COSEKEY_CRV);
     gen.writeNumber(value.getCrv().toInteger());
 
-    //rfc8152 Leading zero octets MUST be preserved.
-    final int size;
     switch (value.getCrv()) {
       case P256EC2:
-        size = 32;
-        break;
       case P384EC2:
-        size = 48;
         break;
       default:
         throw new InvalidParameterException("coseSignatureAlg " + value.getCrv());
     }
 
-    byte[] coordinate = new byte[size];
-    int pos = size - value.getX().length;
-    System.arraycopy(value.getX(), 0, coordinate, pos, value.getX().length);
-    gen.writeFieldId(COSEKEY_X);
-    gen.writeBinary(coordinate);
+    //rfc8152 Leading zero octets MUST be preserved so copy
+    // entire X and Y values
 
-    coordinate = new byte[size];
-    pos = size - value.getY().length;
-    System.arraycopy(value.getY(), 0, coordinate, pos, value.getY().length);
+    gen.writeFieldId(COSEKEY_X);
+    gen.writeBinary(value.getX());
 
     gen.writeFieldId(COSEKEY_Y);
-    gen.writeBinary(coordinate);
+    gen.writeBinary(value.getY());
 
     gen.writeEndObject();
   }
