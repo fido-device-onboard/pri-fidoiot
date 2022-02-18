@@ -22,7 +22,7 @@ http-server:
   keystore: 
     path: ssl.p12
     store-type: PKCS12
-    password: fdo123
+    password: $(ssl_password)
     alias: ssl
   auth:
     method: DIGEST
