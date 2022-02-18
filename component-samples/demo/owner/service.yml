@@ -58,6 +58,7 @@ epid:
 
 h2-database:
    tcp-server:
+     - "-ifNotExists"
      - "-tcpPort" 
      - "9095"
    web-server:

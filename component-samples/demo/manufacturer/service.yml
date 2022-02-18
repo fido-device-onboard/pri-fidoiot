@@ -17,7 +17,7 @@ http-server:
   https_port: 8038
   http_schemes:
   - http
-  #- https
+  - https
   http_timeout: 20000
   keystore: 
     path: ssl.p12
@@ -42,7 +42,8 @@ manufacturer:
 
 h2-database:
    tcp-server:
-     - "-webPort"
+     - "-ifNotExists"
+     - "-tcpPort"
      - "9093"
    web-server:
       # - "-webAllowOthers"
