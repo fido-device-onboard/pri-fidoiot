@@ -51,19 +51,19 @@ gen_credentials()
 db_user=sa
 api_pass=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 db_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
-encrypted_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+encrypt_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 ssl_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 
 cd $CREDS_PATH
 mkdir -p $1 && cd $1
 
-rm service.env && touch service.env
+rm -f service.env && touch service.env
 
 echo "## environment variables" >> service.env
 echo "db_user=$db_user" >> service.env
 echo "api_password=$api_pass" >> service.env
 echo "db_password=$db_password" >> service.env
-echo "encrypted_password=$encrypted_password" >> service.env
+echo "encrypt_password=$encrypt_password" >> service.env
 echo "ssl_password=$ssl_password" >> service.env
 
 }

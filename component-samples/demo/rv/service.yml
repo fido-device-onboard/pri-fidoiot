@@ -60,7 +60,8 @@ epid:
 
 h2-database:
    tcp-server:
-     - "-webPort"
+     - "-ifNotExists"
+     - "-tcpPort"
      - "9094"
    web-server:
       # - "-webAllowOthers"
@@ -81,6 +82,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
+  - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
 
 
 

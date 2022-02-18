@@ -11,9 +11,9 @@ services:
     expose:
       - "8040"
       - "8041"
-    #ports:
-    #  - "8040:8040"
-    #  - "8041:8041"
+    ports:
+      - "8040:8040"
+      - "8041:8041"
     build:
       context: .
       dockerfile: Dockerfile
