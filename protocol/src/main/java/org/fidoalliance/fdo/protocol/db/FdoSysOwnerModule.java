@@ -2,6 +2,7 @@ package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
@@ -9,10 +10,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpClientSupplier;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
@@ -31,6 +32,7 @@ import org.hibernate.Session;
 public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
+  private LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
   @Override
   public String getName() {
     return FdoSys.NAME;
@@ -160,17 +162,19 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
   protected void onStatusCb(ServiceInfoModuleState state, FdoSysModuleExtra extra,
       StatusCb status) throws IOException {
-
+    logger.info("status_cb completed " + status.isCompleted() + " retcode "
+        + status.getRetCode() + " timeout " + status.getTimeout());
   }
 
   protected void onFetch(ServiceInfoModuleState state, FdoSysModuleExtra extra,
       byte[] data) throws IOException {
 
+    logger.warn(new String(data, StandardCharsets.US_ASCII));
   }
 
   protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, int result)
       throws IOException {
-
+    logger.info("EOT:resultCode " + result);
   }
 
   protected void load(ServiceInfoModuleState state, FdoSysModuleExtra extra)

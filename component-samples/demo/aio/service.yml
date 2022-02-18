@@ -52,12 +52,13 @@ owner:
 
 
 h2-database:
-   tcp-server: []
+   tcp-server: 
+     - "-ifNotExists"
    web-server:
    # - "-webAllowOthers"
    # - "-webExternalNames"
    # - "serverfqdn"
-     - "-ifNotExists"
+
   
  
 epid:
