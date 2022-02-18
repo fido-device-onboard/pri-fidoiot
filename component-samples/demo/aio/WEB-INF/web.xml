@@ -256,6 +256,32 @@
     </servlet-mapping>
 
    <servlet>
+      <servlet-name>AllowList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.AllowList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>AllowList</servlet-name>
+      <url-pattern>/api/v1/rv/allow</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>DenyList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.DenyList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>DenyList</servlet-name>
+      <url-pattern>/api/v1/rv/deny</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
         <servlet-name>Reseller</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
         <init-param>

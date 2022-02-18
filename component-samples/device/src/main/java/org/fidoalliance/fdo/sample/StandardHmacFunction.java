@@ -23,7 +23,7 @@ public class StandardHmacFunction implements HmacFunction {
   public Hash apply(DeviceCredential credential, byte[] headerTag) throws IOException {
 
     DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
-    HashType hmacType = HashType.SHA384;
+    HashType hmacType = HashType.HMAC_SHA384;
     if (config.getKeyType().equals(PublicKeyType.SECP256R1)) {
       OwnershipVoucherHeader header =
           Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
