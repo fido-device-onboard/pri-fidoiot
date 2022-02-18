@@ -27,17 +27,17 @@ public class Log4jProvider implements LogProvider {
 
   @Override
   public void debug(Object log) {
-    logger.info(log.toString());
+    logger.debug(log.toString());
   }
 
   @Override
   public void error(Object log) {
-    logger.info(log.toString());
+    logger.error(log.toString());
   }
 
   @Override
   public void warn(Object log) {
-    logger.info(log.toString());
+    logger.warn(log.toString());
   }
 
   @Override

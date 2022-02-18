@@ -11,9 +11,9 @@ services:
     expose:
       - "8040"
       - "8041"
-    ports:
-      - "8040:8040"
-      - "8041:8041"
+    #ports:
+    #  - "8040:8040"
+    #  - "8041:8041"
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,4 +28,4 @@ services:
     mem_reservation: 200m
     cpu_shares: 1024
     pids_limit: 500
-    #network_mode: host
+    network_mode: host

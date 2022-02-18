@@ -10,6 +10,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.HttpClientSupplier;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
@@ -179,7 +181,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       SystemPackage systemPackage =
           session.find(SystemPackage.class, Long.valueOf(1));
 
-
       if (systemPackage != null) {
         String body = systemPackage.getData().getSubString(1,
             Long.valueOf(systemPackage.getData().length()).intValue());
@@ -289,7 +290,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     String resource = instruction.getResource();
     resource = resource.replace("$(guid)", state.getGuid().toString());
 
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+    try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
       HttpGet httpRequest = new HttpGet(resource);
       try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {

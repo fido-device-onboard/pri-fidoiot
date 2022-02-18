@@ -2,7 +2,7 @@ hibernate-properties:
   connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./app-data/emdb
+  hibernate.connection.url: jdbc:h2:tcp://localhost:9093/./app-data/emdb
   hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 system-properties:
@@ -32,10 +32,17 @@ manufacturer:
      password: $(encrypt_password)
 
 
-
-
 h2-database:
- 
+   tcp-server:
+     - "-webPort"
+     - "9093"
+   web-server:
+      # - "-webAllowOthers"
+      # - "-webExternalNames"
+      # - "serverfqdn"
+      - "-ifNotExists"
+      - "-webPort"
+      - "8083" 
 
 
 

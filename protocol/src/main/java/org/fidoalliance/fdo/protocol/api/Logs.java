@@ -12,7 +12,7 @@ import org.fidoalliance.fdo.protocol.HttpUtils;
 public class Logs extends RestApi{
 
   private File getLogFile() {
-    return new File("service.log");
+    return new File("./app-data/service.log");
   }
 
   @Override

@@ -17,7 +17,7 @@ http-server:
   https_port: 8443
   http_schemes:
   - http
-  #- https
+  - https
   http_timeout: 20000
   keystore: 
     path: ssl.p12
@@ -52,6 +52,13 @@ owner:
 
 
 h2-database:
+   tcp-server: []
+   web-server:
+   # - "-webAllowOthers"
+   # - "-webExternalNames"
+   # - "serverfqdn"
+     - "-ifNotExists"
+  
  
 epid:
   # WARNING: do not set testmode to true in production environments
@@ -81,7 +88,10 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
+  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
+  - org.fidoalliance.fdo.protocol.db.To0Scheduler
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier

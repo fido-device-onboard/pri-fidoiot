@@ -38,6 +38,7 @@
 
 	<!-- Fdo protocol default database mapping -->
 
+        <mapping class="org.fidoalliance.fdo.protocol.entity.AllowDenyList"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateValidity"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.RvRedirect"></mapping>
