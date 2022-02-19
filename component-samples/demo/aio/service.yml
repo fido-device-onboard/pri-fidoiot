@@ -99,8 +99,8 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
-  - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
-  #- org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction
+  #- org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
+  - org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
