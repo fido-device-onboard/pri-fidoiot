@@ -2,7 +2,7 @@ hibernate-properties:
   connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:9093/./app-data/emdb
+  hibernate.connection.url: jdbc:h2:tcp://localhost:8049/./app-data/emdb
   hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 system-properties:
@@ -17,13 +17,21 @@ http-server:
   https_port: 8038
   http_schemes:
   - http
-  #- https
+  - https
   http_timeout: 20000
   keystore: 
     path: ssl.p12
     store-type: PKCS12
-    password: $(encrypt_password)
-
+    password: $(ssl_password)
+    alias: ssl
+  auth:
+    method: DIGEST
+    role: api
+    user_name: apiUser
+    user_password: $(api_password)
+  subject_names:
+    - DNS:localhost
+    - IP:127.0.0.1
 
 manufacturer:
    keystore: 
@@ -34,19 +42,15 @@ manufacturer:
 
 h2-database:
    tcp-server:
-     - "-webPort"
-     - "9093"
+     - "-ifNotExists"
+     - "-tcpPort"
+     - "8049"
    web-server:
       # - "-webAllowOthers"
       # - "-webExternalNames"
       # - "serverfqdn"
-      - "-ifNotExists"
       - "-webPort"
       - "8083" 
-
-
-
-
 
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider

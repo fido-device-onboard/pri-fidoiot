@@ -22,7 +22,7 @@ http-server:
   keystore: 
     path: ssl.p12
     store-type: PKCS12
-    password: fdo123
+    password: $(ssl_password)
     alias: ssl
   auth:
     method: DIGEST
@@ -54,7 +54,7 @@ owner:
 h2-database:
    tcp-server: 
      - "-ifNotExists"
-   web-server:
+   web-server: []
    # - "-webAllowOthers"
    # - "-webExternalNames"
    # - "serverfqdn"
@@ -90,6 +90,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
@@ -98,7 +99,8 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
-  - org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction
+  - org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction
+  #- org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction

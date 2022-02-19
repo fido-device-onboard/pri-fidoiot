@@ -2,7 +2,7 @@ hibernate-properties:
   connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:9095/./app-data/emdb
+  hibernate.connection.url: jdbc:h2:tcp://localhost:8051/./app-data/emdb
   hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 system-properties:
@@ -22,7 +22,7 @@ http-server:
   keystore: 
     path: ssl.p12
     store-type: PKCS12
-    password: $(encrypt_password)
+    password: $(ssl_password)
     alias: ssl
   auth:
     method: DIGEST
@@ -57,15 +57,15 @@ epid:
 
 h2-database:
    tcp-server:
+     - "-ifNotExists"
      - "-tcpPort" 
-     - "9095"
+     - "8051"
    web-server:
      # - "-webAllowOthers"
      # - "-webExternalNames"
      # - "serverfqdn"
      - "-webPort"
      - "8085"
-     - "-ifNotExists"
  
 
 workers:
@@ -78,6 +78,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
@@ -89,4 +90,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
+
+
+
 
