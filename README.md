@@ -344,15 +344,9 @@ Result 200 OK
 
 Tell the owner to perform To0 with the voucher 
 Post the extended ownership found obtained from the manufacturer to the owner
-POST https://localhost:8043/api/v1/owner/vouchers (or http://localhost:8042/api/v1/owner/vouchers)
+GET https://localhost:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://localhost:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
 Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
-POST content
-```
------BEGIN OWNERSHIP VOUCHER-----
------END OWNERSHIP VOUCHER-----
-```
-Result body be the uuid of the voucher
-24275cd7-f9f5-4d34-a2a5-e233ac38db6c
+Result 200 OK
 
 
 
