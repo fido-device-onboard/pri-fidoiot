@@ -5,7 +5,7 @@
 4. [Running Demo](#running-demo)
 5. [ServiceInfo Setup](#serviceinfo-setup-between-fdo-pri-http-java-device-sample-and-fdo-pri-owner-sample)
 6. [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer)
-7. [Customize for multi machine setup](#)
+7. [Customize for multi machine setup](#customize-for-multi-machine-setup)
 
 # System Requirements
 
@@ -78,51 +78,54 @@ sudo docker system prune -a
 ## Start Podman
 * Use the following command to start the podman container.
 ```
-podman-compose up -d --build
+sudo podman-compose up -d --build
 ```
 
 ## Stop Podman
 
 * Use the following command to stop a specific podman container.
 ```
-podman stop <container-name>
+sudo podman stop <container-name>
 ```
 OR
 ```
-podman stop <container-id>
+sudo podman stop <container-id>
 ```
 
 * Use the following command to stop all running podman containers.
 ```
-podman stop -a
+sudo podman stop -a
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-podman rm <container-name>
+sudo podman rm <container-name>
 ```
 OR
 ```
-podman rm <container-id>
+sudo podman rm <container-id>
 ```
 
 * Use the following command to remove the podman image.
 ```
-podman rmi <image-name>
+sudo podman rmi <image-name>
 ```
 OR
 ```
-podman rmi <image-id>
+sudo podman rmi <image-id>
 ```
 
 * Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
 ```
-podman system prune -a
+sudo podman system prune -a
 ```
 # Configuring Proxies
-Update the proxy information in `_JAVA_OPTIONS` as
+
+Follow the steps in hyperlink for complete proxy setup. [REFER](#https://secure-device-onboard.github.io/docs-fidoiot/latest/implementation-references/proxy-settings/)
+
+For basic proxy setup, update the proxy information in `_JAVA_OPTIONS` as
 
 ```
 _JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port
@@ -174,7 +177,7 @@ docker container cp <container-id>:/home/fdo/log-filename .
 
 # Running Demo
 
-***NOTE***: Use the following commands to enbale FDO support on RHEL.
+***NOTE***: Use the following commands to enable FDO support on RHEL.
 ```
 bash scripts/enable_rhel_support.sh
 echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
@@ -185,11 +188,29 @@ source ~/.bashrc
 
 2. Complete Device Initialization (DI) by starting the FDO HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credentials.bin' before starting the device.
 
-3. Complete Ownership Voucher Extension by using the API `GET /api/v1/mfg/vouchers/<serial_no>` and save the Ownership Voucher. Please refer to [PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about the API.
+3. Start the PRI RV Sample as per the steps outlined in [RV README](rv/README.md).
 
-4. Start the PRI RV Sample as per the steps outlined in [RV README](rv/README.md).
-
-5. Start the PRI Owner Sample as per the steps outlined in [Owner README](owner/README.md). Import the extended Ownership Voucher from Step#3 into the Owner database by using the API `POST /api/v1/owner/vouchers/`. Please refer to [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis) for more information about the API. Optionally, if ServiceInfo transfer is needed, please refer to [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer).
+4. Start the PRI Owner Sample as per the steps outlined in [Owner README](owner/README.md).
+   
+5. Complete Ownership Voucher Extension by using the APIs 
+ 
+    - `GET /api/v1/mfg/vouchers/<serial_no>` to collect voucher. 
+ 
+       - Ex: `curl -D - --digest -u ${api_user}:${api_passwd} --location --request POST "http://${mfg_ip}:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw "$owner_certificate" -o ${serial_no}_voucher.txt` 
+    
+    - `POST /api/v1/owner/vouchers/` to upload ownership voucher to Owner.
+      
+      - Ex: `(curl -D - --digest -u ${api_user}:${api_passwd} --location --request POST "http://${onr_ip}:8042/api/v1/owner/vouchers/" --header 'Content-Type: text/plain' --data-raw "$extended_voucher" -o ${serial_no}_guid.txt`
+  
+    - `GET /api/v1/to0/${device_guid}` to initiate TO0
+  
+      - Ex: `curl -D - --digest -u ${api_user}:${api_passwd} --location --request GET "http://${onr_ip}:8042/api/v1/to0/${device_guid}" --header 'Content-Type: text/plain'`
+  
+     - Or Extend and upload ownership voucher using `extend_upload.sh`
+  
+       - Ex: `bash extend_upload.sh -m ${mfg_ip} -o ${owner_ip} -s abcdef`
+   
+    - Please refer to [PRI Manufacturer REST APIs](manufacturer/README.md/#fdo-pri-manufacturer-rest-apis) for more information about the API. Optionally, if ServiceInfo transfer is needed, please refer to [Enabling ServiceInfo transfer](#enabling-serviceinfo-transfer).
 
 6. Complete Transfer Ownership 1 and 2 (TO1 and TO2) by starting the FDO PRI HTTP Java Device Sample again. The previously created 'credentials.bin' from Step#2 will be used directly by the Device.
 
@@ -197,7 +218,7 @@ source ~/.bashrc
 
 # ServiceInfo setup between FDO PRI HTTP Java Device Sample and FDO PRI Owner Sample
 
-The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` and `fidoalliance` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
+The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
 
 - `fdo_sys` Owner ServiceInfo module: This module supports the following 3 message names as listed below to interpret the ServiceInfo as received from the Owner. The basic functionality of this module is to support payload/script transfers and basic command execution.  A sample format looks like 'fdo_sys:filedesc=filename, fdo_sys:write=filecontent,fdo_sys:exec=command-to-execute'.
 
@@ -209,6 +230,11 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` and `fidoallian
 
     *exec-cb* - This command returns the status / progress of the process running.
 
+    Sample SVI instruction :
+  
+    `{"filedesc" : "sample.txt","resource" : "https://www.google.com"},
+     {"write": "sample.txt"},
+     {"exec" :"/bin/bash cat sample.txt"}`
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
@@ -216,18 +242,76 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` and `fidoallian
 
 - Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. The device will ignore all ServiceInfo module messages if module_name:active doesn't precede the messages of the module.
 
-The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. Few sample ServiceInfo values, as present in owner/serviceinfo/sample-values/ are populated into the database table 'OWNER_SERVICEINFO' as byte arrays. For keeping the association between the Device and the ServiceInfo values to transfer, 'GUID_OWNERSVI' database table is used. When a Device is inserted into the database table 'TO2_DEVICES', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
+The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. When a Device is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo Transfer
 
 To enable ServiceInfo transfer to a Device with a given GUID, follow the steps below:
 
-Insert required ServiceInfo resources into the database table 'SYSTEM_MODULE_RESOURCE' using the API `POST /api/v1/owner/resource?filename=fileName`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table with appropriate tags, start TO1.
+Insert required ServiceInfo resources into the database table 'SYSTEM_RESOURCE' using the API `POST /api/v1/owner/resource?filename=fileName`. More information about the same is provided in section [FDO PRI Owner REST APIs](owner/README.md/#fdo-pri-owner-rest-apis). If the required ServiceInfo already exists in the table with appropriate tags, start TO1.
+
+```
+curl -D - --digest -u apiUser:${api_password} --location --request POST 'http://localhost:8080/api/v1/owner/resource?filename=<file-name>' 
+--header 'Content-Type: text/plain' --data-binary '@<path-to-file>'
+```
 
 
 # Customize for multi-machine setup
 
-While testing for a scenario where different components are running in different
-machines, the SSL certificate needs to be updated to include the DNS / IP of
-these machines in its SubjectAltName.
+While customizing the system configuration for multi machine setup, ensure that all `localhost` and `127.0.0.1` references are replaced with respective DNS and IP address of the host machine. The required changes includes :
+
+- Updating RVInfo blob in Manufacturer
+
+  - Sample cURL command to update RVInfo in Manufacturer running in the localhost.
+    ```shell
+    curl -D - --digest -u apiUser:JVV9xbZnLgVEEcHR --location --request POST 'http://localhost:8039/api/v1/rvinfo' \
+    --header 'Content-Type: text/plain' \
+    --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]'
+    ```
+
+- Updating T02RVBlob in Owner
+
+    - Sample cURL command to update T02RVBlob in Owner running in the localhost.
+      ```shell
+      curl -D - --digest -u apiUser:7yrifue75FxT0YUm --location --request POST 'http://localhost:8042/api/v1/owner/redirect' \
+      --header 'Content-Type: text/plain' \
+      --data-raw '[["localhost","127.0.0.1",8042,3]]'
+      ```
+
+- Updating subject_name in SSL certificate via `service.yml`
+
+  - 
+    ``` 
+    //Updates subject alternative information in the certificate.
+    subject_name:
+      DNS:<DNS-of-host-machine>
+      IP:<IP-address-of-host-machine>
+    ```
+
+
+# Enabling access to the Embedded database
+
+Remote access to H2 Storage DB has been disabled by default. Enabling the remote access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
+
+To enable remote access to DB update the webAllowOthers properties in the `service.yml` :
+
+```shell
+# sample H2 DB configurations
+h2-database:
+   tcp-server:
+     - "-ifNotExists"
+     - "-tcpPort"
+     - "9093"
+   web-server:
+     - "-webAllowOthers"
+     - "-webExternalNames"
+     - "-ifNotExists"
+     - "-webPort"
+     - "8083"
+```
+
+**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://localhost:<webport>`.
+
+IMPORTANT: Not recommended to enable this setting especially on production systems.
+
 

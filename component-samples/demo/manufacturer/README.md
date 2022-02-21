@@ -6,7 +6,7 @@ The FDO manufacturer service is designed to generate new ownership vouchers by i
 
 # Getting Started with the FDO Manufacturer
 
-The following are the system constraints for the FDO Manufacturer.
+The following are the system requirements for the FDO Manufacturer.
 - Operating System: Ubuntu* 20.04
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
@@ -42,7 +42,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 `service.yml` file is structured into multiple sections:
 
-- `hibernate-properties:` - This section contains hibernate related runtime properties including the DB URL, dialect and others.
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
 
 - `system-properties:` - This section contains the runtime environment variables.
@@ -89,35 +89,33 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
-
 # FDO PRI Manufacturer REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number || | Ownership Voucher |
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  |
-| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |  | |
-| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | | | | JSON array of Serial No, GUID and DI Timestamp. |
-| GET /api/v1/logs | Serves the log from the manufacturer service | || Manufacturer logs|
-| DELETE /api/v1/logs | Deletes the log from the manufacturer service | |||
-| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
-| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |s |  | | Number of Days|
-| GET /health | Returns the health status | || Current version |
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds |  |  |  | JSON array of Serial No, GUID and DI Timestamp. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'|
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' --header 'Content-Type: text/plain' |
 
-***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
 
-Following is the list of REST response error codes and it's description :
+Following is the list of REST response error codes and it's possible causes :
 
-|     Error Code     |             Description                  |
+|     Error Code     |             causes                  |
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
 | `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
 | `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
 | `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
 | `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
-
 
 # Troubleshooting
 

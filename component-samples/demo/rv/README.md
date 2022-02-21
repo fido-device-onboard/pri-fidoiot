@@ -6,7 +6,7 @@ The FDO Rendezvous Service is designed to acts as a rendezvous point between a n
 
 # Getting Started with the DO Rendezvous Service
 
-The following are the system constraints for the All-in-One demo.
+The following are the system requirements for the All-in-One demo.
 - Operating System: Ubuntu* 20.04
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
@@ -42,7 +42,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 `service.yml` file is structured into multiple sections:
 
-- `hibernate-properties:` - This section contains hibernate related runtime properties including the DB URL, dialect and others.
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
 
 - `system-properties:` - This section contains the runtime environment variables.
