@@ -4,7 +4,7 @@ The FDO Rendezvous Service is designed to acts as a rendezvous point between a n
 
 ***NOTE***: Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
 
-# Getting Started with the DO Rendezvous Service
+# Getting Started with the FDO Rendezvous Service
 
 The following are the system requirements for the All-in-One demo.
 - Operating System: Ubuntu* 20.04
