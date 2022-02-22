@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.UUID;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -39,7 +41,7 @@ public class CertChainBuilder {
   private String signatureAlgorithm;
   private X500Name subject;
   private int validityDays;
-  private SecureRandom random;
+  private GeneralNames subjectAlternateNames;
 
 
   public CertChainBuilder setPrivateKey(PrivateKey privateKey) {
@@ -93,6 +95,11 @@ public class CertChainBuilder {
     return this;
   }
 
+  public CertChainBuilder setSubjectAlternateNames(GeneralNames names) {
+    this.subjectAlternateNames = names;
+    return this;
+  }
+
   public Certificate[] build() throws IOException {
 
     final Instant now = Instant.now();
@@ -118,6 +125,10 @@ public class CertChainBuilder {
         Date.from(ZonedDateTime.now().plusDays(validityDays).toInstant()),
         subject,
         publicKeyInfo);
+
+    if (subjectAlternateNames != null) {
+      certBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAlternateNames);
+    }
 
     final JcaContentSignerBuilder jcaContentSignerBuilder = new JcaContentSignerBuilder(
         signatureAlgorithm);

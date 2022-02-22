@@ -24,6 +24,7 @@ import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.RendezvousAcceptFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
@@ -474,9 +475,12 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidOwnerSignException();
     }
 
-    //todo: verify device certificate chain hash
-    //todo: verify device certificates revocations
+    if (!getWorker(RendezvousAcceptFunction.class).apply(ownerSign)) {
+      throw new InvalidMessageException("Voucher rejected due to untrusted key or guid");
+    }
+
     //todo: verify  voucher
+
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);

@@ -9,9 +9,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.MsgType;
@@ -25,6 +28,7 @@ public abstract class HttpClient implements Runnable {
   private DispatchMessage response;
   private List<HttpInstruction> httpInst;
   private String tokenCache;
+
 
   protected static LoggerService logger = new LoggerService(HttpClient.class);
 
@@ -46,6 +50,7 @@ public abstract class HttpClient implements Runnable {
     }
     return false;
   }
+
 
   protected void setInstructions(List<HttpInstruction> httpInst) {
     this.httpInst = httpInst;
@@ -87,7 +92,7 @@ public abstract class HttpClient implements Runnable {
     int delay = 0;
     for (; ; ) {
 
-      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
         URIBuilder uriBuilder = new URIBuilder(
             getInstructions().get(index++).getAddress());

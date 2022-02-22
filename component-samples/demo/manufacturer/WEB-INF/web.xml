@@ -60,8 +60,75 @@
       <servlet-name>Logs</servlet-name>
       <url-pattern>/api/v1/logs</url-pattern>
    </servlet-mapping>
-   
 
+    <servlet>
+        <servlet-name>Health</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.HealthApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Health</servlet-name>
+        <url-pattern>/health</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateValidity</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateValidityApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateValidity</servlet-name>
+        <url-pattern>/api/v1/certificate/validity/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateApi</servlet-name>
+        <url-pattern>/api/v1/certificate/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeviceInfo</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.DeviceInfo</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeviceInfo</servlet-name>
+        <url-pattern>/api/v1/deviceinfo/*</url-pattern>
+    </servlet-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>apis</web-resource-name>
+            <url-pattern>/api/v1/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>api</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-role>
+        <role-name>api</role-name>
+    </security-role>
 
 
 </web-app>

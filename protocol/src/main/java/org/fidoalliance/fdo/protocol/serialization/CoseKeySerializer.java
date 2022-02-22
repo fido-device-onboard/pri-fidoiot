@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import java.io.IOException;
+import java.security.InvalidParameterException;
+import org.fidoalliance.fdo.protocol.BufferUtils;
 import org.fidoalliance.fdo.protocol.message.CoseKey;
 
 public class CoseKeySerializer extends StdSerializer<CoseKey> {
@@ -31,12 +33,23 @@ public class CoseKeySerializer extends StdSerializer<CoseKey> {
       final CBORGenerator cbg = (CBORGenerator) gen;
       cbg.writeStartObject(ELEMENT_COUNT);
     } else {
-      gen.writeStartObject(value,ELEMENT_COUNT);
+      gen.writeStartObject(value, ELEMENT_COUNT);
     }
 
     //write the curve
     gen.writeFieldId(COSEKEY_CRV);
     gen.writeNumber(value.getCrv().toInteger());
+
+    switch (value.getCrv()) {
+      case P256EC2:
+      case P384EC2:
+        break;
+      default:
+        throw new InvalidParameterException("coseSignatureAlg " + value.getCrv());
+    }
+
+    //rfc8152 Leading zero octets MUST be preserved so copy
+    // entire X and Y values
 
     gen.writeFieldId(COSEKEY_X);
     gen.writeBinary(value.getX());
