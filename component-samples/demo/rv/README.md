@@ -112,7 +112,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 Following is the list of REST response error codes and it's description :
 
-|     Error Code     |             Description                  |
+|     Error Code     |             Possible Causes               |
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
 | `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |

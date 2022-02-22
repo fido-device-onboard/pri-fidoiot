@@ -232,7 +232,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     Sample SVI instruction :
   
-    `{"filedesc" : "sample.txt","resource" : "https://www.google.com"},
+    `{"filedesc" : "sample.txt","resource" : "http/https url"},
      {"write": "sample.txt"},
      {"exec" :"/bin/bash cat sample.txt"}`
 
@@ -242,7 +242,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 - Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. The device will ignore all ServiceInfo module messages if module_name:active doesn't precede the messages of the module.
 
-The FDO PRI Owner Sample currently supports the same `fdo_sys` module to send Owner ServiceInfo to the Device and `devmod` module to store the received Device ServiceInfo. When a Device is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
+The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When a Device is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo Transfer
 
