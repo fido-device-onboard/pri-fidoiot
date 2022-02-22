@@ -21,6 +21,7 @@ import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
+import org.fidoalliance.fdo.protocol.message.EotResult;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
@@ -33,6 +34,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
   private LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+
   @Override
   public String getName() {
     return FdoSys.NAME;
@@ -96,7 +98,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
       case FdoSys.EOT:
         if (state.isActive()) {
-          int result = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
+          EotResult result = Mapper.INSTANCE.readValue(kvPair.getValue(), EotResult.class);
           extra.setWaiting(false);
           extra.setQueue(extra.getWaitQueue());
           extra.setWaitQueue(new ServiceInfoQueue());
@@ -172,9 +174,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     logger.warn(new String(data, StandardCharsets.US_ASCII));
   }
 
-  protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, int result)
+  protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, EotResult result)
       throws IOException {
-    logger.info("EOT:resultCode " + result);
+    logger.info("EOT:resultCode " + result.getResult());
   }
 
   protected void load(ServiceInfoModuleState state, FdoSysModuleExtra extra)

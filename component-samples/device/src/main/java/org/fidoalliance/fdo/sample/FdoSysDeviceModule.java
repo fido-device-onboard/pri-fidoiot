@@ -28,6 +28,7 @@ import org.fidoalliance.fdo.protocol.db.FdoSysModuleExtra;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.EotResult;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
@@ -294,7 +295,8 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   }
 
   private void fetch(String fetchFileName, int mtu) throws IOException {
-    Integer result = 0;
+    EotResult result = new EotResult();
+    result.setResult(0);
     try (FileInputStream in = new FileInputStream(fetchFileName)) {
 
       byte[] data = new byte[mtu - 100];
@@ -318,10 +320,10 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
 
     } catch (FileNotFoundException e) {
-      result = 1;
+      result.setResult(1);
       logger.debug("fetch file not found");
     } catch (IOException e) {
-      result = 1;
+      result.setResult(1);
       logger.debug("error reading fetch file");
     }
 
