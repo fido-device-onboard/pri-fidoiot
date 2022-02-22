@@ -1,7 +1,7 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-version: "3.4"
+version: "2.4"
 
 services:
 
@@ -10,7 +10,7 @@ services:
     container_name: pri-fdo-rv
     expose:
       - "8040"
-     - "8041"
+      - "8041"
     ports:
       - "8040:8040"
       - "8041:8041"
