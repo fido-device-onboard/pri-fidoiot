@@ -16,12 +16,12 @@ public class ResellApi extends RestApi {
   @Override
   public void doPost() throws Exception {
 
-    List<Certificate> certList = PemLoader.loadCerts(getStringBody());
-    OwnershipVoucher voucher = VoucherUtils.fromString(getStringBody());
+    String body = getStringBody();
+    OwnershipVoucher voucher = VoucherUtils.fromString(body);
 
     KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
 
-    List<Certificate> list = PemLoader.loadCerts(getStringBody());
+    List<Certificate> list = PemLoader.loadCerts(body);
     Certificate[] certs = list.stream()
         .toArray(Certificate[]::new);
 
