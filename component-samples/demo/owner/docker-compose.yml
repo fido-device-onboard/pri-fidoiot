@@ -12,8 +12,8 @@ services:
       - "8042"
       - "8043"
     ports:
-      - "8042:8042"
-      - "8043:8043"
+     - "8042:8042"
+     - "8043:8043"
     build:
       context: .
       dockerfile: Dockerfile

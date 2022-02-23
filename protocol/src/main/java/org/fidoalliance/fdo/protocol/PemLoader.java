@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.PrivateKey;
@@ -10,8 +11,11 @@ import java.security.PublicKey;
 import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -56,15 +60,18 @@ public class PemLoader {
     List<Certificate> certs = new ArrayList<>();
     try {
       PEMParser parser = new PEMParser(new StringReader(pemString));
-      JcaX509CertificateConverter jcac = new JcaX509CertificateConverter();
       for (; ; ) {
-        Object obj = parser.readObject();
+        Object obj = parser.readPemObject();
         if (obj == null) {
           break;
         }
-        if (obj instanceof X509CertificateHolder) {
-          X509CertificateHolder holder = (X509CertificateHolder) obj;
-          certs.add(jcac.getCertificate(holder));
+        PemObject pemObj = (PemObject) obj;
+        if (pemObj.getType().equals("CERTIFICATE")) {
+          CertificateFactory cf = CertificateFactory.getInstance("X.509");
+          Certificate cert = cf.generateCertificate(
+              new ByteArrayInputStream(((PemObject) obj).getContent()));
+
+          certs.add(cert);
         }
       }
     } catch (CertificateException e) {
