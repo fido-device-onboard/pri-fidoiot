@@ -67,13 +67,6 @@
       <scope>compile</scope>
     </dependency>
 
-
-
-    <dependency>
-      <groupId>org.fidoalliance.fdo</groupId>
-      <artifactId>logging-utils</artifactId>
-      <version>${fdo.version}</version>
-    </dependency>
   </dependencies>
 
   <build>
