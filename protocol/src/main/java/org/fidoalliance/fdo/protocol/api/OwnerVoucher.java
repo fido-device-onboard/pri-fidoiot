@@ -65,6 +65,8 @@ public class OwnerVoucher extends RestApi {
       String text = VoucherUtils.toString(onboardingVoucher.getData());
       getResponse().setContentType(HttpUtils.HTTP_PLAIN_TEXT);
       getResponse().getWriter().print(text);
+    } else {
+      throw new NotFoundException(path);
     }
 
 
