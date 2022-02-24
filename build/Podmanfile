@@ -8,7 +8,7 @@ RUN yum install -y java-11-openjdk-devel git
 ENV MVN_VERSION=3.8.3 
 
 RUN curl -sS \
-    https://dlcdn.apache.org/maven/maven-3/${MVN_VERSION}/binaries/apache-maven-${MVN_VERSION}-bin.tar.gz \
+    https://archive.apache.org/dist/maven/maven-3/${MVN_VERSION}/binaries/apache-maven-${MVN_VERSION}-bin.tar.gz
     -o /tmp/apache-maven-${MVN_VERSION}-bin.tar.gz && \
     tar xvzf /tmp/apache-maven-${MVN_VERSION}-bin.tar.gz -C /tmp && \
     mv /tmp/apache-maven-${MVN_VERSION} /var/local/ && \
