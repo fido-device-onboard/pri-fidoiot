@@ -89,8 +89,6 @@ public class DeviceApp extends HttpClient {
 
     if (to1d != null) {
       generateTo2Hello(to1d);
-      logger.info("TO2 complete for GUID" +
-              Config.getWorker(DeviceCredentialSupplier.class).get().getGuid());
     } else {
       final DeviceCredential devCredential = Config.getWorker(DeviceCredentialSupplier.class).get();
       if (devCredential == null) {

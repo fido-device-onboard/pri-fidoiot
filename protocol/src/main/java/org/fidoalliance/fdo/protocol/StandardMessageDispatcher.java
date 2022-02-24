@@ -504,7 +504,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
     acceptOwner.getWaitSeconds();
-
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -1307,6 +1306,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!setupNonce.equals(done2.getNonce())) {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
+    logger.info("TO2 completed successfully.");
   }
 
 
