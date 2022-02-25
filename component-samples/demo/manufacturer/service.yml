@@ -38,6 +38,12 @@ manufacturer:
      path: manufacturer.p12
      store-type: PKCS12
      password: $(encrypt_password)
+   rv-instruction:
+     dns: localhost
+     ip: 127.0.0.1
+     protocol: 1
+     ownerport: 8040
+     devport: 8040
 
 
 h2-database:
