@@ -18,6 +18,33 @@
         <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>CertificateApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateApi</servlet-name>
+        <url-pattern>/api/v1/certificate/*</url-pattern>
+    </servlet-mapping>
+
+  <servlet>
+      <servlet-name>OwnerVoucher</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.OwnerVoucher</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>OwnerVoucher</servlet-name>
+      <url-pattern>/api/v1/owner/vouchers/*</url-pattern>
+   </servlet-mapping>
+
+
    <servlet>
         <servlet-name>Reseller</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
@@ -28,7 +55,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Reseller</servlet-name>
-        <url-pattern>/api/v1/resell</url-pattern>
+        <url-pattern>/api/v1/resell/*</url-pattern>
     </servlet-mapping>
 
    <servlet>
