@@ -41,6 +41,7 @@
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateValidity"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.ManufacturedVoucher"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnDieCertificateData"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.ProtocolSession"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.RvData"></mapping>
 
