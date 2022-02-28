@@ -86,18 +86,19 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
         rvData = new RvData();
 
         final String defaultRvi = "- - - 5\n"
-            + "    - \"localhost\"\n"
+            + "    - \"%s\"\n"
             + "  - - 3\n"
             + "    - %s\n"
             + "  - - 12\n"
-            + "    - 1\n"
+            + "    - %s\n"
             + "  - - 2\n"
-            + "    - \"127.0.0.1\"\n"
+            + "    - \"%s\"\n"
             + "  - - 4\n"
             + "    - %s";
 
-        String rviString = String.format(defaultRvi, config.getDns(), config.getDevport(),
-                config.getProtocol(), config.getIp(), config.getOwnerport());
+        String rviString = String.format(defaultRvi, config.getDns(),
+                config.getDevport(), config.getProtocol(), config.getIp(),
+                config.getOwnerport());
         RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
         rvData.setData(Mapper.INSTANCE.writeValue(rvi));
