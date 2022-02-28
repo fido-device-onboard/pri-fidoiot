@@ -78,6 +78,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream

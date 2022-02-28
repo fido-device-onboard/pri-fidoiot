@@ -61,6 +61,19 @@
       <url-pattern>/api/v1/logs</url-pattern>
    </servlet-mapping>
 
+   <servlet>
+      <servlet-name>OnDie</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+         <param-name>Api-Class</param-name>
+         <param-value>org.fidoalliance.fdo.protocol.api.OnDie</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping>
+      <servlet-name>OnDie</servlet-name>
+      <url-pattern>/api/v1/ondie</url-pattern>
+   </servlet-mapping>
+
     <servlet>
         <servlet-name>Health</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
