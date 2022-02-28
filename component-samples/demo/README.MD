@@ -85,41 +85,41 @@ sudo podman-compose up -d --build
 
 * Use the following command to stop a specific podman container.
 ```
-sudo podman stop <container-name>
+podman stop <container-name>
 ```
 OR
 ```
-sudo podman stop <container-id>
+podman stop <container-id>
 ```
 
 * Use the following command to stop all running podman containers.
 ```
-sudo podman stop -a
+podman stop -a
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-sudo podman rm <container-name>
+podman rm <container-name>
 ```
 OR
 ```
-sudo podman rm <container-id>
+podman rm <container-id>
 ```
 
 * Use the following command to remove the podman image.
 ```
-sudo podman rmi <image-name>
+podman rmi <image-name>
 ```
 OR
 ```
-sudo podman rmi <image-id>
+podman rmi <image-id>
 ```
 
 * Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
 ```
-sudo podman system prune -a
+podman system prune -a
 ```
 # Configuring Proxies
 
@@ -179,8 +179,8 @@ docker container cp <container-id>:/home/fdo/log-filename .
 
 ***NOTE***: Use the following commands to enable FDO support on RHEL.
 ```
-bash scripts/enable_rhel_support.sh
-echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
+bash scripts/enable_podman_support.sh
+grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
 source ~/.bashrc
 ```
 
