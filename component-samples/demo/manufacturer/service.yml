@@ -52,6 +52,15 @@ h2-database:
       - "-webPort"
       - "8083" 
 
+epid:
+  # WARNING: do not set testmode to true in production environments
+  # if testmode is true, EPID signature verification will only
+  # fail for non-signature issues (i.e. malformed requests)
+  testMode: false
+  # TBD: the url below is the used for production purposes
+  # url: http://verify.epid-sbx.trustedservices.intel.com
+  # the url below is used for testing purposes only
+  url: http://verify.epid-sbx.trustedservices.intel.com
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
@@ -61,6 +70,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCertSignatureFunction
   - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
+  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
