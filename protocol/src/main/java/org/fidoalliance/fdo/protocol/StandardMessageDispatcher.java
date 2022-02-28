@@ -1034,8 +1034,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
-    //todo: get from config
-    devInfoReady.setMaxMessageSize(null);
+
+    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+    devInfoReady.setMaxMessageSize(onboardConfig.getMaxServiceInfoSize());
 
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
     response.setMessage(cs.encrypt(cipherText, es));
