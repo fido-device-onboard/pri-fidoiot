@@ -118,7 +118,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>SystemResourceAPI</servlet-name>
-        <url-pattern>/api/v1/owner/sviresource/*</url-pattern>
+        <url-pattern>/api/v1/owner/resource/*</url-pattern>
     </servlet-mapping>
   
    <servlet>
@@ -158,6 +158,32 @@
     <servlet-mapping>
         <servlet-name>CertificateValidity</servlet-name>
         <url-pattern>/api/v1/certificate/validity/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MessageSizeApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MessageSizeApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MessageSizeApi</servlet-name>
+        <url-pattern>/api/v1/owner/messagesize</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServiceInfoSizeApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.SviSizeApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceInfoSizeApi</servlet-name>
+        <url-pattern>/api/v1/owner/svisize</url-pattern>
     </servlet-mapping>
 
   <security-constraint>
