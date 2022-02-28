@@ -2,7 +2,7 @@ hibernate-properties:
   connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:9093/./app-data/emdb
+  hibernate.connection.url: jdbc:h2:tcp://localhost:8049/./app-data/emdb
   hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 system-properties:
@@ -44,18 +44,13 @@ h2-database:
    tcp-server:
      - "-ifNotExists"
      - "-tcpPort"
-     - "9093"
+     - "8049"
    web-server:
       # - "-webAllowOthers"
       # - "-webExternalNames"
       # - "serverfqdn"
-      - "-ifNotExists"
       - "-webPort"
       - "8083" 
-
-
-
-
 
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider

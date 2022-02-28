@@ -1,7 +1,7 @@
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
 This is a reference implementation of the
-[FIDO Device Onboard Spec](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/)
+[FDO v1.1 Review Draft](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/FIDO-device-onboard-spec-v1.1-rd-20211214.html/)
 published by the FIDO Alliance. It provides production-ready implementation for the protocol defined
 by the specification. It also provides example implementation for different components to
 demonstrate end-to-end execution of the protocol. Appropriate security measures should be taken while
@@ -22,13 +22,8 @@ FDO PRI source code is organized into the following sub-folders.
 
 - `component-samples`: It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile.
 
-- `http-api-samples`: It contains Servlet implementation for various operations to be performed using different REST endpoints for all server services.
-
-- `protocol-samples`: It contains client and server implementation that demonstrates the preliminary E2E demo that educates the end-user with the protocol workflow.
-
 - `protocol`: It contains implementations related to protocol message processing.
 
-- `util`: It contains utility packages such as storage, ServiceInfo, dispatchers - for message passing and cert-utils - for loading certificates and keys from PEM formatted strings.
 
 ## Building FDO PRI Source
 
@@ -52,10 +47,13 @@ The list of ports that are used for unit tests and sample code:
 | 8071 | reseller database port |
 | 8072 | reseller https port |
 | 8080 | aio http port |
-| 8081 | aio database port |
-| 8090 | Test RV port |
-| 8091 | Test DB port |
+| 8082 | aio H2 Console port |
+| 8083 | manufacturer H2 Console port |
+| 8084 | rv H2 Console port |
+| 8085 | owner H2 Console port |
 | 8443 | aio https port |
+| 9092 | aio database port |
+
 
 Use the following commands to build FDO PRI source.
 ```
@@ -65,176 +63,311 @@ $ mvn clean install
 
 The build creates artifacts which will be used in the rest of this guide.
 
-## Using Protocol Samples
+The runnable artifacts can be found in <fdo-pri-src>/component-samples/demo/
 
-Protocol samples can run directly without any configuration. There is only one
-option and that is to set EPID test mode. By default this is set to false. To enable 
-test mode set the following variable to true in the application.properties file:
-epid_test_mode=true
-Place a copy of the file in both the protocol-samples\http-server-to0-to1-sample and 
-protocol-samples\http-server-to2-sample directories before starting the servers.
+### Credential storage
+
+Credentials are defined in the service.env for each service and will be made available as environment variables to each docker container.  
+
+aio/service.env
+manufacturer/service.env
+owner/service.env
+reseller/service.env
+rv/service.env
+
+The following passwords are defined in each service.env:
+
+| Environment Variable | Description                          |
+| ---------------------| -------------------------------------|
+| db_user              | database user account.               |
+| db_password          | database password                    |
+| api_password         | defines the DIGEST REST API password |
+| encrypt_password     | keystore encryption password         |
+| ssl_password         | Https/web server keystore password   |
+
+Keystores containing private keys are stored in the H2 database - ./app-data/emdb.mv.db file.
+
+key_gen.sh can be used to generate random passwords for each service.env.
+
+***NOTE***: Changing the database password after the H2 database has been created requires the database file to be deleted and recreated.
+
+
+### Generating random passwords using keys_gen.sh
+
+Running keys_gen.sh will generate random passwords for the all http servers.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/scripts
+$ ./keys_gen.sh
+```
+
+A message "Key generation completed." will be outputted to the console.
+
+Credentials for each service will be generated the creds directory.
+
+creds/aio/service.env
+creds/manufacturer/service.env
+creds/owner/service.env
+creds/reseller/service.env
+creds/rv/service.env
+
+Replace the service.env in the demo folders with the generated ones in the creds folder.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/scripts
+$ cp -r ./creds/. ../
+```
+
+### Specifying Subject alternate names for the Web/Https self-signed certificate.
+
+When the http server starts for the first time it will generate a self-signed certificate for https protocol.
+
+The subject name of the self-signed certificate is defined in the service.yml
+
+under http-server:
+
+subject_names:
+- DNS:localhost
+- IP:127.0.0.1
+
+Replace DNS and IP entries with the ones required by the HTTPs/Web Service.
+
+
 
 ### Starting FDO PRI HTTP Servers
 
-#### Starting the FDO PRI Rendezvous (RV) HTTP Server
+
+#### Starting the FDO PRI All-In-One (AIO) HTTP Server
+
+To start the server as a docker container.
+
 ```
-$ cd <fdo-pri-src>/protocol-samples/http-server-to0-to1-sample/
-$ mvn exec:java
+$ cd <fdo-pri-src>/component-samples/demo/aio
+$ docker-compose up
+```
+
+To start the server as a standalone java application.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/aio
+$ java -jar aio.jar
+```
+
+The server will listen for FDO PRI http messages on port 8080.
+The H2 database will listen on TCP port 9092.
+The H2 Web Console will be available at http://localhost:8082
+
+The all-in-one runs supports all FDO protocols in a single service. By default 
+
+
+#### Starting the FDO PRI Rendezvous (RV) HTTP Server
+
+To start the server as a docker container.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/rv
+$ docker-compose up
+```
+
+To start the server as a standalone java application.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/rv
+$ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI http messages on port 8040.
 The H2 database will listen on TCP port 8050.
+The H2 Web Console will be available at http://localhost:8084
 
 #### Starting the FDO PRI Owner HTTP Server
+
 ```
-$ cd <fdo-pri-src>/protocol-samples/http-server-to2-sample/
-$ mvn exec:java
+$ cd <fdo-pri-src>/component-samples/demo/owner
+$ docker-compose up
+```
+
+To start the server as a standalone java application.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/owner
+$ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI HTTP messages on port 8042.
 The H2 database will listen on TCP port 8051.
+The H2 Web Console will be available at http://localhost:8085
 
 #### Starting the FDO PRI Device Initialization (DI) HTTP Server
+
 ```
-$ cd <fdo-pri-src>/protocol-samples/http-server-di-sample/
-$ mvn exec:java
+$ cd <fdo-pri-src>/component-samples/demo/manufacturer
+$ docker-compose up
+```
+
+To start the server as a standalone java application.
+
+```
+$ cd <fdo-pri-src>/component-samples/demo/manufacturer
+$ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI HTTP messages on port 8039.
 The H2 database will listen on TCP port 8049.
-You can allow remote database console connections by setting webAllowOthers=true in the .h2.server.properties file located your user home directory (for example, '~' for Linux and C:\Users\[username] for Windows).
+The H2 Web Console will be available at http://localhost:8083
 
-### Running FDO PRI HTTP Clients
-
-#### Running the FDO PRI Device Initialization (DI) HTTP Client
-```
-$ cd <fdo-pri-src>/protocol-samples/http-client-di-sample
-$ mvn exec:java
-```
-Expect the following line on successful DI completion.
-
-SerialNo: d35a096f
-
-Device Credentials: 87f5..
-
-DI Client finished.
-
-Refer [Ownership Voucher Creation](#ownership-voucher-creation) for the next steps.
-
-#### Running the FDO PRI TO0 HTTP Client
-```
-$ cd <fdo-pri-src>/protocol-samples/http-client-to0-sample
-$ mvn exec:java
-```
-Expect the following message on successful TO0 completion.
-
-TO0 Response Wait: 3600
-
-TO0 Client finished.
-
-#### Running the FDO PRI TO1 HTTP Client
-```
-$ cd <fdo-pri-src>/protocol-samples/http-client-to1-sample
-$ mvn exec:java
-```
-
-signed RV Blob: 84a10126...
-TO1 Client finished.
-
-### Running the FDO PRI TO2 HTTP Client
-```
-$ cd <fdo-pri-src>/protocol-samples/http-client-to2-sample
-$ mvn exec:java
-```
-
-TO2 Client finished.
-
-***NOTE***: During the execution of the Protocol Samples using the command 'mvn exec:java', the following warning messages may be displayed on the console. These warning messages are a result of the version discrepancy of Guice with Maven and Java 11. This does not have any effect on the execution of the Protocol Sample.
-```
-WARNING: An illegal reflective access operation has occurred
-WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/usr/share/maven/lib/guice.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
-WARNING: Please consider reporting this to the maintainers of com.google.inject.internal.cglib.core.$ReflectUtils$1
-WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-WARNING: All illegal access operations will be denied in a future release
-```
-
-## Ownership Voucher Creation
-
-The DI server will listen for messages at http://localhost:8039/fdo/100/msg/<msgid>.
-The server also includes a SQL database that runs on port 8049. The database console
-UI will be available at http://localhost:8039/console.
-
-Extended Ownership Vouchers can be obtained from the following url:
-
-http://localhost:8039/api/v1/vouchers/<serial_no>
-
-***NOTE***: Default serial number is '0'. To get the serial_no corresponding to the GUID, look up the `SERIAL_NO` field of MT_DEVICES table in the DI database.
-
-The hex value of the extended Ownership Voucher can be obtained by running the API above. The value will be populated on DI server console.
-
-To log in to the database and view records use the following information:
-```
-"User Name:" = "sa"
-"Password:" = "" (blank)
-"JDBC URL:" = "jdbc:h2:tcp://<localhost>:8049/<fdo-pri-src>/protocol-samples/http-server-di-sample/target/data/mfg"
-```
-The path to the DB will be printed out in the following format when the DI server is starting.
-
-`jdbc:h2:tcp:...`
-
-SELECT * FROM MT_DEVICES will show the current Ownership Vouchers created by DI messages.
-
-# Enabling Remote Access to DB
-
-Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
-
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in the following files:
+You can allow remote database console connections by setting uncommenting the line containing "-webAllowOthers" in the service.yml
 
 
-- To enable remote access for DI server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-di-sample/src/main/java/org/fidoalliance/fdo/sample/DiApp.java` <br/>
+### Running the FDO PRI HTTP Device
 
-- To enable remote access for TO0-TO1 server DB, update file:  `<fdo-pri-src>/protocol-samples/http-server-to0-to1-sample/src/main/java/org/fidoalliance/fdo/sample/To0To1ServerApp.java` <br/>
+#### Staring the FDO PRI HTTP Device
 
-- To enable remote access for TO2 server DB, update file: `<fdo-pri-src>/protocol-samples/http-server-to2-sample/src/main/java/org/fidoalliance/fdo/sample/To2ServerApp.java`
+***NOTE***: By default the device is configured to run with the All-In-One (AIO) ports.  You must edit the service.yml in the demo device directory to run with the  manufacturer demo.
+
+To start the PRI device as a standalone java application.
 
 ```
-db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <service_db_port>
-webAllowOthers = true
+$ cd <fdo-pri-src>/component-samples/demo/device
+$ java -jar device.jar
+```
+Running the device for the first time will result in device keys being generated and stored in the current directory in the device.p12 file.
+Once device keys are generated the device will run the DI protocol and store the DI credentials in a file called credential.bin.
+
+Running device a second time will result in the device performing TO1/TO2 protocols.
+
+Deleting the credential.bin file will force the device to re-run DI protocol.
+
+
+#### Configuring FDO PRI HTTP Device
+
+<fdo-pri-src>/component-samples/demo/device/service.yml contains the configuration of the device.
+
+
+#### Creating Ownership Vouchers using All-In-One (AIO) demo
+
+Before running the device for the first time start the demo aio server.
+
+Run the demo device
+
+#### Creating Ownership Vouchers using Individual Component Demos
+
+Before running the device for the first time start the demo manufacturer.
+
+Use the following rest api to specify the rendezvous instructions for demo rv server.
+
+POST https://localhost:8038/api/v1/rvinfo (or http://localhost:8039/api/v1/rvinfo)
+The post body content-type header text/plain
+Authorization DIGEST with "apiUser" and api_password defined in the manufactures service.env
+POST content
+```
+[[[5,"localhost"],[3,8041],[12,2],[2,"127.0.0.1"],[4,8041]]]
 ```
 
-**IMPORTANT: Not recommended to enable this setting especially on production systems.**
+Change the di-url: http://localhost:8080 in the demo device service.yml to di-url: http://localhost:8039
 
-# Enabling Rendezvous Bypass
+After Running the device the successful output would be as follows:
 
-FDO includes a Rendezvous Bypass mechanism that is useful for IOT deployments that are not
-dependent on a particular network structure or ownership.
+```
+$ cd <fdo-pri-src>/component-samples/demo/device
+$ java -jar device.jar
+...
+13:50:21.846 [INFO ] Type 13 []
+13:50:21.850 [INFO ] Starting Fdo Completed
+```
 
-In such cases, an FDO device may elect to bypass the FDO Rendezvous Server mechanism and use
-the local mechanism instead. Since the TO2 provides full authentication and authorization of the
-Device to the Owner, there is no change in the security posture of FDO.
 
-To enable Rendezvous Bypass
+Next get the owners public key by starting the demo owner service and use the following REST API.
 
-- Update the RVInfo blob with `rvbypass` flag and owner address using the API `POST /api/v1/rvinfo` with
-  `http://<owner-ip:port>?rvbypass=&ipaddress=<owner-ip>&ownerport=<port>` as body.
+GET https://localhost:8043/api/v1/certificate?alias=SECP256R1 (or http://localhost:8042/api/v1/certificate?alias=SECP256R1)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+Result body will be the owners certificate in PEM format
 
-- Setting the `rvbypass` flag in RVblob, causes the TO1 protocol to be skipped, and a TO2 connection
- to be attempted to `<owner-ip>` address mentioned in the above POST body.
 
-# EPID Test Mode
+```
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+```
 
-EPID devices can be tested using `Test` mode. EPID `Test` mode feature is intended to support onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device. Test mode is enabled by default for protocol-sample in components.
 
-***NOTE***: Not recommended for use in production systems.
+For EC384 based vouchers use the following API:
 
-# Using Component Samples
+GET https://localhost:8043/api/v1/certificate?alias=SECP384R1 (or http://localhost:8042/api/v1/certificate?alias=SECP384R1)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+Result body will be the owners certificate in PEM format
 
-Refer to [Demo README](component-samples/demo/README.md) for steps to run component sample demo.
+Next get the serial number of the last voucher manufactured
 
-# Support for OnDie Devices
+GET https://localhost:8038/api/v1/deviceinfo/100000 (or http://localhost:8039/api/v1/deviceinfo/100000)
+Authorization DIGEST with "apiUser" and api_password defined in the manufactures service.env
+Result will contain the device info
+```
+[{"serial_no":"43FF320A","timestamp":"2022-02-18 21:50:21.838","uuid":"24275cd7-f9f5-4d34-a2a5-e233ac38db6c"}]
+```
 
-Refer to [Demo README](component-samples/demo/README.md) for steps to configure component-samples to support OnDie devices.
+Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
+POST https://localhost:8038/api/v1/mfg/vouchers/43FF320A(or http://localhost:8039api/v1/mfg/vouchers/43FF320A)
+Authorization DIGEST with "apiUser" and api_password defined in the manufactures service.env
+POST content
+```
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+```
+Result will contain the ownership voucher
+```
+-----BEGIN OWNERSHIP VOUCHER-----
+-----END OWNERSHIP VOUCHER-----
+```
 
-Support for OnDie devices is built into the protocol-samples and no configuration is required. The OnDie certs and CRLs are preloaded into the
-protocol-samples/onDieCache directory. Should these need to be refreshed (in case of devices released after the FDO PRI release) then the script in
-component-samples/onDieScript.py can be used to update the artifacts in this directory.
+Post the extended ownership found obtained from the manufacturer to the owner
+POST https://localhost:8043/api/v1/owner/vouchers (or http://localhost:8042/api/v1/owner/vouchers)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+POST content
+```
+-----BEGIN OWNERSHIP VOUCHER-----
+-----END OWNERSHIP VOUCHER-----
+```
+Result body be the uuid of the voucher
+24275cd7-f9f5-4d34-a2a5-e233ac38db6c
+
+Configure the Owners TO2 address using the following API:
+
+POST https://localhost:8043/api/v1/owner/redirect (or http://localhost:8042/api/v1/owner/redirect)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+POST content
+```
+[[null,"localhost",8041,5]]
+```
+Result 200 OK
+
+Tell the owner to perform To0 with the voucher 
+Post the extended ownership found obtained from the manufacturer to the owner
+GET https://localhost:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://localhost:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+Result 200 OK
+
+
+
+#### Configure the owner service info package
+
+Use the following API to device a service info package
+POST https://localhost:8043/api/v1/owner/svi (or http://localhost:8042/api/v1/owner/svi)
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+POST content
+```
+[ 
+  {"filedesc" : "setup.sh", "resource" : "https://google.com"}, 
+  {"exec" : ["sh","setup.sh"] }
+]
+```
+Result 200 OK
+
+Now run the device again to onboard the device
+```
+$ cd <fdo-pri-src>/component-samples/demo/device
+$ java -jar device.jar
+```
+
+
