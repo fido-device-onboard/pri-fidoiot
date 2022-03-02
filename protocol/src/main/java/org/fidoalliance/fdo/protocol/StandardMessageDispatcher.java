@@ -1059,11 +1059,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2DeviceInfoReady devInfoReady = Mapper.INSTANCE.readValue(cipherText,
         To2DeviceInfoReady.class);
 
-    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
-    if (onboardConfig.getMaxServiceInfoSize() == null) {
+    if (devInfoReady.getMaxMessageSize() == null) {
       devInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
-    } else {
-      devInfoReady.setMaxMessageSize(onboardConfig.getMaxServiceInfoSize());
     }
 
     storage.put(To2DeviceInfoReady.class, devInfoReady);
@@ -1073,9 +1070,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     cipherText = Mapper.INSTANCE.writeValue(ownerInfoReady);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
 
-    if (ownerInfoReady.getMaxMessageSize() == null) {
+    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+    if (onboardConfig.getMaxServiceInfoSize() == null) {
       ownerInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
+    } else {
+      ownerInfoReady.setMaxMessageSize(onboardConfig.getMaxServiceInfoSize());
     }
+
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
     HelloDevice helloDevice = storage.get(HelloDevice.class);
