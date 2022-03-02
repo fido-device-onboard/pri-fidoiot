@@ -1035,8 +1035,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
 
-    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
-    devInfoReady.setMaxMessageSize(onboardConfig.getMaxServiceInfoSize());
+    devInfoReady.setMaxMessageSize(null);
 
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
     response.setMessage(cs.encrypt(cipherText, es));
@@ -1060,9 +1059,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2DeviceInfoReady devInfoReady = Mapper.INSTANCE.readValue(cipherText,
         To2DeviceInfoReady.class);
 
-    if (devInfoReady.getMaxMessageSize() == null) {
+    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+    if (onboardConfig.getMaxServiceInfoSize() == null) {
       devInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
+    } else {
+      devInfoReady.setMaxMessageSize(onboardConfig.getMaxServiceInfoSize());
     }
+
     storage.put(To2DeviceInfoReady.class, devInfoReady);
 
     To2OwnerInfoReady ownerInfoReady = new To2OwnerInfoReady();
