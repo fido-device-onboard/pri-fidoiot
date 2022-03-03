@@ -13,7 +13,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
-import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.CwtKeySupplier;
@@ -98,6 +97,8 @@ import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction;
 
 public class StandardMessageDispatcher implements MessageDispatcher {
+
+  LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
 
    protected StandardCryptoService getCryptoService() {
     return Config.getWorker(StandardCryptoService.class);
@@ -403,6 +404,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceCredentialConsumer consumer = getWorker(DeviceCredentialConsumer.class);
     consumer.accept(credential);
     request.setExtra(new SimpleStorage());
+    logger.info("DI complete, GUID is " + credential.getGuid());
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -502,7 +504,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
     acceptOwner.getWaitSeconds();
-
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -594,6 +595,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     SimpleStorage storage = request.getExtra();
     storage.put(CoseSign1.class, to1d);
+
+    To1dPayload to1dPayload = Mapper.INSTANCE.readValue(to1d.getPayload(), To1dPayload.class);
+    List<String> httpInstruction = new ArrayList<>();
+    for (HttpInstruction instruction : HttpUtils.getInstructions(to1dPayload.getAddressEntries())) {
+      httpInstruction.add(instruction.getAddress());
+    }
+    logger.info("TO1 complete, owner is at " + httpInstruction.toString());
 
   }
 
@@ -1298,6 +1306,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!setupNonce.equals(done2.getNonce())) {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
+    logger.info("TO2 completed successfully.");
   }
 
 
