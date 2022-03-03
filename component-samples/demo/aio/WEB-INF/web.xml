@@ -291,7 +291,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Reseller</servlet-name>
-        <url-pattern>/api/v1/resell</url-pattern>
+        <url-pattern>/api/v1/resell/*</url-pattern>
     </servlet-mapping>
 
  <security-constraint>

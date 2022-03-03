@@ -46,6 +46,9 @@ owner:
        path: replacement.p12
        store-type: PKCS12
        password: $(encrypt_password)
+   to0-scheduler:
+     thread-count: 5
+     interval: 120
 
 epid:
   # WARNING: do not set testmode to true in production environments
@@ -86,6 +89,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
+  - org.fidoalliance.fdo.protocol.db.StandardAcceptOwnerFunction
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
