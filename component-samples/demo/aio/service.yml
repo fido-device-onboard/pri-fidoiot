@@ -23,6 +23,9 @@ http-server:
     path: ssl.p12
     store-type: PKCS12
     password: $(encrypt_password)
+  to0-scheduler:
+    thread-count: 5
+    interval: 120
 
 
 manufacturer:
