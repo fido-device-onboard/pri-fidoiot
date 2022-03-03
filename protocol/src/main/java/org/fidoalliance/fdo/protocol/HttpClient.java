@@ -2,9 +2,11 @@ package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -45,7 +47,7 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected boolean isRepeatable(String uri) {
-    if (uri.endsWith("/30")) {
+    if (uri.endsWith("/30") || uri.endsWith("/20")) {
       return true;
     }
     return false;
@@ -65,6 +67,10 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected abstract void generateHello() throws IOException;
+
+  protected void generateBypass() throws IOException {
+
+  }
 
   protected void initializeSession() throws IOException {
     setRequest(new DispatchMessage());
@@ -94,8 +100,17 @@ public abstract class HttpClient implements Runnable {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
+        HttpInstruction instruction = getInstructions().get(index++);
+        if (instruction.isRendezvousBypass()
+            && getRequest().getMsgType() == MsgType.TO1_HELLO_RV) {
+          generateBypass();
+        }
+
+
+
+
         URIBuilder uriBuilder = new URIBuilder(
-            getInstructions().get(index++).getAddress());
+            instruction.getAddress());
         List<String> segments = new ArrayList<>();
         segments.add(HttpUtils.FDO_COMPONENT);
         segments.add(ProtocolVersion.current().toString());
@@ -105,7 +120,9 @@ public abstract class HttpClient implements Runnable {
 
         requestUri = uriBuilder.build();
 
+
         HttpPost httpRequest = new HttpPost(requestUri);
+
 
         ByteArrayEntity bae = new ByteArrayEntity(getRequest().getMessage());
         httpRequest.setEntity(bae);
@@ -114,6 +131,8 @@ public abstract class HttpClient implements Runnable {
         if (tokenCache != null) {
           httpRequest.addHeader(HttpUtils.HTTP_AUTHORIZATION, tokenCache);
         }
+
+        logMessage(getRequest());
 
         try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
           HttpEntity entity = httpResponse.getEntity();
@@ -136,6 +155,7 @@ public abstract class HttpClient implements Runnable {
               tokenCache = httpResponse.getFirstHeader(HttpUtils.HTTP_AUTHORIZATION).getValue();
             }
             getResponse().setAuthToken(tokenCache);
+            logMessage(getResponse());
           } else {
             throw new IOException(httpResponse.getStatusLine().toString());
           }
@@ -143,18 +163,12 @@ public abstract class HttpClient implements Runnable {
         break; // success
 
       } catch (Exception e) {
-        if (getInstructions().size() > 1
+
+        if (getInstructions().size() > 0
             && index < getInstructions().size()) {
           continue;
         }
-        /*if (isRepeatable(requestUri.getPath())) {
-          try {
-            Thread.sleep(Duration.ofSeconds(delay).toMillis());
-          } catch (InterruptedException ex) {
-            throw new IOException(ex);
-          }
-          index =0;
-        }*/
+
         throw new IOException(e);
       }
 
@@ -174,11 +188,8 @@ public abstract class HttpClient implements Runnable {
       generateHello();
       for (; ; ) {
 
-        logMessage(getRequest());
-
         sendMessage();
 
-        logMessage(getResponse());
         getResponse().setExtra(getRequest().getExtra());
 
         Optional<DispatchMessage> nextMsg = dispatcher.dispatch(getResponse());

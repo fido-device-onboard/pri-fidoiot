@@ -37,8 +37,9 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
             + "  - - 4\n"
             + "    - %s";
 
-        String defaultPort = Config.getWorker(HttpServer.class).getPort();
-        String rviString = String.format(defaultRvi, defaultPort, defaultPort);
+        String defaultPort = Config.getWorker(HttpServer.class).getHttpPort();
+        String defaultHttpsPort = Config.getWorker(HttpServer.class).getHttpsPort();
+        String rviString = String.format(defaultRvi, defaultPort, defaultHttpsPort);
         RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
         rvData.setData(Mapper.INSTANCE.writeValue(rvi));

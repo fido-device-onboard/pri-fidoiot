@@ -43,6 +43,8 @@ import org.fidoalliance.fdo.protocol.message.SigInfo;
 import org.fidoalliance.fdo.protocol.message.SigInfoType;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.To1dPayload;
+import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
+import org.fidoalliance.fdo.protocol.message.To2AddressEntry;
 
 public class DeviceApp extends HttpClient {
 
@@ -100,14 +102,18 @@ public class DeviceApp extends HttpClient {
 
   }
 
+  @Override
+  protected void generateBypass() throws IOException {
+    generateTo2Hello(null);
+  }
 
   private void generateTo1Hello(DeviceCredential devCredential) throws IOException {
-    HelloRv helloRv = new HelloRv();
-    helloRv.setGuid(devCredential.getGuid());
-    helloRv.setSigInfo(getSignInfo(config.getKeyType()));
 
     setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
 
+    HelloRv helloRv = new HelloRv();
+    helloRv.setGuid(devCredential.getGuid());
+    helloRv.setSigInfo(getSignInfo(config.getKeyType()));
     getRequest().setMsgType(MsgType.TO1_HELLO_RV);
     getRequest().setMessage(Mapper.INSTANCE.writeValue(helloRv));
 
@@ -126,9 +132,6 @@ public class DeviceApp extends HttpClient {
 
     helloDevice.setSigInfo(getSignInfo(config.getKeyType()));
 
-    To1dPayload to1dPayload = Mapper.INSTANCE.readValue(tod1.getPayload(), To1dPayload.class);
-
-    setInstructions(HttpUtils.getInstructions(to1dPayload.getAddressEntries()));
 
     getRequest().setMsgType(MsgType.TO2_HELLO_DEVICE);
     getRequest().setMessage(Mapper.INSTANCE.writeValue(helloDevice));
@@ -137,9 +140,13 @@ public class DeviceApp extends HttpClient {
     SimpleStorage storage = getRequest().getExtra();
     storage.put(byte[].class, getRequest().getMessage());
     storage.put(Nonce.class, nonceTO2ProveOv);
-    storage.put(CoseSign1.class, tod1);
 
 
+    if (tod1 != null) {
+      To1dPayload to1dPayload = Mapper.INSTANCE.readValue(tod1.getPayload(), To1dPayload.class);
+      setInstructions(HttpUtils.getInstructions(to1dPayload.getAddressEntries()));
+      storage.put(CoseSign1.class, tod1);
+    }
 
   }
 

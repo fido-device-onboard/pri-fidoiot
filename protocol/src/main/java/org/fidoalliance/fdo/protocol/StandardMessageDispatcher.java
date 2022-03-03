@@ -23,6 +23,7 @@ import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
+import org.fidoalliance.fdo.protocol.dispatch.OwnerInfoSizeSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousAcceptFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
@@ -702,6 +703,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("header hmac does not match");
     }
 
+    //if bypass there will be no CoseSign1 to verify
     if (null != storage.get(CoseSign1.class)) {
       CoseSign1 to1d = storage.get(CoseSign1.class);
       if (!cs.verify(to1d, ownerPublicKey)) {
@@ -1057,7 +1059,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     storage.put(To2DeviceInfoReady.class, devInfoReady);
 
+
     To2OwnerInfoReady ownerInfoReady = new To2OwnerInfoReady();
+
+    ownerInfoReady.setMaxMessageSize(getWorker(OwnerInfoSizeSupplier.class).get());
 
     cipherText = Mapper.INSTANCE.writeValue(ownerInfoReady);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
@@ -1065,6 +1070,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (ownerInfoReady.getMaxMessageSize() == null) {
       ownerInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
     }
+
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
     HelloDevice helloDevice = storage.get(HelloDevice.class);

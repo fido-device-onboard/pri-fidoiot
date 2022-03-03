@@ -78,8 +78,8 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
-  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
+  - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
@@ -89,6 +89,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
 

@@ -160,9 +160,7 @@ public class StandardHttpServer implements HttpServer {
 
   private HttpServerConfig config = Config.getConfig(HttpRoot.class).getRoot();
 
-  @Override
-  public void run() {
-
+  protected void internalRun() {
     Tomcat tomcat = new Tomcat();
 
     tomcat.setBaseDir(config.getBasePath());
@@ -282,14 +280,30 @@ public class StandardHttpServer implements HttpServer {
       tomcat.start();
       logger.info("Started " + serviceName + " Service.");
     } catch (LifecycleException e) {
-      logger.warn("Failed to start All-in-One Demo Service.");
+      logger.warn("Failed to start " +  serviceName + " Service.");
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public String getPort() {
+  public void run() {
+
+    try {
+      internalRun();
+    } catch (Throwable t) {
+      logger.warn(t.getMessage());
+    }
+
+  }
+
+  @Override
+  public String getHttpPort() {
     return config.getHttpPort();
+  }
+
+  @Override
+  public String getHttpsPort() {
+    return config.getHttpsPort();
   }
 
 

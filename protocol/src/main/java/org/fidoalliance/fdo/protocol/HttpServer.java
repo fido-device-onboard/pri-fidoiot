@@ -1,5 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
 public interface HttpServer extends Runnable {
-  String getPort();
+  String getHttpPort();
+  String getHttpsPort();
 }

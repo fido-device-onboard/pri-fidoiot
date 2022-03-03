@@ -107,6 +107,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
 
