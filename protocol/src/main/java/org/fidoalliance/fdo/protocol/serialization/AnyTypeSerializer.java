@@ -21,7 +21,6 @@ public class AnyTypeSerializer extends StdSerializer<AnyType> {
   @Override
   public void serialize(AnyType value, JsonGenerator gen, SerializerProvider provider)
       throws IOException {
-    Object object = value.covertValue(Object.class);
-    gen.writeObject(object);
+    gen.writeObject(value.getObject());
   }
 }

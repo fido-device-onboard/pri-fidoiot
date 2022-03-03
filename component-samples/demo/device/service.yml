@@ -96,6 +96,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
+  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
   - org.fidoalliance.fdo.sample.FileCredentialConsumer
   - org.fidoalliance.fdo.sample.FileCredentialSupplier 
   - org.fidoalliance.fdo.sample.FileKeyStoreInputStream

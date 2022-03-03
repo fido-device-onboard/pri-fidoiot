@@ -3,6 +3,7 @@ package org.fidoalliance.fdo.protocol.api;
 import java.io.IOException;
 import java.time.Duration;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
@@ -18,10 +19,12 @@ public class To0Starter extends RestApi {
   @Override
   public void doGet() throws Exception {
 
+    LoggerService logger = new LoggerService(To0Starter.class);
     String guid = getLastSegment();
     Thread thread = new Thread(){
       public void run(){
         try {
+          logger.info("Triggering TO0 for GUID: " + guid);
           OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(
               guid);
           StandardTo0Client to0Client = new StandardTo0Client();
@@ -38,9 +41,9 @@ public class To0Starter extends RestApi {
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
           to0Client.setTo0d(to0d);
           to0Client.run();
+          logger.info("TO0 completed for GUID: " + guid);
         } catch (IOException e ) {
-
-
+          logger.error("TO0 failed for GUID: " + guid);
         }
 
       }

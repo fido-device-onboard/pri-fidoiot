@@ -7,6 +7,20 @@ import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.hibernate.engine.jdbc.ClobProxy;
 
 public class SviPackage extends RestApi {
+
+  @Override
+  public void doGet() throws Exception {
+    getTransaction();
+
+    SystemPackage systemPackage =
+        getSession().find(SystemPackage.class,Long.valueOf(1));
+
+    if (systemPackage != null) {
+      String result = systemPackage.getData().getSubString(1,
+          Long.valueOf(systemPackage.getData().length()).intValue());
+      getResponse().getWriter().print(result);
+    }
+  }
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();

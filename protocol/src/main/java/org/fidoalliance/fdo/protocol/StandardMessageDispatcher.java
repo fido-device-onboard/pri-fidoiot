@@ -23,6 +23,7 @@ import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.RendezvousAcceptFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
@@ -96,6 +97,8 @@ import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction;
 
 public class StandardMessageDispatcher implements MessageDispatcher {
+
+  LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
 
    protected StandardCryptoService getCryptoService() {
     return Config.getWorker(StandardCryptoService.class);
@@ -219,14 +222,14 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     final AnyType certInfo = diInfo.getCertInfo();
     if (certInfo != null || diInfo.getOnDieDeviceCertChain() != null) {
       try {
-
-        Certificate[] chain = getWorker(CertSignatureFunction.class).apply(diInfo);
+        Certificate[] chain = null;
         if (diInfo.getOnDieDeviceCertChain() != null) {
+          OnDieCertSignatureFunction onDieSigFunction = new OnDieCertSignatureFunction();
           // OnDie ECDSA type device
-          chain = getWorker(OnDieCertSignatureFunction.class).apply(diInfo);
+          chain = onDieSigFunction.apply(diInfo);
 
           // verify ondie revocations
-          if (!getWorker(OnDieCertSignatureFunction.class).checkRevocations(chain)) {
+          if (!onDieSigFunction.checkRevocations(chain)) {
             throw new IOException("OnDie revocation failure");
           }
 
@@ -401,6 +404,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceCredentialConsumer consumer = getWorker(DeviceCredentialConsumer.class);
     consumer.accept(credential);
     request.setExtra(new SimpleStorage());
+    logger.info("DI complete, GUID is " + credential.getGuid());
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -473,14 +477,17 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidOwnerSignException();
     }
 
-    //todo: verify device certificate chain hash
-    //todo: verify device certificates revocations
+    if (!getWorker(RendezvousAcceptFunction.class).apply(ownerSign)) {
+      throw new InvalidMessageException("Voucher rejected due to untrusted key or guid");
+    }
+
     //todo: verify  voucher
+
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);
-    redirectEntry.setPublicKey(ownerPublicKey);
-
+    CertChain deviceChain = to0d.getVoucher().getCertChain();
+    redirectEntry.setCertChain(deviceChain);
     long waitSeconds = getWorker(RvBlobStorageFunction.class).apply(to0d, redirectEntry);
 
     To0AcceptOwner acceptOwner = new To0AcceptOwner();
@@ -497,7 +504,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
     acceptOwner.getWaitSeconds();
-
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -553,14 +559,12 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CwtTo1Id cwtTo1Id = Mapper.INSTANCE.readValue(cwtToken.getCwtId(), CwtTo1Id.class);
     Guid guid = cwtTo1Id.getHelloRv().getGuid();
 
-    //todo fix: get owner key from blob
-    OwnershipVoucher voucher = getWorker(VoucherQueryFunction.class).apply(guid.toString());
-    OwnershipVoucherHeader header = VoucherUtils.getHeader(voucher);
+    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
 
-    CertChain certChain = voucher.getCertChain();
+
     OwnerPublicKey pubKey = null;
+    CertChain certChain = entry.getCertChain();
     if (certChain != null) {
-      KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
       pubKey = getCryptoService().encodeKey(
           new AlgorithmFinder().getPublicKeyType(certChain.getChain().get(0).getPublicKey()),
           PublicKeyEncoding.X509,
@@ -571,7 +575,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
-      boolean verified = getCryptoService().verify(sign1, cwtTo1Id.getHelloRv().getSigInfo());
+      boolean verified = getCryptoService().verify(
+              sign1,
+              cwtTo1Id.getHelloRv().getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
@@ -580,8 +586,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!cwtTo1Id.getNonce().equals(eatPayload.getNonce())) {
       throw new InvalidMessageException("NonceTO1Proof noes not match");
     }
-
-    To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
     response.setMessage(Mapper.INSTANCE.writeValue(entry.getTo1d()));
   }
 
@@ -591,6 +595,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     SimpleStorage storage = request.getExtra();
     storage.put(CoseSign1.class, to1d);
+
+    To1dPayload to1dPayload = Mapper.INSTANCE.readValue(to1d.getPayload(), To1dPayload.class);
+    List<String> httpInstruction = new ArrayList<>();
+    for (HttpInstruction instruction : HttpUtils.getInstructions(to1dPayload.getAddressEntries())) {
+      httpInstruction.add(instruction.getAddress());
+    }
+    logger.info("TO1 complete, owner is at " + httpInstruction.toString());
 
   }
 
@@ -890,7 +901,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
-      boolean verified = getCryptoService().verify(sign1, helloDevice.getSigInfo());
+      boolean verified = getCryptoService().verify(
+              sign1,
+              helloDevice.getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
@@ -1293,6 +1306,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!setupNonce.equals(done2.getNonce())) {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
+    logger.info("TO2 completed successfully.");
   }
 
 

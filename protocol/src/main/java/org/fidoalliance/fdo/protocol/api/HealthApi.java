@@ -26,7 +26,7 @@ public class HealthApi extends RestApi {
 
      String systemTime = new Date().toString();
      logger.info("Health check invoked at " + systemTime);
-     String responseBody = "{\"version\"= \"%s\"}";
+     String responseBody = "{\"version\" : \"%s\"}";
 
      // Collects property from the service.yml file.
      String appVersion = System.getProperty("application.version");

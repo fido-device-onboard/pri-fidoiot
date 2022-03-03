@@ -14,6 +14,7 @@ import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 public class RestApi implements AutoCloseable {
 
@@ -73,7 +74,9 @@ public class RestApi implements AutoCloseable {
 
   protected void commit() {
     if (transaction != null ) {
-      transaction.commit();
+      if (transaction.getStatus() == TransactionStatus.ACTIVE) {
+        transaction.commit();
+      }
       transaction = null;
     }
   }
@@ -98,9 +101,17 @@ public class RestApi implements AutoCloseable {
       throws UnsupportedMediaTypeException, NotFoundException {
     this.request = req;
     this.response = resp;
-    if (!request.getContentType().equals(getRequestContentType())) {
-      throw new UnsupportedMediaTypeException(req.getContentType());
+
+    if (request.getContentType() != null) {
+      if (!request.getContentType().equals(getRequestContentType())) {
+        throw new UnsupportedMediaTypeException(req.getContentType());
+      }
+    } else {
+      if (request.getContentLength() > 0) {
+        throw new UnsupportedMediaTypeException("unspecified content type");
+      }
     }
+
 
     File file = new File(req.getRequestURI());
 

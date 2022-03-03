@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.protocol.HTTP;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
@@ -33,6 +34,9 @@ public class HttpUtils {
   public static final String HTTP_PLAIN_TEXT = "text/plain";
   public static final String HTTP_MESSAGE_TYPE = "Message-Type";
   public static final String HTTP_CONTENT_TYPE = "Content-Type";
+  public static final String HTTP_BEARER = "Bearer";
+  public static final String HTTP_SCHEME = "http";
+  public static final String HTTPS_SCHEME = "https";
 
 
   public static final String FDO_COMPONENT = "fdo";
@@ -90,8 +94,15 @@ public class HttpUtils {
     for (RendezvousDirective directive : info) {
       String dns = null;
       String ipAddress = null;
-      Integer port = Integer.valueOf(80);
-      List<String> schemes = new ArrayList<>();
+      Integer devPort = Integer.valueOf(80);
+      Integer ownerPort = Integer.valueOf(443);
+      List<String> devSchemes =  new ArrayList<>();
+      List<String> ownerSchemes = new ArrayList<>();
+      ownerSchemes.add(HTTPS_SCHEME);
+      ownerSchemes.add(HTTP_SCHEME);
+
+
+
       long delaySec = 0;
       boolean ownerOnly = false;
       boolean devOnly = false;
@@ -120,18 +131,21 @@ public class HttpUtils {
             }
             break;
           case DEV_PORT:
-            port = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+            devPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+            break;
+          case OWNER_PORT:
+            ownerPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
             break;
           case PROTOCOL: {
             RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
                 RendezvousProtocol.class);
             if (rvp.equals(RendezvousProtocol.PROT_HTTPS)) {
-              schemes.add("https");
+              devSchemes.add(HTTPS_SCHEME);
             } else if (rvp.equals(RendezvousProtocol.PROT_HTTP)) {
-              schemes.add("http");
+              devSchemes.add(HTTP_SCHEME);
             } else if (rvp.equals(RendezvousProtocol.PROT_REST)) {
-              schemes.add("https");
-              schemes.add("http");
+              devSchemes.add(HTTPS_SCHEME);
+              devSchemes.add(HTTP_SCHEME);
             }
           }
           break;
@@ -151,6 +165,8 @@ public class HttpUtils {
             break;
         }
       }
+
+      //done getting both
       if (!isDevice && devOnly) {
         continue;
       }
@@ -158,9 +174,7 @@ public class HttpUtils {
         continue;
       }
 
-      if (port == null) {
-        continue;
-      }
+
 
       if (dns == null && ipAddress == null) {
         continue;
@@ -169,6 +183,15 @@ public class HttpUtils {
         continue;
       }
 
+      List<String> schemes = new ArrayList<>();
+      Integer port = null;
+      if (isDevice) {
+        schemes = devSchemes;
+        port = devPort;
+      } else {
+        schemes = ownerSchemes;
+        port = ownerPort;
+      }
       for (String scheme : schemes) {
         int assignedPort = 0;
         if (port == null) {
@@ -180,6 +203,7 @@ public class HttpUtils {
         } else {
           assignedPort = port;
         }
+
         if (dns != null) {
           HttpInstruction httpInst = new HttpInstruction();
           httpInst.setDelay(delaySec);

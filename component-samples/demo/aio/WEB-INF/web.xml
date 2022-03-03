@@ -242,4 +242,73 @@
         <url-pattern>/api/v1/owner/svisize</url-pattern>
     </servlet-mapping>
 
+   <servlet>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.SystemResourceApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <url-pattern>/api/v1/owner/resource</url-pattern>
+    </servlet-mapping>
+
+   <servlet>
+      <servlet-name>AllowList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.AllowList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>AllowList</servlet-name>
+      <url-pattern>/api/v1/rv/allow</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>DenyList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.DenyList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>DenyList</servlet-name>
+      <url-pattern>/api/v1/rv/deny</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+        <servlet-name>Reseller</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.ResellApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Reseller</servlet-name>
+        <url-pattern>/api/v1/resell</url-pattern>
+    </servlet-mapping>
+
+ <security-constraint>
+    <web-resource-collection>
+        <web-resource-name>apis</web-resource-name>
+        <url-pattern>/api/v1/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+        <role-name>api</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-role>
+    <role-name>api</role-name>
+  </security-role>
+
 </web-app>

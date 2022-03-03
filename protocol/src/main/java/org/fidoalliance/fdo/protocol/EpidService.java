@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.message.SigInfo;
 import org.fidoalliance.fdo.protocol.message.SigInfoType;
@@ -27,7 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public final class EpidService {
+public class EpidService {
 
   private static ExecutorService executor = Executors.newCachedThreadPool(r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -37,7 +38,7 @@ public final class EpidService {
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
 
   private static String defaultEpidOnlineUrl = "http://verify.epid-sbx.trustedservices.intel.com/";
-  private static URI epidOnlineUrl = URI.create(defaultEpidOnlineUrl);
+  private static URI epidOnlineUrl = null;
 
   private static final int EpidGroupLength = 4;
   private static final String EPID_PROTOCOL_VERSION_V1 = "v1";
@@ -50,29 +51,52 @@ public final class EpidService {
   private static final String GROUPCERTSIGMA10 = "PUBKEY.CRT.BIN";
   private static final String GROUPCERTSIGMA11 = "PUBKEY.CRT";
 
+  // This is not defined in HttpUrlConnection
+  public static final int HTTP_EXPECTATION_FAILED = 417;
+
   private static final LoggerService logger = new LoggerService(EpidService.class);
 
-  /**
-   * Set the EPID Online Verification Service URL.
-   *
-   * @param url String url
-   */
-  public static void setEpidOnlineUrl(String url) {
-    if (null == url) {
-      throw new IllegalArgumentException();
-    }
-    epidOnlineUrl = URI.create(url);
-    logger.info("EPID Online URL: " + epidOnlineUrl.toString());
-  }
+  protected static class RootConfig {
+    @JsonProperty("epid")
+    private EpidService.EpidConfig root;
+
+    protected EpidService.EpidConfig getRoot() {
+        return root;
+     }
+   }
+
+   protected static class EpidConfig {
+     @JsonProperty("url")
+     private String path;
+     @JsonProperty("testMode")
+     private Boolean testMode;
+
+     protected String getPath() {
+        return path;
+      }
+     protected Boolean getTestMode() {
+       return testMode;
+     }
+   }
+
+
+  protected EpidService.RootConfig config =
+    Config.getConfig(EpidService.RootConfig.class);
+
 
   /**
    * Return the EPID Online Verification Service URL.
    *
    * @return {@link URI} instance
    */
-  private static URI getEpidOnlineUrl() {
+  private URI getEpidOnlineUrl() {
     if (null == epidOnlineUrl) {
-      throw new RuntimeException();
+      if (config.getRoot().getPath() != null
+              && !config.getRoot().getPath().isEmpty()) {
+        epidOnlineUrl = URI.create(config.getRoot().getPath());
+      } else {
+        epidOnlineUrl = URI.create(defaultEpidOnlineUrl);
+      }
     }
     return epidOnlineUrl;
   }
@@ -113,7 +137,7 @@ public final class EpidService {
                       .toURI()
                       .resolve(URL_PATH_SEPARATOR + path)
                       .toString();
-      return EpidService.doGet(url);
+      return doGet(url);
     } catch (URISyntaxException | IOException e) {
       logger.error(e.getMessage());
       throw new RuntimeException(e);
@@ -215,11 +239,27 @@ public final class EpidService {
               Arrays.asList(EpidService.EPID_PROTOCOL_VERSION_V1,
                       EpidService.EPID_11, EpidService.EPID_PROOF_URI_PATH));
       url = new URL(
-              EpidService.getEpidOnlineUrl().toString()).
+              getEpidOnlineUrl().toString()).
               toURI().resolve(EpidService.URL_PATH_SEPARATOR + path).toString();
 
       int response = doPost(url, msg);
       if (response != HttpURLConnection.HTTP_OK) {
+        if (config.getRoot().getTestMode() != null
+                && config.getRoot().getTestMode()) {
+          // in test mode return false only for non-signature issues
+          switch (response) {
+            case HttpURLConnection.HTTP_OK:
+              // valid signature
+            case HttpURLConnection.HTTP_FORBIDDEN:
+              // invalid signature
+            case HTTP_EXPECTATION_FAILED:
+              // outdated sigrl
+              return true;
+            default:
+              // malformed request or other reason
+              return false;
+          }
+        }
         return false;
       }
     } catch (Exception ex) {
@@ -228,7 +268,7 @@ public final class EpidService {
     return true;
   }
 
-  private static String createEpidSignatureBodyMessage(byte[] signature,
+  private String createEpidSignatureBodyMessage(byte[] signature,
                                                       byte[] maroePrefix,
                                                       byte[] nonce,
                                                       byte[] signedData,
@@ -298,7 +338,7 @@ public final class EpidService {
    * @return the response from the Url
    * @throws IOException throws an IOException in case the response status code is not 200 (OK)
    */
-  private static byte[] doGet(String url) throws IOException {
+  private byte[] doGet(String url) throws IOException {
     java.net.http.HttpClient httpClient;
     try {
       httpClient = java.net.http.HttpClient.newBuilder().build();
@@ -328,7 +368,7 @@ public final class EpidService {
    * @return the status code response from the Url
    * @throws IOException throws an IOException in case the response status code is not 200 (OK)
    */
-  private static int doPost(String url, String payload) throws IOException {
+  private int doPost(String url, String payload) throws IOException {
     java.net.http.HttpClient httpClient;
     try {
       httpClient = HttpClient.newBuilder().build();

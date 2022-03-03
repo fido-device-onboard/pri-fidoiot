@@ -32,7 +32,7 @@ public class OnboardingConfig {
   @Column(name = "max_serviceinfo_size")
   private Integer maxServiceInfoSize;
 
-  @Column(name = "wait_seconds",  nullable = false)
+  @Column(name = "wait_seconds", nullable = false)
   private long waitSeconds;
 
   public byte[] getRvBlob() {
@@ -55,6 +55,8 @@ public class OnboardingConfig {
     return waitSeconds;
   }
 
+
+
   public void setRvBlob(byte[] rvBlob) {
     this.rvBlob = rvBlob;
   }
@@ -74,4 +76,6 @@ public class OnboardingConfig {
   public void setWaitSeconds(long waitSeconds) {
     this.waitSeconds = waitSeconds;
   }
+
+
 }

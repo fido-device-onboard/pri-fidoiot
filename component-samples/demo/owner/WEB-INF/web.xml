@@ -107,6 +107,71 @@
       <url-pattern>/api/v1/interop/vouchers/*</url-pattern>
    </servlet-mapping>
 
+   <servlet>
+      <servlet-name>OnDie</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+         <param-name>Api-Class</param-name>
+         <param-value>org.fidoalliance.fdo.protocol.api.OnDie</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping>
+      <servlet-name>OnDie</servlet-name>
+      <url-pattern>/api/v1/ondie</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+        <servlet-name>SystemResourceAPI</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.SystemResourceApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SystemResourceAPI</servlet-name>
+        <url-pattern>/api/v1/owner/sviresource/*</url-pattern>
+    </servlet-mapping>
+  
+   <servlet>
+          <servlet-name>CertificateApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateApi</servlet-name>
+        <url-pattern>/api/v1/certificate/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Health</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.HealthApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Health</servlet-name>
+        <url-pattern>/health</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateValidity</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateValidityApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateValidity</servlet-name>
+        <url-pattern>/api/v1/certificate/validity/*</url-pattern>
+    </servlet-mapping>
+
   <security-constraint>
     <web-resource-collection>
         <web-resource-name>apis</web-resource-name>
