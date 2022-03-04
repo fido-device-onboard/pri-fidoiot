@@ -77,6 +77,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.FILEDESC:
         if (state.isActive()) {
           String fileDesc = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          logger.info("File created on path: " + fileDesc);
           createFile(Path.of(fileDesc));
         }
         break;
@@ -89,6 +90,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.EXEC:
         if (state.isActive()) {
           String[] args = Mapper.INSTANCE.readValue(kvPair.getValue(), String[].class);
+          logger.info("Executing command: " + Arrays.asList(args).toString());
           exec(args);
         }
         break;

@@ -40,6 +40,7 @@
 
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateValidity"></mapping>
         <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateData"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnboardingVoucher"/>
 
 
 

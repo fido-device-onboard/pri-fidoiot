@@ -94,6 +94,7 @@ public class DeviceApp extends HttpClient {
       if (devCredential == null) {
         generateDiHello();
       } else {
+        logger.info("credentials loaded, GUID is " + devCredential.getGuid());
         generateTo1Hello(devCredential);
       }
     }
@@ -163,6 +164,8 @@ public class DeviceApp extends HttpClient {
     httpInst.add(instruction);
 
     setInstructions(httpInst);
+
+    logger.info("DI URL is " + config.getDiUri());
 
     byte[] csr = generateCsr(keyType, keySize);
 

@@ -9,6 +9,7 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
+import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
 public class ResellApi extends RestApi {
@@ -17,7 +18,18 @@ public class ResellApi extends RestApi {
   public void doPost() throws Exception {
 
     String body = getStringBody();
-    OwnershipVoucher voucher = VoucherUtils.fromString(body);
+    OwnershipVoucher voucher = null;
+    String path = getLastSegment();
+    if (path.indexOf("-") > 0) {
+      OnboardingVoucher onboardingVoucher = getSession().find(OnboardingVoucher.class, path);
+      if (onboardingVoucher != null) {
+        voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(), OwnershipVoucher.class);
+      } else {
+        throw new NotFoundException(path);
+      }
+    } else {
+      voucher = VoucherUtils.fromString(body);
+    }
 
     KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
 
