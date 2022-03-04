@@ -51,6 +51,9 @@ public abstract class HttpClient implements Runnable {
     return false;
   }
 
+  protected void finishedOk() {
+
+  }
 
   protected void setInstructions(List<HttpInstruction> httpInst) {
     this.httpInst = httpInst;
@@ -204,10 +207,12 @@ public abstract class HttpClient implements Runnable {
           msg.setExtra(response.getExtra());
           setRequest(msg);
         } else {
+          finishedOk();
           if (getResponse().getMsgType() == MsgType.TO1_RV_REDIRECT) {
             generateHello();
           } else {
             break;
+
           }
         }
 
