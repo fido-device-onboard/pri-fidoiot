@@ -77,6 +77,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         if (state.isActive()) {
           StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
           if (status.isCompleted()) {
+            // check for error
+            if (status.getRetCode() != 0) {
+              throw new InternalServerErrorException("Exec_cb status returned failure.");
+            }
             extra.setWaiting(false);
             extra.setQueue(extra.getWaitQueue());
             extra.setWaitQueue(new ServiceInfoQueue());
