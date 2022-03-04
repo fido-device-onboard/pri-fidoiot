@@ -8,6 +8,6 @@ public class StandardHttpClientSupplier implements HttpClientSupplier {
 
   @Override
   public CloseableHttpClient get() throws IOException {
-    return HttpClients.createDefault();
+    return HttpClients.createSystem();
   }
 }
