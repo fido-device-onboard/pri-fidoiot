@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
+import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.CwtKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialConsumer;
@@ -1025,7 +1026,11 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     cred.setRvInfo(newHeader.getRendezvousInfo());
     //cred.setPubKeyHash();
     //todo: update cred info
-    //todo: check cred resuse
+    //todo: check cred reuse
+    boolean credReuse = false;
+    if (!getWorker(CredReuseFunction.class).apply(credReuse)) {
+      throw new CredentialReuseException();
+    }
 
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
