@@ -53,6 +53,9 @@ public abstract class HttpClient implements Runnable {
     return false;
   }
 
+  protected void finishedOk() {
+
+  }
 
   protected void setInstructions(List<HttpInstruction> httpInst) {
     this.httpInst = httpInst;
@@ -100,29 +103,34 @@ public abstract class HttpClient implements Runnable {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
-        HttpInstruction instruction = getInstructions().get(index++);
-        if (instruction.isRendezvousBypass()
-            && getRequest().getMsgType() == MsgType.TO1_HELLO_RV) {
-          generateBypass();
+        MsgType msgId = getRequest().getMsgType();
+        HttpInstruction httpInstruction = getInstructions().get(index++);
+        URIBuilder uriBuilder = new URIBuilder(
+            httpInstruction.getAddress());
+
+        if (msgId == MsgType.TO1_HELLO_RV) {
+          if (!httpInstruction.isRendezvousBypass()) {
+            logger.info("RVBypass flag not set, Starting TO1.");
+          }
+          logger.info("TO1 URL is " + uriBuilder.toString());
+        } else if (msgId == MsgType.TO2_HELLO_DEVICE) {
+          if (!httpInstruction.isRendezvousBypass()) {
+            logger.info("RVBypass flag is set, Skipped T01.");
+          }
+          logger.info("TO2 URL is " + uriBuilder.toString());
         }
 
-
-
-
-        URIBuilder uriBuilder = new URIBuilder(
-            instruction.getAddress());
         List<String> segments = new ArrayList<>();
+
         segments.add(HttpUtils.FDO_COMPONENT);
         segments.add(ProtocolVersion.current().toString());
         segments.add(HttpUtils.MSG_COMPONENT);
-        segments.add(Integer.toString(getRequest().getMsgType().toInteger()));
+        segments.add(Integer.toString(msgId.toInteger()));
         uriBuilder.setPathSegments(segments);
 
         requestUri = uriBuilder.build();
 
-
         HttpPost httpRequest = new HttpPost(requestUri);
-
 
         ByteArrayEntity bae = new ByteArrayEntity(getRequest().getMessage());
         httpRequest.setEntity(bae);
@@ -198,10 +206,12 @@ public abstract class HttpClient implements Runnable {
           msg.setExtra(response.getExtra());
           setRequest(msg);
         } else {
+          finishedOk();
           if (getResponse().getMsgType() == MsgType.TO1_RV_REDIRECT) {
             generateHello();
           } else {
             break;
+
           }
         }
 

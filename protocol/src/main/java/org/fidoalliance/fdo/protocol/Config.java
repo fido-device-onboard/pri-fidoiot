@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class Config {
 
   private static String configPath;
   private static final String CONFIG_FILE = "service.yml";
+  private static boolean autoInjectionEnabled = false;
 
   static {
 
@@ -201,6 +203,10 @@ public class Config {
     return result;
   }
 
+  public static Boolean isAutoInjectionEnabled( ) {
+    return autoInjectionEnabled;
+  }
+
   private static String getEnvValue(String value) {
 
     String result = value;
@@ -240,6 +246,10 @@ public class Config {
       for (String name : workerNames) {
         Object worker = loadObject(name);
         workers.add(worker);
+      }
+      if (Arrays.asList(workerNames).
+              contains("org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction")) {
+        autoInjectionEnabled = true;
       }
     }
     ROOT.workers = new String[0];

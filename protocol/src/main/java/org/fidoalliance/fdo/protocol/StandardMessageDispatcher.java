@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
+import org.fidoalliance.fdo.protocol.dispatch.AcceptOwnerFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -101,7 +102,11 @@ import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction
 
 public class StandardMessageDispatcher implements MessageDispatcher {
 
-   protected StandardCryptoService getCryptoService() {
+
+  LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
+
+
+  protected StandardCryptoService getCryptoService() {
     return Config.getWorker(StandardCryptoService.class);
   }
 
@@ -240,8 +245,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
           // we have no nonce with the test signature.
           AlgorithmFinder finder = new AlgorithmFinder();
           CoseProtectedHeader cph = new CoseProtectedHeader();
-          cph.setAlgId( finder.getCoseAlgorithm(PublicKeyType.SECP384R1,
-                  KeySizeType.SIZE_384));
+          cph.setAlgId(finder.getCoseAlgorithm(PublicKeyType.SECP384R1,
+              KeySizeType.SIZE_384));
           byte[] cphData = Mapper.INSTANCE.writeValue(cph);
 
           CoseUnprotectedHeader cuh = new CoseUnprotectedHeader();
@@ -356,7 +361,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     SetCredentials setCredentials = request.getMessage(SetCredentials.class);
     byte[] headerTag = setCredentials.getVoucherHeader();
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
 
     DeviceCredential credential = new DeviceCredential();
 
@@ -405,6 +410,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceCredentialConsumer consumer = getWorker(DeviceCredentialConsumer.class);
     consumer.accept(credential);
     request.setExtra(new SimpleStorage());
+    logger.info("DI complete, GUID is " + credential.getGuid());
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -483,7 +489,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     //todo: verify  voucher
 
-
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);
     CertChain deviceChain = to0d.getVoucher().getCertChain();
@@ -504,7 +509,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
     acceptOwner.getWaitSeconds();
-
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -562,7 +566,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2RedirectEntry entry = getWorker(RvBlobQueryFunction.class).apply(guid.toString());
 
-
     OwnerPublicKey pubKey = null;
     CertChain certChain = entry.getCertChain();
     if (certChain != null) {
@@ -577,8 +580,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
       boolean verified = getCryptoService().verify(
-              sign1,
-              cwtTo1Id.getHelloRv().getSigInfo());
+          sign1,
+          cwtTo1Id.getHelloRv().getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
@@ -596,6 +599,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     SimpleStorage storage = request.getExtra();
     storage.put(CoseSign1.class, to1d);
+
+    To1dPayload to1dPayload = Mapper.INSTANCE.readValue(to1d.getPayload(), To1dPayload.class);
+    List<String> httpInstruction = new ArrayList<>();
+    for (HttpInstruction instruction : HttpUtils.getInstructions(to1dPayload.getAddressEntries())) {
+      httpInstruction.add(instruction.getAddress());
+    }
+    logger.info("TO1 complete, owner is at " + httpInstruction.toString());
 
   }
 
@@ -620,8 +630,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     KexMessage kexMessage =
         cs.getKeyExchangeMessage(helloDevice.getKexSuiteName(),
-                KexParty.A,
-                null);
+            KexParty.A,
+            null);
     hdrPayload.setKexA(kexMessage.getMessage());
 
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(
@@ -644,6 +654,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     storage.put(OwnershipVoucher.class, voucher);
     storage.put(HelloDevice.class, helloDevice);
     storage.put(KexMessage.class, kexMessage);
+    storage.put(To2ProveHeaderPayload.class, hdrPayload);
 
     //store the tod2 for latter
     To2Done to2Done = new To2Done();
@@ -682,6 +693,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         To2ProveHeaderPayload.class);
 
     SimpleStorage storage = request.getExtra();
+    storage.put(OwnerPublicKey.class, ownerPublicKey);
     byte[] original = storage.get(byte[].class);
     Nonce nonceTO2ProveOv = storage.get(Nonce.class);
 
@@ -756,7 +768,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(), OwnershipVoucherHeader.class);
 
     HashType hashType =
         new AlgorithmFinder().getCompatibleHashType(hdrPayload.getHmac().getHashType());
@@ -837,7 +849,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     eat.setNonce(deviceNonce);
 
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(), OwnershipVoucherHeader.class);
     eat.setGuid(header.getGuid());
 
     KeyResolver resolver = Config.getWorker(DeviceKeySupplier.class).get();
@@ -897,21 +909,18 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } else {
       //we don't have the cert chain so the only way is to verify using sigInfo
       boolean verified = getCryptoService().verify(
-              sign1,
-              helloDevice.getSigInfo());
+          sign1,
+          helloDevice.getSigInfo());
       if (!verified) {
         throw new InvalidOwnerSignException();
       }
     }
-
-
 
     EatPayloadBase eatPayload = Mapper.INSTANCE.readValue(sign1.getPayload(), EatPayloadBase.class);
     if (!eatPayload.getGuid().equals(helloDevice.getGuid())) {
       throw new InvalidMessageException("EUID does not match");
     }
 
-    To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
     Nonce deviceNonce = storage.get(To2Done.class).getNonce(); // this is sent in 61
     if (!deviceNonce.equals(eatPayload.getNonce())) {
       throw new InvalidMessageException("NonceTO2ProveDv does not match");
@@ -958,17 +967,30 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     // determine the sharedsecret for KEX
     KeyExchangeResult kxResult = cs
-            .getSharedSecret(helloDevice.getKexSuiteName(),
-                    fdoPayload.getKexB(), kexMessage, originalPrivateKey);
+        .getSharedSecret(helloDevice.getKexSuiteName(),
+            fdoPayload.getKexB(), kexMessage, originalPrivateKey);
 
+    To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
-    OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
-    KeyResolver resolver = getWorker(ReplacementKeySupplier.class).get();
-    PrivateKey privateKey = resolver.getPrivateKey(cs.decodeKey(setupDevice.getOwner2Key()));
+    OwnershipVoucherHeader oldHeader = Mapper.INSTANCE.readValue(hdrPayload.getHeader(),
+        OwnershipVoucherHeader.class);
+    PublicKey owner1 = cs.decodeKey(oldHeader.getPublicKey());
+    PublicKey owner2 = cs.decodeKey(setupDevice.getOwner2Key());
+    KeyResolver resolver = null;
+    if (owner2.equals(owner1)) {
+      resolver = getWorker(OwnerKeySupplier.class).get();
+      setupDevice.setOwner2Key(VoucherUtils.getLastOwner(voucher));
+    } else {
+      resolver = getWorker(ReplacementKeySupplier.class).get();
+    }
+
+    PrivateKey privateKey = resolver.getPrivateKey(
+        KeyResolver.getAlias(setupDevice.getOwner2Key().getType(),
+            new AlgorithmFinder().getKeySizeType(cs.decodeKey(setupDevice.getOwner2Key()))));
     sign1 = null;
     try {
       byte[] payload = Mapper.INSTANCE.writeValue(setupDevice);
-      sign1 = cs.sign(payload, privateKey, ownerPublicKey);
+      sign1 = cs.sign(payload, privateKey, setupDevice.getOwner2Key());
     } finally {
       cs.destroyKey(privateKey);
     }
@@ -1004,11 +1026,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("signature failure");
     }
 
-
-
     To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
     OwnershipVoucherHeader oldHeader =
-        Mapper.INSTANCE.readValue(hdrPayload.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(hdrPayload.getHeader(), OwnershipVoucherHeader.class);
     OwnershipVoucherHeader newHeader = new OwnershipVoucherHeader();
     newHeader.setVersion(oldHeader.getVersion());
     newHeader.setDeviceInfo(oldHeader.getDeviceInfo());
@@ -1022,6 +1042,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Hash newMac = cs.hash(oldMac.getHashType(), cred.getHmacSecret(),
         Mapper.INSTANCE.writeValue(newHeader));
 
+<<<<<<< HEAD
     cred.setGuid(newHeader.getGuid());
     cred.setRvInfo(newHeader.getRendezvousInfo());
     //cred.setPubKeyHash();
@@ -1030,10 +1051,43 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     boolean credReuse = false;
     if (!getWorker(CredReuseFunction.class).apply(credReuse)) {
       throw new CredentialReuseException();
+=======
+    //check cred resuse
+    boolean credReuse = true;
+    if (!oldHeader.getGuid().equals(newHeader.getGuid())) {
+      credReuse = false;
+    }
+
+    if (credReuse) {
+      byte[] rv1 = Mapper.INSTANCE.writeValue(oldHeader.getRendezvousInfo());
+      byte[] rv2 = Mapper.INSTANCE.writeValue(newHeader.getRendezvousInfo());
+      if (!Arrays.equals(rv1, rv1)) {
+        credReuse = false;
+      }
+    }
+
+    if (credReuse) {
+
+      OwnerPublicKey owner1 = storage.get(OwnerPublicKey.class);
+      OwnerPublicKey owner2 = payload.getOwner2Key();
+      if (!cs.decodeKey(owner1).equals(cs.decodeKey(owner2))) {
+        credReuse = false;
+      }
+    }
+
+    if (credReuse) {
+      newMac = null;
+    } else {
+      cred.setGuid(newHeader.getGuid());
+      cred.setRvInfo(newHeader.getRendezvousInfo());
+      //cred.setPubKeyHash();
+
+>>>>>>> upstream/1.1-dev
     }
 
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
+
     //todo: get from config
     devInfoReady.setMaxMessageSize(null);
 
@@ -1094,12 +1148,11 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         moduleList.add(state);
       }
     }
-    storage.put(ServiceInfoModuleList.class,moduleList);
+    storage.put(ServiceInfoModuleList.class, moduleList);
 
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
-    storage.put(OwnerServiceInfo.class,lastInfo);
-
+    storage.put(OwnerServiceInfo.class, lastInfo);
 
     manager.updateSession(request.getAuthToken().get(), storage);
   }
@@ -1120,14 +1173,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
-
     DeviceServiceInfo devInfo = new DeviceServiceInfo();
     devInfo.setServiceInfo(new ServiceInfo());
 
     To2DeviceInfoReady deviceInfoReady = storage.get(To2DeviceInfoReady.class);
     To2ProveHeaderPayload ownerPayload = storage.get(To2ProveHeaderPayload.class);
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(ownerPayload.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(ownerPayload.getHeader(), OwnershipVoucherHeader.class);
 
     List<Object> workers = getWorkers();
     ServiceInfoModuleList moduleList = new ServiceInfoModuleList();
@@ -1142,7 +1194,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         state.setMtu(ownerInfoReady.getMaxMessageSize());
         module.prepare(state);
         if (state.getName().equals(DevMod.NAME)) {
-          module.send(state,new
+          module.send(state, new
               StandardServiceInfoSendFunction(state.getMtu(),
               devInfo.getServiceInfo()));
           devInfo.setMore(state.isMore());
@@ -1151,7 +1203,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
-    storage.put(ServiceInfoModuleList.class,moduleList);
+    storage.put(ServiceInfoModuleList.class, moduleList);
 
     cipherText = Mapper.INSTANCE.writeValue(devInfo);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
@@ -1174,27 +1226,26 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     for (ServiceInfoModuleState state : moduleList) {
       ServiceInfoModule module = getModule(state.getName());
       for (ServiceInfoKeyValuePair pair : devInfo.getServiceInfo()) {
-        module.receive(state,pair);
+        module.receive(state, pair);
       }
     }
-
 
     ServiceInfo info = new ServiceInfo();
     OwnerServiceInfo ownerInfo = new OwnerServiceInfo();
     ownerInfo.setServiceInfo(info);
     To2DeviceInfoReady devInfoReady = storage.get(To2DeviceInfoReady.class);
     ServiceInfoSendFunction sendFunction =
-        new StandardServiceInfoSendFunction(devInfoReady.getMaxMessageSize(),info);
+        new StandardServiceInfoSendFunction(devInfoReady.getMaxMessageSize(), info);
 
     if (devInfo.isMore()) {
       ownerInfo.setDone(false);
       ownerInfo.setMore(false);
       ownerInfo.setServiceInfo(new ServiceInfo());
-    } else  {
+    } else {
       ownerInfo.setDone(true);
       for (ServiceInfoModuleState state : moduleList) {
         ServiceInfoModule module = getModule(state.getName());
-        module.send(state,sendFunction);
+        module.send(state, sendFunction);
         if (state.isMore()) {
           ownerInfo.setMore(true);
           ownerInfo.setDone(false);
@@ -1209,8 +1260,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     cipherText = Mapper.INSTANCE.writeValue(ownerInfo);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
 
-
-    manager.updateSession(request.getAuthToken().get(),storage);
+    manager.updateSession(request.getAuthToken().get(), storage);
   }
 
   protected void doOwnerInfo(DispatchMessage request, DispatchMessage response)
@@ -1221,7 +1271,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
-
     OwnerServiceInfo ownerInfo = Mapper.INSTANCE.readValue(cipherText,
         OwnerServiceInfo.class);
 
@@ -1230,25 +1279,24 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     for (ServiceInfoModuleState state : moduleList) {
       ServiceInfoModule module = getModule(state.getName());
       for (ServiceInfoKeyValuePair pair : ownerInfo.getServiceInfo()) {
-        module.receive(state,pair);
+        module.receive(state, pair);
       }
     }
-
 
     ServiceInfo info = new ServiceInfo();
     DeviceServiceInfo devInfo = new DeviceServiceInfo();
     devInfo.setServiceInfo(info);
     To2OwnerInfoReady ownerInfoReady = storage.get(To2OwnerInfoReady.class);
     ServiceInfoSendFunction sendFunction =
-        new StandardServiceInfoSendFunction(ownerInfoReady.getMaxMessageSize(),info);
+        new StandardServiceInfoSendFunction(ownerInfoReady.getMaxMessageSize(), info);
 
     if (ownerInfo.isMore()) {
       devInfo.setMore(false);
       devInfo.setServiceInfo(new ServiceInfo());
-    } else  {
+    } else {
       for (ServiceInfoModuleState state : moduleList) {
         ServiceInfoModule module = getModule(state.getName());
-        module.send(state,sendFunction);
+        module.send(state, sendFunction);
         if (state.isMore()) {
           devInfo.setMore(true);
           break;
@@ -1275,7 +1323,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
-
     To2Done done = Mapper.INSTANCE.readValue(cipherText,
         To2Done.class);
 
@@ -1299,7 +1346,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     byte[] cipherText = getCryptoService().decrypt(request.getMessage(), es);
 
-
     To2Done2 done2 = Mapper.INSTANCE.readValue(cipherText,
         To2Done2.class);
 
@@ -1309,6 +1355,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (!setupNonce.equals(done2.getNonce())) {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
+    logger.info("TO2 completed successfully.");
   }
 
 
