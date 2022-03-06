@@ -76,6 +76,7 @@ public class OnDieCertificateManager {
     String hql = "SELECT C.id FROM OnDieCertificateData C ORDER BY C.id";
     Query query = session.createQuery(hql);
     list = query.list();
+    session.close();
     return list;
   }
 
@@ -86,7 +87,7 @@ public class OnDieCertificateManager {
    * and for the debug version: "https://pre-tsci.intel.com/content/csme.zip".
    *
    */
-  public void LoadFromZipFileURL(URL zipFileUrl) throws IOException {
+  public void loadFromZipFileURL(URL zipFileUrl) throws IOException {
     Session session = HibernateUtil.getSessionFactory().openSession();
     Transaction trans = session.beginTransaction();
     Query query = session.createQuery("delete OnDieCertificateData");

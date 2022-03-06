@@ -35,8 +35,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     unknownModules.clear();
     moduleNames.clear();
 
-    ServiceInfo serviceInfo = new ServiceInfo();
-
     //active=true (required)
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_ACTIVE);
@@ -126,9 +124,9 @@ public class StandardDeviceModule implements ServiceInfoModule {
       moduleName = moduleName.substring(0, pos);
     }
     //check if module is in the known list
-    if (moduleNames.indexOf(moduleName) < 0) {
+    if (!moduleNames.contains(moduleName)) {
       //check if the module is in the unknown list
-      if (unknownModules.indexOf(moduleName) < 0) {
+      if (!unknownModules.contains(moduleName)) {
         unknownModules.add(moduleName);
         ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
         kv.setKeyName(moduleName + ":active");

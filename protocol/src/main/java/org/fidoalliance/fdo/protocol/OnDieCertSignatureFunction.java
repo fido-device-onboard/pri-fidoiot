@@ -40,6 +40,7 @@ import java.util.Set;
 public class OnDieCertSignatureFunction implements CertSignatureFunction {
 
   private CertificateFactory certFactory;
+  private LoggerService logger = new LoggerService(OnDieCertSignatureFunction.class);
 
   /**
   * Constructor.
@@ -71,6 +72,7 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
                     return true;
                 }
         } catch (CertificateEncodingException ex) {
+            logger.error("Invalid certificate encoding.");
         }
         return false;
     }
@@ -78,7 +80,6 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
   @Override
   public Certificate[] apply(ManufacturingInfo info) throws IOException {
 
-    final CryptoService cs = Config.getWorker(CryptoService.class);
     List<Certificate> deviceCertChainList = null;
 
     try {
