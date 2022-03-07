@@ -894,7 +894,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CertChain certChain = voucher.getCertChain();
     OwnerPublicKey pubKey = null;
     if (certChain != null) {
-      KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
       pubKey = getCryptoService().encodeKey(
           new AlgorithmFinder().getPublicKeyType(certChain.getChain().get(0).getPublicKey()),
           PublicKeyEncoding.X509,
@@ -1158,7 +1157,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceServiceInfo devInfo = new DeviceServiceInfo();
     devInfo.setServiceInfo(new ServiceInfo());
 
-    To2DeviceInfoReady deviceInfoReady = storage.get(To2DeviceInfoReady.class);
     To2ProveHeaderPayload ownerPayload = storage.get(To2ProveHeaderPayload.class);
     OwnershipVoucherHeader header =
         Mapper.INSTANCE.readValue(ownerPayload.getHeader(), OwnershipVoucherHeader.class);
