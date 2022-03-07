@@ -82,7 +82,7 @@ public class RestApi implements AutoCloseable {
   }
 
   protected String getStringBody() throws Exception {
-    StringBuilder builder = new StringBuilder();
+
     try {
       //we don't close streams per servlet api
       final InputStreamReader reader =

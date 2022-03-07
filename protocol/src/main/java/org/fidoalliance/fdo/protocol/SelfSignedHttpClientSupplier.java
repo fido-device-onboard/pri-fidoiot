@@ -34,6 +34,6 @@ public class SelfSignedHttpClientSupplier implements HttpClientSupplier {
   @Override
   public CloseableHttpClient get() throws IOException {
     return HttpClients.custom().setSSLSocketFactory(
-        socketFactory).build();
+        socketFactory).useSystemProperties().build();
   }
 }

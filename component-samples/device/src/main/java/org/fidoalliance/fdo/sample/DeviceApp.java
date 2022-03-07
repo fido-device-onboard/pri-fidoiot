@@ -94,6 +94,7 @@ public class DeviceApp extends HttpClient {
       if (devCredential == null) {
         generateDiHello();
       } else {
+        logger.info("credentials loaded, GUID is " + devCredential.getGuid());
         generateTo1Hello(devCredential);
       }
     }
@@ -145,8 +146,6 @@ public class DeviceApp extends HttpClient {
 
   private void generateDiHello() throws IOException {
 
-    KeyPair pair = null;
-
     PublicKeyType keyType = config.getKeyType();
     if (!keyType.equals(PublicKeyType.SECP384R1) && !keyType.equals(PublicKeyType.SECP256R1)) {
       throw new InternalServerErrorException(new IllegalArgumentException("invalid key type"));
@@ -163,6 +162,8 @@ public class DeviceApp extends HttpClient {
     httpInst.add(instruction);
 
     setInstructions(httpInst);
+
+    logger.info("DI URL is " + config.getDiUri());
 
     byte[] csr = generateCsr(keyType, keySize);
 
