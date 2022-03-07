@@ -31,7 +31,6 @@ public class StandardVoucherReplacementFunction implements VoucherReplacementFun
     replaceHeader.setVersion(header.getVersion());
     replaceHeader.setCertHash(header.getCertHash());
 
-    //todo: get from database
     replaceHeader.setGuid(Guid.fromRandomUUID());
     replaceHeader.setRendezvousInfo(header.getRendezvousInfo());
 

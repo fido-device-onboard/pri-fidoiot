@@ -13,6 +13,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8040
   https_port: 8041
   http_schemes:

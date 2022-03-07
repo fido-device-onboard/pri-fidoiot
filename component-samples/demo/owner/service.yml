@@ -13,6 +13,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8042
   https_port: 8043
   http_schemes:
@@ -95,6 +96,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
+  - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction 
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule

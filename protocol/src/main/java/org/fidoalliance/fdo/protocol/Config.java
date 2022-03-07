@@ -39,7 +39,6 @@ public class Config {
 
   private static String configPath;
   private static final String CONFIG_FILE = "service.yml";
-  private static boolean autoInjectionEnabled = false;
 
   static {
 
@@ -203,9 +202,7 @@ public class Config {
     return result;
   }
 
-  public static Boolean isAutoInjectionEnabled( ) {
-    return autoInjectionEnabled;
-  }
+
 
   private static String getEnvValue(String value) {
 
@@ -247,10 +244,7 @@ public class Config {
         Object worker = loadObject(name);
         workers.add(worker);
       }
-      if (Arrays.asList(workerNames).
-              contains("org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction")) {
-        autoInjectionEnabled = true;
-      }
+
     }
     ROOT.workers = new String[0];
     workers = Collections.unmodifiableList(workers);

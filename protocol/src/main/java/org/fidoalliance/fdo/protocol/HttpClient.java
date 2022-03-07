@@ -109,12 +109,14 @@ public abstract class HttpClient implements Runnable {
             httpInstruction.getAddress());
 
         if (msgId == MsgType.TO1_HELLO_RV) {
-          if (!httpInstruction.isRendezvousBypass()) {
+          if (httpInstruction.isRendezvousBypass()) {
+            generateBypass();
+          } else {
             logger.info("RVBypass flag not set, Starting TO1.");
           }
           logger.info("TO1 URL is " + uriBuilder.toString());
         } else if (msgId == MsgType.TO2_HELLO_DEVICE) {
-          if (!httpInstruction.isRendezvousBypass()) {
+          if (httpInstruction.isRendezvousBypass()) {
             logger.info("RVBypass flag is set, Skipped T01.");
           }
           logger.info("TO2 URL is " + uriBuilder.toString());
@@ -145,8 +147,14 @@ public abstract class HttpClient implements Runnable {
         try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
           HttpEntity entity = httpResponse.getEntity();
           if (entity != null) {
+            if (entity.getContentLength() == 0 && getRequest().getMsgType() == MsgType.ERROR) {
+              break;
+            }
             setResponse(new DispatchMessage());
             getResponse().setProtocolVersion(getRequest().getProtocolVersion());
+
+            getInstructions().clear();
+            getInstructions().add(httpInstruction);
 
             if (entity.getContentLength() > BufferUtils.getMaxBufferSize()) {
               throw new MessageBodyException("Message too large.");
@@ -165,7 +173,7 @@ public abstract class HttpClient implements Runnable {
             getResponse().setAuthToken(tokenCache);
             logMessage(getResponse());
           } else {
-            throw new IOException(httpResponse.getStatusLine().toString());
+            continue;
           }
         }
         break; // success
@@ -173,10 +181,15 @@ public abstract class HttpClient implements Runnable {
       } catch (Exception e) {
 
         if (getInstructions().size() > 0
-            && index < getInstructions().size()) {
+            && index < getInstructions().size()
+            && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
+            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE)) {
+          logger.info("instruction failed " + e.getMessage());
+          logger.info("moving to next instruction");
           continue;
         }
 
+        logger.info("all instructions exhausted");
         throw new IOException(e);
       }
 
@@ -205,6 +218,7 @@ public abstract class HttpClient implements Runnable {
           DispatchMessage msg = nextMsg.get();
           msg.setExtra(response.getExtra());
           setRequest(msg);
+
         } else {
           finishedOk();
           if (getResponse().getMsgType() == MsgType.TO1_RV_REDIRECT) {
@@ -217,10 +231,10 @@ public abstract class HttpClient implements Runnable {
 
       }
     } catch (Throwable throwable) {
-      if (getResponse() != null) {
+      if (getResponse() != null && getResponse().getMsgType() != MsgType.ERROR) {
         DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, getRequest());
         setRequest(errorMsg);
-        logMessage(errorMsg);
+
         try {
           sendMessage();
         } catch (Throwable e) {

@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.InetAddress;
@@ -12,7 +14,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertPath;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -23,6 +32,7 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKey;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.fidoalliance.fdo.protocol.api.RvInfo;
@@ -76,7 +86,7 @@ public class VoucherUtils {
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(mac.getHashType());
     byte[] headerTag = voucher.getHeader();
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
 
     CryptoService cs = Config.getWorker(CryptoService.class);
     Hash hdrHash = getHeaderHash(hashType, header);
@@ -85,7 +95,7 @@ public class VoucherUtils {
 
     OwnershipVoucherEntries entries = voucher.getEntries();
     if (entries.size() == 0) {
-      prevHash = getEntryHash(mac,headerTag);
+      prevHash = getEntryHash(mac, headerTag);
       prevOwnerPubKey = header.getPublicKey();
     } else {
       CoseSign1 entry = entries.getLast();
@@ -201,7 +211,7 @@ public class VoucherUtils {
    */
   public static Guid getGuid(OwnershipVoucher voucher) throws IOException {
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
 
     return header.getGuid();
   }
@@ -218,7 +228,7 @@ public class VoucherUtils {
     OwnershipVoucherEntries entries = voucher.getEntries();
     if (entries.size() == 0) {
       OwnershipVoucherHeader header =
-          Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
+          Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
       return header.getPublicKey();
     }
     CoseSign1 entry = entries.getLast();
@@ -238,7 +248,7 @@ public class VoucherUtils {
    * @throws IOException An error occurred.
    */
   public static OwnershipVoucherHeader getHeader(OwnershipVoucher voucher) throws IOException {
-    return Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
+    return Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
   }
 
 
@@ -268,7 +278,8 @@ public class VoucherUtils {
 
   /**
    * Gets the first Entry Hash.
-   * @param hmac The hmac of the voucher.
+   *
+   * @param hmac     The hmac of the voucher.
    * @param ovhBytes The ownership voucher header bytes.
    * @return The hash (HMAC|OVHEADER)
    * @throws IOException An Error occured.
@@ -287,4 +298,85 @@ public class VoucherUtils {
   }
 
 
+  /**
+   * Verifies an ownership voucher.
+   *
+   * @param voucher The voucher to verify.
+   */
+  public static void verifyVoucher(OwnershipVoucher voucher) throws IOException {
+
+    CryptoService cs = Config.getWorker(CryptoService.class);
+    OwnershipVoucherHeader header = Mapper.INSTANCE.readValue(voucher.getHeader(),
+        OwnershipVoucherHeader.class);
+
+    if (voucher.getCertChain() != null) {
+      List<Certificate> certs = voucher.getCertChain().getChain();
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      try {
+        for (Certificate cert : certs) {
+          out.write(cert.getEncoded());
+        }
+      } catch (CertificateEncodingException e) {
+        e.printStackTrace();
+      }
+
+      Hash hash1 = header.getCertHash();
+      Hash hash2 = cs.hash(hash1.getHashType(), out.toByteArray());
+      if (!hash1.equals(hash2)) {
+        throw new InvalidOwnershipVoucherException("cert hash does not match.");
+      }
+      verifyCertChain(certs);
+    }
+  }
+
+  /**
+   * Gets the alias of the public key of a voucher.
+   * @param voucher An ownership voucher.
+   * @return The alias name.
+   * @throws IOException An error occurred.
+   */
+  public static String getPublicKeyAlias(OwnershipVoucher voucher) throws IOException {
+    OwnerPublicKey ownerKey = getLastOwner(voucher);
+
+    CryptoService cs = Config.getWorker(CryptoService.class);
+    PublicKey publicKey = cs.decodeKey(ownerKey);
+    return KeyResolver.getAlias(ownerKey.getType(),
+        new AlgorithmFinder().getKeySizeType(publicKey));
+  }
+
+  private static CertPath getCertPath(List<Certificate> chain) throws IOException {
+
+    final CertificateFactory cf;
+    try {
+      cf = CertificateFactory
+          .getInstance("X.509");
+    } catch (CertificateException e) {
+      throw new InternalServerErrorException(e);
+    }
+
+    try {
+      return cf.generateCertPath(chain);
+    } catch (CertificateException e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+
+  private static void verifyCertChain(List<Certificate> certChain) throws IOException {
+    X509Certificate leafCertificate = null;
+
+    final CertPath cp = getCertPath(certChain);
+    leafCertificate = (X509Certificate) cp.getCertificates().get(0);
+
+    verifyLeafCertPrivileges(leafCertificate);
+  }
+
+  private static void verifyLeafCertPrivileges(X509Certificate cert) throws IOException {
+    if (cert.getKeyUsage() != null) {
+      if (!(cert.getKeyUsage()[0])) {
+        throw new InvalidOwnershipVoucherException(
+            "Digital signature is not allowed for the device certificate");
+      }
+    }
+  }
 }

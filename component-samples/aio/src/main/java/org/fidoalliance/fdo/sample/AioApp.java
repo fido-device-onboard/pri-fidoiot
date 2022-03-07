@@ -10,12 +10,12 @@ public class AioApp {
 
   static LoggerService logger = new LoggerService(AioApp.class);
   public static void main(String args[]) {
-    HibernateUtil.getSessionFactory();
-
-    if (Config.isAutoInjectionEnabled()) {
-      logger.info("Voucher auto-injection enabled.");
+    try {
+      HibernateUtil.getSessionFactory();
+      Config.getWorker(HttpServer.class).run();
+    } catch (Throwable throwable) {
+      HibernateUtil.shutdown();
+      logger.error(throwable.getMessage());
     }
-
-    Config.getWorker(HttpServer.class).run();
   }
 }

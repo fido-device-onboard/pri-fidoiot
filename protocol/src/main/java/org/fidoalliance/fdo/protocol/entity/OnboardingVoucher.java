@@ -25,6 +25,10 @@ public class OnboardingVoucher {
   @Column(name = "data", nullable = false)
   private byte[] data;
 
+  @Lob
+  @Column(name = "replacement")
+  private byte[] replacement;
+
 
   @Column(name = "created_on", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -77,5 +81,13 @@ public class OnboardingVoucher {
 
   public void setTo0Expiry(Date to0Expiry) {
     this.to0Expiry = to0Expiry;
+  }
+
+  public byte[] getReplacement() {
+    return replacement;
+  }
+
+  public void setReplacement(byte[] replacement) {
+    this.replacement = replacement;
   }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -160,8 +161,11 @@ public class StandardHttpServer implements HttpServer {
 
   private HttpServerConfig config = Config.getConfig(HttpRoot.class).getRoot();
 
-  protected void internalRun() {
+  @Override
+  public void run() {
+
     Tomcat tomcat = new Tomcat();
+
 
     tomcat.setBaseDir(config.getBasePath());
 
@@ -245,7 +249,6 @@ public class StandardHttpServer implements HttpServer {
           logger.error(e.getMessage());
         }
 
-
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
         httpsConnector.setProperty("SSLEnabled", "true");
@@ -280,20 +283,9 @@ public class StandardHttpServer implements HttpServer {
       tomcat.start();
       logger.info("Started " + serviceName + " Service.");
     } catch (LifecycleException e) {
-      logger.warn("Failed to start " +  serviceName + " Service.");
+      logger.warn("Failed to start " + serviceName + " Service.");
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public void run() {
-
-    try {
-      internalRun();
-    } catch (Throwable t) {
-      logger.warn(t.getMessage());
-    }
-
   }
 
   @Override

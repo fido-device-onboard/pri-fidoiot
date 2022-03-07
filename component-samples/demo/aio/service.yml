@@ -19,6 +19,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8080
   https_port: 8443
   http_schemes:
@@ -102,11 +103,11 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
-  #- org.fidoalliance.fdo.protocol.ReuseVoucherReplacementFunction
+  #- org.fidoalliance.fdo.protocol.db.ReuseVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
-  - org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
-  #- org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
+  #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+  - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
@@ -124,6 +125,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
   #- org.fidoalliance.fdo.protocol.db.ReuseVoucherReplacementFunction 
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
+  - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction 
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
