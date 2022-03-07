@@ -269,7 +269,6 @@ public class InteropVoucher extends RestApi {
     entryPayload.setOwnerPublicKey(nextOwnerKey);
     byte[] payload = Mapper.INSTANCE.writeValue(entryPayload);
 
-    PublicKey publicKey = cs.decodeKey(prevOwnerPubKey);
     try {
       CoseSign1 nextEntry = cs.sign(payload, signingKey, prevOwnerPubKey);
       entries.add(nextEntry);

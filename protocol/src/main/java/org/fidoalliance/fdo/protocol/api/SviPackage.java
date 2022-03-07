@@ -1,12 +1,15 @@
 package org.fidoalliance.fdo.protocol.api;
 
 
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.db.FdoSysInstruction;
 import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.hibernate.engine.jdbc.ClobProxy;
 
 public class SviPackage extends RestApi {
+
+  LoggerService logger =  new LoggerService(SviPackage.class);
 
   @Override
   public void doGet() throws Exception {
@@ -25,8 +28,14 @@ public class SviPackage extends RestApi {
   public void doPost() throws Exception {
     String body = getStringBody();
     getTransaction();
-
-    FdoSysInstruction[] instructions = Mapper.INSTANCE.readJsonValue(body, FdoSysInstruction[].class);
+    try {
+      FdoSysInstruction[] instructions = Mapper.INSTANCE.readJsonValue(body, FdoSysInstruction[].class);
+      if (instructions.length <= 0) {
+        logger.warn("Empty SVI instruction.");
+      }
+    } catch (Exception e) {
+      logger.error("Received invalid SVI instruction.");
+    }
 
     SystemPackage systemPackage =
         getSession().find(SystemPackage.class,Long.valueOf(1));

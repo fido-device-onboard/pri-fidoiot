@@ -543,7 +543,6 @@ public class StandardCryptoService implements CryptoService {
   @Override
   public KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party,
       OwnerPublicKey ownerKey) throws IOException {
-    KexMessage kexMessage = new KexMessage();
 
     switch (kexSuiteName) {
       case "ECDH256":
