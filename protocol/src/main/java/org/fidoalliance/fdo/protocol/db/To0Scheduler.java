@@ -59,7 +59,18 @@ public class To0Scheduler {
     }
 
     public int getThreadCount() {
-      return Integer.parseInt(Config.resolve(threadCount));
+      int threadCountValue;
+      try {
+        threadCountValue = Integer.parseInt(Config.resolve(threadCount));
+        if(threadCountValue <= 0) {
+          logger.error("Received threadCount less than 1. Defaulting the thread-count to 1.");
+          threadCountValue = 1;
+        }
+      } catch (NumberFormatException e) {
+        threadCountValue = 5;
+        logger.error("Invalid threadCount. Defaulting the thread-count to 5.");
+      }
+      return threadCountValue;
     }
   }
 
@@ -120,13 +131,14 @@ public class To0Scheduler {
     executor =
         (ThreadPoolExecutor) Executors.newFixedThreadPool(config.getThreadCount());
 
+    Long interval = config.getInterval();
     scheduler.scheduleWithFixedDelay(new Runnable() {
       @Override
       public void run() {
         onInterval();
       }
-    },config.getInterval(),config.getInterval(),TimeUnit.SECONDS);
+    }, interval, interval,TimeUnit.SECONDS);
 
-    logger.info("To0Scheduler will run every" + config.getInterval() + " seconds");
+    logger.info("To0Scheduler will run every " + interval + " seconds");
   }
 }

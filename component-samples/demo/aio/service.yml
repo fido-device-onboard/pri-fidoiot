@@ -30,8 +30,6 @@ http-server:
     store-type: PKCS12
     password: $(ssl_password)
     alias: ssl
-    password: $(ssl_password)
-    alias: ssl
   auth:
     method: DIGEST
     role: api

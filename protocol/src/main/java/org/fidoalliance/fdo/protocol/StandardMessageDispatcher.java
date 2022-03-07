@@ -1318,6 +1318,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2Done2 done2 = storage.get(To2Done2.class);
     cipherText = Mapper.INSTANCE.writeValue(done2);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
+
+
   }
 
   protected void doTo2Done2(DispatchMessage request, DispatchMessage response)
