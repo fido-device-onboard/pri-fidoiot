@@ -78,7 +78,7 @@ sudo docker system prune -a
 ## Start Podman
 * Use the following command to start the podman container.
 ```
-sudo podman-compose up -d --build
+podman-compose up -d --build
 ```
 
 ## Stop Podman
