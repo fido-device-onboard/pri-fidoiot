@@ -236,7 +236,6 @@ public class VoucherUtils {
     OwnershipVoucherEntryPayload entryPayload =
         Mapper.INSTANCE.readValue(entry.getPayload(), OwnershipVoucherEntryPayload.class);
 
-    byte[] prevBytes = Mapper.INSTANCE.writeValue(entry);
     return entryPayload.getOwnerPublicKey();
   }
 

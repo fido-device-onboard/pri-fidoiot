@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -37,6 +38,7 @@ import org.fidoalliance.fdo.protocol.dispatch.SessionManager;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherStorageFunction;
+import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.CertChain;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.CoseProtectedHeader;
@@ -638,8 +640,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Hash hash = cs.hash(hashType, request.getMessage());
     hdrPayload.setHelloHash(hash);
 
-    //todo: get from database
-    hdrPayload.setMaxMessageSize(0);
+    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+    if (onboardConfig.getMaxMessageSize() != null) {
+      int maxMessageSize = onboardConfig.getMaxMessageSize();
+      hdrPayload.setMaxMessageSize(maxMessageSize);
+    } else {
+      hdrPayload.setMaxMessageSize(0);
+    }
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
     Nonce deviceNonce = Nonce.fromRandomUUID();
@@ -896,7 +903,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     CertChain certChain = voucher.getCertChain();
     OwnerPublicKey pubKey = null;
     if (certChain != null) {
-      KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
       pubKey = getCryptoService().encodeKey(
           new AlgorithmFinder().getPublicKeyType(certChain.getChain().get(0).getPublicKey()),
           PublicKeyEncoding.X509,
@@ -1169,7 +1175,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceServiceInfo devInfo = new DeviceServiceInfo();
     devInfo.setServiceInfo(new ServiceInfo());
 
-    To2DeviceInfoReady deviceInfoReady = storage.get(To2DeviceInfoReady.class);
     To2ProveHeaderPayload ownerPayload = storage.get(To2ProveHeaderPayload.class);
     OwnershipVoucherHeader header =
         Mapper.INSTANCE.readValue(ownerPayload.getHeader(), OwnershipVoucherHeader.class);

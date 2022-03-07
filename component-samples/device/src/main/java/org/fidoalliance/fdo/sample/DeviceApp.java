@@ -153,8 +153,6 @@ public class DeviceApp extends HttpClient {
 
   private void generateDiHello() throws IOException {
 
-    KeyPair pair = null;
-
     PublicKeyType keyType = config.getKeyType();
     if (!keyType.equals(PublicKeyType.SECP384R1) && !keyType.equals(PublicKeyType.SECP256R1)) {
       throw new InternalServerErrorException(new IllegalArgumentException("invalid key type"));
