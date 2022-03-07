@@ -6,6 +6,8 @@ package org.fidoalliance.fdo.protocol;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
@@ -284,11 +286,13 @@ public class HttpUtils {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     for (HttpInstruction instruction : h1) {
-      list1.add(instruction.getAddress());
+      URI uri = URI.create(instruction.getAddress());
+      list1.add(uri.getHost());
     }
 
     for (HttpInstruction instruction : h2) {
-      list2.add(instruction.getAddress());
+      URI uri = URI.create(instruction.getAddress());
+      list2.add(uri.getHost());
     }
 
     Set<String> result = list1.stream()
