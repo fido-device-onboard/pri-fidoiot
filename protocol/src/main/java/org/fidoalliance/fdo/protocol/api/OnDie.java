@@ -40,6 +40,6 @@ public class OnDie extends RestApi {
             Config.getWorker(OnDieCertificateManager.class);
 
     URL zipUrl = new URL(zipFilePathname);
-    certManager.LoadFromZipFileURL(zipUrl);
+    certManager.loadFromZipFileURL(zipUrl);
   }
 }

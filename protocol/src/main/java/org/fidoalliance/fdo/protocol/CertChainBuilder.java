@@ -103,8 +103,6 @@ public class CertChainBuilder {
   public Certificate[] build() throws IOException {
 
     final Instant now = Instant.now();
-    final Date notBefore = Date.from(now);
-    final Date notAfter = Date.from(now.plus(Duration.ofDays(validityDays)));
 
     X500Name issuer = subject;
     if (issuerChain.length > 0) {
