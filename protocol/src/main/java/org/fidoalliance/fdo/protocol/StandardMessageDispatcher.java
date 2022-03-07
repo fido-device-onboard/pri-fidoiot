@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.AcceptOwnerFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
@@ -36,6 +37,7 @@ import org.fidoalliance.fdo.protocol.dispatch.SessionManager;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherStorageFunction;
+import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.CertChain;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.CoseProtectedHeader;
@@ -637,8 +639,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Hash hash = cs.hash(hashType, request.getMessage());
     hdrPayload.setHelloHash(hash);
 
-    //todo: get from database
-    hdrPayload.setMaxMessageSize(0);
+    OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+    if (onboardConfig.getMaxMessageSize() != null) {
+      int maxMessageSize = onboardConfig.getMaxMessageSize();
+      hdrPayload.setMaxMessageSize(maxMessageSize);
+    } else {
+      hdrPayload.setMaxMessageSize(0);
+    }
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
     Nonce deviceNonce = Nonce.fromRandomUUID();
