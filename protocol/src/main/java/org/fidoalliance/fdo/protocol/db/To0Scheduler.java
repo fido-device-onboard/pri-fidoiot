@@ -55,16 +55,27 @@ public class To0Scheduler {
     private String interval;
 
     public long getInterval() {
-      return Long.parseLong(Config.resolve(interval));
+      Long intervalValue;
+      try {
+        intervalValue = Long.parseLong(Config.resolve(interval));
+        if(intervalValue <= 60) {
+          logger.error("Received intervalValue less than 60. Defaulting intervalValue to 60.");
+          intervalValue = Long.valueOf(60);
+        }
+      } catch (NumberFormatException e) {
+        intervalValue = Long.valueOf(120);
+        logger.error("Invalid intervalValue. Defaulting intervalValue to 120.");
+      }
+      return intervalValue;
     }
 
     public int getThreadCount() {
       int threadCountValue;
       try {
         threadCountValue = Integer.parseInt(Config.resolve(threadCount));
-        if(threadCountValue <= 0) {
-          logger.error("Received threadCount less than 1. Defaulting the thread-count to 1.");
-          threadCountValue = 1;
+        if(threadCountValue <= 5) {
+          logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
+          threadCountValue = 5;
         }
       } catch (NumberFormatException e) {
         threadCountValue = 5;
