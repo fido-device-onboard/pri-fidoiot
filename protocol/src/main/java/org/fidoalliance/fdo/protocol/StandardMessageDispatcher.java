@@ -480,6 +480,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(to0d.getVoucher());
     boolean verified = cs.verify(sign1, ownerPublicKey);
     if (!verified) {
+      logger.error("Unable to verify Owner signature.");
       throw new InvalidOwnerSignException();
     }
 
