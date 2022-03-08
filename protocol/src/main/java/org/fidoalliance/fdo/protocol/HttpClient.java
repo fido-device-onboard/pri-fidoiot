@@ -99,7 +99,7 @@ public abstract class HttpClient implements Runnable {
     int index = 0;
     URI requestUri = null;
     int delay = 0;
-    for (; ; ) {
+    while (getInstructions().size() > 0) {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
@@ -111,15 +111,21 @@ public abstract class HttpClient implements Runnable {
         if (msgId == MsgType.TO1_HELLO_RV) {
           if (httpInstruction.isRendezvousBypass()) {
             generateBypass();
+            //this will change bypass
+            msgId = MsgType.TO2_HELLO_DEVICE;
           } else {
             logger.info("RVBypass flag not set, Starting TO1.");
+            logger.info("TO1 URL is " + uriBuilder.toString());
           }
-          logger.info("TO1 URL is " + uriBuilder.toString());
-        } else if (msgId == MsgType.TO2_HELLO_DEVICE) {
+
+        }
+        if (msgId == MsgType.TO2_HELLO_DEVICE) {
           if (httpInstruction.isRendezvousBypass()) {
             logger.info("RVBypass flag is set, Skipped T01.");
           }
           logger.info("TO2 URL is " + uriBuilder.toString());
+        } else if (msgId == MsgType.TO0_HELLO) {
+          logger.info("TO0 URL is " + uriBuilder.toString());
         }
 
         List<String> segments = new ArrayList<>();
@@ -207,7 +213,7 @@ public abstract class HttpClient implements Runnable {
 
       initializeSession();
       generateHello();
-      for (; ; ) {
+      while (getInstructions().size() > 0){
 
         sendMessage();
 

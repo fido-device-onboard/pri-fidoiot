@@ -68,16 +68,13 @@ public class DeviceApp extends HttpClient {
   @Override
   public void run() {
 
-    /**
-     *
-     * TODO: if owner sends unsupported module message return 255
-     */
-
-
-
-    logger.info("Starting Fdo Device");
-    super.run();
-    logger.info("Starting Fdo Completed");
+    try {
+      logger.info("Starting Fdo Device");
+      super.run();
+      logger.info("Starting Fdo Completed");
+    } catch (Throwable throwable) {
+      logger.error(throwable);
+    }
   }
 
   @Override
@@ -133,15 +130,12 @@ public class DeviceApp extends HttpClient {
 
     helloDevice.setSigInfo(getSignInfo(config.getKeyType()));
 
-
     getRequest().setMsgType(MsgType.TO2_HELLO_DEVICE);
     getRequest().setMessage(Mapper.INSTANCE.writeValue(helloDevice));
-
 
     SimpleStorage storage = getRequest().getExtra();
     storage.put(byte[].class, getRequest().getMessage());
     storage.put(Nonce.class, nonceTO2ProveOv);
-
 
     if (tod1 != null) {
       To1dPayload to1dPayload = Mapper.INSTANCE.readValue(tod1.getPayload(), To1dPayload.class);

@@ -54,7 +54,7 @@ manufacturer:
      dns: localhost
      ip: 127.0.0.1
      protocol: 1
-     ownerport: 8080
+     ownerport: 8443
      devport: 8080
 
 owner:
@@ -76,6 +76,8 @@ h2-database:
    tcp-server: 
      - "-ifNotExists"
    web-server:
+     - "-webPort"
+     - "8082"
    # - "-webAllowOthers"
    # - "-webExternalNames"
    # - "serverfqdn"
@@ -114,9 +116,11 @@ workers:
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
-  - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
+  - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction
+  #- org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
+  - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier

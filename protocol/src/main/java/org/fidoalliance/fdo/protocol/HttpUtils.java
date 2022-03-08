@@ -99,11 +99,6 @@ public class HttpUtils {
       Integer devPort = Integer.valueOf(80);
       Integer ownerPort = Integer.valueOf(443);
       List<String> devSchemes =  new ArrayList<>();
-      List<String> ownerSchemes = new ArrayList<>();
-      ownerSchemes.add(HTTPS_SCHEME);
-      ownerSchemes.add(HTTP_SCHEME);
-
-
 
       long delaySec = 0;
       boolean ownerOnly = false;
@@ -191,15 +186,17 @@ public class HttpUtils {
         schemes = devSchemes;
         port = devPort;
       } else {
-        schemes = ownerSchemes;
+        schemes = Config.getWorker(OwnerSchemesSupplier.class).get();
+
+
         port = ownerPort;
       }
       for (String scheme : schemes) {
         int assignedPort = 0;
         if (port == null) {
-          if (scheme.equals("http")) {
+          if (scheme.equals(HTTP_SCHEME)) {
             assignedPort = Integer.valueOf(80);
-          } else if (scheme.equals("https")) {
+          } else if (scheme.equals(HTTPS_SCHEME)) {
             assignedPort = Integer.valueOf(443);
           }
         } else {
@@ -242,9 +239,9 @@ public class HttpUtils {
     for (To2AddressEntry entry : entries) {
 
       if (entry.getProtocol() == TransportProtocol.PROT_HTTP) {
-        schemes.add("http");
+        schemes.add(HTTP_SCHEME);
       } else if (entry.getProtocol() == TransportProtocol.PROT_HTTPS) {
-        schemes.add("https");
+        schemes.add(HTTPS_SCHEME);
       } else {
         continue;
       }
@@ -282,6 +279,12 @@ public class HttpUtils {
     return list;
   }
 
+  /**
+   * See if two lists of HTTP instructions have the same host in common.
+   * @param h1 List of Rv Instructions.
+   * @param h2 List of To0d HTTP instructions.
+   * @return true if the owner and RV hosts are the same.
+   */
   public static boolean containsAddress(List<HttpInstruction> h1, List<HttpInstruction> h2) {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();

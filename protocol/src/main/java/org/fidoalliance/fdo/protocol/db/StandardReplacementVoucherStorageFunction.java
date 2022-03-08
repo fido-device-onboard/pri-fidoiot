@@ -20,9 +20,8 @@ public class StandardReplacementVoucherStorageFunction implements
   public String apply(OwnershipVoucher voucher1, OwnershipVoucher voucher2) throws IOException {
 
     final Session session = HibernateUtil.getSessionFactory().openSession();
-    Transaction trans = null;
     try {
-      trans = session.beginTransaction();
+      Transaction trans = session.beginTransaction();
       OwnershipVoucherHeader header1 = Mapper.INSTANCE.readValue(voucher1.getHeader(),
           OwnershipVoucherHeader.class);
       OwnershipVoucherHeader header2 = Mapper.INSTANCE.readValue(voucher2.getHeader(),
@@ -38,6 +37,7 @@ public class StandardReplacementVoucherStorageFunction implements
         }
         onboardingVoucher.setTo2CompletedOn( new Date(System.currentTimeMillis()));
         session.update(onboardingVoucher);
+        trans.commit();
       }
       return header2.getGuid().toString();
     } finally {
