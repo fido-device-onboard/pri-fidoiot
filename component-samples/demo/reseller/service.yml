@@ -13,6 +13,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8070
   https_port: 8072
   http_schemes:
@@ -38,12 +39,6 @@ owner:
      path: owner.p12
      store-type: PKCS12
      password: $(encrypt_password)
-   replacement:
-     keystore: 
-       path: replacement.p12
-       store-type: PKCS12
-       password: $(encrypt_password)
-
 
 h2-database:
    tcp-server:

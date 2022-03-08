@@ -7,6 +7,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
+import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.entity.ManufacturedVoucher;
 import org.fidoalliance.fdo.protocol.message.Guid;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
@@ -78,6 +79,7 @@ public class DeviceInfo extends RestApi {
         obj.put("serial_no", voucher.getSerialNo());
         obj.put("timestamp", createdOn.toString());
         obj.put("uuid", header.getGuid().toString());
+        obj.put("alias", VoucherUtils.getPublicKeyAlias(ov));
         rootNode.add(obj);
       }
     }

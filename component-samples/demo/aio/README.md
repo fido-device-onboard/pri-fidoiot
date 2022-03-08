@@ -141,6 +141,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/ondie | Serves the stored certs & crls files | || Ondie certs & crl files |
 | POST /api/v1/ondie | To download onDie certs and crls zip file url. | | text/plain | Ondie certs/crls URL |
 | GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?alias=SECP256R1 | Returns the owner certificate of the given alias type | Path - alias | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?alias=SECP256R1' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?uuid=uuid | Returns the owner alias type for the given voucher| Path - uuid | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?uuid=cc60f0aa-56d0-492e-8c8d-9a1fe55cb60 --header 'Content-Type: text/plain' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
 | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
@@ -184,3 +186,12 @@ AIO can generate its own certificate and if you want to override the default cer
 - Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
 
 - Update the SSL keystore password & subject_names in `service.yml` file.
+
+# Configuring AIO workers
+
+|     worker                                              |             Description                                  |
+| -------------------------------------------------------:|:--------------------------------------------------------:|
+| org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier   | Tells owner to use HTTP instead of HTTPS for TO0 protocol|
+| org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier | Tells owner to use HTTPS for TO0 protocol |
+| org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction | Stores voucher in the database without performing To0 protocol |
+| org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction | Automatically extends the voucher to the owner and performs To0 protocol |

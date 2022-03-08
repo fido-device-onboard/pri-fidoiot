@@ -48,8 +48,9 @@ public class AioRvInfo extends RestApi {
         rvi = rvi.append("  - - 12\n    - 1\n");
       }
 
-      String port = Config.getWorker(HttpServer.class).getPort();
-      rvi = rvi.append(String.format("  - - 3\n    - %s\n  - - 4\n    - %s", port, port));
+      String port = Config.getWorker(HttpServer.class).getHttpPort();
+      String securePort = Config.getWorker(HttpServer.class).getHttpsPort();
+      rvi = rvi.append(String.format("  - - 3\n    - %s\n  - - 4\n    - %s", port, securePort));
 
       // Creating RendezvousInfo object from yaml structure.
       RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi.toString(), RendezvousInfo.class);

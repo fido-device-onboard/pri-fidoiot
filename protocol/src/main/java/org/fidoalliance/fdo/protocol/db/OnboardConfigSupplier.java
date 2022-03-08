@@ -40,7 +40,7 @@ public class OnboardConfigSupplier
             + "  - %s\n"
             + "  - 3\n";
 
-        final String defaultPort = Config.getWorker(HttpServer.class).getPort();
+        final String defaultPort = Config.getWorker(HttpServer.class).getHttpPort();
         final String rviString = String.format(defaultBob, defaultPort);
         final To2AddressEntries entries = Mapper.INSTANCE.readValue(rviString, To2AddressEntries.class);
         onboardConfig.setRvBlob(Mapper.INSTANCE.writeValue(entries));

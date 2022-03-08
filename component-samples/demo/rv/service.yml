@@ -13,6 +13,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8040
   https_port: 8041
   http_schemes:
@@ -82,7 +83,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardRvBlobStorageFunction
-  - org.fidoalliance.fdo.protocol.TrustedRendezvousAcceptFunction
+  - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction
 
 
 

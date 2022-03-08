@@ -8,11 +8,15 @@ import java.util.Arrays;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemFormatter;
 import org.fidoalliance.fdo.protocol.PemLoader;
+import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import java.io.IOException;
+import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
+import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
 
 /***
@@ -43,6 +47,22 @@ public class CertificateApi extends RestApi {
     // Collect parameter 'filename' from HttpRequest
     String fileName = getParamByValue("filename");
     String alias = getParamByValue("alias");
+    String uuid = getParamByValue("uuid");
+
+    if (uuid != null) {
+
+      OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class, uuid);
+
+      if (onboardingVoucher != null) {
+        OwnershipVoucher voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(),
+            OwnershipVoucher.class);
+        String keyAlias = VoucherUtils.getPublicKeyAlias(voucher);
+
+        getResponse().getWriter().print("[\"alias\":\"" + keyAlias + "\"]");
+      }
+      return;
+    }
+
     if (alias != null) {
 
       KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
