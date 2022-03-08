@@ -1048,7 +1048,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (credReuse) {
       byte[] rv1 = Mapper.INSTANCE.writeValue(oldHeader.getRendezvousInfo());
       byte[] rv2 = Mapper.INSTANCE.writeValue(newHeader.getRendezvousInfo());
-      if (!Arrays.equals(rv1, rv1)) {
+      if (!Arrays.equals(rv1, rv2)) {
         credReuse = false;
       }
     }
