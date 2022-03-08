@@ -60,6 +60,18 @@ All the runtime configurations for the services are specified in four files: `se
 
 `WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
 
+# Configuring Owner Proxy Settings
+
+To configure Owner proxy resolution, add the following properties to `demo/owner/service.env` file:
+
+```
+http_host=<value>
+https_host=<value>
+http_port=<value>
+https_port=<value>
+no_proxy=<value>
+```
+
 # Running FDO Owner Service
 
 FDO Owner Service can be executed as a standalone service as well as a docker service. At the
