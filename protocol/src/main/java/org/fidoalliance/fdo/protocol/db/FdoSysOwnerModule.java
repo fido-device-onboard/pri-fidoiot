@@ -84,6 +84,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           extra.getQueue().add(kv);
           onStatusCb(state, extra, status);
           if (status.isCompleted()) {
+            // check for error
+            if (status.getRetCode() != 0) {
+              throw new InternalServerErrorException("Exec_cb status returned failure.");
+            }
             extra.setWaiting(false);
             extra.getQueue().addAll(extra.getWaitQueue());
             extra.setWaitQueue(new ServiceInfoQueue());
