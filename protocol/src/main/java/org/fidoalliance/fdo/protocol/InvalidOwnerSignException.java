@@ -2,7 +2,7 @@ package org.fidoalliance.fdo.protocol;
 
 import org.fidoalliance.fdo.protocol.message.ErrorCode;
 
-public class InvalidOwnerSignException extends DispatchException{
+public class InvalidOwnerSignException extends DispatchException {
 
   @Override
   public ErrorCode getErrorCode() {

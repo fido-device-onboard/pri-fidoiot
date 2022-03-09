@@ -68,7 +68,5 @@ public class OwnerVoucher extends RestApi {
     } else {
       throw new NotFoundException(path);
     }
-
-
   }
 }

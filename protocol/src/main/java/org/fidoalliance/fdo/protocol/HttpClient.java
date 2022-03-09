@@ -2,9 +2,11 @@ package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -45,7 +47,7 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected boolean isRepeatable(String uri) {
-    if (uri.endsWith("/30")) {
+    if (uri.endsWith("/30") || uri.endsWith("/20")) {
       return true;
     }
     return false;
@@ -68,6 +70,10 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected abstract void generateHello() throws IOException;
+
+  protected void generateBypass() throws IOException {
+
+  }
 
   protected void initializeSession() throws IOException {
     setRequest(new DispatchMessage());
@@ -93,7 +99,7 @@ public abstract class HttpClient implements Runnable {
     int index = 0;
     URI requestUri = null;
     int delay = 0;
-    for (; ; ) {
+    while (getInstructions().size() > 0) {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
@@ -103,15 +109,23 @@ public abstract class HttpClient implements Runnable {
             httpInstruction.getAddress());
 
         if (msgId == MsgType.TO1_HELLO_RV) {
-          if (!httpInstruction.isRendezvousBypass()) {
+          if (httpInstruction.isRendezvousBypass()) {
+            generateBypass();
+            //this will change bypass
+            msgId = MsgType.TO2_HELLO_DEVICE;
+          } else {
             logger.info("RVBypass flag not set, Starting TO1.");
+            logger.info("TO1 URL is " + uriBuilder.toString());
           }
-          logger.info("TO1 URL is " + uriBuilder.toString());
-        } else if (msgId == MsgType.TO2_HELLO_DEVICE) {
-          if (!httpInstruction.isRendezvousBypass()) {
+
+        }
+        if (msgId == MsgType.TO2_HELLO_DEVICE) {
+          if (httpInstruction.isRendezvousBypass()) {
             logger.info("RVBypass flag is set, Skipped T01.");
           }
           logger.info("TO2 URL is " + uriBuilder.toString());
+        } else if (msgId == MsgType.TO0_HELLO) {
+          logger.info("TO0 URL is " + uriBuilder.toString());
         }
 
         List<String> segments = new ArrayList<>();
@@ -121,7 +135,6 @@ public abstract class HttpClient implements Runnable {
         segments.add(HttpUtils.MSG_COMPONENT);
         segments.add(Integer.toString(msgId.toInteger()));
         uriBuilder.setPathSegments(segments);
-
 
         requestUri = uriBuilder.build();
 
@@ -135,11 +148,19 @@ public abstract class HttpClient implements Runnable {
           httpRequest.addHeader(HttpUtils.HTTP_AUTHORIZATION, tokenCache);
         }
 
+        logMessage(getRequest());
+
         try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
           HttpEntity entity = httpResponse.getEntity();
           if (entity != null) {
+            if (entity.getContentLength() == 0 && getRequest().getMsgType() == MsgType.ERROR) {
+              break;
+            }
             setResponse(new DispatchMessage());
             getResponse().setProtocolVersion(getRequest().getProtocolVersion());
+
+            getInstructions().clear();
+            getInstructions().add(httpInstruction);
 
             if (entity.getContentLength() > BufferUtils.getMaxBufferSize()) {
               throw new MessageBodyException("Message too large.");
@@ -156,25 +177,25 @@ public abstract class HttpClient implements Runnable {
               tokenCache = httpResponse.getFirstHeader(HttpUtils.HTTP_AUTHORIZATION).getValue();
             }
             getResponse().setAuthToken(tokenCache);
+            logMessage(getResponse());
           } else {
-            throw new IOException(httpResponse.getStatusLine().toString());
+            continue;
           }
         }
         break; // success
 
       } catch (Exception e) {
-        if (getInstructions().size() > 1
-            && index < getInstructions().size()) {
+
+        if (getInstructions().size() > 0
+            && index < getInstructions().size()
+            && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
+            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE)) {
+          logger.info("instruction failed " + e.getMessage());
+          logger.info("moving to next instruction");
           continue;
         }
-        /*if (isRepeatable(requestUri.getPath())) {
-          try {
-            Thread.sleep(Duration.ofSeconds(delay).toMillis());
-          } catch (InterruptedException ex) {
-            throw new IOException(ex);
-          }
-          index =0;
-        }*/
+
+        logger.info("all instructions exhausted");
         throw new IOException(e);
       }
 
@@ -192,13 +213,10 @@ public abstract class HttpClient implements Runnable {
 
       initializeSession();
       generateHello();
-      for (; ; ) {
-
-        logMessage(getRequest());
+      while (getInstructions().size() > 0){
 
         sendMessage();
 
-        logMessage(getResponse());
         getResponse().setExtra(getRequest().getExtra());
 
         Optional<DispatchMessage> nextMsg = dispatcher.dispatch(getResponse());
@@ -206,6 +224,7 @@ public abstract class HttpClient implements Runnable {
           DispatchMessage msg = nextMsg.get();
           msg.setExtra(response.getExtra());
           setRequest(msg);
+
         } else {
           finishedOk();
           if (getResponse().getMsgType() == MsgType.TO1_RV_REDIRECT) {
@@ -218,10 +237,10 @@ public abstract class HttpClient implements Runnable {
 
       }
     } catch (Throwable throwable) {
-      if (getResponse() != null) {
+      if (getResponse() != null && getResponse().getMsgType() != MsgType.ERROR) {
         DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, getRequest());
         setRequest(errorMsg);
-        logMessage(errorMsg);
+
         try {
           sendMessage();
         } catch (Throwable e) {

@@ -13,6 +13,7 @@ import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpInstruction;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.KeyResolver;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -39,6 +40,11 @@ import org.hibernate.Transaction;
 
 public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunction {
 
+  public static LoggerService logger = new LoggerService(AutoInjectVoucherStorageFunction.class);
+
+  public AutoInjectVoucherStorageFunction() {
+    logger.info("Voucher auto-injection enabled.");
+  }
   @Override
   public UUID apply(String serialNo, OwnershipVoucher ownershipVoucher) throws IOException {
     super.apply(serialNo, ownershipVoucher);

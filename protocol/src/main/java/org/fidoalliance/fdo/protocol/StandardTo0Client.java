@@ -61,6 +61,8 @@ public class StandardTo0Client extends HttpClient {
         Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
     setInstructions(HttpUtils.getInstructions(header.getRendezvousInfo(), false));
 
+    //remove any instruction that are rvbypass
+    getInstructions().removeIf( n -> n.isRendezvousBypass());
     setRequest(new DispatchMessage());
     getRequest().setMsgType(MsgType.TO0_HELLO);
     getRequest().setMessage(Mapper.INSTANCE.writeValue(new To0Hello()));

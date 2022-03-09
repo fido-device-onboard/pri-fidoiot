@@ -1,6 +1,7 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DatabaseServer;
+import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.hibernate.SessionFactory;
@@ -93,6 +95,24 @@ public class HibernateUtil {
   public static void shutdown() {
     //sessionFactory.ge
     // Close caches and connection pools
-    getSessionFactory().close();
+    try {
+      getSessionFactory().close();
+    } catch (Throwable throwable) {
+      logger.error(throwable.getMessage());
+    }
+
+
+    for (Object worker : Config.getWorkers()) {
+      if (worker instanceof Closeable) {
+        try {
+          ((Closeable)worker).close();
+        } catch (IOException e) {
+         logger.error(e.getMessage());
+        }
+      }
+    }
+
+
+
   }
 }

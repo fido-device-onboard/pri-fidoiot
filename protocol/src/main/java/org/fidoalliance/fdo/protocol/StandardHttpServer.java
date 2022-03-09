@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -165,6 +166,7 @@ public class StandardHttpServer implements HttpServer {
 
     Tomcat tomcat = new Tomcat();
 
+
     tomcat.setBaseDir(config.getBasePath());
 
     tomcat.setAddDefaultWebXmlToWebapp(false);
@@ -247,7 +249,6 @@ public class StandardHttpServer implements HttpServer {
           logger.error(e.getMessage());
         }
 
-
         httpsConnector.setProperty("clientAuth", "false");
         httpsConnector.setProperty("sslProtocol", "TLS");
         httpsConnector.setProperty("SSLEnabled", "true");
@@ -282,14 +283,19 @@ public class StandardHttpServer implements HttpServer {
       tomcat.start();
       logger.info("Started " + serviceName + " Service.");
     } catch (LifecycleException e) {
-      logger.warn("Failed to start All-in-One Demo Service.");
+      logger.warn("Failed to start " + serviceName + " Service.");
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public String getPort() {
+  public String getHttpPort() {
     return config.getHttpPort();
+  }
+
+  @Override
+  public String getHttpsPort() {
+    return config.getHttpsPort();
   }
 
 

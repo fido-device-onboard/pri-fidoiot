@@ -97,8 +97,10 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
             + "  - - 4\n"
             + "    - %s";
 
+
         String rviString = String.format(defaultRvi, config.getDns(), config.getDevport(),
                 config.getProtocol(), config.getIp(), config.getOwnerport());
+
         RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
         rvData.setData(Mapper.INSTANCE.writeValue(rvi));

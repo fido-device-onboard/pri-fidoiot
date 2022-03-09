@@ -14,9 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
-import org.fidoalliance.fdo.protocol.db.StandardRvBlobQueryFunction;
-import org.fidoalliance.fdo.protocol.dispatch.AcceptOwnerFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
+import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.CwtKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialConsumer;
@@ -25,10 +24,12 @@ import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
+import org.fidoalliance.fdo.protocol.dispatch.OwnerInfoSizeSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousAcceptFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.ReplacementVoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobStorageFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
@@ -488,7 +489,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("Voucher rejected due to untrusted key or guid");
     }
 
-    //todo: verify  voucher
+    VoucherUtils.verifyVoucher(to0d.getVoucher());
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
     redirectEntry.setTo1d(sign1);
@@ -722,6 +723,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("header hmac does not match");
     }
 
+    //if bypass there will be no CoseSign1 to verify
     if (null != storage.get(CoseSign1.class)) {
       CoseSign1 to1d = storage.get(CoseSign1.class);
       if (!cs.verify(to1d, ownerPublicKey)) {
@@ -1046,6 +1048,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Hash newMac = cs.hash(oldMac.getHashType(), cred.getHmacSecret(),
         Mapper.INSTANCE.writeValue(newHeader));
 
+
     //check cred resuse
     boolean credReuse = true;
     if (!oldHeader.getGuid().equals(newHeader.getGuid())) {
@@ -1069,13 +1072,16 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
+    if (!getWorker(CredReuseFunction.class).apply(credReuse)) {
+      throw new CredentialReuseException();
+    }
+
     if (credReuse) {
       newMac = null;
     } else {
       cred.setGuid(newHeader.getGuid());
       cred.setRvInfo(newHeader.getRendezvousInfo());
       //cred.setPubKeyHash();
-
     }
 
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
@@ -1111,7 +1117,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     storage.put(To2DeviceInfoReady.class, devInfoReady);
 
+
     To2OwnerInfoReady ownerInfoReady = new To2OwnerInfoReady();
+
+    ownerInfoReady.setMaxMessageSize(getWorker(OwnerInfoSizeSupplier.class).get());
 
     cipherText = Mapper.INSTANCE.writeValue(ownerInfoReady);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
@@ -1119,6 +1128,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (ownerInfoReady.getMaxMessageSize() == null) {
       ownerInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
     }
+
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
     HelloDevice helloDevice = storage.get(HelloDevice.class);
@@ -1142,6 +1152,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
     storage.put(OwnerServiceInfo.class, lastInfo);
+    storage.put(Hash.class,devInfoReady.getHmac());
 
     manager.updateSession(request.getAuthToken().get(), storage);
   }
@@ -1319,7 +1330,20 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("NonceTO2ProveDv noes not match");
     }
 
-    //todo: save replacement voucher
+    OwnershipVoucherHeader replaceHeader = storage.get(OwnershipVoucherHeader.class);
+    OwnershipVoucher voucher = storage.get(OwnershipVoucher.class);
+
+
+    OwnershipVoucher replaceVoucher = new OwnershipVoucher();
+    Hash hmac = storage.get(Hash.class);
+    if (hmac != null) {
+      replaceVoucher.setCertChain(voucher.getCertChain());
+      replaceVoucher.setHeader(Mapper.INSTANCE.writeValue(replaceHeader));
+      replaceVoucher.setEntries(new OwnershipVoucherEntries());
+      replaceVoucher.setVersion(voucher.getVersion());
+      replaceVoucher.setHmac(hmac);
+    }
+    getWorker(ReplacementVoucherStorageFunction.class).apply(voucher,replaceVoucher);
 
     To2Done2 done2 = storage.get(To2Done2.class);
     cipherText = Mapper.INSTANCE.writeValue(done2);
@@ -1336,8 +1360,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To2Done2 done2 = Mapper.INSTANCE.readValue(cipherText,
         To2Done2.class);
-
-    //todo: commit and changes
 
     Nonce setupNonce = storage.get(To2Done2.class).getNonce();
     if (!setupNonce.equals(done2.getNonce())) {
