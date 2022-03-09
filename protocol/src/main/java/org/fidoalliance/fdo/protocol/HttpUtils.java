@@ -234,47 +234,48 @@ public class HttpUtils {
   public static List<HttpInstruction> getInstructions(To2AddressEntries entries)
       throws IOException {
     List<HttpInstruction> list = new ArrayList<>();
-    List<String> schemes = new ArrayList<>();
+    String scheme = "https";
 
     for (To2AddressEntry entry : entries) {
 
       if (entry.getProtocol() == TransportProtocol.PROT_HTTP) {
-        schemes.add(HTTP_SCHEME);
+        scheme =  HTTP_SCHEME;
       } else if (entry.getProtocol() == TransportProtocol.PROT_HTTPS) {
-        schemes.add(HTTPS_SCHEME);
+        scheme =  HTTPS_SCHEME;
       } else {
         continue;
       }
 
-      for (String scheme : schemes) {
-        if (entry.getDnsAddress() != null) {
-          HttpInstruction httpInst = new HttpInstruction();
-          httpInst.setDelay(0);
-          httpInst.setAddress(scheme + "://" + entry.getDnsAddress() + ":" + entry.getPort());
-          httpInst.setRendezvousBypass(false);
-          list.add(httpInst);
-        }
-
-        if (entry.getIpAddress() != null) {
-          try {
-            InetAddress address = InetAddress.getByAddress(entry.getIpAddress());
-            String ipAddress = address.toString();
-            int pos = ipAddress.lastIndexOf('/');
-            if (pos >= 0) {
-              ipAddress = ipAddress.substring(pos + 1);
-            }
-            HttpInstruction httpInst = new HttpInstruction();
-            httpInst.setDelay(0);
-            httpInst.setAddress(scheme + "://" + ipAddress + ":" + entry.getPort());
-            httpInst.setRendezvousBypass(false);
-            list.add(httpInst);
-          } catch (UnknownHostException e) {
-            throw new InvalidIpAddressException(e);
-          }
-
-        }
+      if (entry.getDnsAddress() != null) {
+        HttpInstruction httpInst = new HttpInstruction();
+        httpInst.setDelay(0);
+        httpInst.setAddress(scheme + "://" + entry.getDnsAddress() + ":" + entry.getPort());
+        httpInst.setRendezvousBypass(false);
+        list.add(httpInst);
       }
 
+      if (entry.getIpAddress() != null) {
+        try {
+          InetAddress address = InetAddress.getByAddress(entry.getIpAddress());
+          String ipAddress = address.toString();
+          int pos = ipAddress.lastIndexOf('/');
+          if (pos >= 0) {
+            ipAddress = ipAddress.substring(pos + 1);
+          }
+          HttpInstruction httpInst = new HttpInstruction();
+          httpInst.setDelay(0);
+          httpInst.setAddress(scheme + "://" + ipAddress + ":" + entry.getPort());
+          httpInst.setRendezvousBypass(false);
+          list.add(httpInst);
+        } catch (UnknownHostException e) {
+          throw new InvalidIpAddressException(e);
+        }
+
+      }
+
+    }
+    if (list.isEmpty()) {
+      throw new RuntimeException("Invalid T02_RVBLOB.");
     }
     return list;
   }
