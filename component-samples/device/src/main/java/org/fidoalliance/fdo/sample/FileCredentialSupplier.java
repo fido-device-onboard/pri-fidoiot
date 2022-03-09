@@ -10,7 +10,6 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.message.DeviceCredential;
 
-
 public class FileCredentialSupplier implements DeviceCredentialSupplier {
 
   @Override
