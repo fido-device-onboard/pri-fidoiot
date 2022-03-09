@@ -6,8 +6,8 @@ import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 public class UnsupportedCredReuseFunction implements CredReuseFunction {
 
   @Override
-  public Boolean apply(Boolean aBoolean) throws IOException {
-    if (aBoolean) {
+  public Boolean apply(Boolean value) throws IOException {
+    if (value) {
       return false;
     }
     return true;

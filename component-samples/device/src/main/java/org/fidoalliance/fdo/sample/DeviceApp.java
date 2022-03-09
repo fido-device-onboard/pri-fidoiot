@@ -26,6 +26,7 @@ import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
+import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AppStart;
@@ -38,7 +39,6 @@ import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.Nonce;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
-import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.message.SigInfo;
 import org.fidoalliance.fdo.protocol.message.SigInfoType;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
@@ -56,6 +56,11 @@ public class DeviceApp extends HttpClient {
     config = Config.getConfig(RootConfig.class).getRoot();
   }
 
+  /**
+   * Initial execution point of the PRI device application.
+   * @param args system arguments.
+   *
+   */
   public static void main(String[] args) {
     try {
       new DeviceApp().run();
@@ -166,12 +171,12 @@ public class DeviceApp extends HttpClient {
 
     logger.info("DI URL is " + config.getDiUri());
 
-    byte[] csr = generateCsr(keyType, keySize);
-
     String serialNo = Hex.encodeHexString(
         Config.getWorker(CryptoService.class).getRandomBytes(4), false);
 
     logger.info("Device Serial No:" + serialNo);
+
+    byte[] csr = generateCsr(keyType, keySize);
 
     ManufacturingInfo mfgInfo = new ManufacturingInfo();
     mfgInfo.setKeyType(keyType);

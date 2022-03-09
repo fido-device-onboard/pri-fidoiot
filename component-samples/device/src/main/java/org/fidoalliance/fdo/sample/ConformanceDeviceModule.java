@@ -11,7 +11,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FidoAlliance;
 
 public class ConformanceDeviceModule implements ServiceInfoModule {
 
-  private final LoggerService logger = new LoggerService(DeviceApp.class);;
+  private final LoggerService logger = new LoggerService(DeviceApp.class);
 
   @Override
   public String getName() {
@@ -29,7 +29,7 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
 
     switch (kvPair.getKey()) {
       case FidoAlliance.ACTIVE:
-        logger.info(FidoAlliance.ACTIVE+ " = "
+        logger.info(FidoAlliance.ACTIVE + " = "
             + Mapper.INSTANCE.readValue(kvPair.getValue(),Boolean.class));
         state.setActive(true);
         break;
@@ -37,8 +37,8 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
         if (state.isActive()) {
           logger.info(FidoAlliance.DEV_CONFORMANCE + " = "
               + Mapper.INSTANCE.readValue(kvPair.getValue(),String.class));
-          break;
         }
+        break;
       default:
         break;
 

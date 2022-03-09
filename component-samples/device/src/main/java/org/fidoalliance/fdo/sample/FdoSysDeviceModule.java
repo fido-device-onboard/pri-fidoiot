@@ -21,9 +21,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.db.FdoSysModuleExtra;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
@@ -119,6 +119,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
         } else {
           logger.warn("fdo_sys module not active. Ignoring fdo_sys:fetch.");
         }
+        break;
       default:
         break;
     }
