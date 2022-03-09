@@ -5,7 +5,6 @@ import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 
-
 public class AioApp {
 
   static LoggerService logger = new LoggerService(AioApp.class);
