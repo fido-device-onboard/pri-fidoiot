@@ -1,11 +1,12 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
+import org.fidoalliance.fdo.protocol.message.ErrorCode;
 
 /**
  * Represents an InvalidMessageException.
  */
-public class InvalidMessageException extends IOException {
+public class InvalidMessageException extends DispatchException {
 
   /**
    * Constructs an InvalidMessageException.
@@ -23,5 +24,10 @@ public class InvalidMessageException extends IOException {
    */
   public InvalidMessageException(String cause) {
     super(cause);
+  }
+
+  @Override
+  public ErrorCode getErrorCode() {
+    return ErrorCode.INVALID_MESSAGE_ERROR;
   }
 }

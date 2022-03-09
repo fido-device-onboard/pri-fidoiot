@@ -76,18 +76,22 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       case FdoSys.STATUS_CB:
         if (state.isActive()) {
           StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
-          if (status.isCompleted()) {
-            extra.setWaiting(false);
-            extra.setQueue(extra.getWaitQueue());
-            extra.setWaitQueue(new ServiceInfoQueue());
-          } else {
-            //send notification of status
-            ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-            kv.setKeyName(FdoSys.STATUS_CB);
-            kv.setValue(Mapper.INSTANCE.writeValue(status));
-            extra.getQueue().add(kv);
-          }
+
+          //send notification of status
+          ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(FdoSys.STATUS_CB);
+          kv.setValue(Mapper.INSTANCE.writeValue(status));
+          extra.getQueue().add(kv);
           onStatusCb(state, extra, status);
+          if (status.isCompleted()) {
+            // check for error
+            if (status.getRetCode() != 0) {
+              throw new InternalServerErrorException("Exec_cb status returned failure.");
+            }
+            extra.setWaiting(false);
+            extra.getQueue().addAll(extra.getWaitQueue());
+            extra.setWaitQueue(new ServiceInfoQueue());
+          }
         }
         break;
       case FdoSys.DATA:
@@ -181,6 +185,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
   protected void load(ServiceInfoModuleState state, FdoSysModuleExtra extra)
       throws IOException {
+
+    if (!state.isActive()) {
+      return;
+    }
 
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
@@ -280,8 +288,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             extra.getQueue().add(kv);
           }
         } catch (SQLException throwables) {
-          throw new IOException(throwables);
+          throw new InternalServerErrorException(throwables);
         }
+      } else {
+        throw new InternalServerErrorException("svi resource missing " + resource);
       }
 
     } finally {
@@ -325,7 +335,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         }
       }
     } catch (Exception e) {
-      throw new IOException(e);
+      throw new InternalServerErrorException(e);
     }
 
   }

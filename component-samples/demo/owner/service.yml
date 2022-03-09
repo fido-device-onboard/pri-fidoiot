@@ -10,9 +10,14 @@ system-properties:
   app-data.dir: ./app-data
   application.version: 1.1-SNAPSHOT
   service.name: "Owner"
-  
+  http.proxyHost: $(http_host)
+  http.proxyPort: $(http_port)
+  https.proxyHost: $(https_host)
+  https.proxyPort: $(https_port)
+  http.nonProxyHosts: $(no_proxy)
 
 http-server:
+  base_path: app-data
   http_port: 8042
   https_port: 8043
   http_schemes:
@@ -84,18 +89,22 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+  #- org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
-  - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
+  - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardAcceptOwnerFunction
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
+  - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction 
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
 

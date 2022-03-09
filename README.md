@@ -1,3 +1,4 @@
+
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
 This is a reference implementation of the
@@ -67,7 +68,7 @@ The runnable artifacts can be found in <fdo-pri-src>/component-samples/demo/
 
 ### Credential storage
 
-Credentials are defined in the service.env for each service and will be made available as environment variables to each docker container.  
+Credentials are defined in the service.env for each service and will be made available as environment variables to each docker/podman container.  
 
 aio/service.env
 manufacturer/service.env
@@ -139,11 +140,11 @@ Replace DNS and IP entries with the ones required by the HTTPs/Web Service.
 
 #### Starting the FDO PRI All-In-One (AIO) HTTP Server
 
-To start the server as a docker container.
+To start the server as a docker/podman container.
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/aio
-$ docker-compose up
+$ docker-compose up --build / podman-compose up --build
 ```
 
 To start the server as a standalone java application.
@@ -162,11 +163,11 @@ The all-in-one runs supports all FDO protocols in a single service. By default
 
 #### Starting the FDO PRI Rendezvous (RV) HTTP Server
 
-To start the server as a docker container.
+To start the server as a docker/podman container.
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/rv
-$ docker-compose up
+$ docker-compose up --build / podman-compose up --build
 ```
 
 To start the server as a standalone java application.
@@ -184,7 +185,7 @@ The H2 Web Console will be available at http://localhost:8084
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/owner
-$ docker-compose up
+$ docker-compose up --build / podman-compose up --build
 ```
 
 To start the server as a standalone java application.
@@ -202,7 +203,7 @@ The H2 Web Console will be available at http://localhost:8085
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/manufacturer
-$ docker-compose up
+$ docker-compose up --build / podman-compose up --build
 ```
 
 To start the server as a standalone java application.

@@ -4,6 +4,8 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -14,6 +16,64 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
+
+  private static class RootConfig {
+    @JsonProperty("manufacturer")
+    private RvInfoConfig config;
+
+    protected RvInfoConfig getRoot() {
+      return config;
+    }
+  }
+
+  private static class RvInfoConfig {
+    @JsonProperty("rv-instruction")
+    private RvInstructionConfig rvInstruction;
+
+    public RvInstructionConfig getRoot() {
+      return rvInstruction;
+    }
+  }
+
+  private static class RvInstructionConfig {
+    @JsonProperty("dns")
+    private String dns;
+
+    @JsonProperty("ip")
+    private String ip;
+
+    @JsonProperty("protocol")
+    private String protocol;
+
+    @JsonProperty("ownerport")
+    private String ownerport;
+
+    @JsonProperty("devport")
+    private String devport;
+
+    public String getDns() {
+      return dns;
+    }
+
+    public String getIp() {
+      return ip;
+    }
+
+    public String getProtocol() {
+      return protocol;
+    }
+
+    public String getOwnerport() {
+      return ownerport;
+    }
+
+    public String getDevport() {
+      return devport;
+    }
+  }
+
+  private static final RvInstructionConfig config =
+          Config.getConfig(RootConfig.class).getRoot().getRoot();
 
   @Override
   public RendezvousInfo get() throws IOException {
@@ -27,18 +87,20 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
         rvData = new RvData();
 
         final String defaultRvi = "- - - 5\n"
-            + "    - \"localhost\"\n"
+            + "    - \"%s\"\n"
             + "  - - 3\n"
             + "    - %s\n"
             + "  - - 12\n"
-            + "    - 1\n"
+            + "    - %s\n"
             + "  - - 2\n"
-            + "    - \"127.0.0.1\"\n"
+            + "    - \"%s\"\n"
             + "  - - 4\n"
             + "    - %s";
 
-        String defaultPort = Config.getWorker(HttpServer.class).getPort();
-        String rviString = String.format(defaultRvi, defaultPort, defaultPort);
+
+        String rviString = String.format(defaultRvi, config.getDns(), config.getDevport(),
+                config.getProtocol(), config.getIp(), config.getOwnerport());
+
         RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
         rvData.setData(Mapper.INSTANCE.writeValue(rvi));

@@ -543,7 +543,6 @@ public class StandardCryptoService implements CryptoService {
   @Override
   public KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party,
       OwnerPublicKey ownerKey) throws IOException {
-    KexMessage kexMessage = new KexMessage();
 
     switch (kexSuiteName) {
       case "ECDH256":
@@ -767,7 +766,7 @@ public class StandardCryptoService implements CryptoService {
 
         break;
       case A128GCM:
-      case AES_CCM_16_128_128:
+      case AES_CCM_64_128_128:
 
         // 128-bit AES (SEVK)
         sekSize = 16;
@@ -776,7 +775,7 @@ public class StandardCryptoService implements CryptoService {
 
         break;
       case A256GCM:
-      case AES_CCM_16_128_256:
+      case AES_CCM_64_128_256:
 
         // 256-bit AES (SEVK)
         sekSize = 32;
@@ -829,7 +828,9 @@ public class StandardCryptoService implements CryptoService {
 
   protected boolean isCcmCipher(CipherSuiteType cipherType) {
     return CipherSuiteType.AES_CCM_16_128_128.equals(cipherType)
-        || CipherSuiteType.AES_CCM_16_128_256.equals(cipherType);
+        || CipherSuiteType.AES_CCM_16_128_256.equals(cipherType)
+        || CipherSuiteType.AES_CCM_64_128_128.equals(cipherType)
+        || CipherSuiteType.AES_CCM_64_128_256.equals(cipherType);
   }
 
   protected boolean isCcbCipher(CipherSuiteType cipherType) {
@@ -1179,7 +1180,9 @@ public class StandardCryptoService implements CryptoService {
     return CipherSuiteType.A128GCM == aesType
         || CipherSuiteType.A256GCM == aesType
         || CipherSuiteType.AES_CCM_16_128_128 == aesType
-        || CipherSuiteType.AES_CCM_16_128_256 == aesType;
+        || CipherSuiteType.AES_CCM_16_128_256 == aesType
+        || CipherSuiteType.AES_CCM_64_128_128 == aesType
+        || CipherSuiteType.AES_CCM_64_128_256 == aesType;
   }
 
   @Override

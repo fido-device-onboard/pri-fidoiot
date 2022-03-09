@@ -1,6 +1,7 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Closeable;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,10 +10,12 @@ import org.h2.server.web.WebServer;
 import org.h2.tools.Server;
 
 
-public class StandardDatabaseServer implements DatabaseServer {
+public class StandardDatabaseServer implements DatabaseServer, Closeable {
 
 
   private static LoggerService logger = new LoggerService(DatabaseServer.class);
+
+
 
   private static class RootConfig {
     @JsonProperty("h2-database")
@@ -47,30 +50,49 @@ public class StandardDatabaseServer implements DatabaseServer {
   private static final ServiceConfig config = Config.getConfig(RootConfig.class).getConfig();
 
 
+  private Server webServer;
+  private Server tcpServer;
 
   @Override
   public void start() throws IOException {
 
-    //-tcpPort, -tcpSSL, -tcpPassword, -tcpAllowOthers, -tcpDaemon, -trace, -ifExists, -ifNotExists, -baseDir, -key
-    //-webPort, -webSSL, -webAllowOthers, -webDaemon, -trace, -ifExists, -ifNotExists, -baseDir,-properties
+    //-tcpPort, -tcpSSL, -tcpPassword, -tcpAllowOthers, -tcpDaemon, -trace, -ifExists,
+    // -ifNotExists, -baseDir, -key
+    //-webPort, -webSSL, -webAllowOthers, -webDaemon, -trace, -ifExists,
+    // -ifNotExists, -baseDir,-properties
 
     //tcp port should be 9092
     //tcp port should be 8082
 
     try {
       //get the port from the connection string
-      Server server = Server.createTcpServer(config.getTcpArgs()).start();
+      tcpServer = Server.createTcpServer(config.getTcpArgs()).start();
 
-      logger.info("database tcp port " + server.getPort());
+      logger.info("database tcp port " + tcpServer.getPort());
 
       String[] webArgs = config.getWebArgs();
       if (webArgs != null) {
-        Server web = Server.createWebServer(webArgs).start();
-        logger.info("database web port " + web.getPort());
+        webServer = Server.createWebServer(webArgs).start();
+        logger.info("database web port " + webServer.getPort());
       }
     } catch (SQLException e) {
       throw new IOException(e);
     }
 
   }
+
+  @Override
+  public void close() throws IOException {
+    if (webServer != null && webServer.isRunning(true)) {
+      webServer.stop();
+      webServer = null;
+    }
+
+    if (tcpServer != null && tcpServer.isRunning(true)) {
+      tcpServer.stop();
+      tcpServer = null;
+    }
+
+  }
+
 }

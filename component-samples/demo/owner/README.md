@@ -60,6 +60,18 @@ All the runtime configurations for the services are specified in four files: `se
 
 `WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
 
+# Configuring Owner Proxy Settings
+
+To configure Owner proxy resolution, add the following properties to `demo/owner/service.env` file:
+
+```
+http_host=<value>
+https_host=<value>
+http_port=<value>
+https_port=<value>
+no_proxy=<value>
+```
+
 # Running FDO Owner Service
 
 FDO Owner Service can be executed as a standalone service as well as a docker service. At the
@@ -112,12 +124,12 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
 | GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
 | GET /api/v1/owner/messagesize | Collects the max message size from `ONBOARDING_CONFIG` table | | |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain'|
-| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize?size=1400' --header 'Content-Type: text/plain'|
+| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain' --data-raw '10000'|
 | GET /api/v1/owner/svisize | Collects the owner svi size from `ONBOARDING_CONFIG` table | | text/plain |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' |
-| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize?size=1400' --header 'Content-Type: text/plain' |
-| GET /api/v1/owner/resource?filename=fileName | Returns the file based on filename from `SYSTEM_RESOURCE` table | Path - filename | | | file |  curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=fileName' --header 'Content-Type: text/plain'  |
-| POST /api/v1/owner/resource?filename=fileName | Adds the file to DB based on filename  from `SYSTEM_RESOURCE` table  | Path - filename | text/plain| file in Binary format |  |  curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=fileName' --header 'Content-Type: text/plain' --data-binary '@< path to file >' |
-| DELETE /api/v1/owner/resource?filename=fileName | Delete the  file from DB based on filename from `SYSTEM_RESOURCE` table   | Path - filename | | |  |  curl -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=fileName' --header 'Content-Type: text/plain'|
+| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' --data-raw '10000' |
+| GET /api/v1/owner/resource?filename=fileName | Returns the file based on filename from `SYSTEM_RESOURCE` table | Path - filename | | | file |  curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'  |
+| POST /api/v1/owner/resource?filename=fileName | Adds the file to DB based on filename  from `SYSTEM_RESOURCE` table  | Path - filename | text/plain| file in Binary format |  |  curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain' --data-binary '@< path to file >' |
+| DELETE /api/v1/owner/resource?filename=fileName | Delete the  file from DB based on filename from `SYSTEM_RESOURCE` table   | Path - filename | | |  |  curl -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'|
 
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.

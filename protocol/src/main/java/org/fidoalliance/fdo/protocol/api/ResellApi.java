@@ -9,6 +9,7 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
@@ -20,18 +21,27 @@ public class ResellApi extends RestApi {
     String body = getStringBody();
     OwnershipVoucher voucher = null;
     String path = getLastSegment();
+    KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
     if (path.indexOf("-") > 0) {
       OnboardingVoucher onboardingVoucher = getSession().find(OnboardingVoucher.class, path);
       if (onboardingVoucher != null) {
-        voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(), OwnershipVoucher.class);
+
+        if (onboardingVoucher.getReplacement() != null) {
+          voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getReplacement(),
+              OwnershipVoucher.class);
+
+          resolver = Config.getWorker(ReplacementKeySupplier.class).get();
+        } else {
+          voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(), OwnershipVoucher.class);
+
+        }
+
       } else {
         throw new NotFoundException(path);
       }
     } else {
       voucher = VoucherUtils.fromString(body);
     }
-
-    KeyResolver resolver = Config.getWorker(OwnerKeySupplier.class).get();
 
     List<Certificate> list = PemLoader.loadCerts(body);
     Certificate[] certs = list.stream()

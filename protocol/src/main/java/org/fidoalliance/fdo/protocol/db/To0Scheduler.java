@@ -1,12 +1,10 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Closeable;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,10 +16,7 @@ import javax.persistence.criteria.Root;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
-import org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier;
 import org.fidoalliance.fdo.protocol.StandardTo0Client;
-import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
@@ -29,12 +24,21 @@ import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
-public class To0Scheduler {
+public class To0Scheduler implements Closeable {
 
-   private final ThreadPoolExecutor executor;
+  static final private LoggerService logger = new LoggerService(To0Scheduler.class);
+
+  private final ThreadPoolExecutor executor;
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+  @Override
+  public void close() throws IOException {
+    if (executor != null) {
+      executor.shutdown();
+      scheduler.shutdown();
+    }
+  }
 
   private static class RootConfig {
     @JsonProperty("owner")
@@ -85,7 +89,6 @@ public class To0Scheduler {
     }
   }
 
-  static LoggerService logger = new LoggerService(To0Scheduler.class);
 
   private static To0SchedulerConfig config = Config.getConfig(RootConfig.class).config.scheduler;
 

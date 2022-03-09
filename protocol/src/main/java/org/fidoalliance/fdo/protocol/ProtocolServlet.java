@@ -75,7 +75,8 @@ public class ProtocolServlet extends HttpServlet {
 
     } catch (Throwable throwable) {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-
+      resp.setHeader(HttpUtils.HTTP_MESSAGE_TYPE,
+          Integer.toString(MsgType.ERROR.toInteger()));
       if (reqMsg != null) {
         DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, reqMsg);
 
@@ -90,7 +91,6 @@ public class ProtocolServlet extends HttpServlet {
         logMessage(errorMsg);
       }
 
-      throwable.printStackTrace();
     }
   }
 }

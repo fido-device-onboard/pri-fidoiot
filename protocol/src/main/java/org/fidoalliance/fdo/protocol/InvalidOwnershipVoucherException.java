@@ -5,6 +5,14 @@ import org.fidoalliance.fdo.protocol.message.ErrorCode;
 
 public class InvalidOwnershipVoucherException extends DispatchException {
 
+  /**
+   * Constructs an invalid guid exception.
+   *
+   * @param cause The cause of the exception.
+   */
+  public InvalidOwnershipVoucherException(String cause) {
+    super(cause);
+  }
 
   @Override
   public ErrorCode getErrorCode() {

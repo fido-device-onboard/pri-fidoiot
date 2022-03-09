@@ -13,6 +13,7 @@ system-properties:
   
 
 http-server:
+  base_path: app-data
   http_port: 8039
   https_port: 8038
   http_schemes:
@@ -38,7 +39,12 @@ manufacturer:
      path: manufacturer.p12
      store-type: PKCS12
      password: $(encrypt_password)
-
+   rv-instruction:
+     dns: localhost
+     ip: 127.0.0.1
+     protocol: 1
+     ownerport: 8043
+     devport: 8040
 
 h2-database:
    tcp-server:
@@ -71,6 +77,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
+  - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
