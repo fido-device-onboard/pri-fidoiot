@@ -58,6 +58,7 @@ public class DeviceApp extends HttpClient {
 
   /**
    * Main entry.
+   *
    * @param args Commandline arguments.
    */
   public static void main(String[] args) {
@@ -126,6 +127,8 @@ public class DeviceApp extends HttpClient {
     DeviceCredential cred = Config.getWorker(DeviceCredentialSupplier.class).get();
     HelloDevice helloDevice = new HelloDevice();
     helloDevice.setMaxMessageSize(config.getMaxMessageSize());
+    logger.info("max message size is " + config.getMaxMessageSize());
+
     helloDevice.setGuid(cred.getGuid());
     Nonce nonceTO2ProveOv = Nonce.fromRandomUuid();
     helloDevice.setProveTo2Ov(nonceTO2ProveOv);
@@ -176,7 +179,6 @@ public class DeviceApp extends HttpClient {
     logger.info("Device Serial No:" + serialNo);
 
     byte[] csr = generateCsr(keyType, keySize);
-
 
     ManufacturingInfo mfgInfo = new ManufacturingInfo();
     mfgInfo.setKeyType(keyType);

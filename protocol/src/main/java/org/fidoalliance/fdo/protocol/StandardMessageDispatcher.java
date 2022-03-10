@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
@@ -197,7 +198,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       CoseSign1 sign1 = getCryptoService().sign(payload, privateKey, pubKey);
       byte[] data = Mapper.INSTANCE.writeValue(sign1);
       String token = Base64.getEncoder().encodeToString(data);
-      return "Bearer " + token;
+      return HttpUtils.HTTP_BEARER + token;
     } finally {
       getCryptoService().destroyKey(privateKey);
     }
@@ -209,10 +210,25 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     String token = authHeader.substring("Bearer ".length());
     byte[] data = Base64.getDecoder().decode(token);
     CoseSign1 sign1 = Mapper.INSTANCE.readValue(data, CoseSign1.class);
-    //todo: verify
-    //todo: check expired
 
     CwtToken cwtToken = Mapper.INSTANCE.readValue(sign1.getPayload(), CwtToken.class);
+
+    final KeyResolver resolver = Config.getWorker(CwtKeySupplier.class).get();
+    final String alias = KeyResolver.getAlias(PublicKeyType.SECP384R1, KeySizeType.SIZE_384);
+    OwnerPublicKey pubKey = getCryptoService().encodeKey(PublicKeyType.SECP384R1,
+        PublicKeyEncoding.X509,
+        resolver.getCertificateChain(alias));
+
+    boolean verified = getCryptoService().verify(sign1, pubKey);
+    if (!verified) {
+      throw new InvalidMessageException("invalid signature");
+    }
+
+    Date now = new Date(System.currentTimeMillis());
+    Date expiry = new Date(Duration.ofSeconds(cwtToken.getExpiry()).toMillis());
+    if (now.after(expiry)) {
+      throw new InvalidJwtTokenException("session expired");
+    }
 
     return cwtToken;
   }
@@ -291,7 +307,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         final List<Certificate> certList = new ArrayList<>(Arrays.asList(chain));
         voucher.setCertChain(CertChain.fromList(certList));
-        //todo: verifychain
 
         final KeyResolver keyResolver = getWorker(ManufacturerKeySupplier.class).get();
         final String alias = KeyResolver.getAlias(diInfo.getKeyType(),
@@ -330,6 +345,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     voucher.setEntries(new OwnershipVoucherEntries());
     voucher.setHeader(Mapper.INSTANCE.writeValue(header));
+    VoucherUtils.verifyVoucher(voucher);
 
     SimpleStorage storage = new SimpleStorage();
     storage.put(OwnershipVoucher.class, voucher);
@@ -360,7 +376,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
   protected void doSetCredentials(DispatchMessage request, DispatchMessage response)
       throws IOException {
-
 
     SetCredentials setCredentials = request.getMessage(SetCredentials.class);
     byte[] headerTag = setCredentials.getVoucherHeader();
@@ -945,7 +960,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     done2.setNonce(setupNonce);
     storage.put(To2Done2.class, done2);
 
-
     To2SetupDevicePayload setupDevice = new To2SetupDevicePayload();
     setupDevice.setNonce(setupNonce);
 
@@ -1093,8 +1107,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
 
-    //todo: get from config
     devInfoReady.setMaxMessageSize(null);
+    logger.info("max message size is null (default)");
 
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
     response.setMessage(cs.encrypt(cipherText, es));
@@ -1157,7 +1171,12 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
     storage.put(OwnerServiceInfo.class, lastInfo);
-    storage.put(Hash.class, devInfoReady.getHmac());
+
+    if (devInfoReady.getHmac() != null) {
+      storage.put(Hash.class, devInfoReady.getHmac());
+    } else {
+      storage.put(Hash.class, new Hash());
+    }
 
     manager.updateSession(request.getAuthToken().get(), storage);
   }
@@ -1342,7 +1361,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     OwnershipVoucher replaceVoucher = new OwnershipVoucher();
     Hash hmac = storage.get(Hash.class);
-    if (hmac != null) {
+    if (hmac.getHashValue() != null) {
       replaceVoucher.setCertChain(voucher.getCertChain());
       replaceVoucher.setHeader(Mapper.INSTANCE.writeValue(replaceHeader));
       replaceVoucher.setEntries(new OwnershipVoucherEntries());

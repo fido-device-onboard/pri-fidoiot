@@ -80,7 +80,6 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
       onboardingVoucher.setGuid(guid.toString());
       onboardingVoucher.setCreatedOn(new Date(System.currentTimeMillis()));
       onboardingVoucher.setData(Mapper.INSTANCE.writeValue(ownershipVoucher));
-      session.persist(onboardingVoucher);
 
       OwnershipVoucherHeader header = VoucherUtils.getHeader(ownershipVoucher);
       List<HttpInstruction> h1 = HttpUtils.getInstructions(header.getRendezvousInfo(),
@@ -90,6 +89,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
       To2AddressEntries to2Entries = Mapper.INSTANCE.readValue(
           onboardConfig.getRvBlob(), To2AddressEntries.class);
       List<HttpInstruction> h2 = HttpUtils.getInstructions(to2Entries);
+
       if (HttpUtils.containsAddress(h1, h2)) {
         To0d to0d = new To0d();
         to0d.setVoucher(ownershipVoucher);
@@ -122,16 +122,20 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
           redirectEntry.setCertChain(ownershipVoucher.getCertChain());
           blob.setData(Mapper.INSTANCE.writeValue(redirectEntry));
 
+          Date expiry = new Date(System.currentTimeMillis()
+              + Duration.ofSeconds(to0d.getWaitSeconds()).toMillis());
           blob.setCreatedOn(new Date(System.currentTimeMillis()));
-          blob.setExpiry(
-              new Date(System.currentTimeMillis()
-                  + Duration.ofSeconds(to0d.getWaitSeconds()).toMillis()));
+          blob.setExpiry(expiry);
+          onboardingVoucher.setTo0Expiry(expiry);
 
           session.persist(blob);
+
         } finally {
           cs.destroyKey(privateKey);
         }
       }
+
+      session.persist(onboardingVoucher);
 
       trans.commit();
       return VoucherUtils.getGuid(ownershipVoucher).toUuid();

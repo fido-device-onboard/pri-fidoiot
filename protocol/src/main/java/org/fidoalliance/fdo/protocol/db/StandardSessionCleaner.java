@@ -12,15 +12,21 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.ProtocolSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public class StandardSessionCleaner {
 
+  private static final LoggerService logger = new LoggerService(StandardSessionCleaner.class);
+
+
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-  private final Duration interval = Duration.ofHours(2);
+  //private final Duration interval = Duration.ofHours(2);
+  private final Duration interval = Duration.ofMinutes(60);
+  private final Duration expires = Duration.ofHours(2);
 
   /**
    * Worker Constructor.
@@ -33,6 +39,8 @@ public class StandardSessionCleaner {
         onClean();
       }
     }, interval.toSeconds(), interval.toSeconds(), TimeUnit.SECONDS);
+
+    logger.info("Session cleaner will run every " + interval.toSeconds() + " seconds");
 
   }
 
@@ -48,13 +56,18 @@ public class StandardSessionCleaner {
 
       TypedQuery<ProtocolSession> allQuery = session.createQuery(all);
       Date now = new Date(System.currentTimeMillis());
-      long intervalSeconds = interval.toSeconds();
+      long expiresSeconds = expires.toSeconds();
 
+      boolean reported = false;
       for (ProtocolSession protocolSession : allQuery.getResultList()) {
         Date created = protocolSession.getCreatedOn();
         long dur = Duration.between(created.toInstant(), now.toInstant()).toSeconds();
-        if (dur > intervalSeconds) {
+        if (dur > expiresSeconds) {
           session.delete(protocolSession);
+          if (!reported) {
+            logger.info("expired session removed");
+            reported = true;
+          }
         }
 
       }

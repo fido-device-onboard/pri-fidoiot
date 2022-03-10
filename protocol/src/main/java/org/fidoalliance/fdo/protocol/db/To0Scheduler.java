@@ -84,7 +84,7 @@ public class To0Scheduler implements Closeable {
       int threadCountValue;
       try {
         threadCountValue = Integer.parseInt(Config.resolve(threadCount));
-        if (threadCountValue <= 5) {
+        if (threadCountValue < 5) {
           logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
           threadCountValue = 5;
         }

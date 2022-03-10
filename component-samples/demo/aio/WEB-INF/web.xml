@@ -256,6 +256,19 @@
     </servlet-mapping>
 
    <servlet>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.DeviceStateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <url-pattern>/api/v1/owner/state/*</url-pattern>
+    </servlet-mapping>
+
+   <servlet>
       <servlet-name>AllowList</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
       <init-param>
