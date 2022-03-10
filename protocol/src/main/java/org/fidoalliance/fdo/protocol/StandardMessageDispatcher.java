@@ -1176,6 +1176,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (ownerInfoReady.getMaxMessageSize() == null) {
       ownerInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
     }
+    logger.info("Received maxDeviceServiceInfoSz: " + ownerInfoReady.getMaxMessageSize());
+
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
     DeviceServiceInfo devInfo = new DeviceServiceInfo();
