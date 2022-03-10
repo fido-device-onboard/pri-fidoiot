@@ -1,244 +1,138 @@
+# About
+
+The FDO manufacturer service is designed to generate new ownership vouchers by initializing devices with the FDO device initialization (DI) protocol and assigning those vouchers to another owner. 
+
+***NOTE***:  Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
+
+# Getting Started with the FDO Manufacturer
+
+The following are the system requirements for the FDO Manufacturer.
+- Operating System: Ubuntu* 20.04
+- Java* Development Kit 11
+- Apache Maven* 3.5.4 (Optional) software for building the demo from source
+- Java IDE (Optional) for convenience in modifying the source code
+- Docker 18.09
+- Docker compose 1.21.2
+- Haveged
+
+# Configuring JAVA Execution Environment
+
+Appropriate proxy configuration should be updated in **`_JAVA_OPTIONS`** environment variable. (Mandatory, if you are working behind a proxy.)
+
+Update the proxy information in _JAVA_OPTIONS as ```_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port```.
+
 # Getting the Executable
 
-Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
-(PRI) Manufacturer component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fdo-pri-src>/component-samples/manufacturer/
+$ cd <fdo-pri-src>/
 $ mvn clean install
 ```
 
 This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/manufacturer/.
 
-# Configuring the FDO PRI Manufacturer Sample
+# Configuring the FDO Manufacturer Service
 
-Manufacturer runtime arguments:
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
 
-- `manufacturer_di_port`
+`service.env`: consists of all the credentials used by the Manufacturer service. These credential configurations are to be generated freshly for each deployment.
 
-  Manufacturer server port.
+`hibernate.cfg.xml`: consists of all the database configurations used by the FDO Manufacturer service. This file can be configured to pick various database tables and properties.
 
-  Default value: 8039.
+`service.yml` file is structured into multiple sections:
 
-- `manufacturer_database_connection_url`
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
-   JDBC URL for database connection. Includes the database driver name, port number for database and the location of `.db` file
 
-  Default value: jdbc:h2:tcp://localhost:8049/./target/data/mfg
+- `system-properties:` - This section contains the runtime environment variables.
 
-- `manufacturer_database_username`
 
-  Manufacturer database username.
+- `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
-  Default value: sa
 
-- `manufacturer_database_password`
+- `manufacturer:` - This section contains the configuration related to manufacturer keystore path, type and credentials.
 
-  Manufacturer database password.
 
-  Default value: <no_password>
+- `workers:` The section contains the configuration to select desired functionality for the services. The deployer can pick and choose the functionality during runtime.
 
-- `manufacturer_database_port`
 
-  Manufacturer database port number.
+`WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
 
-  Default value: 8049
+# Running FDO Manufacturer
 
-- `catalina_home`
+The FDO Manufacturer can be executed as a standalone service as well as a docker service. At the
+end of initialization of all services, you will see following statement on the console.
 
-  Tomcat configuration.
+`[INFO] Started Manufacturer Service.`
 
-  Docker default: ./target/tomcat
+Follow the below steps to start All-In-One demo.
 
-- `manufacturer_keystore`
+##  Run as Standalone service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/manufacturer/` and execute following command.
 
-  Path to the Manufacturer keystore file containing the Manufacturer's keys.
-
-  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-- `manufacturer_keystore_password`
-
-  Keystore password for manufacturer_keystore.p12 and the internal softHSM's PKCS11 keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-- `manufacturer_api_user`
-
-  Username for the database REST API calls.
-
-  Default value: apiUser
-
-- `manufacturer_api_password`
-
-  Password for the database REST API calls.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-- `manufacturer_protocol_scheme`
-
-  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
-
-  Default value: http
-
-- `manufacturer_https_port`
-
-  Allows end user to select a port for accepting HTTPS requests.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default value: 443
-
-- `manufacturer_ssl_keystore`
-
-  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-
-  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `manufacturer_ssl_keystore-password`
-
-  Provides password for the specified keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `manufacturer_session_check_interval`
-
-   To set the scheduled DI session cleaner interval. DI session cleaner will be automatically invoked in the specified time interval.
-
-   Default value: 60
-
-## Support for OnDie Devices
-
-Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure manufacturer to support OnDie devices.
-
-# Enabling Remote Access to DB
-
-Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
-
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/manufacturer/src/main/java/org/fidoalliance/fdo/sample/ManufacturerApp.java` file
-
-```
-db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <manufacturer_db_port>
-webAllowOthers = true
+```shell
+java -jar manufacturer.jar
 ```
 
-**IMPORTANT: Not recommended to enable this setting especially on production systems.**
+Make sure to export the credential environment variables set in `service.env` file.
 
-# Starting the Manufacturer Service
+##  Run as Docker Service
 
-Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/manufacturer/` and execute following command.
 
-***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/target/data/mfg.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+```
+docker-compose up --build
+```
+
+In case you need super user access, prefix 'sudo -E' to above command.
+
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Manufacturer REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| POST /api/v1/assign/?id=<customer_id>&serial=<serial_no> | Assigns customer ID to Ownership Voucher having the input serial no. | Query - id: Customer ID, serial = Device serial number | | | |
-| GET /api/v1/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | | Ownership Voucher |
-| POST /api/v1/customers/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
-| POST /api/v1/rvinfo/ | Updates RV Info in `MT_SETTINGS` table | | text/plain; charset=us-ascii | RV Info | | |
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds |  |  |  | JSON array of Serial No, GUID and DI Timestamp. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'|
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' --header 'Content-Type: text/plain' |
+
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
+
+Following is the list of REST response error codes and it's possible causes :
+
+|     Error Code     |             Possible Causes               |
+| -------------------:|:----------------------------------------:|
+| `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
+| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
+| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
+
+# Troubleshooting
+
+As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+
+# Configuring FDO Manufacturer for HTTPS/TLS Communication
+
+By default, the FDO Manufacturer uses HTTP for all communications on port 8039. In addition to that, the manufacturer can be configured to handle HTTPS requests from the device.
+
+Manufacturer can generate its own certificate and if you want to override the default certificate, follow these steps:
+
+- Generate the Keystore/Certificate for the Manufacturer. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+    * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
 
 
-# Inserting Keys into Manufacturer Keystore
+- Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contains the default manufacturer keys that are imported into the softHSM keystore inside the container, during startup. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default manufacturer_keystore.p12 is generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
 
-**IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
-
-# Configuring Manufacturer for HTTPS/TLS Communication
-
-By default, the PRI-Manufacturer uses HTTP for all communications on port 8039. In addition to that, the PRI-Manufacturer can be configured to handle HTTPS requests from the device.
-
-- Generate the Keystore/Certificate for the PRI-manufacturer. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
-
-  * Ensure that the web certificate is issued to the resolvable domain of the Manufacturer server.
-
-- Copy the generated Keystore/Certificate to `<fdo-pri-src>/component-samples/demo/manufacturer/certs` folder.
-
-- Update the following environment variables in `<fdo-pri-src>/component-samples/demo/manufacturer/manufacturer.env` file
-
-    |  Variable            |  Value            |             description       |
-    | ---------------------|-------------------|-------------------------------|
-    | manufacturer_protocol_scheme  | https             | To enable HTTPS communication.|
-    | manufacturer_https_port | Port for HTTPS communication | The given port number will be opened for HTTPS communication. |
-    | manufacturer_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
-    | manufacturer_ssl_keystore-password| keystore-password | password of the keystore. |
-
-    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Manufacturer.
-    Avoid using the default keystore available for production deployment.
-
-# Rendezvous Info
-Commonly referred as RvInfo, is one of the most important configurations of FDO. RvInfo is specified in `MT_SETTINGS` table in the manufacturer storage. It is consumed by device for performing TO1 and by owner through the ownership voucher for performing TO0. The default diagnostic representation of the RvInfo value is: `[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8041]]]` which points to localhost over the port 8041 for Owner during TO0 and localhost over the port 8040 for device during TO1
-and the equivalent bytes representation is `81858205696C6F63616C686F73748203191F68820C018202447F0000018204191F69`. In the following section, we will be discussing on the generation of bytes representation from the CBOR diagnostic representation.
-
-## Generating CBOR RVInfo
-
-As per the spec, a sample RendezvousInfo with one RendezvousInstrList is as follows:
-
-```
-[[[RVDns,"localhost"],
-  [RVDevPort,8040],
-  [RVProt, 1],
-  [RVIPAddress, h’7F000001'],     //Represents 127.0.0.1
-  [RVOwnerPort,8443]]]
-```
-and the equivalent diagnostic representation is:
-
-```
-[[[5, "localhost"], [3, 8040], [12, 1], [2, h'7F000001'], [4, 8443]]]
-```
-**NOTE:** In the spec, RVDns is represented as 5, RVDevPort as 3, RVProt as 12, RVIPAddress as 2 and RVOwnerPort as 4.
-[Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about the RV variable representations.
-
-**NOTE:** h'7F00001' is the hexadecimal representation of the ip address and it is interpreted as
-```
-7F -> 127
-00 -> 0
-00 -> 0
-01 -> 1     ; 127.0.0.1
-```
-
-You can generate the equivalent byte value of the above CBOR representation by visiting [CBOR playground](cbor.me).
-
-On visiting CBOR playground, you will be presented with two text areas (Diagnostic and Bytes). Enter the diagnostic
-representation `[[[5, "localhost"],[3,8040], .. ]` on the Diagnostic text area and click `→`. The bytes representation will be generated on the 'Bytes' textarea.
-
-Sample bytes representation of the default RvInfo:
-```
-81                             # array(1)
-   85                          # array(5)
-      82                       # array(2)
-         05                    # unsigned(5)
-         69                    # text(9)
-            6C6F63616C686F7374 # "localhost"
-      82                       # array(2)
-         03                    # unsigned(3)
-         19 1F68               # unsigned(8040)
-      82                       # array(2)
-         0C                    # unsigned(12)
-         01                    # unsigned(1)
-      82                       # array(2)
-         02                    # unsigned(2)
-         44                    # bytes(4)
-            7F000001           # "\x7F\x00\x00\x01"
-      82                       # array(2)
-         04                    # unsigned(4)
-         19 20FB               # unsigned(8443)
-```
-
-From the above representation, you have to strip the whitespaces and comments(Starting with #) to the format `81858205696c6f63616c686f73748203191f68820c018202447f00000182041920fb`.
-
-You can also make use of the `get-cbor-bytes.sh` script available in `component-samples/scripts` to generate the bytes
-representation from the diagnostic representation.
-
-This bytes value is interpreted internally as:
-
-Directives for Device: `http://localhost:8040`, `http://127.0.0.1:8040`
-
-Directives for Owner: `https://localhost:8443`, `https://127.0.0.1:8443`
-
-***NOTE***: The "http" directive is for device only as the spec dictates that TO0 should always take place over `HTTPS`, irrespective of the http directive used by the device. User can specify any number of RvInfo separated by space. Both device and owner will recursively try each IPaddress and / or DNS address specified in the RvInfo till it reaches an active server with which it can complete the respective Transfer Ownership Protocol. [Read more](https://fidoalliance.org/specs/FDO/fido-device-onboard-v1.0-ps-20210323/#RVInfo) about RendezvousInfo.
+- Update the SSL keystore password & subject_names in `service.yml` file.

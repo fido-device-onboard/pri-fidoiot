@@ -1,174 +1,142 @@
+# About
+
+The FDO Rendezvous Service is designed to acts as a rendezvous point between a newly powered on Device and the Owner Onboarding Service.
+
+***NOTE***: Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
+
+# Getting Started with the FDO Rendezvous Service
+
+The following are the system requirements for the All-in-One demo.
+- Operating System: Ubuntu* 20.04
+- Java* Development Kit 11
+- Apache Maven* 3.5.4 (Optional) software for building the demo from source
+- Java IDE (Optional) for convenience in modifying the source code
+- Docker 18.09
+- Docker compose 1.21.2
+- Haveged
+
+# Configuring JAVA Execution Environment
+
+Appropriate proxy configuration should be updated in **`_JAVA_OPTIONS`** environment variable. (Mandatory, if you are working behind a proxy.)
+
+Update the proxy information in _JAVA_OPTIONS as ```_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port```.
+
 # Getting the Executable
 
-Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation
-(PRI) Rendezvous (RV) component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Rendezvous Service source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fdo-pri-src>/component-samples/rv/
+$ cd <fdo-pri-src>/
 $ mvn clean install
 ```
 
-This will copy the required executables and libraries into <fdo-pri-src>/demo/rv/.
+This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/rv/.
 
-# Configuring the FDO PRI RV Sample
+# Configuring the FDO Rendezvous Service
 
-RV runtime arguments:
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
 
-- `rv_port`
+`service.env`: consists of all the credentials used by the FDO Rendezvous service. These credential configurations are to be generated freshly for each deployment.
 
-  RV server port.
+`hibernate.cfg.xml`: consists of all the database configurations used by the FDO Rendezvous service. This file can be configured to pick various database tables and properties.
 
-  Default value: 8040
+`service.yml` file is structured into multiple sections:
 
-- `rv_database_connection_url`
-
-   JDBC URL for database connection. Includes the database driver name, port number for database and the location of `.db` file
-
-  Default value: jdbc:h2:tcp://localhost:8050/./target/data/rvs
-
-- `rv_database_username`
-
-  RV database username.
-
-  Default value: sa
-
-- `rv_database_password`
-
-  RV database password.
-
-  Default value: `<no-password>`
-
-- `rv_database_port`
-
-  RV database port number.
-
-  Default value: 8050
-
-- `epid_online_url`
-
-  EPID Verification Service URL for EPID device signature verification.
-
-  Default value: https://verify.epid-sbx.trustedservices.intel.com/
-  Other server options: https://verify.epid.trustedservices.intel.com/ (production EPID verification server), https://localhost:1180 (onprem verification service)
-
-- `epid_test_mode`
-
-   EPID devices can be tested using `Test` mode, it is intended for supporting onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device.
-
-   Default value: false
-
-   ***NOTE***: Not recommended for use in production systems.
-
-- `catalina_home`
-
-  Tomcat configuration for catalina home.
-
-  Default value: ./target/tomcat
-
-- `rv_protocol_scheme`
-
-  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
-
-  Default value: https
-
-- `rv_https_port`
-
-  Allows enduser to select a port for accepting HTTPS requests.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default value: 443
-
-- `rv_ssl_keystore`
-
-  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-
-  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `rv_ssl_keystore_password`
-
-  Provides password for the specified keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
 
-## Support for OnDie Devices
+- `system-properties:` - This section contains the runtime environment variables.
 
-Refer to [Demo README](../README.md) for steps to configure rendezvous to support OnDie devices.
 
-# Enabling Remote Access to DB
+- `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
-Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
 
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `<fdo-pri-src>/component-samples/rv/src/main/java/org/fidoalliance/fdo/sample/RvServerApp.java` file
+- `manufacturer:` - This section contains the configuration related to manufacturer keystore path, type and credentials.
 
-```
-db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <rv_db_port>
-webAllowOthers = true
+
+- `cwt:` - This section contains the configuration related to CBOR web token (cwt) keystore path, type and credentials.
+
+
+- `workers:` The section contains the configuration to select desired functionality for the services. The deployer can pick and choose the functionality during runtime.
+
+
+`WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
+
+# Running FDO Rendezvous service
+
+FDO Rendezvous service demo can be executed as a standalone service as well as a docker service. At the
+end of initialization of all services, you will see following statement on the console.
+
+`[INFO] Started Rendezvous Service.`
+
+Follow the below steps to start All-In-One demo.
+
+##  Run as Standalone service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/rv/` and execute following command.
+
+```shell
+java -jar rv.jar
 ```
 
-**IMPORTANT: Not recommended to enable this setting especially on production systems.**
+Make sure to export the credential environment variables set in `service.env` file.
 
-# Starting the RV Service
+##  Run as Docker Service
 
-Refer the [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
-
-# Allowlist and Denylist Configuration
-
-- RV provides the option to allow and deny requests based on the owner, manufacturer and reseller public keys and based on the GUID used in the Device Ownership Voucher
-header.
-- To add entries to these allowlist and denylist, update the `config.properties` file in `<fdo-pri-src>/util/storage-samples/storage-rv-sample/src/main/resources` location and rebuild the code and restart the docker or update the `config.properties` in `<fdo-pri-src>/component-samples/demo/rv` and restart the docker.
-- Once updated, rebuild the code, rebuild RV docker image and then start the docker.
-- The hashes for the default public keys present of owner, manufacturer and reseller are already added in allowlist configuration of component sample. The table below lists them.
-
-  | Hashes in Allowlist | PRI-FIDOIOT Component |
-  | --- | --- |
-  | 42110E8F0F3184A1A5C51868BCBFF7144D66E41D1A188103C0264D5DA8BBCF88 | Manufacturer ECDSA 256 |
-  | 25D42F0536CE584E5812AB8750E80E7464742B4B65347BEA90AD4BBC71D3FFA6 | Manufacturer ECDSA 384 |
-  | 283ADF4CCB527C19A72CFB21A9FF7B555788E6B365CEF3A26C6B876EE0FFE017 | Manufacturer RSA 2048 |
-  | 85A481BBC2DA15EDD7301FF92BA2BB60093D5864A8207F9D78A399B32AB4CFF4 | Reseller ECDSA 256 |
-  | 31726603CB0751BFB926B6436369265557855744338FFC3307693E0D14D5241D | Reseller ECDSA 384 |
-  | 2ED65928AD50CB8542E648B9CD5C8B4BFB76DA870C723B16464F49F5140F7098 | Reseller RSA 2048 |
-  | 1DAC184C6A8BB2D00665F4CFC55B1F55AC9BFB4C899B06827C0C1990A1A0F74C | Owner ECDSA 256 |
-  | 834F83875910C8507CE935BE2F947DCF854E6554C3ACB79893ACF91220EA5D8B | Owner ECDSA 384 |
-  | 91984D7EE0BC1F153900401E6E0D0DC4F6F8472709AA1DAA9256429046C2E367 | Owner RSA 2048 |
-
-- To add entries to allowlist and denylist for public key, public key hash needs to be calculated. Refer [Generating Public Key Hash](#calculate-sha256-hash-of-a-public-key) for the steps to generate public key hash from public key.
-
-**IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
-
-# Calculate SHA256 Hash of a Public Key
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/rv/` and execute following command.
 
 ```
-$ openssl x509 -in cert.pem -pubkey -noout | openssl enc -base64 -d > example_allowlist_publickey.der
-
-$ cat example_allowlist_publickey.der | openssl dgst -sha256 | awk '/s/{print toupper($2)}'
+docker-compose up --build
 ```
 
-***NOTE***: Input file cert.pem is an X509 certificate.
+In case you need super user access, prefix 'sudo -E' to above command.
 
-# Configuring RV for HTTPS/TLS Communication
+***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/rv/ondiecache` folder.
 
-By default, the RV uses HTTP for all communications on port 8040. In addition to that, the RV can be configured to handle HTTPS requests from the owner & device on port 8041.
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/rv/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
-- Generate the Keystore/Certificate for the RV. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
-  * Ensure that the web certificate is issued to the resolvable domain of the Rendezvous server. Refer the above section to generate the keystore.
+# FDO PRI Rendezvous REST APIs
 
-- Copy the generated Keystore/Certificate to `<fdo-pri-src>/component-samples/demo/rv/certs` folder.
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  |
+| GET /api/v1/logs | Serves the log from the manufacturer service | || Manufacturer logs|
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | |||
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |s |  | | Number of Days|
+| GET /health | Returns the health status | || Current version |
 
-- Update the following environment varibles in `<fdo-pri-src>/component-samples/demo/rv/rv.env` file
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
 
-    |  Variable            |  Value            |             Description       |
-    | ---------------------|-------------------|-------------------------------|
-    | rv_protocol_scheme  | https             | To enable HTTPS communication.|
-    | rv_https_port       | port number       | The given port number will be used for HTTPS communication. |
-    | rv_ssl_keystore     | keystore-filename | filename of Keystore that is present in the certs folder.|
-    | rv_ssl_keystore-password| keystore-password | password of the keystore. |
+Following is the list of REST response error codes and it's description :
 
-    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of RV.
-    Avoid using the default keystore available for production deployment.
+|     Error Code     |             Possible Causes               |
+| -------------------:|:----------------------------------------:|
+| `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
+| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
+| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
+
+
+# Troubleshooting
+
+As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+
+# Configuring FDO Rendezvous service for HTTPS/TLS Communication
+
+By default, the Rendezvous service uses HTTP for all communications on port 8040. In addition to that, the Rendezvous service can be configured to handle HTTPS requests from the Owner & device.
+
+Rendezvous service can generate its own certificate and if you want to override the default certificate, follow these steps:
+
+- Generate the Keystore/Certificate for the Rendezvous service. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+
+    * Ensure that the web certificate is issued to the resolvable domain of the Rendezvous service .
+
+
+- Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
+
+
+- Update the SSL keystore password & subject_names in `service.yml` file.

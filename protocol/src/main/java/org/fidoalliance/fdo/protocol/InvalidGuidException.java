@@ -1,7 +1,9 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol;
+
+import org.fidoalliance.fdo.protocol.message.ErrorCode;
 
 /**
  * Represents an invalid GUID exception.
@@ -18,7 +20,9 @@ public class InvalidGuidException extends DispatchException {
   }
 
   @Override
-  protected int getErrorCode() {
-    return Const.INVALID_GUID;
+  public ErrorCode getErrorCode() {
+    return ErrorCode.INVALID_GUID;
   }
+
+
 }

@@ -1,26 +1,26 @@
-# Copyright 2020 Intel Corporation
+# Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
 FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y openjdk-11-jdk opensc wget haveged
+RUN apt-get update && apt-get install -y openjdk-11-jdk wget haveged
 
 RUN useradd -ms /bin/bash fdo
-RUN mkdir -p /home/fdo/lib
 WORKDIR /home/fdo/
+RUN mkdir -p /home/fdo/lib /home/fdo/WEB-INF /home/fdo/app-data
 
-# Setup manufacturer dependencies
+# Setup service dependencies
 COPY ./lib ./lib/
-COPY ./certs ./certs/
-COPY ./ondie_cache ./ondie_cache/
+COPY ./WEB-INF ./WEB-INF
 COPY log4j2.xml .
-COPY manufacturer.jar .
-COPY manufacturer_keystore.p12 owner_pub_keys.pem* reseller_pub_keys.pem* ./
-COPY manufacturer-entrypoint.sh .
+COPY aio.jar .
+COPY hibernate.cfg.xml .
+COPY service.yml .
+
 
 RUN chown -R fdo:fdo /home/fdo
 USER fdo
 
-# Configure and start manufacturer
-CMD ["bash", "manufacturer-entrypoint.sh"]
+# Configure and start all-in-one
+CMD ["/usr/lib/jvm/java-11-openjdk-amd64/bin/java", "-jar", "aio.jar"]
