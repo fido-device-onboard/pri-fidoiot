@@ -3,11 +3,11 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.PemLoader;
