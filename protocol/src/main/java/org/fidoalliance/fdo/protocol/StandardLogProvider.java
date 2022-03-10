@@ -1,14 +1,12 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
-
-import org.fidoalliance.fdo.protocol.Log4jProvider;
-import org.fidoalliance.fdo.protocol.LogProvider;
-import org.fidoalliance.fdo.protocol.LogProviderFactory;
-
 
 public class StandardLogProvider implements LogProviderFactory {
 
   @Override
-  public LogProvider apply(Class<?> aClass) {
-    return new Log4jProvider(aClass);
+  public LogProvider apply(Class<?> clazz) {
+    return new Log4jProvider(clazz);
   }
 }

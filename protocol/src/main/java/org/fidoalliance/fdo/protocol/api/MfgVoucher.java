@@ -1,24 +1,23 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import java.security.cert.Certificate;
-import java.util.Date;
 import java.util.List;
-import org.fidoalliance.fdo.protocol.AlgorithmFinder;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
-import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
-import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.ManufacturedVoucher;
-import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
-import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
-import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 
+/**
+ * Get API for Manufacturing voucher.
+ */
 public class MfgVoucher extends RestApi {
 
 

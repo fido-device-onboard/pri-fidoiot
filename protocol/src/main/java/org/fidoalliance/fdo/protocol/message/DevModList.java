@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -7,7 +10,7 @@ import org.fidoalliance.fdo.protocol.serialization.DevModListSerializer;
 
 @JsonDeserialize(using = DevModListDeserializer.class)
 @JsonSerialize(using = DevModListSerializer.class)
-public class DevModList  {
+public class DevModList {
 
   private int index;
   private int count;

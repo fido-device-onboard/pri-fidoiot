@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -29,7 +32,11 @@ import org.fidoalliance.fdo.protocol.message.StatusCb;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
+/**
+ * Implements FdoSysModule spec.
+ */
 public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
@@ -102,10 +109,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
       case FdoSys.EOT:
         if (state.isActive()) {
-          EotResult result = Mapper.INSTANCE.readValue(kvPair.getValue(), EotResult.class);
           extra.setWaiting(false);
           extra.setQueue(extra.getWaitQueue());
           extra.setWaitQueue(new ServiceInfoQueue());
+          EotResult result = Mapper.INSTANCE.readValue(kvPair.getValue(), EotResult.class);
           onEot(state, extra, result);
         }
         break;
@@ -150,6 +157,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         extra.setWaiting(true);
         extra.setWaitQueue(extra.getQueue());
         extra.setQueue(new ServiceInfoQueue());
+        break;
       default:
         break;
     }
@@ -192,6 +200,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
+      Transaction trans = session.beginTransaction();
       SystemPackage systemPackage =
           session.find(SystemPackage.class, Long.valueOf(1));
 
@@ -222,6 +231,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         }
 
       }
+      trans.commit();
     } catch (SQLException e) {
       throw new InternalServerErrorException(e);
     } finally {
@@ -262,6 +272,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     String resource = instruction.getResource();
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
+      Transaction trans = session.beginTransaction();
       resource = resource.replace("$(guid)", state.getGuid().toString());
 
       // Query database table SYSTEM_RESOURCE for filename Key
@@ -293,6 +304,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       } else {
         throw new InternalServerErrorException("svi resource missing " + resource);
       }
+      trans.commit();
 
     } finally {
       session.close();

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,8 +18,9 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
 
 /**
  * Singleton Pattern for Mapping object.
@@ -37,21 +41,19 @@ public enum Mapper {
   }
 
 
-
-  private void writeDiagnostic(JsonNode node,StringBuilder output) throws IOException {
+  private void writeDiagnostic(JsonNode node, StringBuilder output) throws IOException {
 
     if (node.isBinary()) {
       output.append("h'");
-      output.append(Hex.encodeHexString(node.binaryValue(),false));
+      output.append(Hex.encodeHexString(node.binaryValue(), false));
       output.append("'");
-    }
-    else if (node.isArray()) {
+    } else if (node.isArray()) {
       output.append("[");
       String comma = "";
       int count = node.size();
       for (int i = 0; i < count; i++) {
         output.append(comma);
-        writeDiagnostic(node.get(i),output);
+        writeDiagnostic(node.get(i), output);
         comma = ", ";
       }
       output.append("]");
@@ -68,7 +70,7 @@ public enum Mapper {
           output.append(fieldName);
         }
         output.append(": ");
-        writeDiagnostic(node.get(fieldName),output);
+        writeDiagnostic(node.get(fieldName), output);
         comma = ", ";
       }
       output.append("}");
@@ -85,10 +87,25 @@ public enum Mapper {
       } else {
         output.append("false");
       }
-    }
-    else if (node.isNull()) {
+    } else if (node.isNull()) {
       output.append("null");
     }
+  }
+
+  /**
+   * Writes an Object as a CBOR Diagnostic encoded string.
+   *
+   * @param builder The String builder to append to
+   * @param value   The object to encode.
+   * @return The object representation in Diagnostic form.
+   * @throws IOException An error occurred when writing the content.
+   */
+  public String writeDiagnostic(StringBuilder builder, Object value) throws IOException {
+    JsonNode node = cborMapper.valueToTree(value);
+
+    writeDiagnostic(node, builder);
+
+    return builder.toString();
   }
 
   /**
@@ -117,21 +134,6 @@ public enum Mapper {
     return yamlMapper.writeValueAsString(value);
   }
 
-  /**
-   * Writes an Object as a CBOR Diagnostic encoded string.
-   *
-   * @param builder The String builder to append to
-   * @param value The object to encode.
-   * @return The object representation in Diagnostic form.
-   * @throws IOException An error occurred when writing the content.
-   */
-  public String writeDiagnostic(StringBuilder builder,Object value) throws IOException {
-    JsonNode node = cborMapper.valueToTree(value);
-
-    writeDiagnostic(node,builder);
-
-    return builder.toString();
-  }
 
   /**
    * Reads Config file.
@@ -164,9 +166,9 @@ public enum Mapper {
   /**
    * Reads a cbor value from an input stream.
    *
-   * @param in The input stream.
-   * @param t    The target class.
-   * @param <T>  The target Class type.
+   * @param in  The input stream.
+   * @param t   The target class.
+   * @param <T> The target Class type.
    * @return The converted result.
    * @throws IOException An error occurred when reading the content.
    */
@@ -174,22 +176,6 @@ public enum Mapper {
     ObjectReader reader = cborMapper.readerFor(t);
     return reader.readValue(in, t);
   }
-
-  /**
-   * Reads a Json encoded value.
-   * @param json Json String.
-   * @param t    The target class.
-   * @param <T>  The target Class type.
-   * @return The converted result.
-   * @throws IOException An error occurred when reading the content.
-   */
-  public <T> T readJsonValue(String json, Class<T> t) throws IOException {
-    ObjectReader reader = jsonMapper.readerFor(t);
-    return reader.readValue(json, t);
-  }
-
-
-
 
   /**
    * Reads a value from binary (CBOR) encoding.
@@ -204,6 +190,21 @@ public enum Mapper {
     ObjectReader reader = cborMapper.readerFor(t);
     return reader.readValue(bytes, t);
   }
+
+  /**
+   * Reads a Json encoded value.
+   *
+   * @param json Json String.
+   * @param t    The target class.
+   * @param <T>  The target Class type.
+   * @return The converted result.
+   * @throws IOException An error occurred when reading the content.
+   */
+  public <T> T readJsonValue(String json, Class<T> t) throws IOException {
+    ObjectReader reader = jsonMapper.readerFor(t);
+    return reader.readValue(json, t);
+  }
+
 
   /**
    * Threads the cbor content to a JsonNode.
@@ -239,9 +240,10 @@ public enum Mapper {
   }
 
   /**
-   * Coverts an instance to a Json Node
+   * Coverts an instance to a Json Node.
+   *
    * @param fromValue the instance to convert.
-   * @param <T> The target Json Object.
+   * @param <T>       The target Json Object.
    * @return The Json Object.
    */
   public <T> T valueToTree(Object fromValue) {

@@ -3,22 +3,15 @@
 
 package org.fidoalliance.fdo.protocol;
 
-import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.NoSuchElementException;
-import javax.crypto.Cipher;
 import org.fidoalliance.fdo.protocol.message.CipherSuiteType;
 import org.fidoalliance.fdo.protocol.message.CoseKeyCurveType;
 import org.fidoalliance.fdo.protocol.message.HashType;
 import org.fidoalliance.fdo.protocol.message.KeySizeType;
-import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
-import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
-import org.fidoalliance.fdo.protocol.message.SigInfo;
 
 /**
  * Finds algorithm values.
@@ -27,7 +20,7 @@ public class AlgorithmFinder {
 
 
   /**
-   * Gets the Java hash Algorithm for the given HashType
+   * Gets the Java hash Algorithm for the given HashType.
    *
    * @param hashType The HashType.
    * @return The Java Algorithm to use.
@@ -46,6 +39,67 @@ public class AlgorithmFinder {
         throw new InvalidParameterException("hashType " + hashType);
     }
   }
+
+  /**
+   * Gets the Java Algorithm for the provided key.
+   *
+   * @param keyType The provided Public key Type.
+   * @return The Java Key Factory Algorithm.
+   */
+  public String getAlgorithm(PublicKeyType keyType) {
+    switch (keyType) {
+      case RSA2048RESTR:
+      case RSAPKCS:
+        return "RSA";
+      case SECP256R1:
+      case SECP384R1:
+        return "EC";
+      default:
+        throw new InvalidParameterException("PublicKeyType " + keyType);
+    }
+  }
+
+  /**
+   * Gets the Java algorithm for the given cipher suite.
+   * @param cipherType The CipherSuiteType.
+   * @return The Java algorithm name.
+   */
+  public String getAlgorithm(CipherSuiteType cipherType) {
+    switch (cipherType) {
+      case COSE_AES128_CTR:
+      case COSE_AES256_CTR:
+        return "AES/CTR/NoPadding";
+      case COSE_AES128_CBC:
+      case COSE_AES256_CBC:
+        return "AES/CBC/PKCS7Padding";
+      case A128GCM:
+      case A256GCM:
+        return "AES/GCM/NoPadding";
+      default:
+        throw new InvalidParameterException("invalid cipher " + cipherType);
+    }
+
+  }
+
+
+  /**
+   * Gets the Java algorithm for the given CoseKey Curve.
+   *
+   * @param coseKeyCurveType A coseCurveType.
+   * @return The Java algorithm name.
+   */
+  public String getAlgorithm(CoseKeyCurveType coseKeyCurveType) {
+    switch (coseKeyCurveType) {
+      case P256EC2:
+        return "secp256r1";
+      case P384EC2:
+        return "secp384r1";
+      default:
+        throw new InvalidParameterException("invalid curve " + coseKeyCurveType);
+    }
+  }
+
+
 
   /**
    * Get the Digest/SHA HashType for a given HMAC Type.
@@ -91,59 +145,6 @@ public class AlgorithmFinder {
   }
 
 
-  /**
-   * Gets the Java Algorithm for the provided key
-   *
-   * @param keyType The provided Public key Type.
-   * @return The Java Key Factory Algorithm.
-   */
-  public String getAlgorithm(PublicKeyType keyType) {
-    switch (keyType) {
-      case RSA2048RESTR:
-      case RSAPKCS:
-        return "RSA";
-      case SECP256R1:
-      case SECP384R1:
-        return "EC";
-      default:
-        throw new InvalidParameterException("PublicKeyType " + keyType);
-    }
-  }
-
-
-  /**
-   * Gets the Java algorithm for the given CoseKey Curve.
-   *
-   * @param coseKeyCurveType A coseCurveType.
-   * @return The Java algorithm name.
-   */
-  public String getAlgorithm(CoseKeyCurveType coseKeyCurveType) {
-    switch (coseKeyCurveType) {
-      case P256EC2:
-        return "secp256r1";
-      case P384EC2:
-        return "secp384r1";
-      default:
-        throw new InvalidParameterException("invalid curve " + coseKeyCurveType);
-    }
-  }
-
-  public String getAlgorithm(CipherSuiteType cipherType) {
-    switch (cipherType) {
-      case COSE_AES128_CTR:
-      case COSE_AES256_CTR:
-        return "AES/CTR/NoPadding";
-      case COSE_AES128_CBC:
-      case COSE_AES256_CBC:_CBC:
-        return "AES/CBC/PKCS7Padding";
-      case A128GCM:
-      case A256GCM:
-        return "AES/GCM/NoPadding";
-      default:
-        throw  new InvalidParameterException("invalid cipher " + cipherType);
-    }
-
-  }
 
   /**
    * Gets the CoseKey Curve type for the given public Key Type.
@@ -189,10 +190,20 @@ public class AlgorithmFinder {
     }
   }
 
+  /**
+   * Gets the Cose spec Algorithm Id.
+   * @return The Algorithm Id from the Cose spec.
+   */
   public int getCoseAlgorithmId() {
     return 1;
   }
 
+  /**
+   * Gets the Cose Algorithm value for the given Keytype and key size.
+   * @param keyType The PublicKeyType.
+   * @param sizeType The size of the key.
+   * @return The Cose Algorithm value.
+   */
   public int getCoseAlgorithm(PublicKeyType keyType, KeySizeType sizeType) {
     // note:
     // EC values come from COSE spec, table 5
@@ -238,6 +249,11 @@ public class AlgorithmFinder {
   }
 
 
+  /**
+   * Gets the PublicKeyType from the given key.
+   * @param publicKey A Java public key.
+   * @return The PublicKeyType type.
+   */
   public PublicKeyType getPublicKeyType(PublicKey publicKey) {
     if (publicKey instanceof ECPublicKey) {
       switch (getKeySizeType(publicKey)) {

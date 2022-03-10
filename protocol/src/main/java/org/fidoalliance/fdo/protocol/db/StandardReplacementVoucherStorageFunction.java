@@ -1,11 +1,12 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementVoucherStorageFunction;
-import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
@@ -35,7 +36,7 @@ public class StandardReplacementVoucherStorageFunction implements
         } else {
           onboardingVoucher.setReplacement(null);
         }
-        onboardingVoucher.setTo2CompletedOn( new Date(System.currentTimeMillis()));
+        onboardingVoucher.setTo2CompletedOn(new Date(System.currentTimeMillis()));
         session.update(onboardingVoucher);
         trans.commit();
       }

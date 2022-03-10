@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,10 +18,15 @@ public enum TransportProtocol {
 
   private int id;
 
-  private TransportProtocol(int id) {
+  TransportProtocol(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static TransportProtocol fromNumber(Number n) {
     int i = n.intValue();

@@ -1,22 +1,19 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.MsgType;
@@ -189,7 +186,8 @@ public abstract class HttpClient implements Runnable {
         if (getInstructions().size() > 0
             && index < getInstructions().size()
             && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
-            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE)) {
+            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+            || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
           logger.info("instruction failed " + e.getMessage());
           logger.info("moving to next instruction");
           continue;
@@ -213,7 +211,7 @@ public abstract class HttpClient implements Runnable {
 
       initializeSession();
       generateHello();
-      while (getInstructions().size() > 0){
+      while (getInstructions().size() > 0) {
 
         sendMessage();
 

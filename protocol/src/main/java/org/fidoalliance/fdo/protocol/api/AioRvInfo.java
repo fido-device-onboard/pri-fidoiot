@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,18 +11,15 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.RvData;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 
-import java.sql.Blob;
 
-/***
- *  AioRvInfo REST endpoint enables users to set value for RVINFO_BLOB in RV_DATA table
- *  with IP address and Protocol_type.
+/**
+ * AioRvInfo REST endpoint enables users to set value for RVINFO_BLOB in RV_DATA table with IP
+ * address and Protocol_type.
  *
- *  Accepted URL pattern: POST /api/v1/aio/rvinfo?ip=<ip-address>&rvprot=http/https
+ * <p>Accepted URL pattern: POST /api/v1/aio/rvinfo?ip=&lt; ip-address&gt&rvprot=http/https
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
-*/
-
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
+ */
 public class AioRvInfo extends RestApi {
 
   @Override

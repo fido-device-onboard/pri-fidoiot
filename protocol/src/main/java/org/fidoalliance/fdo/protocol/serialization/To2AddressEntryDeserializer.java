@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,7 +33,6 @@ public class To2AddressEntryDeserializer extends StdDeserializer<To2AddressEntry
 
     To2AddressEntry entry = new To2AddressEntry();
     int index = 0;
-
 
     JsonNode subNode = node.get(index++);
     if (subNode.isBinary()) {

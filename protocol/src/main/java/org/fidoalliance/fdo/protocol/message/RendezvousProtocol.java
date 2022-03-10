@@ -1,10 +1,13 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.NoSuchElementException;
 
-public enum RendezvousProtocol  {
+public enum RendezvousProtocol {
   PROT_REST(0),
   PROT_HTTP(1),
   PROT_HTTPS(2),
@@ -15,10 +18,15 @@ public enum RendezvousProtocol  {
 
   private int id;
 
-  private RendezvousProtocol(int id) {
+  RendezvousProtocol(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static RendezvousProtocol fromNumber(Number n) {
     int i = n.intValue();

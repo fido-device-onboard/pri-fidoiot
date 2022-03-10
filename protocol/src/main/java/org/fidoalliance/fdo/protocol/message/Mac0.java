@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,7 +13,7 @@ import org.fidoalliance.fdo.protocol.serialization.TaggedItem;
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
 @JsonPropertyOrder({"protectedHeader", "unprotectedHeader", "payload", "tagValue"})
 @JsonSerialize(using = GenericArraySerializer.class)
-public class Mac0  implements TaggedItem {
+public class Mac0 implements TaggedItem {
 
   @JsonProperty("protectedHeader")
   private byte[] protectedHeader;

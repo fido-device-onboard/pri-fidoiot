@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,8 +47,6 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 
 /**
  * Defines a FDO server.
- * <p>
- * FdoSettings and FdoConfig defines settings of the server.
  */
 public class StandardHttpServer implements HttpServer {
 
@@ -165,7 +166,6 @@ public class StandardHttpServer implements HttpServer {
   public void run() {
 
     Tomcat tomcat = new Tomcat();
-
 
     tomcat.setBaseDir(config.getBasePath());
 

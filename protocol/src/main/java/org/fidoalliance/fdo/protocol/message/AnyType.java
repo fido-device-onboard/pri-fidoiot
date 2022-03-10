@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,7 +21,7 @@ public class AnyType {
 
   @JsonIgnore
   private AnyType(final Object object) {
-   this.object = object;
+    this.object = object;
   }
 
   @JsonIgnore

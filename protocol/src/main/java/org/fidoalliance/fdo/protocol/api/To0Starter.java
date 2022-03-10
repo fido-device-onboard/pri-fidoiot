@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import java.io.IOException;
@@ -14,6 +17,9 @@ import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
+/**
+ * API to start Starts To0 protocol.
+ */
 public class To0Starter extends RestApi {
 
   @Override
@@ -21,8 +27,9 @@ public class To0Starter extends RestApi {
 
     LoggerService logger = new LoggerService(To0Starter.class);
     String guid = getLastSegment();
-    Thread thread = new Thread(){
-      public void run(){
+
+    Thread thread = new Thread() {
+      public void run() {
         try {
           logger.info("Triggering TO0 for GUID: " + guid);
           OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(
@@ -35,14 +42,14 @@ public class To0Starter extends RestApi {
 
           OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
           To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(),To2AddressEntries.class);
+              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(), To2AddressEntries.class);
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
           to0Client.setTo0d(to0d);
           to0Client.run();
           logger.info("TO0 completed for GUID: " + guid);
-        } catch (IOException e ) {
+        } catch (IOException e) {
           logger.error("TO0 failed for GUID: " + guid);
         }
 

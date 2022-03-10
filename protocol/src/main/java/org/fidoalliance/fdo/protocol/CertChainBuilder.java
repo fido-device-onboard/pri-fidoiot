@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +33,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
- * Builds a self-signed certificate chain.
+ * Builds a signed certificate chain.
  */
 public class CertChainBuilder {
 
@@ -44,62 +47,122 @@ public class CertChainBuilder {
   private GeneralNames subjectAlternateNames;
 
 
+  /**
+   * Sets the Private Key.
+   * @param privateKey A Private Key.
+   * @return The builder.
+   */
   public CertChainBuilder setPrivateKey(PrivateKey privateKey) {
     this.privateKey = privateKey;
     return this;
   }
 
+  /**
+   * Sets the issuer chain.
+   * @param issuerChain The issuer chain.
+   * @return The builder.
+   */
   public CertChainBuilder setIssuerChain(Certificate[] issuerChain) {
     this.issuerChain = issuerChain;
     return this;
   }
 
+  /**
+   * Sets the public key.
+   * @param publicKeyInfo The subject public key info.
+   * @return The builder.
+   */
   public CertChainBuilder setPublicKey(SubjectPublicKeyInfo publicKeyInfo) {
     this.publicKeyInfo = publicKeyInfo;
     return this;
   }
 
+  /**
+   * Sets the public key.
+   * @param publicKey A Java public key.
+   * @return The builder.
+   */
   public CertChainBuilder setPublicKey(PublicKey publicKey) {
     this.publicKeyInfo =
         SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
     return this;
   }
 
+  /**
+   * Sets the signature algorithm.
+   * @param signatureAlgorithm The algorithm as a string.
+   * @return The builder.
+   */
   public CertChainBuilder setSignatureAlgorithm(String signatureAlgorithm) {
     this.signatureAlgorithm = signatureAlgorithm;
     return this;
   }
 
+  /**
+   * Sets the signature algorithm.
+   * @param algorithm The ANS1 signature algorithm.
+   * @return The builder.
+   */
   public CertChainBuilder setSignatureAlgorithm(ASN1ObjectIdentifier algorithm) {
     this.signatureAlgorithm = new DefaultAlgorithmNameFinder().getAlgorithmName(algorithm);
     return this;
   }
 
+  /**
+   * Sets the crypto provider.
+   * @param provider A java cryto Provider.
+   * @return The builder.
+   */
   public CertChainBuilder setProvider(Provider provider) {
     this.provider = provider;
     return this;
   }
 
+  /**
+   * Sets the Subject Name.
+   * @param subject The subject as a String.
+   * @return The builder.
+   */
   public CertChainBuilder setSubject(String subject) {
     this.subject = new X500Name(subject);
     return this;
   }
 
+  /**
+   * Sets the subject Name.
+   * @param subject The X500Name subject.
+   * @return The builder.
+   */
   public CertChainBuilder setSubject(X500Name subject) {
     this.subject = subject;
     return this;
   }
 
+  /**
+   * Sets the validity days.
+   * @param days the validity days.
+   * @return The builder.
+   */
   public CertChainBuilder setValidityDays(int days) {
     this.validityDays = days;
     return this;
   }
 
+  /**
+   * Sets the Subject Alternate Names.
+   * @param names Subject Alternate Names.
+   * @return The builder.
+   */
   public CertChainBuilder setSubjectAlternateNames(GeneralNames names) {
     this.subjectAlternateNames = names;
     return this;
   }
 
+  /**
+   * Builds a certificate chain.
+   * @return The built certificate chain.
+   * @throws IOException An Error occurred.
+   */
   public Certificate[] build() throws IOException {
 
     final Instant now = Instant.now();

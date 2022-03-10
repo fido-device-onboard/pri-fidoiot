@@ -1,8 +1,10 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
+import java.io.IOException;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import org.fidoalliance.fdo.protocol.Config;
@@ -10,28 +12,23 @@ import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemFormatter;
-import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.CertificateData;
-import java.io.IOException;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
 
-/***
- *  CertificateAPI REST endpoint enables users to
- *     - Collect the keystores stored in the DB based on the filename.
- *     - Upload new keystores to database.
- *     - Delete existing keystores in database.
+/**
+ * CertificateAPI REST endpoint enables users to - Collect the keystores stored in the DB based on
+ * the filename. - Upload new keystores to database. - Delete existing keystores in database.
  *
- *  Accepted URL patterns :
- *     - GET /api/v1/certificate?filename=<filename>
- *     - POST  /api/v1/certificate?filename=<filename> with filecontents in the body
- *     - DELETE /api/v1/certificate?filename=<filename>
+ * <p>Accepted URL patterns :
+ * - GET /api/v1/certificate?filename=&ltfilename&gt
+ * - POST  /api/v1/certificate?filename=&ltfilename&gt with filecontents in the body
+ * - DELETE /api/v1/certificate?filename=&ltfilename&gt
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
  */
 
 public class CertificateApi extends RestApi {

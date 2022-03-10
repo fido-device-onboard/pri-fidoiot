@@ -11,8 +11,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"maxMessageSize","guid","proveTo2Ov","kexSuiteName","cipherSuiteType",
-    "sigInfoA"} )
+@JsonPropertyOrder({"maxMessageSize", "guid", "proveTo2Ov", "kexSuiteName", "cipherSuiteType",
+    "sigInfoA"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class HelloDevice {
 
@@ -88,6 +88,7 @@ public class HelloDevice {
   public void setCipherSuiteName(CipherSuiteType cipherSuiteType) {
     this.cipherSuiteType = cipherSuiteType;
   }
+
   @JsonIgnore
   public void setSigInfo(SigInfo sigInfo) {
     this.sigInfo = sigInfo;

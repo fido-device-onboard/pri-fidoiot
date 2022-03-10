@@ -1,23 +1,27 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.entity;
 
-
+import java.sql.Blob;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
-import java.sql.Blob;
+
 
 @Entity
 @Table(name = "ondie_certificate_data")
 public class OnDieCertificateData {
+
   @Id
   @Column(name = "id", nullable = false)
   private String name;
 
   @Lob
   @Column(name = "data")
-   private Blob data;
+  private Blob data;
 
   public String getId() {
     return name;

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -30,6 +33,13 @@ import org.bouncycastle.util.io.pem.PemWriter;
 public class PemFormatter {
 
 
+  /**
+   * Formats a list of certificates as PEM.
+   *
+   * @param certs A list of certificates.
+   * @return The certs in PEM format.
+   * @throws IOException An error occurred.
+   */
   public static String format(List<Certificate> certs) throws IOException {
     StringBuilder builder = new StringBuilder();
     for (Certificate cert : certs) {
@@ -38,6 +48,14 @@ public class PemFormatter {
     return builder.toString();
   }
 
+
+  /**
+   * Formats a Certificate in PEM format.
+   *
+   * @param cert A certificate.
+   * @return The certificate in PEM format.
+   * @throws IOException An error occurred.
+   */
   public static String format(Certificate cert) throws IOException {
     try (StringWriter writer = new StringWriter();
         PemWriter pemWriter = new PemWriter(writer);) {
@@ -51,6 +69,13 @@ public class PemFormatter {
   }
 
 
+  /**
+   * Formats a public as PEM.
+   *
+   * @param publicKey The public key.
+   * @return The public key in PEM format.
+   * @throws IOException An error occurred.
+   */
   public static String format(PublicKey publicKey) throws IOException {
     try (StringWriter writer = new StringWriter();
         PemWriter pemWriter = new PemWriter(writer);) {
@@ -63,6 +88,15 @@ public class PemFormatter {
     }
   }
 
+  /**
+   * Formats a private in PEM format.
+   *
+   * @param key      A private key.
+   * @param random   A secure random generate.
+   * @param password The password to encrypt the key.
+   * @return The key in PEM format.
+   * @throws IOException An error occurred.
+   */
   public static String formatKey(PrivateKey key, SecureRandom random, String password)
       throws IOException {
 

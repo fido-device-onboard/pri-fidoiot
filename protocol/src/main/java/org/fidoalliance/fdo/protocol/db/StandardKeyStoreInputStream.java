@@ -1,10 +1,13 @@
-package org.fidoalliance.fdo.protocol.db;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.fidoalliance.fdo.protocol.dispatch.KeyStoreInputStreamFunction;
 import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import org.hibernate.Session;
@@ -20,7 +23,7 @@ public class StandardKeyStoreInputStream implements KeyStoreInputStreamFunction 
       trans = session.beginTransaction();
 
       final String name = new File(s).getName();
-      CertificateData certStore = session.find(CertificateData.class,name);
+      CertificateData certStore = session.find(CertificateData.class, name);
       if (certStore == null) {
         certStore = new CertificateData();
 
@@ -30,10 +33,9 @@ public class StandardKeyStoreInputStream implements KeyStoreInputStreamFunction 
         return null;
       }
 
-
       byte[] data = certStore.getData();
       if (data != null) {
-          return new ByteArrayInputStream(data);
+        return new ByteArrayInputStream(data);
       }
       return null;
 

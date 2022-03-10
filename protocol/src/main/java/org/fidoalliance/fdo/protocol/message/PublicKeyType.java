@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -5,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.NoSuchElementException;
 
 
-public enum PublicKeyType  {
+public enum PublicKeyType {
   RSA2048RESTR(1),
   RSAPKCS(5),
   SECP256R1(10),
@@ -18,8 +21,11 @@ public enum PublicKeyType  {
     this.id = id;
   }
 
-
-
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static PublicKeyType fromNumber(Number n) {
     int i = n.intValue();
