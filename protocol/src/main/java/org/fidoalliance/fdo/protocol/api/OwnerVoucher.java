@@ -3,10 +3,15 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.logging.Logger;
+
 import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
+import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
@@ -16,6 +21,7 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
  */
 public class OwnerVoucher extends RestApi {
 
+  protected static LoggerService logger = new LoggerService(OwnerVoucher.class);
 
   @Override
   public void doPost() throws Exception {
@@ -63,5 +69,27 @@ public class OwnerVoucher extends RestApi {
     } else {
       throw new NotFoundException(path);
     }
+  }
+
+  @Override
+  public void doDelete() throws NotFoundException {
+
+    // Create Session object and begin Hibernate transaction.
+    getTransaction();
+
+    // Collect 'guid' from HttpRequest URL last segment
+    String guid = getLastSegment();
+
+    // Query database table ONBOARDING_VOUCHER for guid
+    OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class,guid);
+
+    if (onboardingVoucher != null) {
+      // delete the row, if data exists.
+      getSession().delete(onboardingVoucher);
+    } else {
+      logger.warn("GUID not found.");
+      getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
   }
 }
