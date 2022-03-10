@@ -1064,7 +1064,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (credReuse) {
       byte[] rv1 = Mapper.INSTANCE.writeValue(oldHeader.getRendezvousInfo());
       byte[] rv2 = Mapper.INSTANCE.writeValue(newHeader.getRendezvousInfo());
-      if (!Arrays.equals(rv1, rv1)) {
+      if (!Arrays.equals(rv1, rv2)) {
         credReuse = false;
       }
     }
@@ -1352,6 +1352,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2Done2 done2 = storage.get(To2Done2.class);
     cipherText = Mapper.INSTANCE.writeValue(done2);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
+
+
   }
 
   protected void doTo2Done2(DispatchMessage request, DispatchMessage response)

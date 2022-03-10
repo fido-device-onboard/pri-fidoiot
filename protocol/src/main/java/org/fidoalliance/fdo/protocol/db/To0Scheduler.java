@@ -66,11 +66,33 @@ public class To0Scheduler implements Closeable {
     private String interval;
 
     public long getInterval() {
-      return Long.parseLong(Config.resolve(interval));
+      Long intervalValue;
+      try {
+        intervalValue = Long.parseLong(Config.resolve(interval));
+        if(intervalValue <= 60) {
+          logger.error("Received intervalValue less than 60. Defaulting intervalValue to 60.");
+          intervalValue = Long.valueOf(60);
+        }
+      } catch (NumberFormatException e) {
+        intervalValue = Long.valueOf(120);
+        logger.error("Invalid intervalValue. Defaulting intervalValue to 120.");
+      }
+      return intervalValue;
     }
 
     public int getThreadCount() {
-      return Integer.parseInt(Config.resolve(threadCount));
+      int threadCountValue;
+      try {
+        threadCountValue = Integer.parseInt(Config.resolve(threadCount));
+        if(threadCountValue <= 5) {
+          logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
+          threadCountValue = 5;
+        }
+      } catch (NumberFormatException e) {
+        threadCountValue = 5;
+        logger.error("Invalid threadCount. Defaulting the thread-count to 5.");
+      }
+      return threadCountValue;
     }
   }
 
@@ -131,13 +153,15 @@ public class To0Scheduler implements Closeable {
     executor =
         (ThreadPoolExecutor) Executors.newFixedThreadPool(config.getThreadCount());
 
+    Long interval = config.getInterval();
     scheduler.scheduleWithFixedDelay(new Runnable() {
       @Override
       public void run() {
         onInterval();
       }
-    }, config.getInterval(), config.getInterval(), TimeUnit.SECONDS);
+    }, interval, interval,TimeUnit.SECONDS);
 
-    logger.info("To0Scheduler will run every " + config.getInterval() + " seconds");
+
+    logger.info("To0Scheduler will run every " + interval + " seconds");
   }
 }

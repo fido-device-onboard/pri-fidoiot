@@ -213,7 +213,12 @@ public class StandardHttpServer implements HttpServer {
 
       if (scheme.toLowerCase().equals("https")) {
         Connector httpsConnector = new Connector();
-        int httpsPort = Integer.parseInt(config.getHttpsPort());
+        int httpsPort = 8443;
+        try {
+          httpsPort = Integer.parseInt(config.getHttpsPort());
+        } catch (NumberFormatException e) {
+          logger.error("Invalid HTTPS port. Defaulting to 8443 port.");
+        }
         httpsConnector.setPort(httpsPort);
         httpsConnector.setSecure(true);
         httpsConnector.setScheme("https");
@@ -262,7 +267,12 @@ public class StandardHttpServer implements HttpServer {
 
       } else if (scheme.toLowerCase().equals("http")) {
         Connector httpsConnector = new Connector();
-        int httpPort = Integer.parseInt(config.getHttpPort());
+        int httpPort = 8080;
+        try {
+          httpPort = Integer.parseInt(config.getHttpPort());
+        } catch (NumberFormatException e) {
+          logger.error("Invalid HTTP port. Defaulting to 8080 port.");
+        }
 
         httpsConnector.setPort(httpPort);
         httpsConnector.setScheme("http");
