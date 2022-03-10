@@ -69,7 +69,7 @@ public class To0Scheduler implements Closeable {
       Long intervalValue;
       try {
         intervalValue = Long.parseLong(Config.resolve(interval));
-        if(intervalValue <= 60) {
+        if (intervalValue <= 60) {
           logger.error("Received intervalValue less than 60. Defaulting intervalValue to 60.");
           intervalValue = Long.valueOf(60);
         }
@@ -84,7 +84,7 @@ public class To0Scheduler implements Closeable {
       int threadCountValue;
       try {
         threadCountValue = Integer.parseInt(Config.resolve(threadCount));
-        if(threadCountValue <= 5) {
+        if (threadCountValue <= 5) {
           logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
           threadCountValue = 5;
         }

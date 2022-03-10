@@ -61,7 +61,8 @@ public class Config {
       loadWorkerItems();
       loadEnvFiles();
     } catch (IOException e) {
-      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");// todo : Replace with logger.
+      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
+      // todo : Replace with logger.
       System.exit(-1);
     }
   }
