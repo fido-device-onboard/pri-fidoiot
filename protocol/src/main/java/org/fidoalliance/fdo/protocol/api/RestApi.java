@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +19,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
+/**
+ * Base class for Rest Apis.
+ */
 public class RestApi implements AutoCloseable {
 
   private static final int READ_SIZE = 1024;
@@ -46,8 +52,9 @@ public class RestApi implements AutoCloseable {
   protected int getReadSize() {
     return READ_SIZE;
   }
+
   protected int getMaxMessageSize() {
-    return BufferUtils.getMaxBufferSize()*2;
+    return BufferUtils.getMaxBufferSize() * 2;
   }
 
   protected HttpServletResponse getResponse() {
@@ -73,7 +80,7 @@ public class RestApi implements AutoCloseable {
   }
 
   protected void commit() {
-    if (transaction != null ) {
+    if (transaction != null) {
       if (transaction.getStatus() == TransactionStatus.ACTIVE) {
         transaction.commit();
       }
@@ -112,7 +119,6 @@ public class RestApi implements AutoCloseable {
       }
     }
 
-
     File file = new File(req.getRequestURI());
 
     while (file != null) {
@@ -132,7 +138,7 @@ public class RestApi implements AutoCloseable {
     throw new NotFoundException(getRequest().getRequestURI());
   }
 
-  protected void doDelete() throws Exception  {
+  protected void doDelete() throws Exception {
   }
 
   protected void doPut() throws Exception {
@@ -149,7 +155,7 @@ public class RestApi implements AutoCloseable {
   public void close() throws Exception {
     commit();
     if (session != null) {
-        session.close();
+      session.close();
     }
   }
 }

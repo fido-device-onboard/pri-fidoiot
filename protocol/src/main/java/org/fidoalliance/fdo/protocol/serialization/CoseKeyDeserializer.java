@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -36,10 +39,10 @@ public class CoseKeyDeserializer extends StdDeserializer<CoseKey> {
     } else if (subNode.isTextual()) {
       coseKey.setCurve(CoseKeyCurveType.fromString(subNode.textValue()));
     } else {
-      throw new JsonParseException(jp,"no such EC key");
+      throw new JsonParseException(jp, "no such EC key");
     }
 
-    subNode = node.get(COSEKEY_X );
+    subNode = node.get(COSEKEY_X);
     coseKey.setX(subNode.binaryValue());
 
     subNode = node.get(COSEKEY_Y);

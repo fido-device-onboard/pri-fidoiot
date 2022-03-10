@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +30,7 @@ import org.hibernate.Session;
 
 public class To0Scheduler implements Closeable {
 
-  static final private LoggerService logger = new LoggerService(To0Scheduler.class);
+  private static final LoggerService logger = new LoggerService(To0Scheduler.class);
 
   private final ThreadPoolExecutor executor;
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -41,29 +44,55 @@ public class To0Scheduler implements Closeable {
   }
 
   private static class RootConfig {
+
     @JsonProperty("owner")
     private To0SchedulerRoot config;
 
   }
 
   private static class To0SchedulerRoot {
+
     @JsonProperty("to0-scheduler")
     private To0SchedulerConfig scheduler;
 
 
   }
+
   private static class To0SchedulerConfig {
+
     @JsonProperty("thread-count")
     private String threadCount;
     @JsonProperty("interval")
     private String interval;
 
     public long getInterval() {
-      return Long.parseLong(Config.resolve(interval));
+      Long intervalValue;
+      try {
+        intervalValue = Long.parseLong(Config.resolve(interval));
+        if (intervalValue <= 60) {
+          logger.error("Received intervalValue less than 60. Defaulting intervalValue to 60.");
+          intervalValue = Long.valueOf(60);
+        }
+      } catch (NumberFormatException e) {
+        intervalValue = Long.valueOf(120);
+        logger.error("Invalid intervalValue. Defaulting intervalValue to 120.");
+      }
+      return intervalValue;
     }
 
     public int getThreadCount() {
-      return Integer.parseInt(Config.resolve(threadCount));
+      int threadCountValue;
+      try {
+        threadCountValue = Integer.parseInt(Config.resolve(threadCount));
+        if (threadCountValue <= 5) {
+          logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
+          threadCountValue = 5;
+        }
+      } catch (NumberFormatException e) {
+        threadCountValue = 5;
+        logger.error("Invalid threadCount. Defaulting the thread-count to 5.");
+      }
+      return threadCountValue;
     }
   }
 
@@ -85,8 +114,8 @@ public class To0Scheduler implements Closeable {
       Date now = new Date(System.currentTimeMillis());
       OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
       for (OnboardingVoucher onboardingVoucher : list) {
-        if (onboardingVoucher.getTo0Expiry() == null ||
-            now.after(onboardingVoucher.getTo0Expiry())) {
+        if (onboardingVoucher.getTo0Expiry() == null
+            || now.after(onboardingVoucher.getTo0Expiry())) {
 
           OwnershipVoucher voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(),
               OwnershipVoucher.class);
@@ -107,9 +136,8 @@ public class To0Scheduler implements Closeable {
         }
       }
 
-
     } catch (IOException e) {
-
+      logger.error("T0 scheduler failure due to " + e.getMessage());
     } finally {
       session.close();
     }
@@ -117,19 +145,23 @@ public class To0Scheduler implements Closeable {
     executor.submit(new StandardTo0Client());
   }
 
+  /**
+   * Worker Constructor.
+   */
   public To0Scheduler() {
-
 
     executor =
         (ThreadPoolExecutor) Executors.newFixedThreadPool(config.getThreadCount());
 
+    Long interval = config.getInterval();
     scheduler.scheduleWithFixedDelay(new Runnable() {
       @Override
       public void run() {
         onInterval();
       }
-    },config.getInterval(),config.getInterval(),TimeUnit.SECONDS);
+    }, interval, interval,TimeUnit.SECONDS);
 
-    logger.info("To0Scheduler will run every " + config.getInterval() + " seconds");
+
+    logger.info("To0Scheduler will run every " + interval + " seconds");
   }
 }

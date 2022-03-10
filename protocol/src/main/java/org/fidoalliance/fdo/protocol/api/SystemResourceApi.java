@@ -1,35 +1,27 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.fidoalliance.fdo.protocol.Config;
-import org.fidoalliance.fdo.protocol.KeyResolver;
-import org.fidoalliance.fdo.protocol.LoggerService;
-import org.fidoalliance.fdo.protocol.PemFormatter;
-import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
-import org.fidoalliance.fdo.protocol.entity.CertificateData;
-import org.fidoalliance.fdo.protocol.entity.SystemResource;
-
-import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
-import java.security.cert.Certificate;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.Arrays;
+import javax.sql.rowset.serial.SerialBlob;
+import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.entity.SystemResource;
 
-
-/***
- *  SystemResourceApi REST endpoint enables users to
- *     - Collect the svi resource files stored in the DB(based on the filename).
- *     - Upload new svi resource files to SYSTEM_RESOURCE table.
- *     - Delete existing svi resource files in SYSTEM_RESOURCE table.
+/**
+ * SystemResourceApi REST endpoint enables users to - Collect the svi resource files stored in the
+ * DB(based on the filename). - Upload new svi resource files to SYSTEM_RESOURCE table. - Delete
+ * existing svi resource files in SYSTEM_RESOURCE table.
  *
- *  Accepted URL patterns :
- *     - GET /api/v1/sviresource?filename=<filename>
- *     - POST  /api/v1/sviresource?filename=<filename> with filecontents in the body
- *     - DELETE /api/v1/sviresource?filename=<filename>
+ * <p>Accepted URL patterns :
+ *   - GET /api/v1/sviresource?filename=&lt;filename&gt;
+ *   - POST /api/v1/sviresource?filename=&lt;filename&gt;  with filecontents in the body
+ *   - DELETE /api/v1/sviresource?filename=&lt;filename&gt;
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
  */
 
 public class SystemResourceApi extends RestApi {
@@ -50,7 +42,7 @@ public class SystemResourceApi extends RestApi {
 
     if (sviResource != null) {
       Blob data = sviResource.getData();
-      getResponse().getOutputStream().write(data.getBytes(1,(int)data.length()));
+      getResponse().getOutputStream().write(data.getBytes(1, (int) data.length()));
     } else {
       logger.warn("SVI resource file not found.");
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);

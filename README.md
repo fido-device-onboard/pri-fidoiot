@@ -339,7 +339,7 @@ POST https://localhost:8043/api/v1/owner/redirect (or http://localhost:8042/api/
 Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
 POST content
 ```
-[[null,"localhost",8041,5]]
+[[null,"localhost",8043,5]]
 ```
 Result 200 OK
 

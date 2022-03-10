@@ -13,7 +13,7 @@ public class GuidTest {
   @Test
   public void Test() throws DecoderException, IOException {
 
-    Guid guid1 = Guid.fromRandomUUID();
+    Guid guid1 = Guid.fromRandomUuid();
     String str = guid1.toString();
 
     byte[] data = guid1.toBytes();
@@ -21,7 +21,7 @@ public class GuidTest {
 
     assertTrue(guid1.equals(guid2));
 
-    Guid guid3  = Guid.fromUUID(UUID.randomUUID());
+    Guid guid3  = Guid.fromUuid(UUID.randomUUID());
     assertFalse(guid1.equals(guid3));
 
   }

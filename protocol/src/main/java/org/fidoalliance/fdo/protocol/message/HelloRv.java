@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"guid", "sigInfoA"} )
+@JsonPropertyOrder({"guid", "sigInfoA"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class HelloRv {
 

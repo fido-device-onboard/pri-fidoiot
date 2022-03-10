@@ -1,24 +1,21 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.LoggerService;
-import org.fidoalliance.fdo.protocol.entity.CertificateData;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 
-import java.io.IOException;
-
-
-/***
- *  MessageSizeApi REST endpoint enables users to set and collect MAX_MESSAGE_SIZE value.
- *  MAX_MESSAGE_SIZE value is used in msg/61.
+/**
+ * MessageSizeApi REST endpoint enables users to set and collect MAX_MESSAGE_SIZE value.
+ * MAX_MESSAGE_SIZE value is used in msg/61.
  *
- *  Accepted URL patterns :
- *         - GET /api/v1/owner/messagesize
- *         - POST /api/v1/owner/messagesize with message size value in body.
+ * <p>Accepted URL patterns : - GET /api/v1/owner/messagesize
+ *                         - POST /api/v1/owner/messagesize with message size value in body.
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
-*/
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
+ */
 
 public class MessageSizeApi extends RestApi {
 

@@ -1,19 +1,22 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.fidoalliance.fdo.protocol.LoggerService;
-
 import java.util.Date;
 
+import org.fidoalliance.fdo.protocol.LoggerService;
 
-/***
- *  HealthApi returns the health status of service.
+
+
+/**
+ * HealthApi returns the health status of service.
  *
- *  Accepted URL pattern: GET /health
+ * <p>Accepted URL pattern: GET /health
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
-*/
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
+ */
 
 public class HealthApi extends RestApi {
 
@@ -24,16 +27,16 @@ public class HealthApi extends RestApi {
 
     try {
 
-     String systemTime = new Date().toString();
-     logger.info("Health check invoked at " + systemTime);
-     String responseBody = "{\"version\" : \"%s\"}";
+      String systemTime = new Date().toString();
+      logger.info("Health check invoked at " + systemTime);
+      String responseBody = "{\"version\" : \"%s\"}";
 
-     // Collects property from the service.yml file.
-     String appVersion = System.getProperty("application.version");
+      // Collects property from the service.yml file.
+      String appVersion = System.getProperty("application.version");
 
-     // Appends responseBody to the outputStream of HttpResponse Object.
-     getResponse().getWriter().write(String.format(responseBody, appVersion));
-     getResponse().setContentType("plain/text");
+      // Appends responseBody to the outputStream of HttpResponse Object.
+      getResponse().getWriter().write(String.format(responseBody, appVersion));
+      getResponse().setContentType("plain/text");
 
     } catch (Exception e) {
       logger.error("Unable to perform health check");

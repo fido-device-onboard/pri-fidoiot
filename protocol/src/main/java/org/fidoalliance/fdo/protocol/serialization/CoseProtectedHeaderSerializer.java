@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -33,8 +36,6 @@ public class CoseProtectedHeaderSerializer extends StdSerializer<CoseProtectedHe
 
     gen.writeFieldId(ALG);
     gen.writeNumber(value.getAlgId());
-
-
 
     gen.writeEndObject();
 

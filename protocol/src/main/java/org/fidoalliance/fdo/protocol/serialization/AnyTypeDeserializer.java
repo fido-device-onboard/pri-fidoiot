@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -27,7 +30,7 @@ public class AnyTypeDeserializer extends StdDeserializer<AnyType> {
     if (node.isNull()) {
       return AnyType.fromObject(new NullValue());
     }
-    Object object = Mapper.INSTANCE.covertValue(node,Object.class);
+    Object object = Mapper.INSTANCE.covertValue(node, Object.class);
     return AnyType.fromObject(object);
   }
 

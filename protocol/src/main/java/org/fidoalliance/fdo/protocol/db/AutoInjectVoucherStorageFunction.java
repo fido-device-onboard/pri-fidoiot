@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -30,7 +33,6 @@ import org.fidoalliance.fdo.protocol.message.Nonce;
 import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
-import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To1dPayload;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
@@ -38,18 +40,27 @@ import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+/**
+ * Auto-injects voucher during DI to owner and RV database tables.
+ */
 public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunction {
 
   public static LoggerService logger = new LoggerService(AutoInjectVoucherStorageFunction.class);
 
+  /**
+   * Constructor.
+   */
   public AutoInjectVoucherStorageFunction() {
     logger.info("Voucher auto-injection enabled.");
   }
+
   @Override
   public UUID apply(String serialNo, OwnershipVoucher ownershipVoucher) throws IOException {
     super.apply(serialNo, ownershipVoucher);
     final Session session = HibernateUtil.getSessionFactory().openSession();
+    Transaction trans = null;
     try {
+      trans = session.beginTransaction();
 
       OwnerPublicKey lastOwner = VoucherUtils.getLastOwner(ownershipVoucher);
       final KeyResolver ownerResolver = Config.getWorker(OwnerKeySupplier.class).get();
@@ -63,8 +74,6 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
           Config.getWorker(ManufacturerKeySupplier.class).get(),
           newOwnerChain
       );
-
-      Transaction trans = session.beginTransaction();
 
       OnboardingVoucher onboardingVoucher = new OnboardingVoucher();
       Guid guid = VoucherUtils.getGuid(ownershipVoucher);
@@ -85,7 +94,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
         To0d to0d = new To0d();
         to0d.setVoucher(ownershipVoucher);
         to0d.setWaitSeconds(Duration.ofDays(360 * 10).toSeconds());
-        to0d.setNonce(Nonce.fromRandomUUID());
+        to0d.setNonce(Nonce.fromRandomUuid());
 
         HashType hashType = new AlgorithmFinder().getCompatibleHashType(
             ownershipVoucher.getHmac().getHashType());
@@ -125,9 +134,9 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
       }
 
       trans.commit();
-
       return VoucherUtils.getGuid(ownershipVoucher).toUuid();
     } finally {
+
       session.close();
     }
   }

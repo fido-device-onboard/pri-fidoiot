@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -35,10 +38,15 @@ public enum MsgType {
 
   private int id;
 
-  private MsgType(int id) {
+  MsgType(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static MsgType fromNumber(Number n) throws InvalidMessageException {
     int i = n.intValue();
@@ -55,6 +63,12 @@ public enum MsgType {
 
   }
 
+  /**
+   * Converts to type from a string value.
+   * @param value The string value.
+   * @return The message type from a string value.
+   * @throws InvalidMessageException An error occurred.
+   */
   public static MsgType fromString(String value) throws InvalidMessageException {
     if (NumberUtils.isCreatable(value)) {
       return fromNumber(Integer.valueOf(value));

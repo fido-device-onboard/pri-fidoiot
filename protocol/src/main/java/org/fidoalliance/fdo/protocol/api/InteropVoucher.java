@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -78,14 +81,14 @@ public class InteropVoucher extends RestApi {
 
               voucher = Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
               OwnershipVoucherHeader header =
-                  Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
+                  Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
 
               guid = header.getGuid().toUuid();
               logger.info("voucher guid: " + guid.toString());
             } else if (pemObj.getType().equals("EC PRIVATE KEY")) {
               ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
               //PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
-             // signKey = new JcaPEMKeyConverter().getPrivateKey(info);
+              // signKey = new JcaPEMKeyConverter().getPrivateKey(info);
               ECPrivateKey ecpKey = ECPrivateKey.getInstance(seq);
               AlgorithmIdentifier algId = new AlgorithmIdentifier(
                   X9ObjectIdentifiers.id_ecPublicKey, ecpKey.getParameters());
@@ -124,11 +127,10 @@ public class InteropVoucher extends RestApi {
           new AlgorithmFinder().getKeySizeType(cs.decodeKey(prevKey)));
       Certificate[] certs = resolver.getCertificateChain(alias);
 
-
-      extend(voucher,signKey,certs);
+      extend(voucher, signKey, certs);
 
       getTransaction();
-      OnboardingVoucher dbVoucher = getSession().get(OnboardingVoucher.class,guid.toString());
+      OnboardingVoucher dbVoucher = getSession().get(OnboardingVoucher.class, guid.toString());
       if (dbVoucher == null) {
         dbVoucher = new OnboardingVoucher();
         dbVoucher.setGuid(guid.toString());
@@ -165,8 +167,7 @@ public class InteropVoucher extends RestApi {
 
         if (voucher != null) {
           String pemString = VoucherUtils.toString(Mapper.INSTANCE.writeValue(voucher))
-          + getFormattedKey(voucher);
-
+              + getFormattedKey(voucher);
 
           getResponse().getWriter().print(pemString);
         } else {
@@ -181,8 +182,6 @@ public class InteropVoucher extends RestApi {
       getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
-
-
 
 
   private String getKeyFormatString(OwnerPublicKey ownerKey) {
@@ -228,14 +227,14 @@ public class InteropVoucher extends RestApi {
     }
   }
 
-  public OwnershipVoucher extend(OwnershipVoucher voucher,
+  private OwnershipVoucher extend(OwnershipVoucher voucher,
       PrivateKey signingKey, Certificate[] nextChain)
       throws Exception {
 
     Hash mac = voucher.getHmac();
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(mac.getHashType());
     OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(voucher.getHeader(),OwnershipVoucherHeader.class);
+        Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
 
     CryptoService cs = Config.getWorker(CryptoService.class);
     Hash hdrHash = VoucherUtils.getHeaderHash(hashType, header);

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 /**
@@ -8,7 +11,7 @@ public class LoggerService {
   private final LogProvider provider;
 
   public LoggerService(Class<?> clazz) {
-    LogProviderFactory factory =  Config.getWorker(LogProviderFactory.class);
+    LogProviderFactory factory = Config.getWorker(LogProviderFactory.class);
     provider = factory.apply(clazz);
   }
 

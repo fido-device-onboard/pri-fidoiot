@@ -21,6 +21,11 @@ public enum SigInfoType {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static SigInfoType fromNumber(Number n) {
     int i = n.intValue();

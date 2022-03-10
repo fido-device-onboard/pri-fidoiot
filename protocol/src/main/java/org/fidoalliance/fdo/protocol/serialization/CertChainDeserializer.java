@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -39,12 +42,12 @@ public class CertChainDeserializer extends StdDeserializer<CertChain> {
     } catch (CertificateException e) {
       throw new IOException(e);
     }
-    for (int i=0; i< node.size(); i++) {
+    for (int i = 0; i < node.size(); i++) {
       JsonNode element = node.get(i);
       try (InputStream in = new ByteArrayInputStream(element.binaryValue());) {
         list.add(cf.generateCertificate(in));
       } catch (CertificateException e) {
-        throw new JsonParseException(jp,"parsing X509", e);
+        throw new JsonParseException(jp, "parsing X509", e);
       }
     }
 

@@ -23,7 +23,6 @@ public class RvData {
   private byte[] data;
 
 
-
   public byte[] getData() {
     return data;
   }

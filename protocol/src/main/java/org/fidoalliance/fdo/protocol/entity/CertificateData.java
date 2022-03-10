@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +15,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "certificate_data")
-public class CertificateData  {
+public class CertificateData {
 
   @Id
   @Column(name = "name", nullable = false)

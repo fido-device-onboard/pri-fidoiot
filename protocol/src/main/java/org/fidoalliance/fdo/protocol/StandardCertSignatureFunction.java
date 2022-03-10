@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -29,11 +32,10 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
 
     final AnyType certInfo = info.getCertInfo();
 
-
     final Object certObject = certInfo.covertValue(Object.class);
     byte[] encoded = null;
-    if (certObject instanceof byte[] )  {
-      encoded = (byte[])certObject;
+    if (certObject instanceof byte[]) {
+      encoded = (byte[]) certObject;
     } else {
       CertChain certChain = certInfo.covertValue(CertChain.class);
       return certChain.getChain().toArray(Certificate[]::new);
@@ -41,7 +43,6 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
 
     final JcaPKCS10CertificationRequest csr =
         new JcaPKCS10CertificationRequest(encoded);
-
 
     final KeyResolver keyResolver = Config.getWorker(ManufacturerKeySupplier.class).get();
 
@@ -51,9 +52,9 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
 
       final PublicKey publicKey = csr.getPublicKey();
       final KeySizeType sizeType = new AlgorithmFinder().getKeySizeType(publicKey);
-      final String alias = KeyResolver.getAlias(info.getKeyType(),sizeType);
+      final String alias = KeyResolver.getAlias(info.getKeyType(), sizeType);
 
-     privateKey = keyResolver.getPrivateKey(alias);
+      privateKey = keyResolver.getPrivateKey(alias);
 
       final Certificate[] issuerChain = keyResolver.getCertificateChain(alias);
 
@@ -71,8 +72,7 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
       throw new IOException(e);
     } catch (InvalidKeyException e) {
       throw new IOException(e);
-    }
-    finally {
+    } finally {
       cs.destroyKey(privateKey);
     }
 

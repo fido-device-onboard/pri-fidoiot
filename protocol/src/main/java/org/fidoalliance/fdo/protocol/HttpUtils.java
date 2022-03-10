@@ -49,7 +49,13 @@ public class HttpUtils {
   private static final int URI_PART_MSG = 2;
   private static final int URI_PART_MSG_ID = 3;
 
-  public static DispatchMessage getMessageFromURI(String uri) throws IOException {
+  /**
+   * Builds a dispatch message from an uri.
+   * @param uri A fdo spec URI.
+   * @return A dispatch message representing the uri.
+   * @throws IOException An error occurred.
+   */
+  public static DispatchMessage getMessageFromUri(String uri) throws IOException {
 
     //URI is in form /fdo/<protocolver>/msg/<msgType>
     DispatchMessage message = new DispatchMessage();
@@ -98,7 +104,7 @@ public class HttpUtils {
       String ipAddress = null;
       Integer devPort = Integer.valueOf(80);
       Integer ownerPort = Integer.valueOf(443);
-      List<String> devSchemes =  new ArrayList<>();
+      List<String> devSchemes = new ArrayList<>();
 
       long delaySec = 0;
       boolean ownerOnly = false;
@@ -153,7 +159,7 @@ public class HttpUtils {
             devOnly = true;
             break;
           case DELAYSEC:
-            delaySec = Mapper.INSTANCE.readValue(instruction.getValue(),Long.class);
+            delaySec = Mapper.INSTANCE.readValue(instruction.getValue(), Long.class);
             break;
           case BYPASS:
             bypass = true;
@@ -171,8 +177,6 @@ public class HttpUtils {
         continue;
       }
 
-
-
       if (dns == null && ipAddress == null) {
         continue;
       }
@@ -187,7 +191,6 @@ public class HttpUtils {
         port = devPort;
       } else {
         schemes = Config.getWorker(OwnerSchemesSupplier.class).get();
-
 
         port = ownerPort;
       }
@@ -282,6 +285,7 @@ public class HttpUtils {
 
   /**
    * See if two lists of HTTP instructions have the same host in common.
+   *
    * @param h1 List of Rv Instructions.
    * @param h2 List of To0d HTTP instructions.
    * @return true if the owner and RV hosts are the same.

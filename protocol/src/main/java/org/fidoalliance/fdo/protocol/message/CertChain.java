@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +35,10 @@ public class CertChain {
     return chain;
   }
 
+  /**
+   * Gets the Cert path.
+   * @return The certificate path.
+   */
   @JsonIgnore
   public CertPath getPath() {
     final CertificateFactory cf;

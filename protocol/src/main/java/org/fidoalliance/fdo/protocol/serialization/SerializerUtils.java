@@ -1,19 +1,22 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Optional;
-import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 
 public class SerializerUtils {
 
+  /**
+   * Gets an annotated property value.
+   * @param object The object to get annotated value.
+   * @param name The name of the property.
+   * @return The value of the property.
+   * @throws IOException An error occurred.
+   */
   public static Object getPropertyValue(Object object, String name) throws IOException {
 
     Class theClass = object.getClass();
@@ -23,7 +26,7 @@ public class SerializerUtils {
       Field[] fields = theClass.getDeclaredFields();
 
       for (Field field : fields) {
-        JsonProperty properties[] =
+        JsonProperty[] properties =
             (JsonProperty[]) field.getDeclaredAnnotationsByType(JsonProperty.class);
         for (JsonProperty property : properties) {
           if (property.value().equals(name)) {
@@ -52,14 +55,18 @@ public class SerializerUtils {
   }
 
 
-
+  /**
+   * Get the list of annotated property names.
+   * @param value The object to get the annotated property names.
+   * @return An array of annotated property names.
+   */
   public static String[] getPropertyNames(Object value) {
     Class theClass = value.getClass();
 
     String[] propertyOrder = null;
 
     for (; ; ) {
-      JsonPropertyOrder orders[] =
+      JsonPropertyOrder[] orders =
           (JsonPropertyOrder[]) theClass.getDeclaredAnnotationsByType(JsonPropertyOrder.class);
 
       for (JsonPropertyOrder order : orders) {
@@ -79,9 +86,6 @@ public class SerializerUtils {
     }
     return propertyOrder;
   }
-
-
-
 
 
 }

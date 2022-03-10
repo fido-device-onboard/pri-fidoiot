@@ -15,7 +15,6 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,16 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import org.fidoalliance.fdo.protocol.db.HibernateUtil;
-import org.hibernate.Session;
 
+/**
+ * FDO Configuration Object.
+ */
 public class Config {
 
   private static final String ENV_PARAM_START = "$(";
   private static final String ENV_PARAM_END = ")";
   private static final String CONFIG_HOME = "fdo.config.home";
 
-  private static final Root ROOT;
+  private static Root ROOT;
   private static final Properties env = new Properties();
   private static List<Object> workers = new ArrayList<>();
   private static final List<Object> configs = new ArrayList<>();
@@ -60,13 +60,17 @@ public class Config {
       loadSystemProperties();
       loadWorkerItems();
       loadEnvFiles();
-    } catch (
-        IOException e) {
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
+      // todo : Replace with logger.
+      System.exit(-1);
     }
   }
 
 
+  /**
+   * The Keystore Config.
+   */
   public static class KeyStoreConfig {
 
     @JsonProperty("path")
@@ -108,6 +112,9 @@ public class Config {
   }
 
 
+  /**
+   * The root configuration.
+   */
   public static class Root {
 
     @JsonProperty("workers")
@@ -153,7 +160,7 @@ public class Config {
   }
 
   /**
-   * Resolves any environment environment variables to a path
+   * Resolves any environment  variables to a path.
    *
    * @param path The path string to resolve.
    * @return The resolved path
@@ -170,6 +177,12 @@ public class Config {
     return Path.of(getPath(), path).toString();
   }
 
+  /**
+   * Resolves any environment variables.
+   *
+   * @param map A configuration map to result values.
+   * @return The resolved map.
+   */
   public static Map<String, String> resolve(final Map<String, String> map) {
 
     Map<String, String> result = new HashMap<>();
@@ -180,6 +193,12 @@ public class Config {
   }
 
 
+  /**
+   * Resolves any environment variables.
+   *
+   * @param value The array of values to resolve.
+   * @return The resolved values.
+   */
   public static String[] resolve(final String[] value) {
     String[] result = new String[value.length];
     for (int i = 0; i < value.length; i++) {
@@ -189,10 +208,10 @@ public class Config {
   }
 
   /**
-   * Resolve environment variables in value.
+   * Resolve environment variables.
    *
    * @param value The value to resolve.
-   * @return The resolves value.
+   * @return The resolved value.
    */
   public static String resolve(final String value) {
     String result = value;
@@ -201,7 +220,6 @@ public class Config {
     }
     return result;
   }
-
 
 
   private static String getEnvValue(String value) {
@@ -303,14 +321,29 @@ public class Config {
     return configPath;
   }
 
+  /**
+   * Gets the path and name of the config file.
+   *
+   * @return The config file name.
+   */
   public static String getFileName() {
     return Path.of(configPath, CONFIG_FILE).toString();
   }
 
+  /**
+   * Gets the Root configuration Items.
+   *
+   * @return The Root Config Object.
+   */
   public static Root getRoot() {
     return ROOT;
   }
 
+  /**
+   * Gets a read only list of workers.
+   *
+   * @return The list of workers.
+   */
   public static List<Object> getWorkers() {
     return workers;
   }
@@ -318,10 +351,10 @@ public class Config {
   /**
    * Loads a config object frm the service yaml.
    *
-   * @param clazz The class to load
+   * @param clazz The class to load.
    * @param <T>   The class template argument.
    * @return An instance of the config object.
-   * @throws IOException
+   * @throws IOException An error occurred.
    */
   public static <T> T getConfig(Class<T> clazz) {
     for (Object cfg : configs) {
@@ -338,11 +371,16 @@ public class Config {
     }
   }
 
+  /**
+   * Gets a worker by its Interface class.
+   *
+   * @param clazz The instance/class to get.
+   * @param <T>   The template argument.
+   * @return The instance of the works.
+   */
   public static <T> T getWorker(Class<T> clazz) {
     List<Object> list = getWorkers();
     for (Object item : list) {
-
-
 
       if (clazz.isInterface()) {
         Class currentClass = item.getClass();
@@ -361,12 +399,6 @@ public class Config {
 
     }
     throw new NoSuchElementException(clazz.getName());
-  }
-
-  public static <T> T getEntity(Class<T> clazz, int id) {
-
-    Session session = HibernateUtil.getSessionFactory().openSession();
-    return (T) session.get(clazz, id);
   }
 
 

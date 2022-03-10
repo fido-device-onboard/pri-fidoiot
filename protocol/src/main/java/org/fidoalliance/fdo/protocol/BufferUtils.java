@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -30,8 +33,9 @@ public class BufferUtils {
 
   /**
    * Write a BigInteger into a fixed-length buffer.
-   * @param src Source Integer to write to the buffer.
-   * @param dest Destination buffer.
+   *
+   * @param src     Source Integer to write to the buffer.
+   * @param dest    Destination buffer.
    * @param destPos Position to write in destination buffer
    * @param length  The exact length to write (truncate or pad to fix).
    */
@@ -61,8 +65,9 @@ public class BufferUtils {
   }
 
   /**
-   * Adjusts the buffer to pad with zero
-   * @param buffer the buffer to pad if necessary.
+   * Adjusts the buffer to pad with zero.
+   *
+   * @param buffer     the buffer to pad if necessary.
    * @param byteLength The length of buffer should be
    * @return The padded buffer.
    */
@@ -86,6 +91,7 @@ public class BufferUtils {
 
   /**
    * Gets the Max ServiceInfo Transmission.
+   *
    * @return the max size of serviceInfo.
    */
   public static int getServiceInfoMtuSize() {
@@ -94,6 +100,7 @@ public class BufferUtils {
 
   /**
    * Gets the Max packet Transmission size.
+   *
    * @return Max size of a packet.
    */
   public static int getPacketMtuSize() {
@@ -103,9 +110,10 @@ public class BufferUtils {
 
   /**
    * Gets the maximum negotiated message size.
+   *
    * @return The maximum negotiated message size.
    */
   public static int getMaxBufferSize() {
-    return Short.MAX_VALUE * 2 +1;
+    return Short.MAX_VALUE * 2 + 1;
   }
 }

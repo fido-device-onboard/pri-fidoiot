@@ -1,7 +1,9 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -26,6 +28,7 @@ import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
+import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AppStart;
@@ -38,13 +41,10 @@ import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.Nonce;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
-import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.message.SigInfo;
 import org.fidoalliance.fdo.protocol.message.SigInfoType;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.To1dPayload;
-import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
-import org.fidoalliance.fdo.protocol.message.To2AddressEntry;
 
 public class DeviceApp extends HttpClient {
 
@@ -56,6 +56,10 @@ public class DeviceApp extends HttpClient {
     config = Config.getConfig(RootConfig.class).getRoot();
   }
 
+  /**
+   * Main entry.
+   * @param args Commandline arguments.
+   */
   public static void main(String[] args) {
     try {
       new DeviceApp().run();
@@ -123,7 +127,7 @@ public class DeviceApp extends HttpClient {
     HelloDevice helloDevice = new HelloDevice();
     helloDevice.setMaxMessageSize(config.getMaxMessageSize());
     helloDevice.setGuid(cred.getGuid());
-    Nonce nonceTO2ProveOv = Nonce.fromRandomUUID();
+    Nonce nonceTO2ProveOv = Nonce.fromRandomUuid();
     helloDevice.setProveTo2Ov(nonceTO2ProveOv);
     helloDevice.setKexSuiteName(config.getKexSuite());
     helloDevice.setCipherSuiteName(config.getCipherSuite());
@@ -166,12 +170,13 @@ public class DeviceApp extends HttpClient {
 
     logger.info("DI URL is " + config.getDiUri());
 
-    byte[] csr = generateCsr(keyType, keySize);
-
     String serialNo = Hex.encodeHexString(
         Config.getWorker(CryptoService.class).getRandomBytes(4), false);
 
     logger.info("Device Serial No:" + serialNo);
+
+    byte[] csr = generateCsr(keyType, keySize);
+
 
     ManufacturingInfo mfgInfo = new ManufacturingInfo();
     mfgInfo.setKeyType(keyType);

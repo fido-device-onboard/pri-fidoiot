@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,10 +16,15 @@ public enum PublicKeyEncoding {
 
   private int id;
 
-  private PublicKeyEncoding(int id) {
+  PublicKeyEncoding(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static PublicKeyEncoding fromNumber(Number n) {
     int i = n.intValue();

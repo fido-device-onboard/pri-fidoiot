@@ -37,13 +37,15 @@ public class ManufacturedVoucher {
     return data;
   }
 
-  public Date getCreatedOn() { return createdOn; }
+  public Date getCreatedOn() {
+    return createdOn;
+  }
 
   public void setSerialNo(String id) {
     this.serialNo = id;
   }
 
-  public void setCreatedOn(Date date ) {
+  public void setCreatedOn(Date date) {
     this.createdOn = date;
   }
 

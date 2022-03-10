@@ -1,7 +1,8 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.CoseKeyDeserializer;
@@ -19,10 +20,10 @@ public class CoseKey {
   private CoseKeyCurveType crv;
 
 
-  private byte[] x;
+  private byte[] theX;
 
 
-  private byte[] y;
+  private byte[] theY;
 
 
   public CoseKeyCurveType getCrv() {
@@ -31,12 +32,12 @@ public class CoseKey {
 
 
   public byte[] getX() {
-    return x;
+    return theX;
   }
 
 
   public byte[] getY() {
-    return y;
+    return theY;
   }
 
 
@@ -45,11 +46,11 @@ public class CoseKey {
   }
 
 
-  public void setX(byte[] x) {
-    this.x = x;
+  public void setX(byte[] theX) {
+    this.theX = theX;
   }
 
-  public void setY(byte[] y) {
-    this.y = y;
+  public void setY(byte[] theY) {
+    this.theY = theY;
   }
 }

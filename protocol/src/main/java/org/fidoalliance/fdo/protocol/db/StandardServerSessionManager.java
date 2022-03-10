@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -25,7 +28,7 @@ public class StandardServerSessionManager implements SessionManager {
         throw new InvalidJwtTokenException(name);
       }
 
-      return Mapper.INSTANCE.readValue(protocolSession.getData(),SimpleStorage.class);
+      return Mapper.INSTANCE.readValue(protocolSession.getData(), SimpleStorage.class);
 
 
     } finally {

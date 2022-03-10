@@ -1,5 +1,7 @@
-package org.fidoalliance.fdo.protocol.serialization;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,11 +14,11 @@ import org.fidoalliance.fdo.protocol.message.CwtToken;
 
 public class CwtTokenDeserializer extends StdDeserializer<CwtToken> {
 
-  public CwtTokenDeserializer () {
+  public CwtTokenDeserializer() {
     this(null);
   }
 
-  public CwtTokenDeserializer (Class<?> t) {
+  public CwtTokenDeserializer(Class<?> t) {
     super(t);
   }
 
@@ -26,7 +28,6 @@ public class CwtTokenDeserializer extends StdDeserializer<CwtToken> {
 
     JsonNode node = jp.getCodec().readTree(jp);
     CwtToken cwtToken = new CwtToken();
-
 
     int index = 1;
     cwtToken.setIssuer(node.get(Integer.toString(index++)).textValue());

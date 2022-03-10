@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -74,6 +77,10 @@ public class StreamMessage {
     this.body = body;
   }
 
+  /**
+   * Compute the length of the message.
+   * @throws IOException An error occured.
+   */
   @JsonIgnore
   public void computeLength() throws IOException {
 
@@ -88,20 +95,30 @@ public class StreamMessage {
     }
   }
 
+  /**
+   * Gets the minimum bytes to read from the stream.
+   * @return The minim bytes to read.
+   */
   @JsonIgnore
   public static int getMinimumReadLength() {
-    return (Integer.BYTES+1)+1;//a5(1) + tag(1) + int32(4)
+    return (Integer.BYTES + 1) + 1;//a5(1) + tag(1) + int32(4)
   }
 
+  /**
+   * Gets the byte remaining after reading the initial bytes.
+   * @param initialBytes The buffer containing the inital bytes.
+   * @return The remaining bytes of the message.
+   * @throws IOException An error occurred.
+   */
   @JsonIgnore
   public static int getBytesRemaining(byte[] initialBytes) throws IOException {
-    byte[] numBuff = new byte[Integer.BYTES+1];
+    byte[] numBuff = new byte[Integer.BYTES + 1];
 
     // the smallest stream message possible is 7 bytes T0 hello
     if (initialBytes == null || initialBytes.length < (numBuff.length + 1)) {
       throw new IOException(
           new IllegalArgumentException(
-              "initial read bytes < " + Integer.toString(numBuff.length + 1) ));
+              "initial read bytes < " + Integer.toString(numBuff.length + 1)));
     }
 
     for (int i = 0; i < numBuff.length; i++) {

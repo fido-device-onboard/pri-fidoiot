@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -66,8 +69,6 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
       nonce.setNonce(subNode.binaryValue());
       uph.setEatNonce(nonce);
     }
-
-
 
     return uph;
   }

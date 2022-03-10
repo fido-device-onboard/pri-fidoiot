@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -30,17 +33,17 @@ public class StandardVoucherStorageFunction implements VoucherStorageFunction {
       ManufacturedVoucher mfgVoucher = new ManufacturedVoucher();
       mfgVoucher.setSerialNo(serialNo);
 
-      OwnershipVoucherHeader header =
-          Mapper.INSTANCE.readValue(ownershipVoucher.getHeader(), OwnershipVoucherHeader.class);
-
       mfgVoucher.setCreatedOn(new Date(System.currentTimeMillis()));
 
       byte[] data = Mapper.INSTANCE.writeValue(ownershipVoucher);
-      Transaction trans = session.beginTransaction();
 
+      Transaction trans = session.beginTransaction();
       mfgVoucher.setData(data);
       session.saveOrUpdate(mfgVoucher);
       trans.commit();
+
+      OwnershipVoucherHeader header =
+          Mapper.INSTANCE.readValue(ownershipVoucher.getHeader(), OwnershipVoucherHeader.class);
 
       return header.getGuid().toUuid();
     } finally {

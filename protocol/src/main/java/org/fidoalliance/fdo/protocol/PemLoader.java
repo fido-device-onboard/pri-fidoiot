@@ -1,4 +1,4 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol;
@@ -37,10 +37,17 @@ import org.bouncycastle.util.io.pem.PemReader;
 public class PemLoader {
 
 
+  /**
+   * Load tagged Certificates.
+   *
+   * @param pemString A PEM string.
+   * @return The certificate chain.
+   * @throws IOException An Error occurred.
+   */
   public static List<Certificate> loadTaggedCerts(String pemString) throws IOException {
     List<Certificate> certs = new ArrayList<>();
     StringReader reader = new StringReader(pemString);
-      PemReader pemReader = new PemReader(reader);
+    PemReader pemReader = new PemReader(reader);
     try {
       PemObject o = pemReader.readPemObject();
       o.toString();
@@ -50,12 +57,12 @@ public class PemLoader {
     return certs;
   }
 
-    /**
-     * Loads the X509Certificate chain from a string in PEM format.
-     *
-     * @param pemString A String containing PEM information.
-     * @return A List of X509 Certificates found in the PEM string.
-     */
+  /**
+   * Loads the X509Certificate chain from a string in PEM format.
+   *
+   * @param pemString A String containing PEM information.
+   * @return A List of X509 Certificates found in the PEM string.
+   */
   public static List<Certificate> loadCerts(String pemString) {
     List<Certificate> certs = new ArrayList<>();
     try {
@@ -87,7 +94,7 @@ public class PemLoader {
    * Loads a private key from a PEM formatted String.
    *
    * @param pemString A String containing PEM information.
-   * @param password A Pem password or null.
+   * @param password  A Pem password or null.
    * @return The PrivateKey found in the PEM String.
    */
   public static PrivateKey loadPrivateKey(String pemString, String password) {

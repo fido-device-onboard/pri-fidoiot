@@ -22,7 +22,7 @@ public class To0d {
   private long waitSeconds;
 
   @JsonProperty("nonce")
-  private Nonce Nonce;
+  private Nonce nonce;
 
   @JsonIgnore
   public OwnershipVoucher getVoucher() {
@@ -36,7 +36,7 @@ public class To0d {
 
   @JsonIgnore
   public Nonce getNonce() {
-    return Nonce;
+    return nonce;
   }
 
   @JsonIgnore
@@ -51,6 +51,6 @@ public class To0d {
 
   @JsonIgnore
   public void setNonce(Nonce nonce) {
-    Nonce = nonce;
+    this.nonce = nonce;
   }
 }
