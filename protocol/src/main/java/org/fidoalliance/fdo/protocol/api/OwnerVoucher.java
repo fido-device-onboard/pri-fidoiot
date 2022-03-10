@@ -1,24 +1,19 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
 import java.util.Date;
-import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
-import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
-import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
-import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
-import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
-import org.fidoalliance.fdo.protocol.message.To0d;
-import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
+/**
+ * Maintains Ownership Vouchers for the owner server.
+ */
 public class OwnerVoucher extends RestApi {
 
 

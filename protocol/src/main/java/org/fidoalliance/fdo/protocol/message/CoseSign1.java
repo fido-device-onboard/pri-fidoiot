@@ -15,6 +15,7 @@ import org.fidoalliance.fdo.protocol.serialization.TaggedItem;
 @JsonPropertyOrder({"protectedHeader", "unprotectedHeader", "payload", "signature"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class CoseSign1 implements TaggedItem {
+
   @JsonProperty("protectedHeader")
   byte[] protectedHeader;
 

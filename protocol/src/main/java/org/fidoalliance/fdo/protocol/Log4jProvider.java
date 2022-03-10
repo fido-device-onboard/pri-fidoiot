@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import org.slf4j.Logger;
@@ -13,8 +16,9 @@ public class Log4jProvider implements LogProvider {
 
 
   /**
-   * Constructs a Log4jProvider
-   * @param clazz
+   * Constructs a Log4jProvider.
+   *
+   * @param clazz The logger class.
    */
   public Log4jProvider(Class<?> clazz) {
     logger = LoggerFactory.getLogger(clazz);

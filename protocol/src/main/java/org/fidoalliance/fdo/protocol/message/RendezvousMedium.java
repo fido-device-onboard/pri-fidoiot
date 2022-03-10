@@ -1,10 +1,13 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.NoSuchElementException;
 
-public enum RendezvousMedium  {
+public enum RendezvousMedium {
   ETH0(0),
   ETH1(1),
   ETH2(2),
@@ -31,10 +34,15 @@ public enum RendezvousMedium  {
 
   private int id;
 
-  private RendezvousMedium(int id) {
+  RendezvousMedium(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static RendezvousMedium fromNumber(Number n) {
     int i = n.intValue();

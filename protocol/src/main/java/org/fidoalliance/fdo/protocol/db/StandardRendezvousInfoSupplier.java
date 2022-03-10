@@ -3,11 +3,9 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.IOException;
 import org.fidoalliance.fdo.protocol.Config;
-import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.entity.RvData;

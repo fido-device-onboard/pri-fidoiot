@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -31,7 +34,7 @@ public class StandardDeviceKeySupplier implements DeviceKeySupplier {
       default:
         throw new InternalServerErrorException(new IllegalArgumentException());
     }
-    String alias = KeyResolver.getAlias(keyType,sizeType);
+    String alias = KeyResolver.getAlias(keyType, sizeType);
     keyResolver.setAlias(alias);
     return keyResolver;
   }

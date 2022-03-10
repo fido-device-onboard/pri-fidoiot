@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import java.security.cert.Certificate;
@@ -11,6 +14,9 @@ import org.fidoalliance.fdo.protocol.entity.AllowDenyList;
 import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.HashType;
 
+/**
+ * Deny List for RV Server.
+ */
 public class DenyList extends RestApi {
 
 

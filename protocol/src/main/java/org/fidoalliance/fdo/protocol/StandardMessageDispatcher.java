@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -39,9 +42,11 @@ import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
+import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.AppStart;
 import org.fidoalliance.fdo.protocol.message.CertChain;
-import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.CoseProtectedHeader;
+import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.CoseUnprotectedHeader;
 import org.fidoalliance.fdo.protocol.message.CwtTo1Id;
 import org.fidoalliance.fdo.protocol.message.CwtToken;
@@ -60,26 +65,26 @@ import org.fidoalliance.fdo.protocol.message.KexMessage;
 import org.fidoalliance.fdo.protocol.message.KexParty;
 import org.fidoalliance.fdo.protocol.message.KeySizeType;
 import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
+import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.Nonce;
 import org.fidoalliance.fdo.protocol.message.NullValue;
 import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.OwnerServiceInfo;
+import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntries;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntryPayload;
+import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
-import org.fidoalliance.fdo.protocol.message.AnyType;
-import org.fidoalliance.fdo.protocol.message.AppStart;
-import org.fidoalliance.fdo.protocol.message.MsgType;
-import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
-import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.SetCredentials;
 import org.fidoalliance.fdo.protocol.message.SetHmac;
+import org.fidoalliance.fdo.protocol.message.SigInfo;
+import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.To0AcceptOwner;
 import org.fidoalliance.fdo.protocol.message.To0HelloAck;
 import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
@@ -89,15 +94,13 @@ import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.fidoalliance.fdo.protocol.message.To2DeviceInfoReady;
 import org.fidoalliance.fdo.protocol.message.To2Done;
 import org.fidoalliance.fdo.protocol.message.To2Done2;
-import org.fidoalliance.fdo.protocol.message.To2OwnerInfoReady;
-import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
-import org.fidoalliance.fdo.protocol.message.To2SetupDevicePayload;
-import org.fidoalliance.fdo.protocol.message.SigInfo;
-import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.To2GetNextEntry;
 import org.fidoalliance.fdo.protocol.message.To2NextEntry;
+import org.fidoalliance.fdo.protocol.message.To2OwnerInfoReady;
 import org.fidoalliance.fdo.protocol.message.To2ProveDevicePayload;
 import org.fidoalliance.fdo.protocol.message.To2ProveHeaderPayload;
+import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;
+import org.fidoalliance.fdo.protocol.message.To2SetupDevicePayload;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction;
 
@@ -220,7 +223,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     final OwnershipVoucher voucher = new OwnershipVoucher();
     final OwnershipVoucherHeader header = new OwnershipVoucherHeader();
     final CryptoService cs = getCryptoService();
-    final Guid guid = Guid.fromRandomUUID();
+    final Guid guid = Guid.fromRandomUuid();
 
     header.setVersion(version);
     header.setGuid(guid);
@@ -283,7 +286,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
           buff.put(chain[i].getEncoded());
         }
         buff.flip();
-        byte[] data = BufferUtils.unwrap(buff);
 
         buff.clear();
 
@@ -303,6 +305,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         header.setPublicKey(firstOwner);
 
         //set the cert hash
+        byte[] data = BufferUtils.unwrap(buff);
         header.setCertHash(
             cs.hash(new AlgorithmFinder().getCompatibleHashType(
                     certList.get(0).getPublicKey()),
@@ -358,11 +361,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   protected void doSetCredentials(DispatchMessage request, DispatchMessage response)
       throws IOException {
 
-    CryptoService cs = getCryptoService();
+
     SetCredentials setCredentials = request.getMessage(SetCredentials.class);
     byte[] headerTag = setCredentials.getVoucherHeader();
-    OwnershipVoucherHeader header =
-        Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
 
     DeviceCredential credential = new DeviceCredential();
 
@@ -373,12 +374,16 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     setHmac.setHmac(hmac);
     response.setMessage(Mapper.INSTANCE.writeValue(setHmac));
 
+    OwnershipVoucherHeader header =
+        Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
+
     credential.setActive(true);
     credential.setGuid(header.getGuid());
     credential.setDeviceInfo(header.getDeviceInfo());
     credential.setProtVer(response.getProtocolVersion());
     credential.setRvInfo(header.getRendezvousInfo());
 
+    CryptoService cs = getCryptoService();
     PublicKey publicKey = cs.decodeKey(header.getPublicKey());
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(hmac.getHashType());
     credential.setPubKeyHash(cs.hash(hashType, publicKey.getEncoded()));
@@ -415,7 +420,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
-    Nonce nonceTO0Sign = Nonce.fromRandomUUID();
+    Nonce nonceTO0Sign = Nonce.fromRandomUuid();
     response.setAuthToken(createCwtSession(nonceTO0Sign));
 
     To0HelloAck helloAck = new To0HelloAck();
@@ -517,7 +522,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     HelloRv helloRv = request.getMessage(HelloRv.class);
     HelloRvAck helloRvAck = new HelloRvAck();
 
-    Nonce nonce = Nonce.fromRandomUUID();
+    Nonce nonce = Nonce.fromRandomUuid();
     helloRvAck.setNonceTo1Proof(nonce);
 
     SigInfo sigInfoB = getCryptoService().getSigInfoB(helloRv.getSigInfo());
@@ -649,11 +654,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
-    Nonce deviceNonce = Nonce.fromRandomUUID();
+    Nonce deviceNonce = Nonce.fromRandomUuid();
     uph.setCupNonce(deviceNonce); //NonceTO2ProveDv
 
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(voucher);
-    KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
     uph.setOwnerPublicKey(ownerPublicKey);
 
     SimpleStorage storage = new SimpleStorage();
@@ -667,6 +671,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     to2Done.setNonce(deviceNonce);
     storage.put(To2Done.class, to2Done);
 
+    KeyResolver resolver = getWorker(OwnerKeySupplier.class).get();
     PrivateKey privateKey = resolver.getPrivateKey(getCryptoService().decodeKey(ownerPublicKey));
     try {
       byte[] payload = Mapper.INSTANCE.writeValue(hdrPayload);
@@ -829,9 +834,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     response.setMsgType(MsgType.TO2_PROVE_DEVICE);
 
     SimpleStorage storage = request.getExtra();
-    To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
-    Nonce setupNonce = Nonce.fromRandomUUID();
+    Nonce setupNonce = Nonce.fromRandomUuid();
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
     uph.setEatNonce(setupNonce); //NonceTO2SetupDv
     To2ProveDevicePayload fdoPayload = new To2ProveDevicePayload();
@@ -853,6 +857,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     Nonce deviceNonce = storage.get(To2Done.class).getNonce();//get stored device nonce
     eat.setNonce(deviceNonce);
+
+    To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
     OwnershipVoucherHeader header =
         Mapper.INSTANCE.readValue(hdrPayload.getHeader(), OwnershipVoucherHeader.class);
@@ -938,8 +944,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     done2.setNonce(setupNonce);
     storage.put(To2Done2.class, done2);
 
-    To2ProveDevicePayload fdoPayload =
-        eatPayload.getFdoClaim().covertValue(To2ProveDevicePayload.class);
 
     To2SetupDevicePayload setupDevice = new To2SetupDevicePayload();
     setupDevice.setNonce(setupNonce);
@@ -968,12 +972,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
 
     CryptoService cs = getCryptoService();
-    KexMessage kexMessage = storage.get(KexMessage.class);
-
-    // determine the sharedsecret for KEX
-    KeyExchangeResult kxResult = cs
-        .getSharedSecret(helloDevice.getKexSuiteName(),
-            fdoPayload.getKexB(), kexMessage, originalPrivateKey);
 
     To2ProveHeaderPayload hdrPayload = storage.get(To2ProveHeaderPayload.class);
 
@@ -999,6 +997,15 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } finally {
       cs.destroyKey(privateKey);
     }
+
+    To2ProveDevicePayload fdoPayload =
+        eatPayload.getFdoClaim().covertValue(To2ProveDevicePayload.class);
+
+    KexMessage kexMessage = storage.get(KexMessage.class);
+    // determine the sharedsecret for KEX
+    KeyExchangeResult kxResult = cs
+        .getSharedSecret(helloDevice.getKexSuiteName(),
+            fdoPayload.getKexB(), kexMessage, originalPrivateKey);
 
     EncryptionState es =
         getCryptoService().getEncryptionState(kxResult, helloDevice.getCipherSuiteType());
@@ -1046,7 +1053,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceCredential cred = getWorker(DeviceCredentialSupplier.class).get();
     Hash newMac = cs.hash(oldMac.getHashType(), cred.getHmacSecret(),
         Mapper.INSTANCE.writeValue(newHeader));
-
 
     //check cred resuse
     boolean credReuse = true;
@@ -1116,7 +1122,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
     storage.put(To2DeviceInfoReady.class, devInfoReady);
 
-
     To2OwnerInfoReady ownerInfoReady = new To2OwnerInfoReady();
 
     ownerInfoReady.setMaxMessageSize(getWorker(OwnerInfoSizeSupplier.class).get());
@@ -1151,7 +1156,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
     storage.put(OwnerServiceInfo.class, lastInfo);
-    storage.put(Hash.class,devInfoReady.getHmac());
+    storage.put(Hash.class, devInfoReady.getHmac());
 
     manager.updateSession(request.getAuthToken().get(), storage);
   }
@@ -1332,7 +1337,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OwnershipVoucherHeader replaceHeader = storage.get(OwnershipVoucherHeader.class);
     OwnershipVoucher voucher = storage.get(OwnershipVoucher.class);
 
-
     OwnershipVoucher replaceVoucher = new OwnershipVoucher();
     Hash hmac = storage.get(Hash.class);
     if (hmac != null) {
@@ -1342,7 +1346,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       replaceVoucher.setVersion(voucher.getVersion());
       replaceVoucher.setHmac(hmac);
     }
-    getWorker(ReplacementVoucherStorageFunction.class).apply(voucher,replaceVoucher);
+    getWorker(ReplacementVoucherStorageFunction.class).apply(voucher, replaceVoucher);
 
     To2Done2 done2 = storage.get(To2Done2.class);
     cipherText = Mapper.INSTANCE.writeValue(done2);

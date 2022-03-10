@@ -3,7 +3,6 @@ package org.fidoalliance.fdo.protocol;
 import java.io.IOException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.Guid;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
@@ -18,7 +17,7 @@ public class VoucherTest {
     OwnershipVoucherHeader header = new OwnershipVoucherHeader();
     header.setDeviceInfo("sample");
     header.setVersion(ProtocolVersion.current());
-    header.setGuid(Guid.fromRandomUUID());
+    header.setGuid(Guid.fromRandomUuid());
     voucher.setHeader(Mapper.INSTANCE.writeValue(header));
 
     byte[] data = Mapper.INSTANCE.writeValue(voucher);

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -11,7 +14,8 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FidoAlliance;
 
 public class ConformanceDeviceModule implements ServiceInfoModule {
 
-  private final LoggerService logger = new LoggerService(DeviceApp.class);;
+  private final LoggerService logger = new LoggerService(DeviceApp.class);
+
 
   @Override
   public String getName() {
@@ -29,16 +33,16 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
 
     switch (kvPair.getKey()) {
       case FidoAlliance.ACTIVE:
-        logger.info(FidoAlliance.ACTIVE+ " = "
-            + Mapper.INSTANCE.readValue(kvPair.getValue(),Boolean.class));
+        logger.info(FidoAlliance.ACTIVE + " = "
+            + Mapper.INSTANCE.readValue(kvPair.getValue(), Boolean.class));
         state.setActive(true);
         break;
       case FidoAlliance.DEV_CONFORMANCE:
         if (state.isActive()) {
           logger.info(FidoAlliance.DEV_CONFORMANCE + " = "
-              + Mapper.INSTANCE.readValue(kvPair.getValue(),String.class));
-          break;
+              + Mapper.INSTANCE.readValue(kvPair.getValue(), String.class));
         }
+        break;
       default:
         break;
 
@@ -48,7 +52,6 @@ public class ConformanceDeviceModule implements ServiceInfoModule {
   @Override
   public void send(ServiceInfoModuleState state, ServiceInfoSendFunction sendFunction)
       throws IOException {
-
 
   }
 }

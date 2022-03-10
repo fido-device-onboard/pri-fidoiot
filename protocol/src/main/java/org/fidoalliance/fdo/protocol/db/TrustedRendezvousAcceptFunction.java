@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -37,7 +40,8 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
 
     OwnershipVoucherEntries entries = voucher.getEntries();
     for (CoseSign1 sign1 : entries) {
-      OwnershipVoucherEntryPayload payload = Mapper.INSTANCE.readValue(sign1.getPayload(), OwnershipVoucherEntryPayload.class);
+      OwnershipVoucherEntryPayload payload =
+          Mapper.INSTANCE.readValue(sign1.getPayload(), OwnershipVoucherEntryPayload.class);
       PublicKey publicKey = cs.decodeKey(payload.getOwnerPublicKey());
       Hash hash = cs.hash(HashType.SHA384,publicKey.getEncoded());
       hashList.add(Hex.toHexString(hash.getHashValue()));
@@ -45,6 +49,7 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
 
     return hashList;
   }
+
   @Override
   public Boolean apply(To0OwnerSign to0OwnerSign) throws IOException {
 

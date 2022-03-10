@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -13,14 +16,16 @@ public class CoseUnprotectedHeader {
   private Nonce cupNonce;
   private Nonce eatNonce;
   private OwnerPublicKey ownerPublicKey;
-  private byte[]  maroPrefix;
+  private byte[] maroPrefix;
   private byte[] iv;
 
   public Nonce getCupNonce() {
     return cupNonce;
   }
 
-  public Nonce getEatNonce() { return eatNonce; }
+  public Nonce getEatNonce() {
+    return eatNonce;
+  }
 
   public OwnerPublicKey getOwnerPublicKey() {
     return ownerPublicKey;

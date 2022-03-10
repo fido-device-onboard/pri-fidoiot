@@ -71,7 +71,7 @@ public class OnboardingVoucher {
     this.data = data;
   }
 
-  public void setCreatedOn(Date date ) {
+  public void setCreatedOn(Date date) {
     this.createdOn = date;
   }
 

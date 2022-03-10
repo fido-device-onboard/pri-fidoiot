@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -6,6 +9,9 @@ import org.fidoalliance.fdo.protocol.entity.RvData;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
+/**
+ * Maintains To2Blob for owners.
+ */
 public class To2Blob extends RestApi {
 
   @Override

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -56,7 +59,7 @@ public final class DiffieHellman {
   /**
    * Build a new DH key exchange matching the supplied config name.
    *
-   * @param name The name of the config to apply, which may be one of ("DHKEXid14","DHKEXid15")
+   * @param name   The name of the config to apply, which may be one of ("DHKEXid14","DHKEXid15")
    * @param random Random Number Generator.
    * @return The new key exchange object.
    */

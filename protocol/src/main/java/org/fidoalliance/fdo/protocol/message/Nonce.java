@@ -56,10 +56,14 @@ public class Nonce {
     return super.equals(o);
   }
 
+  /**
+   * Gets a nonce from a random 16 byte value.
+   * @return The nonce.
+   */
   @JsonIgnore
-  public static Nonce fromRandomUUID() {
+  public static Nonce fromRandomUuid() {
     Nonce nonce = new Nonce();
-    nonce.setNonce(Guid.fromRandomUUID().toBytes());
+    nonce.setNonce(Guid.fromRandomUuid().toBytes());
     return nonce;
   }
 

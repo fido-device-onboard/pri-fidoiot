@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +30,7 @@ import org.hibernate.Session;
 
 public class To0Scheduler implements Closeable {
 
-  static final private LoggerService logger = new LoggerService(To0Scheduler.class);
+  private static final LoggerService logger = new LoggerService(To0Scheduler.class);
 
   private final ThreadPoolExecutor executor;
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -41,18 +44,22 @@ public class To0Scheduler implements Closeable {
   }
 
   private static class RootConfig {
+
     @JsonProperty("owner")
     private To0SchedulerRoot config;
 
   }
 
   private static class To0SchedulerRoot {
+
     @JsonProperty("to0-scheduler")
     private To0SchedulerConfig scheduler;
 
 
   }
+
   private static class To0SchedulerConfig {
+
     @JsonProperty("thread-count")
     private String threadCount;
     @JsonProperty("interval")
@@ -85,8 +92,8 @@ public class To0Scheduler implements Closeable {
       Date now = new Date(System.currentTimeMillis());
       OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
       for (OnboardingVoucher onboardingVoucher : list) {
-        if (onboardingVoucher.getTo0Expiry() == null ||
-            now.after(onboardingVoucher.getTo0Expiry())) {
+        if (onboardingVoucher.getTo0Expiry() == null
+            || now.after(onboardingVoucher.getTo0Expiry())) {
 
           OwnershipVoucher voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(),
               OwnershipVoucher.class);
@@ -107,9 +114,8 @@ public class To0Scheduler implements Closeable {
         }
       }
 
-
     } catch (IOException e) {
-
+      logger.error("T0 scheduler failure due to " + e.getMessage());
     } finally {
       session.close();
     }
@@ -117,8 +123,10 @@ public class To0Scheduler implements Closeable {
     executor.submit(new StandardTo0Client());
   }
 
+  /**
+   * Worker Constructor.
+   */
   public To0Scheduler() {
-
 
     executor =
         (ThreadPoolExecutor) Executors.newFixedThreadPool(config.getThreadCount());
@@ -128,7 +136,7 @@ public class To0Scheduler implements Closeable {
       public void run() {
         onInterval();
       }
-    },config.getInterval(),config.getInterval(),TimeUnit.SECONDS);
+    }, config.getInterval(), config.getInterval(), TimeUnit.SECONDS);
 
     logger.info("To0Scheduler will run every " + config.getInterval() + " seconds");
   }

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -30,7 +33,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
   @Override
   public void prepare(ServiceInfoModuleState state) throws IOException {
 
-
     queue.clear();
     unknownModules.clear();
     moduleNames.clear();
@@ -40,7 +42,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     kv.setKeyName(DevMod.KEY_ACTIVE);
     kv.setValue(Mapper.INSTANCE.writeValue(true));
     queue.add(kv);
-
 
     //os=linux
     kv = new ServiceInfoKeyValuePair();
@@ -60,7 +61,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.version")));
     queue.add(kv);
 
-
     //devmod:device
     kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(DevMod.KEY_DEVICE);
@@ -78,7 +78,6 @@ public class StandardDeviceModule implements ServiceInfoModule {
     kv.setKeyName(DevMod.KEY_BIN);
     kv.setValue(Mapper.INSTANCE.writeValue(System.getProperty("os.arch")));
     queue.add(kv);
-
 
     //build module list
     List<Object> workers = Config.getWorkers();

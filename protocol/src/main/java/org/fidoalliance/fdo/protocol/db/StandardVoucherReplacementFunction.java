@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -8,7 +11,6 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherReplacementFunction;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.Guid;
 import org.fidoalliance.fdo.protocol.message.OwnerPublicKey;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
@@ -31,7 +33,7 @@ public class StandardVoucherReplacementFunction implements VoucherReplacementFun
     replaceHeader.setVersion(header.getVersion());
     replaceHeader.setCertHash(header.getCertHash());
 
-    replaceHeader.setGuid(Guid.fromRandomUUID());
+    replaceHeader.setGuid(Guid.fromRandomUuid());
     replaceHeader.setRendezvousInfo(header.getRendezvousInfo());
 
     CryptoService cs = Config.getWorker(CryptoService.class);

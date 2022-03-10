@@ -1,9 +1,7 @@
-package org.fidoalliance.fdo.protocol.db;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
-import org.fidoalliance.fdo.protocol.entity.OnDieCertificateData;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,13 +15,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.fidoalliance.fdo.protocol.entity.OnDieCertificateData;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+
+/**
+ * Ondie Certificate Manager.
+ */
 public class OnDieCertificateManager {
 
   protected static List<String> rootCaList = new ArrayList<String>(Arrays.asList(
-          "OnDie_CA_RootCA_Certificate.cer",
-          "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
+      "OnDie_CA_RootCA_Certificate.cer",
+      "OnDie_CA_DEBUG_RootCA_Certificate.cer"));
 
+  /**
+   * Checks if certName is the on die root CA.
+   *
+   * @param certName The name of the certificate.
+   * @return True if the cert is the OnDie root Ca.
+   */
   public boolean isOnDieRootCA(String certName) {
     for (String rootName : rootCaList) {
       if (rootName.equalsIgnoreCase(certName)) {
@@ -33,6 +45,13 @@ public class OnDieCertificateManager {
     return false;
   }
 
+  /**
+   * Gets a certificate by name.
+   *
+   * @param name The name of the certificate.
+   * @return The certificate data.
+   * @throws IOException An error occurred.
+   */
   public byte[] getCertificate(String name) throws IOException {
 
     URL url = new URL(name);
@@ -55,7 +74,7 @@ public class OnDieCertificateManager {
       if (blob != null) {
         try {
           byte[] data = blob.getBytes(Long.valueOf(1),
-                  Long.valueOf(blob.length()).intValue());
+              Long.valueOf(blob.length()).intValue());
           return data;
         } catch (SQLException e) {
           throw new IOException(e);
@@ -69,6 +88,11 @@ public class OnDieCertificateManager {
     return null;
   }
 
+  /**
+   * Gets the list of certificates.
+   *
+   * @return The certificate list.
+   */
   public List<String> getCertList() {
     List<String> list;
 
@@ -80,14 +104,12 @@ public class OnDieCertificateManager {
     return list;
   }
 
-  /***
-   * Loads the certificate/crl table from the cert/crl files contained
-   * in the specified zip file
-   * Current default location for zipfile is "https://tsci.intel.com/content/csme.zip".
-   * and for the debug version: "https://pre-tsci.intel.com/content/csme.zip".
-   *
+  /**
+   * Loads the certificate/crl table from the cert/crl files contained in the specified zip file
+   * Current default location for zipfile is "https://tsci.intel.com/content/csme.zip". and for the
+   * debug version: "https://pre-tsci.intel.com/content/csme.zip".
    */
-  public void loadFromZipFileURL(URL zipFileUrl) throws IOException {
+  public void loadFromZipFileUrl(URL zipFileUrl) throws IOException {
     Session session = HibernateUtil.getSessionFactory().openSession();
     Transaction trans = session.beginTransaction();
     Query query = session.createQuery("delete OnDieCertificateData");
@@ -99,8 +121,8 @@ public class OnDieCertificateManager {
       ZipEntry zipEntry = zipInput.getNextEntry();
       while (zipEntry != null) {
         if (zipEntry.getName().startsWith("content/OnDieCA")
-                && (zipEntry.getName().endsWith(".crl")
-                || zipEntry.getName().endsWith(".cer"))) {
+            && (zipEntry.getName().endsWith(".crl")
+            || zipEntry.getName().endsWith(".cer"))) {
 
           String artifactId = Paths.get(zipEntry.getName()).getFileName().toString();
 

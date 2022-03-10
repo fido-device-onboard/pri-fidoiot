@@ -19,19 +19,23 @@ import org.fidoalliance.fdo.protocol.serialization.SimpleStorageSerializer;
 @JsonDeserialize(using = SimpleStorageDeserializer.class)
 public class SimpleStorage {
 
-  private Map<String,Object> map;
+  private Map<String, Object> map;
 
+  /**
+   * Default constructor.
+   */
   @JsonIgnore
   public SimpleStorage() {
     map = new HashMap<>();
   }
 
   /**
+   * Add on object to the storage.
    *
    * @param clazz The object name.
    * @param value The object to put in the storage.
-   * @param <T> The template type argument.
-   * @return
+   * @param <T>   The template type argument.
+   * @return The Object replaced.
    */
   @JsonIgnore
   public <T> T put(Class<?> clazz, Object value) {
@@ -52,12 +56,13 @@ public class SimpleStorage {
 
 
   /**
-   * Gets the values in the storage
+   * Gets the values in the storage.
+   *
    * @return A collection of objects in the storage.
    */
   @JsonIgnore
   public Collection<Object> values() {
-    return  map.values();
+    return map.values();
   }
 
 

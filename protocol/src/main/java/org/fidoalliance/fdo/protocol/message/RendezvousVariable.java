@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -5,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.NoSuchElementException;
 
 
-public enum RendezvousVariable  {
+public enum RendezvousVariable {
   DEV_ONLY(0),//
   OWNER_ONLY(1),//
   IP_ADDRESS(2),//
@@ -25,10 +28,15 @@ public enum RendezvousVariable  {
 
   private int id;
 
-  private RendezvousVariable(int id) {
+  RendezvousVariable(int id) {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static RendezvousVariable fromNumber(Number n) {
     int i = n.intValue();

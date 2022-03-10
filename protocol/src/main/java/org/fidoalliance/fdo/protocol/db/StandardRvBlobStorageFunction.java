@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
@@ -6,7 +9,6 @@ import java.util.Date;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobStorageFunction;
 import org.fidoalliance.fdo.protocol.entity.RvRedirect;
-import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To2RedirectEntry;

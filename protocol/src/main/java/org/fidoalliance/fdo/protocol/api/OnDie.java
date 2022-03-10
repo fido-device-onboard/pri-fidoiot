@@ -3,13 +3,17 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import java.net.URL;
+import java.util.List;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.db.OnDieCertificateManager;
 
-import java.net.URL;
-import java.util.List;
 
+
+/**
+ * Maintains OnDie Certificates.
+ */
 public class OnDie extends RestApi {
 
   @Override
@@ -18,8 +22,9 @@ public class OnDie extends RestApi {
             Config.getWorker(OnDieCertificateManager.class);
 
     List<String> certs = certManager.getCertList();
-    getResponse().setContentType("text/plain");  // Set content type of the response so that jQuery knows what it can expect.
-    getResponse().setCharacterEncoding("UTF-8"); // You want world domination, huh?
+    // Set content type of the response
+    getResponse().setContentType("text/plain");
+    getResponse().setCharacterEncoding("UTF-8");
 
     getResponse().getWriter().write("\n");
     getResponse().getWriter().write("Number of certs/crl: " + certs.size());
@@ -40,6 +45,6 @@ public class OnDie extends RestApi {
             Config.getWorker(OnDieCertificateManager.class);
 
     URL zipUrl = new URL(zipFilePathname);
-    certManager.loadFromZipFileURL(zipUrl);
+    certManager.loadFromZipFileUrl(zipUrl);
   }
 }

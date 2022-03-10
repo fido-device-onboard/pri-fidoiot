@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,12 +12,13 @@ import org.fidoalliance.fdo.protocol.serialization.ManufacturingInfoDeserializer
 import org.fidoalliance.fdo.protocol.serialization.ManufacturingInfoSerializer;
 
 @JsonPropertyOrder(
-    {"keyType", "keyEnc", "serialNumber","deviceInfo","certInfo",
-            "onDieDeviceCertChain","testSignature","testSigMaroePrefix"}
+    {"keyType", "keyEnc", "serialNumber", "deviceInfo", "certInfo",
+        "onDieDeviceCertChain", "testSignature", "testSigMaroePrefix"}
 )
 @JsonSerialize(using = ManufacturingInfoSerializer.class)
 @JsonDeserialize(using = ManufacturingInfoDeserializer.class)
 public class ManufacturingInfo {
+
   @JsonProperty("keyType")
   private PublicKeyType keyType;
 

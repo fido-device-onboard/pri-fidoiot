@@ -56,7 +56,6 @@ public class OnboardingConfig {
   }
 
 
-
   public void setRvBlob(byte[] rvBlob) {
     this.rvBlob = rvBlob;
   }

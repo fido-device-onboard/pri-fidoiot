@@ -1,5 +1,7 @@
-package org.fidoalliance.fdo.protocol.message;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,6 +14,7 @@ import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 @JsonPropertyOrder({"waitSeconds"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class To0AcceptOwner {
+
   @JsonProperty("waitSeconds")
   private long waitSeconds;
 

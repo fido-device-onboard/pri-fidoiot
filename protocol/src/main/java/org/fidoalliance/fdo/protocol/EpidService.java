@@ -1,12 +1,9 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.codec.binary.Hex;
-import org.fidoalliance.fdo.protocol.message.SigInfo;
-import org.fidoalliance.fdo.protocol.message.SigInfoType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +24,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.message.SigInfo;
+import org.fidoalliance.fdo.protocol.message.SigInfoType;
 
 public class EpidService {
 
@@ -57,31 +58,34 @@ public class EpidService {
   private static final LoggerService logger = new LoggerService(EpidService.class);
 
   protected static class RootConfig {
+
     @JsonProperty("epid")
     private EpidService.EpidConfig root;
 
     protected EpidService.EpidConfig getRoot() {
-        return root;
-     }
-   }
+      return root;
+    }
+  }
 
-   protected static class EpidConfig {
-     @JsonProperty("url")
-     private String path;
-     @JsonProperty("testMode")
-     private Boolean testMode;
+  protected static class EpidConfig {
 
-     protected String getPath() {
-        return path;
-      }
-     protected Boolean getTestMode() {
-       return testMode;
-     }
-   }
+    @JsonProperty("url")
+    private String path;
+    @JsonProperty("testMode")
+    private Boolean testMode;
+
+    protected String getPath() {
+      return path;
+    }
+
+    protected Boolean getTestMode() {
+      return testMode;
+    }
+  }
 
 
   protected EpidService.RootConfig config =
-    Config.getConfig(EpidService.RootConfig.class);
+      Config.getConfig(EpidService.RootConfig.class);
 
 
   /**
@@ -92,7 +96,7 @@ public class EpidService {
   private URI getEpidOnlineUrl() {
     if (null == epidOnlineUrl) {
       if (config.getRoot().getPath() != null
-              && !config.getRoot().getPath().isEmpty()) {
+          && !config.getRoot().getPath().isEmpty()) {
         epidOnlineUrl = URI.create(config.getRoot().getPath());
       } else {
         epidOnlineUrl = URI.create(defaultEpidOnlineUrl);
@@ -111,32 +115,32 @@ public class EpidService {
 
   private byte[] getGroupCertSigma10(SigInfo sigInfo) {
     return getEpidVerificationServiceResource(
-            sigInfo, GROUPCERTSIGMA10,
-            (EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11));
+        sigInfo, GROUPCERTSIGMA10,
+        (EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11));
   }
 
   private byte[] getGroupCertSigma11(SigInfo sigInfo) {
     return getEpidVerificationServiceResource(
-            sigInfo, GROUPCERTSIGMA11,
-            (EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11));
+        sigInfo, GROUPCERTSIGMA11,
+        (EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11));
   }
 
   private byte[] getEpidVerificationServiceResource(
-          SigInfo sigInfo, String resource, String epidVersion) {
+      SigInfo sigInfo, String resource, String epidVersion) {
     String path =
-            String.join(URL_PATH_SEPARATOR,
-                    Arrays.asList(
-                            epidVersion,
-                            Hex.encodeHexString(sigInfo.getInfo()).toUpperCase(),
-                            resource.toLowerCase()));
+        String.join(URL_PATH_SEPARATOR,
+            Arrays.asList(
+                epidVersion,
+                Hex.encodeHexString(sigInfo.getInfo()).toUpperCase(),
+                resource.toLowerCase()));
 
     String url;
     try {
       url =
-              new URL(getEpidOnlineUrl().toString())
-                      .toURI()
-                      .resolve(URL_PATH_SEPARATOR + path)
-                      .toString();
+          new URL(getEpidOnlineUrl().toString())
+              .toURI()
+              .resolve(URL_PATH_SEPARATOR + path)
+              .toString();
       return doGet(url);
     } catch (URISyntaxException | IOException e) {
       logger.error(e.getMessage());
@@ -187,7 +191,7 @@ public class EpidService {
     byte[] sigRlBytes = new byte[0];
     try {
       sigRlBytes = getSigrl(sigA,
-              EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11);
+          EPID_PROTOCOL_VERSION_V2 + URL_PATH_SEPARATOR + EPID_11);
     } catch (RuntimeException ex) {
       logger.error("Runtime Exception in getSigInfo");
       // intentional fall through
@@ -216,36 +220,46 @@ public class EpidService {
     return lengthBytes;
   }
 
+  /**
+   * Verify epid signature.
+   *
+   * @param signature The signature to verify.
+   * @param maroePrefix The maroePrefix.
+   * @param nonce The nonce.
+   * @param signedData The signed state.
+   * @param groupId The Epid group ID.
+   * @param sgType The sigInfo type.
+   * @return True if the signature is valid.
+   */
   public boolean verifyEpidSignature(byte[] signature,
-                                     byte[] maroePrefix,
-                                     byte[] nonce,
-                                     byte[] signedData,
-                                     byte[] groupId,
-                                     SigInfoType sgType)
-  {
+      byte[] maroePrefix,
+      byte[] nonce,
+      byte[] signedData,
+      byte[] groupId,
+      SigInfoType sgType) {
     try {
       String msg = createEpidSignatureBodyMessage(
-              signature,
-              maroePrefix,
-              nonce,
-              signedData,
-              groupId,
-              sgType);
+          signature,
+          maroePrefix,
+          nonce,
+          signedData,
+          groupId,
+          sgType);
 
       String url = null;
       String path;
 
       path = String.join(EpidService.URL_PATH_SEPARATOR,
-              Arrays.asList(EpidService.EPID_PROTOCOL_VERSION_V1,
-                      EpidService.EPID_11, EpidService.EPID_PROOF_URI_PATH));
+          Arrays.asList(EpidService.EPID_PROTOCOL_VERSION_V1,
+              EpidService.EPID_11, EpidService.EPID_PROOF_URI_PATH));
       url = new URL(
-              getEpidOnlineUrl().toString()).
-              toURI().resolve(EpidService.URL_PATH_SEPARATOR + path).toString();
+          getEpidOnlineUrl().toString())
+          .toURI().resolve(EpidService.URL_PATH_SEPARATOR + path).toString();
 
       int response = doPost(url, msg);
       if (response != HttpURLConnection.HTTP_OK) {
         if (config.getRoot().getTestMode() != null
-                && config.getRoot().getTestMode()) {
+            && config.getRoot().getTestMode()) {
           // in test mode return false only for non-signature issues
           switch (response) {
             case HttpURLConnection.HTTP_OK:
@@ -269,11 +283,11 @@ public class EpidService {
   }
 
   private String createEpidSignatureBodyMessage(byte[] signature,
-                                                      byte[] maroePrefix,
-                                                      byte[] nonce,
-                                                      byte[] signedData,
-                                                      byte[] groupId,
-                                                      SigInfoType sgType) throws IOException {
+      byte[] maroePrefix,
+      byte[] nonce,
+      byte[] signedData,
+      byte[] groupId,
+      SigInfoType sgType) throws IOException {
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     if (sgType == SigInfoType.EPID10) {
@@ -323,10 +337,10 @@ public class EpidService {
 
     // Create the JSON encoded message body to send to verifier
     String msg = "{"
-            + "\"groupId\":\"" + Base64.getEncoder().encodeToString(groupId) + "\""
-            + ",\"msg\":\"" + Base64.getEncoder().encodeToString(baos.toByteArray()) + "\""
-            + ",\"epidSignature\":\"" + Base64.getEncoder().encodeToString(adjSignature) + "\""
-            + "}";
+        + "\"groupId\":\"" + Base64.getEncoder().encodeToString(groupId) + "\""
+        + ",\"msg\":\"" + Base64.getEncoder().encodeToString(baos.toByteArray()) + "\""
+        + ",\"epidSignature\":\"" + Base64.getEncoder().encodeToString(adjSignature) + "\""
+        + "}";
     return msg;
   }
 
@@ -343,10 +357,11 @@ public class EpidService {
     try {
       httpClient = java.net.http.HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-              HttpRequest.newBuilder().header("Accept", "application/octet-stream");
+          HttpRequest.newBuilder().header("Accept", "application/octet-stream");
       final HttpRequest httpRequest = httpRequestBuilder.uri(URI.create(url)).GET().build();
       final Future<HttpResponse<byte[]>> future =
-              executor.submit(() -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray()));
+          executor.submit(
+              () -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray()));
       final HttpResponse<byte[]> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
       if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
@@ -373,11 +388,12 @@ public class EpidService {
     try {
       httpClient = HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-              HttpRequest.newBuilder().header("Content-Type", "application/json");
+          HttpRequest.newBuilder().header("Content-Type", "application/json");
       final HttpRequest httpRequest =
-              httpRequestBuilder.uri(URI.create(url)).POST(HttpRequest.BodyPublishers.ofString(payload)).build();
+          httpRequestBuilder.uri(URI.create(url)).POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
       final Future<HttpResponse<String>> future =
-              executor.submit(() -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()));
+          executor.submit(() -> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()));
       final HttpResponse<String> httpResponse;
       httpResponse = future.get(httpRequestTimeout, TimeUnit.SECONDS);
       return httpResponse.statusCode();

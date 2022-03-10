@@ -3,12 +3,10 @@
 
 package org.fidoalliance.fdo.protocol;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -69,12 +67,12 @@ public class VoucherUtils {
 
 
   /**
-   * Extends and ownership voucher
+   * Extends and ownership voucher.
    *
    * @param voucher     An instance of a Voucher.
    * @param keyResolver The key resolver for the last owner.
    * @param nextChain   The certificate chain for the next owner.
-   * @return An extended voucher
+   * @return An extended voucher.
    * @throws IOException An error occurred.
    */
 
@@ -161,7 +159,7 @@ public class VoucherUtils {
   }
 
   /**
-   * Coverts the voucher to a PEM String
+   * Coverts the voucher to a PEM String.
    *
    * @param voucherData The cbor bytes of the voucher.
    * @return The voucher as a PEM String.
@@ -192,7 +190,7 @@ public class VoucherUtils {
   }
 
   /**
-   * Coverts the voucher to a PEM String
+   * Coverts the voucher to a PEM String.
    *
    * @param voucher An instance of a Voucher.
    * @return The voucher as a PEM String.

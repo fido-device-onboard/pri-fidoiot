@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -20,10 +23,17 @@ public class Guid {
   private Guid(UUID uuid) {
     this.uuid = uuid;
   }
-  public static Guid fromUUID(UUID uuid) {
+
+  public static Guid fromUuid(UUID uuid) {
     return new Guid(uuid);
   }
 
+  /**
+   * Converts guid from bytes.
+   * @param data The bytes of the guid.
+   * @return The Guid object represented by the bytes.
+   * @throws IOException An error occurred.
+   */
   public static Guid fromBytes(byte[] data) throws IOException {
     try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
         DataInputStream in = new DataInputStream(bis);) {
@@ -39,6 +49,10 @@ public class Guid {
     return uuid;
   }
 
+  /**
+   * Converts GUID to bytes.
+   * @return The guid as a byte array.
+   */
   public byte[] toBytes() {
     byte[] data = new byte[Long.BYTES * 2];
     ByteBuffer buffer = ByteBuffer.wrap(data);
@@ -48,8 +62,8 @@ public class Guid {
   }
 
 
-  public static Guid fromRandomUUID() {
-    return fromUUID(UUID.randomUUID());
+  public static Guid fromRandomUuid() {
+    return fromUuid(UUID.randomUUID());
   }
 
   @Override

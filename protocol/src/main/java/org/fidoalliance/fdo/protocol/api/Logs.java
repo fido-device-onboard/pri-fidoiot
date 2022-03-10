@@ -1,15 +1,15 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 
-public class Logs extends RestApi{
+public class Logs extends RestApi {
 
   private File getLogFile() {
     return new File("./app-data/service.log");
