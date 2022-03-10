@@ -32,7 +32,7 @@ public class Config {
   private static final String ENV_PARAM_END = ")";
   private static final String CONFIG_HOME = "fdo.config.home";
 
-  private static final Root ROOT;
+  private static Root ROOT;
   private static final Properties env = new Properties();
   private static List<Object> workers = new ArrayList<>();
   private static final List<Object> configs = new ArrayList<>();
@@ -60,9 +60,9 @@ public class Config {
       loadSystemProperties();
       loadWorkerItems();
       loadEnvFiles();
-    } catch (
-        IOException e) {
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");// todo : Replace with logger.
+      System.exit(-1);
     }
   }
 
