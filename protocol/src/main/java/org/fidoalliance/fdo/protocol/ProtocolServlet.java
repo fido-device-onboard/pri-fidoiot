@@ -89,7 +89,6 @@ public class ProtocolServlet extends HttpServlet {
         logMessage(errorMsg);
       }
 
-      throwable.printStackTrace();
     }
   }
 }
