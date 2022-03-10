@@ -98,7 +98,7 @@ public abstract class HttpClient implements Runnable {
     URI requestUri = null;
     if (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
             || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
-            || getRequest().getMsgType() == MsgType.TO0_HELLO){
+            || getRequest().getMsgType() == MsgType.TO0_HELLO) {
       index = 0;
     }
     while (index <= getInstructions().size()) {
