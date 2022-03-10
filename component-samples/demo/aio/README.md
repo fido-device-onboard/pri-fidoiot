@@ -1,3 +1,27 @@
+# About
+
+The FDO All-In-One demo is designed to run multiple FDO services like Manufacturer, Rendezvous and Owner Service in a single
+**docker** instance. The purpose of this demo is to fast-track demonstration of FDO protocol using different client implementations.
+
+***NOTE***: The All-In-One demo is provided to demonstrate out-of-box operation of FDO components.  Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
+
+# Getting Started with the FDO All-In-One Demo
+
+The following are the system requirements for the All-in-One demo.
+- Operating System: Ubuntu* 20.04
+- Java* Development Kit 11
+- Apache Maven* 3.5.4 (Optional) software for building the demo from source
+- Java IDE (Optional) for convenience in modifying the source code
+- Docker 18.09
+- Docker compose 1.21.2
+- Haveged
+
+# Configuring JAVA Execution Environment
+
+Appropriate proxy configuration should be updated in **`_JAVA_OPTIONS`** environment variable. (Mandatory, if you are working behind a proxy.)
+
+Update the proxy information in _JAVA_OPTIONS as ```_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port```.
+
 # Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) All-In-One Component sample source.
@@ -9,298 +33,165 @@ $ mvn clean install
 
 This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/aio/.
 
-# Configuring the FDO PRI Owner Sample
+# Configuring the FDO All-In-One Demo Service
 
-Owner runtime arguments:
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
 
-public static final String AIO_PORT = "aio_port";
+`service.env`: consists of all the credentials used by the All-in-one demo service. These credential configurations are to be generated freshly for each deployment.
 
-- `aio_port`
+`hibernate.cfg.xml`: consists of all the database configurations used by the All-in-one demo service. This file can be configured to pick various database tables and properties.
 
-  AIO HTTP server port.
+`service.yml` file is structured into multiple sections:
 
-  Default value: 8080
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
-- `aio_https_port`
 
-  AIO HTTPS server port.
+- `system-properties:` - This section contains the runtime environment variables.
 
-  Default value: 8443
 
-- `aio_protocol_scheme`
+- `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
-  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme. .
 
-  Default value: https
+- `manufacturer:` - This section contains the configuration related to manufacturer keystore path, type and credentials.
 
-- `aio_ssl_keystore`
 
-  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
+- `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 
-  The AIO ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
 
-  ***NOTE***: This property is not required if service is running in `http` mode.
+- `cwt:` - This section contains the configuration related to CBOR web token (cwt) keystore path, type and credentials.
 
-- `aio_ssl_keystore-password`
 
-  Provides password for the specified keystore.
+- `workers:` The section contains the configuration to select desired functionality for the services. The deployer can pick and choose the functionality during runtime.
 
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
 
-  ***NOTE***: This property is not required if service is running in `http` mode.
+`WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
 
-- `aio_database_connection_url`
+# Running All-In-One Demo
 
-  JDBC URL for database connection. Includes the database driver name, port number for database, and the location of `.db` file.
+The All-In-One demo can be executed as a standalone service as well as a docker service. At the
+end of initialization of all services, you will see following statement on the console.
 
-  Default value: jdbc:h2:tcp://localhost:8081/./aio
+`[INFO] Started All-in-one demo Service.`
 
-- `aio_database_username"`
+Follow the below steps to start All-In-One demo.
 
-  AIO database username.
+##  Run as Standalone service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/aio/` and execute following command.
 
-  Default value: sa
-
-- `aio_database_password`
-
-  AIO database password.
-
-  Default value: `<no-password>`
-
-- `aio_database_port`
-
-  AIO database port number.
-
-  Default value: 8081
-
-- `aio_database_driver`
-
-  JDBC driver to use.
-
-  Default value: org.h2.Driver
-
-- `aio_database_allow_others`
-
-  Allow Database connection from other machines.
-
-  Default value: false
-
-- `aio_database_init_sql`
-
-  The database script that will be executed when AIO server is started for the first time.
-
-  Default value: ./init.sql
-
-- `aio_database_new_device_sql`
-
-  The database script that will be executed every time a new device is manufactured (DI).
-
-  Default value: /new-device.sql
-
-- `aio_database_new_device_sql`
-
-  How often to check for expired protocol session information and remove it from the database. (seconds)
-
-  Default value: 60
-
-- `epid_online_url`
-
-  EPID Verification Service URL for EPID device signature verification.
-
-  Default value: https://verify.epid-sbx.trustedservices.intel.com/
-  Other server options: https://verify.epid.trustedservices.intel.com/ (production EPID verification server), https://localhost:1180 (onprem verification service)
-
-- `epid_test_mode`
-
-  EPID devices can be tested using `Test` mode, it is intended for supporting onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device.
-
-  Default value: false
-
-  ***NOTE***: True is not recommended for use in production systems.
-
-- `catalaina.home`
-  
-  Tomcat configuration for Catalina home.
-
-  Default value: ./
-
-- `owner_ssl_keystore`
-
-  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-
-  The Owner ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-- `owner_ssl_keystore_password`
-
-  Provides password for the specified keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
- 
-  
-- `owner_keystore_type`
-
-  The owner keystore type.
-  
-  Default value: PKCS12
-
-- `owner_to0_rv_blob`
-
-  Information containing network address of the prospective owner. Owner shares this information with RV during TO0. RV, then shares the same during TO1. Device, then uses this information to initiate TO2 protocol.
-
-  Default value: http://localhost:8042?ipaddress=127.0.0.1
-
-- `owner_transfer_keys`
-
-  PEM file containing owner public keys that will be used for transfer of ownership during manufacturing.
-
-- `owner_replacement_keys`
-
-  PEM file container Owner public keys that will be used to replace manufactured keys during TO2 protocol.
-
-- `manufacturer_keystore_type`
-
-  The manufacturer keystore type.
-
-  Default value: PKCS12
-
-- `manufacturer_keystore`
-
-  Path to the Manufacturer keystore file containing the Manufacturer's keys.
-
-  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-- `manufacturer_keystore_password`
-
-  Keystore password for manufacturer_keystore.p12 and the internal softHSM's PKCS11 keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-- `aio_api_user`
-
-  Username for the database REST API calls.
-
-  Default value: apiUser
-
-- `aio_api_password`
-
-  Password for the database REST API calls.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-- `aio_downloads_path`
-
-  File system path of downloads directory. see API for /downloads/<file>
-
-  Default value: ./downloads
-
-- `aio_auto_inject_blob`
-
-  Auto inject RV Blob into database for TO1 protocol.
-
-  Default value: true
-
-## Support for OnDie Devices
-
-Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure owner to support OnDie devices.
-
-# Enabling Remote Access to DB
-
-Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
-
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `\<fdo-pri-src>/component-samples/owner/src/main/java/org/fidoalliance/fdo/sample/OwnerServerApp.java` file
-
-```
-db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <owner_db_port>
-webAllowOthers = true
+```shell
+java -jar aio.jar
 ```
 
-**IMPORTANT: Not recommended to enable this setting especially on production systems.**
+Make sure to export the credential environment variables set in `service.env` file.
 
-# Starting the Owner Service
+##  Run as Docker Service
 
-Refer to the section [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands) to start the service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/aio/` and execute following command.
 
-***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+```
+docker-compose up --build
+```
 
-# FDO PRI Owner REST APIs
+In case you need super user access, prefix 'sudo -E' to above command.
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| GET /api/v1/owner/vouchers/    | Returns all GUID of Ownership Voucher available in `TO2_DEVICES` table. | | | | Comma-separated list of GUIDs |
-| GET /api/v1/owner/vouchers/?id=<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `TO2_DEVICES` table. | | application/cbor | Content of Ownership Voucher in binary format | |
-| DELETE /api/v1/owner/vouchers/?id=<device_guid> | Deletes Ownership Voucher of the specified GUID from the `TO2_DEVICES` table. | Query - id: Device GUID | | | |
-| GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the new Ownership Voucher for the specified GUID to enable resale. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/svi/settings/ | Updates the various fields of `TO2_SETTINGS` table for ID=1 field.<br/> Example input looks like 'devicemtu:=2000,ownerthreshold:=8192' | | application/text| values based on the field(s) to be modified.| |
-| POST /api/v1/owner/setupinfo/?id=current_guid | updates `Replacement GUID` or `Replacement RVInfo` or `Customer ID` or all three in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or New CUSTOMER_ID or all three. <br/> To update GUID, RV Info and CUSTOMER_ID: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\>,ownerkey:=\<customer_id\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\> <br/> To update CUSTOMER_ID: ownerkey:=\<customer_id\> | | |
-| POST /api/v1/owner/customer/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
-| DELETE /api/v1/owner/customer/?id=<customer_id> | Deletes device entry from `OWNER_CUSTOMERS` table. | Query - id: Customer Id  | | | |
-| GET /api/v1/device/svi/?guid=<guid> | Retieves tag information about a resoruce including id. | Query - guid: Device GUID  | | | |
-| PUT /api/v1/device/svi/?module=<module-name><br>&var=<variable-name>&priority=<priority-no><br>&guid=<device-guid>&filename=\<filename\><br>&bytes=<contents-in-cbor-bytes> | Adds a new tagged resource. |  Query - module: Module Name. <br/>  var: Message Name. <br/> filename: zero length file to be created on device with the given filename. <br/> bytes: content to be populated in file, specified using filename. <br/> guid: Tag resource using GUID. <br/> device: device type tag. <br/> priority: priority order to send messages to device. <br/> os: os name tag. <br/> version: os version tag. <br/> arch: device architecture tag. <br/> crid : content resource identifier tag. <br/> hash: storing hash value of content. **NOTE** Resource will be transferred only to devices matching the tagged architecture version type. Some parameters of the API are **optional** | application/octet-stream | File to be transferred in binary format. | |
-| POST /api/v1/device/svi/?id=<resource_id> | Updates the content of existing resource. | Query - id: Resource Id  | | | |
-| DELETE /api/v1/device/svi/?id=<resource_id> | Removes resource(s) by tag or id. | Query - id: Resource Id  | | | |
+***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/aio/ondiecache` folder.
+
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/aio/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+
+# FDO PRI AIO REST APIs
+
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | | | | Serial No, GUID and Timestamp of device that completed DI | curl -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
+| POST /api/v1/to0/{guid} | initiate TO0 from Owner | GUID of the device to initiate TO0 | text/plain |  |  | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8080/api/v1/to0/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/aio/rvinfo?ip=ip-address&rvprot=(http or https) | allows to update rvInfo with ipaddress and rv protocol | ip => ip-address of machine running aio & rvprot => supported rvProtocol | text/plain |  |  |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8080/api/v1/aio/rvinfo?ip=127.0.0.1&rvprot=http' --header 'Content-Type: text/plain' |
+| GET /api/v1/logs | Serves the log from the AIO service | | | | AIO logs | curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8080/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the AIO service | |  |  |  | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8080/api/v1/logs' --header 'Content-Type: text/plain'|
+| GET /health | Returns the health status | | | | Current version | curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8080/health' --header 'Content-Type: text/plain' |
 
 
 # FDO PRI Manufacturer REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| POST /api/v1/assign/?id=<customer_id>&guid=<device_guid> | Assigns customer ID to Ownership Voucher having the input GUID. | Query - id: Customer ID, guid = Device GUID | | | |
-| GET /api/v1/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | | Ownership Voucher |
-| POST /api/v1/customers/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
-| POST /api/v1/rvinfo/ | Updates RV Info in `MT_SETTINGS` table | | text/plain; charset=us-ascii | RV Info | | |
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds |  |  |  | JSON array of Serial No, GUID and DI Timestamp. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'|
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' --header 'Content-Type: text/plain' |
+
+# FDO PRI Owner REST APIs
+
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| POST /api/v1/owner/redirect    | Updates TO2 RVBlob in `ONBOARDING_CONFIG` table. | | text/plain | RVTO2Addr in diagnostic form | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/redirect' --header 'Content-Type: text/plain'  --data-raw '[["localhost","127.0.0.1",8042,3]]' |
+| POST /api/v1/to0/{guid} | initiate TO0 from Owner | GUID of the device to initiate TO0 | text/plain |  |  | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/to0/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/svi | Uploads SVI instructions to `SYSTEM_PACKAGE` table. |  | text/plain | SVI Instruction |   | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svi' --header 'Content-Type: text/plain' --data-raw '[{"filedesc" : "setup.sh","resource" : "URL"}, {"exec" : ["bash","setup.sh"] }]' |
+| GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-binary '${voucher}' |
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' --header 'Content-Type: text/plain'|
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health' --header 'Content-Type: text/plain' |
+| GET /api/v1/ondie | Serves the stored certs & crls files | || Ondie certs & crl files |
+| POST /api/v1/ondie | To download onDie certs and crls zip file url. | | text/plain | Ondie certs/crls URL |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?alias=SECP256R1 | Returns the owner certificate of the given alias type | Path - alias | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?alias=SECP256R1' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?uuid=uuid | Returns the owner alias type for the given voucher| Path - uuid | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?uuid=cc60f0aa-56d0-492e-8c8d-9a1fe55cb60 --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
+| GET /api/v1/owner/messagesize | Collects the max message size from `ONBOARDING_CONFIG` table | | |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain'|
+| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize?size=1400' --header 'Content-Type: text/plain'|
+| GET /api/v1/owner/svisize | Collects the owner svi size from `ONBOARDING_CONFIG` table | | text/plain |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize?size=1400' --header 'Content-Type: text/plain' |
+| GET /api/v1/owner/resource?filename=fileName | Returns the file based on filename from `SYSTEM_RESOURCE` table | Path - filename | | | file |  curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'  |
+| POST /api/v1/owner/resource?filename=fileName | Adds the file to DB based on filename  from `SYSTEM_RESOURCE` table  | Path - filename | text/plain| file in Binary format |  |  curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain' --data-binary '@< path to file >' |
+| DELETE /api/v1/owner/resource?filename=fileName | Delete the  file from DB based on filename from `SYSTEM_RESOURCE` table   | Path - filename | | |  |  curl -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'|
 
 
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file. 
+ 
+Following is the list of REST response error codes and it's possible causes :
 
+|     Error Code     |             Possible Causes               |
+| -------------------:|:----------------------------------------:|
+| `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
+| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
+| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
 
-# FDO PRI AIO REST APIs
-
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| PUT /api/v1/uploads/<file> | PUT a file that can later be retrieved via /downloads api |  | | | |
-| GET /downloads/<file> | Gets for onboarding   | | | |
-| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | |||
-| GET /api/v1/register/{guid} | registers the To0 RVBlob with the RV Server | |||
-
-
-***NOTE***: These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
-
-# Inserting Keys into Owner & Manufacturer Keystore in AIO
-
-The PKCS12 keystore files \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 and \<fdo-pri-src\>/component-samples/demo/manufacturer/manufacturer_keystore.p12 contain the default Owner & Manufacturer keys. These keystores          contain 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default keystore.p12 files are generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
-
-**IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
-
-***NOTE***: A 'PKCS12' keystore is used to store the keys, instead of 'PKCS11' keystore (softHSM). This is because of the use of 'BouncyCastle' as a security provider for algorithm 'RSA/NONE/OAEPWithSHA256AndMGF1Padding' to support Asymmetric key exchange, since the security provider 'SUNPKCS11' configured with softHSM, does not support the same as per the available documentation.
 
 # Troubleshooting
 
 As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
-# Configuring Owner for HTTPS/TLS Communication
 
-By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS requests from the device.
+# Configuring AIO for HTTPS/TLS Communication
 
-- Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+By default, the AIO uses HTTP for all communications on port 8080. In addition to that, the AIO can be configured to handle HTTPS requests from the device.
 
-  * Ensure that the web certificate is issued to the resolvable domain of the Owner server.
+AIO can generate its own certificate and if you want to override the default certificate, follow these steps:
 
-- Copy the generated Keystore/Certificate to `demo/aio/certs` folder.
+- Generate the Keystore/Certificate for the AIO. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
-- Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
+    * Ensure that the web certificate is issued to the resolvable domain of the AIO server.
 
-- Update the following environment variables in `demo/owner/aio.env` file
+- Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
 
-    |  Variable              |  Value            |             Description       |
-    | -----------------------|-------------------|-------------------------------|
-    | owner_protocol_scheme  | https             | To enable HTTPS communication.|
-    | owner_https_port       | port number       | The given port will be used for HTTPS communication. |
-    | fido_ssl_mode          | TEST / PROD       | If set to `TEST`, then SSL verification is disabled. If set to `PROD`, then certificate verification is initiated. |
-    | owner_ssl_keystore     | keystore-filename | Filename of Keystore that is present in the certs folder.|
-    | owner_ssl_keystore-password| keystore-password | Password of the keystore. |
-    | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
-    | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
-    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS ,PKCS12   |
-    | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
+- Update the SSL keystore password & subject_names in `service.yml` file.
 
-    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
-    Avoid using the default keystore available for production deployment.
+# Configuring AIO workers
+
+|     worker                                              |             Description                                  |
+| -------------------------------------------------------:|:--------------------------------------------------------:|
+| org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier   | Tells owner to use HTTP instead of HTTPS for TO0 protocol|
+| org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier | Tells owner to use HTTPS for TO0 protocol |
+| org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction | Stores voucher in the database without performing To0 protocol |
+| org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction | Automatically extends the voucher to the owner and performs To0 protocol |

@@ -1,19 +1,14 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol;
+
+import org.fidoalliance.fdo.protocol.message.ErrorCode;
 
 /**
  * Represents an InvalidMessageException.
  */
 public class InvalidMessageException extends DispatchException {
-
-  /**
-   * Constructs an InvalidMessageException.
-   */
-  public InvalidMessageException() {
-    super();
-  }
 
   /**
    * Constructs an InvalidMessageException.
@@ -34,7 +29,7 @@ public class InvalidMessageException extends DispatchException {
   }
 
   @Override
-  protected int getErrorCode() {
-    return Const.INVALID_MESSAGE_ERROR;
+  public ErrorCode getErrorCode() {
+    return ErrorCode.INVALID_MESSAGE_ERROR;
   }
 }

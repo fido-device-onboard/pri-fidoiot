@@ -5,13 +5,15 @@ version: "2.4"
 
 services:
 
-  pri-fdo-manufacturer:
-    image: pri-fdo-manufacturer
-    container_name: pri-fdo-manufacturer
+  pri-fdo-mfg:
+    image: pri-fdo-mfg
+    container_name: pri-fdo-mfg
     expose:
       - "8039"
+      - "8038"
     ports:
       - "8039:8039"
+      - "8038:8038"
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,12 +21,11 @@ services:
         - _JAVA_OPTIONS
     restart: on-failure:5
     env_file:
-      - manufacturer.env
-      - creds.env
+      - service.env
     volumes:
-      - ./target:/home/fdo/target
+      - ./app-data:/home/fdo/app-data 
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
-    pids_limit: 100
+    pids_limit: 500
     network_mode: host

@@ -1,38 +1,19 @@
-// Copyright 2020 Intel Corporation
+// Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol;
 
-/**
- * Represents a ResourceNotFoundException.
- */
+import org.fidoalliance.fdo.protocol.message.ErrorCode;
+
 public class ResourceNotFoundException extends DispatchException {
 
-  /**
-   * Constructs a ResourceNotFoundException.
-   */
-  public ResourceNotFoundException() {
-    super();
-  }
-
-  /**
-   * Constructs a ResourceNotFoundException.
-   * @param cause The cause of the exception.
-   */
-  public ResourceNotFoundException(String cause) {
-    super(cause);
-  }
-
-  /**
-   * Constructs a ResourceNotFoundException.
-   * @param cause The cause of the exception.
-   */
-  public ResourceNotFoundException(Exception cause) {
-    super(cause);
+  public ResourceNotFoundException(String message) {
+    super(message);
   }
 
   @Override
-  protected int getErrorCode() {
-    return Const.RESOURCE_NOT_FOUND;
+  public ErrorCode getErrorCode() {
+    return ErrorCode.RESOURCE_NOT_FOUND;
   }
+
 }

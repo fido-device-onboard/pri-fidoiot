@@ -10,8 +10,10 @@ services:
     container_name: pri-fdo-rv
     expose:
       - "8040"
+      - "8041"
     ports:
       - "8040:8040"
+      - "8041:8041"
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,12 +21,11 @@ services:
         - _JAVA_OPTIONS
     restart: on-failure:5
     env_file:
-      - rv.env
-      - creds.env
+      - service.env
     volumes:
-      - ./target:/home/fdo/target
+      - ./app-data:/home/fdo/app-data 
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
-    pids_limit: 100
+    pids_limit: 500
     network_mode: host

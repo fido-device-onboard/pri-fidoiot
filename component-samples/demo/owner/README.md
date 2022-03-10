@@ -1,250 +1,164 @@
+# About
+
+The FDO Owner Service is designed to onboard the client device to a Management service. Owner participates during TO0 and T02 FDO protocols and is responsible for ServiceInfo transfer & initializing the device to working state.
+
+
+***NOTE***: Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
+
+# Getting Started with the FDO Owner Service
+
+The following are the system requirements for the FDO Owner Service.
+- Operating System: Ubuntu* 20.04
+- Java* Development Kit 11
+- Apache Maven* 3.5.4 (Optional) software for building the demo from source
+- Java IDE (Optional) for convenience in modifying the source code
+- Docker 18.09
+- Docker compose 1.21.2
+- Haveged
+
+# Configuring JAVA Execution Environment
+
+Appropriate proxy configuration should be updated in **`_JAVA_OPTIONS`** environment variable. (Mandatory, if you are working behind a proxy.)
+
+Update the proxy information in _JAVA_OPTIONS as ```_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port```.
+
 # Getting the Executable
 
-Use the following commands to build FIDO Device Onboard (FDO) Owner Component sample source.
+Use the following commands to build FIDO Device Onboard (FDO) Owner source.
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
 ```
-$ cd <fdo-pri-src>/component-samples/owner/
+$ cd <fdo-pri-src>/
 $ mvn clean install
 ```
 
 This will copy the required executables and libraries into \<fdo-pri-src\>/component-samples/demo/owner/.
 
-# Configuring the FDO PRI Owner Sample
+# Configuring the FDO Owner Service
 
-Owner runtime arguments:
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
 
-- `owner_to2_port`
+`service.env`: consists of all the credentials used by the Owner Service demo service. These credential configurations are to be generated freshly for each deployment.
 
-  Owner server port.
+`hibernate.cfg.xml`: consists of all the database configurations used by the Owner Service. This file can be configured to pick various database tables and properties.
 
-  Default value: 8042
+`service.yml` file is structured into multiple sections:
 
-- `owner_database_connection_url`
+- `hibernate-properties:` - This section contains *Hibernate related runtime properties including the DB URL, dialect and others.
 
-  JDBC URL for database connection. Includes the database driver name, port number for database, and the location of `.db` file.
 
-  Default value: jdbc:h2:tcp://localhost:8051/./target/data/ops
+- `system-properties:` - This section contains the runtime environment variables.
 
-- `owner_database_username`
 
-  Owner database username.
+- `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
-  Default value: sa
 
-- `owner_database_password`
+- `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 
-  Owner database password.
 
-  Default value: `<no-password>`
+- `workers:` The section contains the configuration to select desired functionality for the services. The deployer can pick and choose the functionality during runtime.
 
-- `owner_database_port`
 
-  Owner database port number.
+`WEB-INF/web.xml`: consist of the all configurations related to REST endpoints served. The deployer can pick and choose the served endpoints during runtime.
 
-  Default value: 8051
+# Configuring Owner Proxy Settings
 
-- `epid_online_url`
-
-  EPID Verification Service URL for EPID device signature verification.
-
-  Default value: https://verify.epid-sbx.trustedservices.intel.com/
-  Other server options: https://verify.epid.trustedservices.intel.com/ (production EPID verification server), https://localhost:1180 (onprem verification service)
-
-- `epid_test_mode`
-
-   EPID devices can be tested using `Test` mode, it is intended for supporting onboarding for `development` and `test` devices. Enabling the test mode means signature verification won't be performed for the device.
-
-   Default value: false
-
-   ***NOTE***: Not recommended for use in production systems.
-
-- `catalina_home`
-
-  Tomcat configuration for Cataline home.
-
-  Default value: ./target/tomcat
-
-- `owner_keystore`
-
-  Path to the Owner keystore file containing the owner's keys.
-
-  The keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-- `owner_keystore_password`
-
-  Keystore password for owner_keystore.p12 and the internal softHSM's PKCS11 keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-- `owner_to0_scheduling_enabled`
-
-  Schedule eligible devices for TO0, as present in `TO2_DEVICES` table. If true, automatic TO0 scheduling is enabled. If false, TO0 scheduling is disabled.
-
-  Default value: true
-
-- `owner_to0_scheduling_interval`
-
-  Time interval to check database for GUIDs with pending TO0.
-
-  Default value: 300s
-
-- `owner_to0_rv_blob`
-
-  Information containing network address of prospective owner. Owner shares this information with RV during TO0. RV, then shares the same during TO1. Device, then uses this information to initiate TO2 protocol.
-
-  Default value: http://localhost:8042?ipaddress=127.0.0.1
-
-- `owner_api_user`
-
-  Username for the database REST API calls.
-
-  Default value: apiUser
-
-- `owner_api_password`
-
-  Password for the database REST API calls.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-
-- `owner_protocol_scheme`
-
-  Enables the service to run in https mode. Pass argument value `https` for the same. For all other values, the server service defaults to `http` scheme.
-
-  Default value: https
-
-- `owner_https_port`
-
-   Allows enduser to select a port for accepting HTTPS requests.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-  Default value: 443
-
-- `fido_ssl_mode`
-
-  There are 2 modes namely 'TEST' and 'PROD'. TEST mode disables SSL verification.
-
-  Default value: TEST
-
-- `owner_ssl_keystore`
-
-  Provides path for SSL keystore to be used by the service, in case it runs in HTTPS mode.
-
-  The ssl keystore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `owner_ssl_keystore_password`
-
-  Provides password for the specified keystore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `ssl_truststore`
-
-  Provides path for SSL truststore to be used by the service.
-
-  The truststore file and path value is generated using keys_gen.sh script and is stored in creds.env file. [Read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about the key generation script here.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `ssl_truststore_password`
-
-  Provides password for the specified truststore.
-
-  The value for this property is auto generated using the keys_gen.sh script and is stored in creds.env file.
-
-  ***NOTE***: This property is not required if service is running in `http` mode.
-
-- `ssl_truststore_type`
-
-  Defines the type of truststore.
-  Default truststore type: PKCS12
-
-
-## Support for OnDie Devices
-
-Refer to [Demo README](../README.md/#configuring-ondie-optional) for steps to configure owner to support OnDie devices.
-
-# Enabling Remote Access to DB
-
-Remote access to H2 Sample Storage DB has been disabled by default. Enabling the access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
-
-To enable remote access to DB update the `db.tcpServer` and `webAllowOthers` properties in `\<fdo-pri-src>/component-samples/owner/src/main/java/org/fidoalliance/fdo/sample/OwnerServerApp.java` file
+To configure Owner proxy resolution, add the following properties to `demo/owner/service.env` file:
 
 ```
-db.tcpServer = -tcp -tcpAllowOthers -ifNotExists -tcpPort <owner_db_port>
-webAllowOthers = true
+http_host=<value>
+https_host=<value>
+http_port=<value>
+https_port=<value>
+no_proxy=<value>
 ```
 
-**IMPORTANT: Not recommended to enable this setting especially on production systems.**
+# Running FDO Owner Service
 
-# Starting the Owner Service
+FDO Owner Service can be executed as a standalone service as well as a docker service. At the
+end of initialization of all services, you will see following statement on the console.
 
-Refer to the section [Docker Commands](../README.md/#docker-commands) / [Podman Commands](../README.md/#podman-commands)  to start the service.
+`[INFO] Started Owner Service.`
 
-***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/target/data/ops.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
+Follow the below steps to start Owner Service.
+
+##  Run as Standalone service.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/owner/` and execute following command.
+
+```shell
+java -jar owner.jar
+```
+
+Make sure to export the credential environment variables set in `service.env` file.
+
+##  Run as Docker Service
+
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/owner/` and execute following command.
+
+```
+docker-compose up --build
+```
+
+In case you need super user access, prefix 'sudo -E' to above command.
+
+***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/owner/ondiecache` folder.
+
+***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Owner REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| GET /api/v1/owner/vouchers/    | Returns all GUID of Ownership Voucher available in `TO2_DEVICES` table. | | | | Comma-separated list of GUIDs |
-| GET /api/v1/owner/vouchers/?id=<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `TO2_DEVICES` table. | | application/cbor | Content of Ownership Voucher in binary format | |
-| DELETE /api/v1/owner/vouchers/?id=<device_guid> | Deletes Ownership Voucher of the specified GUID from the `TO2_DEVICES` table. | Query - id: Device GUID | | | |
-| GET /api/v1/owner/newvoucher/?id=<device_guid> | Returns the new Ownership Voucher for the specified GUID to enable resale. | Query - id: Device GUID | | | Ownership Voucher |
-| POST /api/v1/owner/svi/settings/ | Updates the various fields of `TO2_SETTINGS` table for ID=1 field.<br/> Example input looks like 'devicemtu:=2000,ownerthreshold:=8192' | | application/text| values based on the field(s) to be modified.| |
-| POST /api/v1/owner/setupinfo/?id=current_guid | Updates `Replacement GUID` (only if REUSE support is enabled) or `Replacement RVInfo` or `Customer ID` or all three in TO2_DEVICES table | Query - guid: current device GUID| application/text | New GUID or New RV_Info or New CUSTOMER_ID or all three. <br/> To update GUID, RV Info and CUSTOMER_ID: guid:=\<replacement_guid\>,rvinfo:=\<replacement_rvinfo\>,ownerkey:=\<customer_id\> <br/> To update Replacement GUID: guid:=\<replacement_guid\> <br/> To update Replacement RV_Info: rvinfo:=\<replacement_rvinfo\> <br/> To update CUSTOMER_ID: ownerkey:=\<customer_id\> | | |
-| POST /api/v1/owner/customer/?id=<customer_id>&name=<customer_name> | Adds customer with the given ID and Public key in PEM format. | Query - id: Customer Id, name: Customer Name | text/plain; charset=us-ascii | Customer PEM formatted Public keys | |
-| DELETE /api/v1/owner/customer/?id=<customer_id> | Deletes device entry from `OWNER_CUSTOMERS` table. | Query - id: Customer Id  | | | |
-| GET /api/v1/device/svi/?guid=<guid> | Retrieves tag information about a resource including id. | Query - guid: Device GUID  | | | |
-| PUT /api/v1/device/svi/?module=<module-name><br>&var=<variable-name>&priority=<priority-no><br>&guid=<device-guid>&filename=\<filename\><br>&bytes=<contents-in-cbor-bytes> | Adds a new tagged resource. |  Query - module: Module Name. <br/>  var: Message Name. <br/> filename: zero length file to be created on device with the given filename. <br/> bytes: content to be populated in file, specified using filename. <br/> guid: Tag resource using GUID. <br/> device: device type tag. <br/> priority: priority order to send messages to device. Recommended to set priority to a non-negative value. Setting  a negative value might cause instability in SVI transfer.<br/> os: os name tag. <br/> version: os version tag. <br/> arch: device architecture tag. <br/> crid : content resource identifier tag. <br/> hash: storing hash value of content. **NOTE** Resource will be transferred only to devices matching the tagged architecture version type. Some parameters of the API are **optional** | application/octet-stream | File to be transferred in binary format. | |
-| DELETE /api/v1/device/svi/?id=<resource_id> | Removes resource(s) by tag or id. | Query - id: Resource Id  | | | |
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| POST /api/v1/owner/redirect    | Updates TO2 RVBlob in `ONBOARDING_CONFIG` table. | | text/plain | RVTO2Addr in diagnostic form | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/redirect' --header 'Content-Type: text/plain'  --data-raw '[["localhost","127.0.0.1",8042,3]]' |
+| POST /api/v1/to0/{guid} | initiate TO0 from Owner | GUID of the device to initiate TO0 | text/plain |  |  | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/to0/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/svi | Uploads SVI instructions to `SYSTEM_PACKAGE` table. |  | text/plain | SVI Instruction |   | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svi' --header 'Content-Type: text/plain' --data-raw '[{"filedesc" : "setup.sh","resource" : "URL"}, {"exec" : ["bash","setup.sh"] }]' |
+| GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-binary '${voucher}' |
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' --header 'Content-Type: text/plain'| 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' --header 'Content-Type: text/plain'|
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health' --header 'Content-Type: text/plain' |
+| GET /api/v1/ondie | Serves the stored certs & crls files | || Ondie certs & crl files |
+| POST /api/v1/ondie | To download onDie certs and crls zip file url. | | text/plain | Ondie certs/crls URL |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
+| GET /api/v1/owner/messagesize | Collects the max message size from `ONBOARDING_CONFIG` table | | |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain'|
+| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain' --data-raw '10000'|
+| GET /api/v1/owner/svisize | Collects the owner svi size from `ONBOARDING_CONFIG` table | | text/plain |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' --data-raw '10000' |
+| GET /api/v1/owner/resource?filename=fileName | Returns the file based on filename from `SYSTEM_RESOURCE` table | Path - filename | | | file |  curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'  |
+| POST /api/v1/owner/resource?filename=fileName | Adds the file to DB based on filename  from `SYSTEM_RESOURCE` table  | Path - filename | text/plain| file in Binary format |  |  curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain' --data-binary '@< path to file >' |
+| DELETE /api/v1/owner/resource?filename=fileName | Delete the  file from DB based on filename from `SYSTEM_RESOURCE` table   | Path - filename | | |  |  curl -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'|
 
 
-***NOTE***: These REST APIs use Digest authentication. `owner_api_user` and `owner_api_password` properties specify the credentials to be used while making the REST calls.
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
 
-# Inserting Keys into Owner Keystore
+Following is the list of REST response error codes and it's possible causes :
 
-The PKCS12 keystore file \<fdo-pri-src\>/component-samples/demo/owner/owner_keystore.p12 contains the default Owner keys. It contains 3 PrivateKeyEntry with algorithm types: EC-256, EC-384 and RSA-2048, and should continue to hold PrivateKeyEntry with different algorithms. The default owner_keystore.p12 is generated using the key generation script keys_gen.sh and you can [read more](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#preparing-credentials-for-components) about it here.
+|     Error Code     |             Possible Causes               |
+| -------------------:|:----------------------------------------:|
+| `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
+| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
+| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
 
-**IMPORTANT** This is an example implementation using simplified credentials. This must be changed while performing production deployment
-
-***NOTE***: A 'PKCS12' keystore is used to store the keys, instead of 'PKCS11' keystore (softHSM). This is because of the use of 'BouncyCastle' as a security provider for algorithm 'RSA/NONE/OAEPWithSHA256AndMGF1Padding' to support Asymmetric key exchange, since the security provider 'SUNPKCS11' configured with softHSM, does not support the same as per the available documentation.
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. Default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issues.
+As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
 
-# Configuring Owner for HTTPS/TLS Communication
+# Configuring FDO Owner Service for HTTPS/TLS Communication
 
-By default, the Owner uses HTTP for all communications on port 8042. In addition to that, the Owner can be configured to handle HTTPS requests from the device.
+By default, the Owner Service uses HTTP for all communications on port 8042. In addition to that, the Owner Service can be configured to handle HTTPS requests from the device.
 
-- Generate the Keystore/Certificate for the Owner. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
+Owner Service can generate its own certificate and if you want to override the default certificate, follow these steps:
 
-  * Ensure that the web certificate is issued to the resolvable domain of the Owner server.
+- Generate the Keystore/Certificate for the Owner Service. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
 
-- Copy the generated Keystore/Certificate to `demo/owner/certs` folder.
+    * Ensure that the web certificate is issued to the resolvable domain of Owner Service.
 
-- Copy the truststore containing all the required certificates to `demo/owner/certs` folder.
+- Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
 
-- Update the following environment variables in `demo/owner/owner.env` file
-
-    |  Variable              |  Value            |             Description       |
-    | -----------------------|-------------------|-------------------------------|
-    | owner_protocol_scheme  | https             | To enable HTTPS communication.|
-    | owner_https_port       | port number       | The given port will be used for HTTPS communication. |
-    | fido_ssl_mode          | TEST / PROD       | If set to `TEST`, then SSL verification is disabled. If set to `PROD`, then certificate verification is initiated. |
-    | owner_ssl_keystore     | keystore-filename | Filename of Keystore that is present in the certs folder.|
-    | owner_ssl_keystore-password| keystore-password | Password of the keystore. |
-    | ssl_truststore         | truststore-filename  | Filename of truststore that is present in the certs folder. Not required in `TEST` mode. |
-    | ssl_truststore_password| truststore-password | Password of the truststore. Not required in `TEST` mode. |
-    | ssl_truststore_type    | truststore-type   | Type of truststore. eg: JKS, PKCS12   |
-    | owner_to0_rv_blob      | to0_rv_blob       | Contains the to0_rv_blob used by device to connect with the Owner during T02. Eg: https://localhost:\<owner-https-port\>?ipaddress=127.0.0.1 |
-
-    ***NOTE***: Appropriate security measures with respect to key-store management should be considered while performing production deployment of Owner.
-    Avoid using the default keystore available for production deployment.
+- Update the SSL keystore password & subject_names in `service.yml` file.

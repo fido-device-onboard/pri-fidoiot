@@ -5,7 +5,10 @@
      SPDX-License-Identifier: Apache 2.0
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fdo</artifactId>
@@ -23,29 +26,36 @@
     <!-- FDO Dependency Version -->
     <fdo.version>1.1-SNAPSHOT</fdo.version>
 
+
     <!-- Dependency Version -->
-    <bcpkix.version>1.69</bcpkix.version>
-    <bcprov.version>1.69</bcprov.version>
+    <bcpkix.version>1.70</bcpkix.version>
+    <bcprov.version>1.70</bcprov.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-codec.version>1.15</commons-codec.version>
+    <commons-text.version>1.9</commons-text.version>
+    <commons-lang3.version>3.12.0</commons-lang3.version>
     <commons-configuration2.version>2.7</commons-configuration2.version>
-    <dbcp2.version>2.8.0</dbcp2.version>
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
-    <h2.version>1.4.200</h2.version>
     <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
     <junit-jupiter.version>5.7.1</junit-jupiter.version>
-    <jackson.version>2.12.6</jackson.version>
+    <jackson.version>2.13.1</jackson.version>
     <junit-jupiter.version>5.8.0-M1</junit-jupiter.version>
     <log4j.version>2.17.1</log4j.version>
-    <slf4j.version>1.7.30</slf4j.version>
-    <tomcat.version>9.0.56</tomcat.version>
+    <slf4j.version>1.7.32</slf4j.version>
+    <h2.version>2.1.210</h2.version>
+    <hibernate.version>5.6.4.Final</hibernate.version>
+    <tomcat.version>10.1.0-M8</tomcat.version>
+    <apache-httpcomponents.version>4.5.13</apache-httpcomponents.version>
+    <snakeyaml.version>1.30</snakeyaml.version>
+    <jackson-dataformat.version>2.13.1</jackson-dataformat.version>
     <cose-java.version>1.1.0</cose-java.version>
+
 
     <!-- Maven Version -->
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
     <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
@@ -57,16 +67,16 @@
     <pgpverify-plugin.version>1.14.0</pgpverify-plugin.version>
 
     <!-- Project Configurations -->
+    <!-- Project Configurations -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project-demo-directory>../../component-samples/demo</project-demo-directory>
+
+
   </properties>
 
   <modules>
-    <module>protocol</module>
     <module>component-samples</module>
-    <module>protocol-samples</module>
-    <module>http-api-samples</module>
-    <module>util</module>
+    <module>protocol</module>
   </modules>
 
   <dependencyManagement>
@@ -80,9 +90,13 @@
     </dependencies>
   </dependencyManagement>
 
+
+
+
   <build>
     <pluginManagement>
       <plugins>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -140,6 +154,7 @@
     </pluginManagement>
 
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -167,11 +182,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <source>11</source>
           <target>11</target>
         </configuration>
       </plugin>
+
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -187,97 +204,23 @@
         <groupId>org.simplify4u.plugins</groupId>
         <artifactId>pgpverify-maven-plugin</artifactId>
         <executions>
-            <execution>
-                <goals>
-                    <goal>check</goal>
-                </goals>
-            </execution>
-         </executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
+     
     </plugins>
   </build>
 
   <distributionManagement>
-     <site>
-        <id>${project.artifactId}-site</id>
-        <url>${project.baseUri}</url>
-     </site>
+    <site>
+      <id>${project.artifactId}-site</id>
+      <url>${project.baseUri}</url>
+    </site>
   </distributionManagement>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <configuration>
-          <failOnError>false</failOnError>
-          <additionalOptions>
-            <additionalOption>-Xdoclint:none</additionalOption>
-          </additionalOptions>
-        </configuration>
-        <reportSets>
-          <reportSet>
-            <id>javadoc-javadoc</id>
-            <reports>
-              <report>javadoc</report>
-            </reports>
-          </reportSet>
 
-          <reportSet>
-            <id>javadoc-aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>aggregate</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${maven-project-info-reports-plugin.version}</version>
-        <reportSets>
-          <reportSet>
-            <id>info-default</id>
-            <reports>
-              <report>index</report>
-              <report>dependencies</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>${maven-surefire-report-plugin.version}</version>
-        <reportSets>
-          <reportSet>
-            <id>unit-tests</id>
-            <reports>
-              <report>report</report>
-            </reports>
-          </reportSet>
-
-          <reportSet>
-            <id>unit-tests-aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>report</report>
-            </reports>
-            <configuration>
-              <aggregate>true</aggregate>
-            </configuration>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
-
-  <scm>
-    <developerConnection>scm:git:file://${project.basedir}/</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
 </project>

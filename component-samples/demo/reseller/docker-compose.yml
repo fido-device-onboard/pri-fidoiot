@@ -10,8 +10,10 @@ services:
     container_name: pri-fdo-reseller
     expose:
       - "8070"
+      - "8072"
     ports:
       - "8070:8070"
+      - "8072:8072"
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,12 +21,11 @@ services:
         - _JAVA_OPTIONS
     restart: on-failure:5
     env_file:
-      - reseller.env
-      - creds.env
+      - service.env
     volumes:
-      - ./target:/home/fdo/target
+      - ./app-data:/home/fdo/app-data 
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
-    pids_limit: 100
+    pids_limit: 500
     network_mode: host

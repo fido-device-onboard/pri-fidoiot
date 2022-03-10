@@ -10,8 +10,10 @@ services:
     container_name: pri-fdo-owner
     expose:
       - "8042"
+      - "8043"
     ports:
-      - "8042:8042"
+     - "8042:8042"
+     - "8043:8043"
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,10 +21,9 @@ services:
         - _JAVA_OPTIONS
     restart: on-failure:5
     env_file:
-      - owner.env
-      - creds.env
+      - service.env
     volumes:
-      - ./target:/home/fdo/target
+      - ./app-data:/home/fdo/app-data 
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024

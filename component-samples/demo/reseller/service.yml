@@ -1,0 +1,67 @@
+hibernate-properties:
+  connection.driver_class: org.h2.Driver
+  hibernate.connection.username: $(db_user)
+  hibernate.connection.password: $(db_password)
+  hibernate.connection.url: jdbc:h2:tcp://localhost:8071/./app-data/emdb
+  hibernate.dialect: org.hibernate.dialect.H2Dialect
+
+system-properties:
+  log4j.configurationFile: log4j2.xml
+  app-data.dir: ./app-data
+  application.version: 1.1-SNAPSHOT
+  service.name: "Reseller"
+  
+
+http-server:
+  base_path: app-data
+  http_port: 8070
+  https_port: 8072
+  http_schemes:
+  - http
+  - https
+  http_timeout: 20000
+  keystore: 
+    path: ssl.p12
+    store-type: PKCS12
+    password: $(ssl_password)
+    alias: ssl
+  auth:
+    method: DIGEST
+    role: api
+    user_name: apiUser
+    user_password: $(api_password)
+  subject_names:
+    - DNS:localhost
+    - IP:127.0.0.1
+
+owner:
+   keystore: 
+     path: owner.p12
+     store-type: PKCS12
+     password: $(encrypt_password)
+
+h2-database:
+   tcp-server:
+     - "-ifNotExists"
+     - "-tcpPort"
+     - "8071"
+   web-server:
+      # - "-webAllowOthers"
+      # - "-webExternalNames"
+      # - "serverfqdn"
+      - "-webPort"
+      - "8073" 
+ 
+
+
+workers:
+  - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
+  - org.fidoalliance.fdo.protocol.StandardCryptoService
+  - org.fidoalliance.fdo.protocol.StandardHttpServer
+  - org.fidoalliance.fdo.protocol.StandardDatabaseServer
+  - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
+  - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
+  - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
