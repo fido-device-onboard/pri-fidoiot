@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,8 +34,9 @@ public class DevModListDeserializer extends StdDeserializer<DevModList> {
     String[] names = new String[count];
     modList.setCount(count);
     modList.setIndex(storedIndex);
-    modList.setModulesNames(names);;
-    for (int i=0; i < count; i++) {
+    modList.setModulesNames(names);
+    ;
+    for (int i = 0; i < count; i++) {
       names[i] = node.get(index++).textValue();
     }
 

@@ -1,19 +1,21 @@
-package org.fidoalliance.fdo.protocol.message;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"randomSize","b" ,"party"} )
+@JsonPropertyOrder({"randomSize", "b", "party"})
 public class AsymKex {
 
   @JsonProperty("randomSize")
   private int randomSize;
 
   @JsonProperty("b")
-  private byte[] b;
+  private byte[] beValue;
 
   @JsonProperty("party")
   KexParty party;
@@ -23,7 +25,7 @@ public class AsymKex {
   }
 
   public byte[] getB() {
-    return b;
+    return beValue;
   }
 
   public KexParty getParty() {
@@ -34,8 +36,8 @@ public class AsymKex {
     this.randomSize = randomSize;
   }
 
-  public void setB(byte[] b) {
-    this.b = b;
+  public void setB(byte[] beValue) {
+    this.beValue = beValue;
   }
 
   public void setParty(KexParty party) {

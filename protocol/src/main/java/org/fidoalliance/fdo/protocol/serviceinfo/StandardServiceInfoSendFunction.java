@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serviceinfo;
 
 import java.io.IOException;
@@ -15,6 +18,7 @@ public class StandardServiceInfoSendFunction implements ServiceInfoSendFunction 
     this.mtu = mtu;
     this.serviceInfo = serviceInfo;
   }
+
   @Override
   public Boolean apply(ServiceInfoKeyValuePair keyValuePair) throws IOException {
     serviceInfo.add(keyValuePair);

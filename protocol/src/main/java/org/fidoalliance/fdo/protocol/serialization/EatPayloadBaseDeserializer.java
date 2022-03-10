@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -33,7 +36,7 @@ public class EatPayloadBaseDeserializer extends StdDeserializer<EatPayloadBase> 
 
     EatPayloadBase eat = new EatPayloadBase();
     JsonNode subNode = node.get(EAT_NONCE);
-    if( subNode != null) {
+    if (subNode != null) {
       Nonce nonce = new Nonce();
       nonce.setNonce(subNode.binaryValue());
       eat.setNonce(nonce);

@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,7 +34,7 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
     JsonNode node = jp.getCodec().readTree(jp);
 
     int index = 0;
-    ManufacturingInfo info  = new ManufacturingInfo();
+    ManufacturingInfo info = new ManufacturingInfo();
 
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
     info.setKeyEnc(PublicKeyEncoding.fromNumber(node.get(index++).intValue()));

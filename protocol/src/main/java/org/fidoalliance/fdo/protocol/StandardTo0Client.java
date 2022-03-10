@@ -1,9 +1,11 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
-import org.fidoalliance.fdo.protocol.db.To0Scheduler;
 import org.fidoalliance.fdo.protocol.dispatch.AcceptOwnerFunction;
-import org.fidoalliance.fdo.protocol.message.AnyType;
+
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
@@ -62,7 +64,7 @@ public class StandardTo0Client extends HttpClient {
     setInstructions(HttpUtils.getInstructions(header.getRendezvousInfo(), false));
 
     //remove any instruction that are rvbypass
-    getInstructions().removeIf( n -> n.isRendezvousBypass());
+    getInstructions().removeIf(n -> n.isRendezvousBypass());
     setRequest(new DispatchMessage());
     getRequest().setMsgType(MsgType.TO0_HELLO);
     getRequest().setMessage(Mapper.INSTANCE.writeValue(new To0Hello()));

@@ -14,6 +14,7 @@ import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 @JsonPropertyOrder({"previousHash", "headerHash", "extra", "ownerPubKey"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class OwnershipVoucherEntryPayload {
+
   @JsonProperty("previousHash")
   private Hash previousHash;
 

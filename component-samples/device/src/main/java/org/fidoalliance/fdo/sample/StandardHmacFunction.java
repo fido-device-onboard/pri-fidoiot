@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
@@ -26,7 +29,7 @@ public class StandardHmacFunction implements HmacFunction {
     HashType hmacType = HashType.HMAC_SHA384;
     if (config.getKeyType().equals(PublicKeyType.SECP256R1)) {
       OwnershipVoucherHeader header =
-          Mapper.INSTANCE.readValue(headerTag,OwnershipVoucherHeader.class);
+          Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
       CryptoService cs = Config.getWorker(CryptoService.class);
       PublicKey ownerKey = cs.decodeKey(header.getPublicKey());
       KeySizeType ownerSize = new AlgorithmFinder().getKeySizeType(ownerKey);

@@ -1,5 +1,7 @@
-package org.fidoalliance.fdo.protocol.message;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

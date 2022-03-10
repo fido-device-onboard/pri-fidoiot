@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -5,18 +8,16 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.CertificateValidity;
 
 
-/***
- *  CertificateValidityApi REST endpoint enables users to update
- *  the default CertificateValidity values in DB.
+/**
+ * CertificateValidityApi REST endpoint enables users to update the default CertificateValidity
+ * values in DB.
  *
- *  Accepted URL patterns:
- *     - GET /api/v1/certificate/validity/
- *     - POST /api/v1/certificate/validity?days=<value>
+ * <p>Accepted URL patterns:
+ * - GET /api/v1/certificate/validity/
+ * - POST /api/v1/certificate/validity?days=&ltvalue&gt
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
-*/
-
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
+ */
 public class CertificateValidityApi extends RestApi {
 
   LoggerService logger = new LoggerService(CertificateValidityApi.class);
@@ -29,7 +30,7 @@ public class CertificateValidityApi extends RestApi {
 
     // Query database table CERTIFICATE_VALIDITY for ID `1`.
     CertificateValidity certificateValidity =
-            getSession().get(CertificateValidity.class, Long.valueOf(1));
+        getSession().get(CertificateValidity.class, Long.valueOf(1));
 
     if (certificateValidity != null) {
       // if not DB is not empty, collect the number of days.
@@ -54,7 +55,7 @@ public class CertificateValidityApi extends RestApi {
 
     // Query database table CERTIFICATE_VALIDITY for ID `1`.
     CertificateValidity certificateValidity =
-            getSession().get(CertificateValidity.class, Long.valueOf(1));
+        getSession().get(CertificateValidity.class, Long.valueOf(1));
     try {
       int parsedDays = Integer.parseInt(days);
       certificateValidity.setDays(parsedDays);
@@ -65,7 +66,7 @@ public class CertificateValidityApi extends RestApi {
       } else {
         getSession().update(certificateValidity);
       }
-    } catch (NumberFormatException e)  {
+    } catch (NumberFormatException e) {
       logger.error("Invalid days parameter provided");
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }

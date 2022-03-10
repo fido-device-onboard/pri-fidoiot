@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -12,8 +15,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 
 public class SelfSignedHttpClientSupplier implements HttpClientSupplier {
 
-  static LoggerService logger = new LoggerService(SelfSignedHttpClientSupplier.class);
-  static private SSLConnectionSocketFactory socketFactory = buildFactory();
+  private static LoggerService logger = new LoggerService(SelfSignedHttpClientSupplier.class);
+  private static SSLConnectionSocketFactory socketFactory = buildFactory();
 
   static SSLConnectionSocketFactory buildFactory() {
 
@@ -31,6 +34,7 @@ public class SelfSignedHttpClientSupplier implements HttpClientSupplier {
 
 
   }
+
   @Override
   public CloseableHttpClient get() throws IOException {
     return HttpClients.custom().setSSLSocketFactory(

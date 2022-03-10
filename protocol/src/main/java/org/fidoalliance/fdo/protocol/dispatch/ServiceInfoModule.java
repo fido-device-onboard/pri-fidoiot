@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.dispatch;
 
 import java.io.IOException;
@@ -18,6 +21,7 @@ public interface ServiceInfoModule {
 
   /**
    * Prepares the ServiceInfo Module for sending message.
+   *
    * @param state The stored state of the serviceInfo module
    * @throws IOException An error occurred.
    */
@@ -25,7 +29,8 @@ public interface ServiceInfoModule {
 
   /**
    * Receives service info values.
-   * @param state The stored state of the serviceInfo module.
+   *
+   * @param state  The stored state of the serviceInfo module.
    * @param kvPair The ServiceInfoKeyValuePair to receive.
    * @throws IOException An error occurred.
    */
@@ -34,7 +39,8 @@ public interface ServiceInfoModule {
 
   /**
    * Sends service info values.
-   * @param state The stored state of the serviceInfo module.
+   *
+   * @param state        The stored state of the serviceInfo module.
    * @param sendFunction The function used to send values.
    * @throws IOException An error occurred.
    */

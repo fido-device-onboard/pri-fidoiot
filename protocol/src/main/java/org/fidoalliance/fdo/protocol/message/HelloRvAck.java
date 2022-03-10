@@ -1,5 +1,7 @@
 // Copyright 2022 Intel Corporation
 // SPDX-License-Identifier: Apache 2.0
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
 package org.fidoalliance.fdo.protocol.message;
 
@@ -11,7 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"nonceTo1Proof", "sigInfoB"} )
+@JsonPropertyOrder({"nonceTo1Proof", "sigInfoB"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class HelloRvAck {
 
@@ -19,7 +21,7 @@ public class HelloRvAck {
   private Nonce nonceTo1Proof;
 
   @JsonProperty("sigInfoB")
-  private SigInfo SigInfoB;
+  private SigInfo sigInfoB;
 
   @JsonIgnore
   public Nonce getNonceTo1Proof() {
@@ -28,7 +30,7 @@ public class HelloRvAck {
 
   @JsonIgnore
   public SigInfo getSigInfoB() {
-    return SigInfoB;
+    return sigInfoB;
   }
 
   @JsonIgnore
@@ -38,6 +40,6 @@ public class HelloRvAck {
 
   @JsonIgnore
   public void setSigInfoB(SigInfo sigInfoB) {
-    SigInfoB = sigInfoB;
+    this.sigInfoB = sigInfoB;
   }
 }

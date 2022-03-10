@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
@@ -22,22 +25,45 @@ public class DispatchMessage {
   private String authToken;
   private SimpleStorage extra;
 
+  /**
+   * Gets the authorization token that sent the cbor message.
+   * @return The authorization token.
+   */
   public Optional<String> getAuthToken() {
     return Optional.ofNullable(authToken);
   }
 
+  /**
+   * Gets the Message Type of the cbor message.
+   * @return The Message type.
+   */
   public MsgType getMsgType() {
     return msgType;
   }
 
+  /**
+   * Gets the protocol version of the cbor message.
+   * @return The protocol version.
+   */
   public ProtocolVersion getProtocolVersion() {
     return protocolVersion;
   }
 
+  /**
+   * Gets the cbor message.
+   * @return The cbor bytes of the message.
+   */
   public byte[] getMessage() {
     return message;
   }
 
+  /**
+   * Coverts the cbor message to a Java object.
+   * @param clazz The class to covert the cbor message too.
+   * @param <T> The template argument.
+   * @return The Java object the represents the cbor message
+   * @throws IOException An error occurred.
+   */
   public <T> T getMessage(final Class<T> clazz) throws IOException {
     try {
       return Mapper.INSTANCE.readValue(message, clazz);
@@ -47,34 +73,60 @@ public class DispatchMessage {
     }
   }
 
+  /**
+   * Gets the extra storage associated with the message.
+   * @return The extra storage.
+   */
   public SimpleStorage getExtra() {
     return extra;
   }
 
+  /**
+   * Sets the cbor message.
+   * @param message The cbor bytes of the message.
+   */
   public void setMessage(byte[] message) {
     this.message = message;
   }
 
- // public void setMessage(AnyType anyType) throws IOException {
- //   message = Mapper.INSTANCE.writeValue(anyType);
-  //}
 
+  /**
+   * Sets the protocol version of the message.
+   * @param protocolVersion The protocol version.
+   */
   public void setProtocolVersion(ProtocolVersion protocolVersion) {
     this.protocolVersion = protocolVersion;
   }
 
+  /**
+   * Sets the message type.
+   * @param msgType The message type.
+   */
   public void setMsgType(MsgType msgType) {
     this.msgType = msgType;
   }
 
+  /**
+   * Sets the Authorization token.
+   * @param authToken The Authorization token.
+   */
   public void setAuthToken(String authToken) {
     this.authToken = authToken;
   }
 
+  /**
+   * Sets the extra storage associated with the message.
+   * @param extra The extra storage.
+   */
   public void setExtra(SimpleStorage extra) {
     this.extra = extra;
   }
 
+  /**
+   * Converts the message to a stream message for non HTTP protocols.
+   * @return A stream message.
+   * @throws IOException An error occurred.
+   */
   public StreamMessage toStreamMessage() throws IOException {
     StreamMessage streamMessage = new StreamMessage();
     ProtocolInfo info = ProtocolInfo.empty();
@@ -91,8 +143,14 @@ public class DispatchMessage {
     return streamMessage;
   }
 
+  /**
+   * Gets a cbor 255 error message from a thrown exception.
+   * @param throwable The exception that was thrown.
+   * @param prevMsg The message that was being processed when the exception occurred.
+   * @return The 255 error message.
+   */
   public static DispatchMessage fromThrowable(Throwable throwable, DispatchMessage prevMsg) {
-    DispatchMessage resultMsg = new DispatchMessage();
+
 
     ErrorMessage error = new ErrorMessage();
 
@@ -103,6 +161,8 @@ public class DispatchMessage {
     error.setErrorCode(ErrorCode.INTERNAL_SERVER_ERROR);
     error.setPrevMsgId(prevMsg.getMsgType());
     error.setErrorString("Unspecified error occurred.");
+
+    DispatchMessage resultMsg = new DispatchMessage();
     resultMsg.setMsgType(MsgType.ERROR);
 
     Throwable current = throwable;

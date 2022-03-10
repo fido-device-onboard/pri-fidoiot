@@ -3,11 +3,13 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.RvData;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 
+/**
+ * Maintains RV Info.
+ */
 public class RvInfo extends RestApi {
 
   @Override

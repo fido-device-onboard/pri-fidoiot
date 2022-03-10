@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -8,8 +11,8 @@ import java.util.NoSuchElementException;
  * Cose Key Curve Types.
  * <p>From RFC8151 13.1</p>
  */
-public enum CoseKeyCurveType  {
-  P256EC2 (1),
+public enum CoseKeyCurveType {
+  P256EC2(1),
   P384EC2(2);
 
   private int id;
@@ -18,6 +21,11 @@ public enum CoseKeyCurveType  {
     this.id = id;
   }
 
+  /**
+   * Converts a number to the Type.
+   * @param n The number to convert from.
+   * @return The Type represented by the number.
+   */
   @JsonCreator
   public static CoseKeyCurveType fromNumber(Number n) {
     int i = n.intValue();
@@ -33,6 +41,11 @@ public enum CoseKeyCurveType  {
 
   }
 
+  /**
+   * Converts a String to the Type.
+   * @param value The string value representing the type.
+   * @return The Type represented by the String.
+   */
   @JsonCreator
   public static CoseKeyCurveType fromString(String value) {
 

@@ -1,8 +1,9 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,10 +12,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.fidoalliance.fdo.protocol.InvalidJwtTokenException;
-import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.ProtocolSession;
-import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -22,8 +20,11 @@ public class StandardSessionCleaner {
 
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-  private final  Duration interval = Duration.ofHours(2);
+  private final Duration interval = Duration.ofHours(2);
 
+  /**
+   * Worker Constructor.
+   */
   public StandardSessionCleaner() {
 
     scheduler.scheduleWithFixedDelay(new Runnable() {
@@ -31,9 +32,10 @@ public class StandardSessionCleaner {
       public void run() {
         onClean();
       }
-    },interval.toSeconds(),interval.toSeconds(), TimeUnit.SECONDS);
+    }, interval.toSeconds(), interval.toSeconds(), TimeUnit.SECONDS);
 
   }
+
   private void onClean() {
 
     Session session = HibernateUtil.getSessionFactory().openSession();

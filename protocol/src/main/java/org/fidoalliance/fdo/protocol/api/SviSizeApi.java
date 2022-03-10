@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -5,17 +8,14 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 
 
-/***
- *  SviSizeApi REST endpoint enables users to set and collect MAX_SERVICEINFO_SIZE value.
+/**
+ * SviSizeApi REST endpoint enables users to set and collect MAX_SERVICEINFO_SIZE value.
  *
- *  Accepted URL patterns :
- *         - GET /api/v1/owner/svisize
- *         - POST /api/v1/owner/svisize with message size value in body.
+ * <p>Accepted URL patterns : - GET /api/v1/owner/svisize
+ *                         - POST /api/v1/owner/svisize with message size value in body.
  *
- *  RestApi Class provides a wrapper over the HttpServletRequest methods.
- *
-*/
-
+ * <p>RestApi Class provides a wrapper over the HttpServletRequest methods.
+ */
 public class SviSizeApi extends RestApi {
 
   LoggerService logger = new LoggerService(SviSizeApi.class);

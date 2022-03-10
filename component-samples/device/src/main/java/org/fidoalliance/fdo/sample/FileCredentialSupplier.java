@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.FileNotFoundException;
@@ -7,8 +10,9 @@ import java.nio.file.Path;
 import org.apache.commons.lang3.function.Failable;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.message.DeviceCredential;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
+import org.fidoalliance.fdo.protocol.message.DeviceCredential;
+
 
 public class FileCredentialSupplier implements DeviceCredentialSupplier {
 

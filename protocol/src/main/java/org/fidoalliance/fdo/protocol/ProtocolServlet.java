@@ -1,18 +1,16 @@
-package org.fidoalliance.fdo.protocol;
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.protocol;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Optional;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.message.AnyType;
-import org.fidoalliance.fdo.protocol.message.ErrorMessage;
 import org.fidoalliance.fdo.protocol.message.MsgType;
-import org.fidoalliance.fdo.protocol.message.ProtocolInfo;
-import org.fidoalliance.fdo.protocol.message.StreamMessage;
 
 public class ProtocolServlet extends HttpServlet {
 
@@ -27,7 +25,7 @@ public class ProtocolServlet extends HttpServlet {
     try {
       Mapper.INSTANCE.writeDiagnostic(builder,
           Mapper.INSTANCE.readValue(msg.getMessage(), AnyType.class));
-    } catch (Exception e)  {
+    } catch (Exception e) {
       builder.append("failed to covert to diagnostic form.");
     }
 
@@ -39,7 +37,7 @@ public class ProtocolServlet extends HttpServlet {
 
     DispatchMessage reqMsg = null;
     try {
-      reqMsg = HttpUtils.getMessageFromURI(req.getRequestURI());
+      reqMsg = HttpUtils.getMessageFromUri(req.getRequestURI());
 
       Enumeration<String> values = req.getHeaders(HttpUtils.HTTP_AUTHORIZATION);
       while (values.hasMoreElements()) {
@@ -63,7 +61,7 @@ public class ProtocolServlet extends HttpServlet {
           resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
-        resp.setHeader(HttpUtils.HTTP_AUTHORIZATION,respMsg.getAuthToken().get());
+        resp.setHeader(HttpUtils.HTTP_AUTHORIZATION, respMsg.getAuthToken().get());
         resp.setContentType(HttpUtils.HTTP_APPLICATION_CBOR);
         resp.setHeader(HttpUtils.HTTP_MESSAGE_TYPE,
             Integer.toString(respMsg.getMsgType().toInteger()));

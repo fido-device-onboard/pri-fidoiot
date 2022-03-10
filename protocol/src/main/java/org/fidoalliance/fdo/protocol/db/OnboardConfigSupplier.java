@@ -1,14 +1,15 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
 import java.time.Duration;
 import org.apache.commons.lang3.function.FailableSupplier;
-import org.fidoalliance.fdo.protocol.BufferUtils;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
-import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -42,7 +43,8 @@ public class OnboardConfigSupplier
 
         final String defaultPort = Config.getWorker(HttpServer.class).getHttpPort();
         final String rviString = String.format(defaultBob, defaultPort);
-        final To2AddressEntries entries = Mapper.INSTANCE.readValue(rviString, To2AddressEntries.class);
+        final To2AddressEntries entries =
+            Mapper.INSTANCE.readValue(rviString, To2AddressEntries.class);
         onboardConfig.setRvBlob(Mapper.INSTANCE.writeValue(entries));
 
 

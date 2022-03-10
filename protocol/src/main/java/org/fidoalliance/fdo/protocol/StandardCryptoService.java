@@ -107,8 +107,6 @@ public class StandardCryptoService implements CryptoService {
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
 
-
-
   protected static final SecureRandom random = getInitializedRandom();
   private static final Provider BCPROV = getInitializedProvider();
 
@@ -381,7 +379,7 @@ public class StandardCryptoService implements CryptoService {
 
     AlgorithmFinder finder = new AlgorithmFinder();
     CoseProtectedHeader cph = new CoseProtectedHeader();
-    cph.setAlgId( finder.getCoseAlgorithm(ownerKey.getType(),
+    cph.setAlgId(finder.getCoseAlgorithm(ownerKey.getType(),
         finder.getKeySizeType(publicKey)));
 
     byte[] cphData = Mapper.INSTANCE.writeValue(cph);
@@ -905,7 +903,7 @@ public class StandardCryptoService implements CryptoService {
       CoseProtectedHeader cph = new CoseProtectedHeader();
       cph.setAlgId(cipherType.toInteger());
 
-      byte[] cphData  = Mapper.INSTANCE.writeValue(cph);
+      byte[] cphData = Mapper.INSTANCE.writeValue(cph);
 
       byte[] aad;
       if (isCcmCipher(cipherType) || isGcmCipher(cipherType)) {
@@ -942,7 +940,7 @@ public class StandardCryptoService implements CryptoService {
           cipherParams = new IvParameterSpec(iv);
         }
 
-        final Cipher cipher =  aesTypeToCipher(cipherType);
+        final Cipher cipher = aesTypeToCipher(cipherType);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, cipherParams);
 
         // Since AAD can be no more than 2^64 - 1 bits and a Java array can be
@@ -993,7 +991,7 @@ public class StandardCryptoService implements CryptoService {
 
       if (isSimpleEncryptedMessage(cipherType)) {
 
-        encrypt0 = Mapper.INSTANCE.readValue(message,Encrypt0.class);
+        encrypt0 = Mapper.INSTANCE.readValue(message, Encrypt0.class);
         EncStructure encStructure = new EncStructure();
         encStructure.setContext("Encrypt0");
         encStructure.setProtectedHeader(encrypt0.getProtectedHeader());
@@ -1002,8 +1000,8 @@ public class StandardCryptoService implements CryptoService {
 
       } else { // legacy (composed) message
 
-        Mac0 mac0 = Mapper.INSTANCE.readValue(message,Mac0.class);
-        encrypt0 = Mapper.INSTANCE.readValue(mac0.getPayload(),Encrypt0.class);
+        Mac0 mac0 = Mapper.INSTANCE.readValue(message, Mac0.class);
+        encrypt0 = Mapper.INSTANCE.readValue(mac0.getPayload(), Encrypt0.class);
 
         aad = new byte[0];
         CoseProtectedHeader cph = Mapper.INSTANCE.readValue(encrypt0.getProtectedHeader(),
@@ -1089,7 +1087,7 @@ public class StandardCryptoService implements CryptoService {
   }
 
   protected byte[] ccmEncrypt(boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv,
-      byte[] aad) throws IOException{
+      byte[] aad) throws IOException {
 
     final int macSize = 128; // All CCM cipher modes use this size
 
@@ -1114,7 +1112,7 @@ public class StandardCryptoService implements CryptoService {
     CoseProtectedHeader cph = new CoseProtectedHeader();
     cph.setAlgId(cipherType.toInteger());
 
-    CoseUnprotectedHeader uph =new CoseUnprotectedHeader();
+    CoseUnprotectedHeader uph = new CoseUnprotectedHeader();
     uph.setIv(iv);
 
     Encrypt0 encrypt0 = new Encrypt0();
@@ -1122,7 +1120,8 @@ public class StandardCryptoService implements CryptoService {
     encrypt0.setUnprotectedHeader(uph);
     encrypt0.setCipherText(ciphered);
 
-    if (isSimpleEncryptedMessage(cipherType)) { // not all encrypted messages use the 'composed' type
+    if (isSimpleEncryptedMessage(
+        cipherType)) { // not all encrypted messages use the 'composed' type
       return Mapper.INSTANCE.writeValue(encrypt0);
     }
 
@@ -1136,8 +1135,6 @@ public class StandardCryptoService implements CryptoService {
     } else {
       throw new IOException(new NoSuchAlgorithmException());
     }
-    byte[] payload = Mapper.INSTANCE.writeValue(encrypt0);
-    Hash mac = hash(hmacType, secret, payload);
 
     cph = new CoseProtectedHeader();
     cph.setAlgId(hmacType.toInteger());
@@ -1145,7 +1142,10 @@ public class StandardCryptoService implements CryptoService {
     Mac0 mac0 = new Mac0();
     mac0.setProtectedHeader(Mapper.INSTANCE.writeValue(cph));
     mac0.setUnprotectedHeader(new CoseUnprotectedHeader());
+    byte[] payload = Mapper.INSTANCE.writeValue(encrypt0);
     mac0.setPayload(payload);
+
+    Hash mac = hash(hmacType, secret, payload);
     mac0.setTagValue(mac.getHashValue());
 
     return Mapper.INSTANCE.writeValue(mac0);
@@ -1187,7 +1187,7 @@ public class StandardCryptoService implements CryptoService {
 
   @Override
   public boolean verify(CoseSign1 message, SigInfo sigInfo)
-          throws IOException {
+      throws IOException {
     SigStructure sigStructure = new SigStructure();
     sigStructure.setContext("Signature1");
     sigStructure.setProtectedBody(message.getProtectedHeader());
@@ -1203,12 +1203,12 @@ public class StandardCryptoService implements CryptoService {
 
     EpidService epidService = new EpidService();
     if (!epidService.verifyEpidSignature(
-          signature,
-          maroePrefix,
-          message.getUnprotectedHeader().getEatNonce().getNonce(),
-          sigData,
-          groupId,
-          sigInfoType)) {
+        signature,
+        maroePrefix,
+        message.getUnprotectedHeader().getEatNonce().getNonce(),
+        sigData,
+        groupId,
+        sigInfoType)) {
       return false;
     }
     return true;
@@ -1280,7 +1280,7 @@ public class StandardCryptoService implements CryptoService {
 
       EpidService epidMaterialService = new EpidService();
       try {
-         return epidMaterialService.getSigInfo(sigInfoA);
+        return epidMaterialService.getSigInfo(sigInfoA);
       } catch (IOException ioException) {
         throw new InvalidMessageException(new IllegalArgumentException());
       }

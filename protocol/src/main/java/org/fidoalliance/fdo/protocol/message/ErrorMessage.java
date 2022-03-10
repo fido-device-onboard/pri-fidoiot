@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -7,7 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"errorCode", "prevMsgId","errorString","timestamp","correlationId"})
+@JsonPropertyOrder({"errorCode", "prevMsgId", "errorString", "timestamp", "correlationId"})
 @JsonSerialize(using = GenericArraySerializer.class)
 public class ErrorMessage {
 
@@ -65,12 +68,5 @@ public class ErrorMessage {
   public void setCorrelationId(long correlationId) {
     this.correlationId = correlationId;
   }
-
-  //ErrorMessage = [
-  //EMErrorCode: uint16, ;; Error code
-  //EMPrevMsgID: uint8, ;; Message ID of the previous message
-  //EMErrorStr: tstr, ;; Error string
-  //EMErrorTs: timestamp,;; UTC timestamp
-  //EMErrorUuid: correlationId ;; Unique Uuid associated with this request
-//]
+  
 }

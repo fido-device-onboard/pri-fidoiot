@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.api;
 
 import java.security.cert.Certificate;
@@ -13,6 +16,9 @@ import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
+/**
+ * Performs resell operation.
+ */
 public class ResellApi extends RestApi {
 
   @Override

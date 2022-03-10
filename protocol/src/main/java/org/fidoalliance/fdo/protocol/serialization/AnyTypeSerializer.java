@@ -1,3 +1,6 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.serialization;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -10,11 +13,11 @@ import org.fidoalliance.fdo.protocol.message.AnyType;
 public class AnyTypeSerializer extends StdSerializer<AnyType> {
 
 
-  public AnyTypeSerializer () {
+  public AnyTypeSerializer() {
     this(null);
   }
 
-  public AnyTypeSerializer (Class<AnyType> t) {
+  public AnyTypeSerializer(Class<AnyType> t) {
     super(t);
   }
 
