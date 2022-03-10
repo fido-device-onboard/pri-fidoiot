@@ -43,6 +43,8 @@ public abstract class HttpClient implements Runnable {
     return httpInst;
   }
 
+  protected int index = 0;
+
   protected boolean isRepeatable(String uri) {
     if (uri.endsWith("/30") || uri.endsWith("/20")) {
       return true;
@@ -93,15 +95,18 @@ public abstract class HttpClient implements Runnable {
   }
 
   protected void sendMessage() throws IOException {
-    int index = 0;
     URI requestUri = null;
-    int delay = 0;
-    while (getInstructions().size() > 0) {
+    if (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
+            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+            || getRequest().getMsgType() == MsgType.TO0_HELLO) {
+      index = 0;
+    }
+    while (index <= getInstructions().size()) {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
         MsgType msgId = getRequest().getMsgType();
-        HttpInstruction httpInstruction = getInstructions().get(index++);
+        HttpInstruction httpInstruction = getInstructions().get(index);
         URIBuilder uriBuilder = new URIBuilder(
             httpInstruction.getAddress());
 
@@ -156,9 +161,6 @@ public abstract class HttpClient implements Runnable {
             setResponse(new DispatchMessage());
             getResponse().setProtocolVersion(getRequest().getProtocolVersion());
 
-            getInstructions().clear();
-            getInstructions().add(httpInstruction);
-
             if (entity.getContentLength() > BufferUtils.getMaxBufferSize()) {
               throw new MessageBodyException("Message too large.");
             }
@@ -190,6 +192,7 @@ public abstract class HttpClient implements Runnable {
             || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
           logger.info("instruction failed " + e.getMessage());
           logger.info("moving to next instruction");
+          index++;
           continue;
         }
 
