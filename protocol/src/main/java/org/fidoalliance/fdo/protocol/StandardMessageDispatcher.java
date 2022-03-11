@@ -207,7 +207,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
   protected CwtToken getCwtSession(String authHeader) throws IOException {
 
-    String token = authHeader.substring("Bearer ".length());
+    String token = authHeader.substring(HttpUtils.HTTP_BEARER.length());
     byte[] data = Base64.getDecoder().decode(token);
     CoseSign1 sign1 = Mapper.INSTANCE.readValue(data, CoseSign1.class);
 

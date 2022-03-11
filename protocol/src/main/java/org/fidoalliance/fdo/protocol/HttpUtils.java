@@ -36,7 +36,7 @@ public class HttpUtils {
   public static final String HTTP_PLAIN_TEXT = "text/plain";
   public static final String HTTP_MESSAGE_TYPE = "Message-Type";
   public static final String HTTP_CONTENT_TYPE = "Content-Type";
-  public static final String HTTP_BEARER = "Bearer";
+  public static final String HTTP_BEARER = "Bearer ";
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
 
