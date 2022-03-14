@@ -49,8 +49,7 @@ public class OwnerVoucher extends RestApi {
 
       TypedQuery<OnboardingVoucher> allQuery = session.createQuery(all);
       List<OnboardingVoucher> list = allQuery.getResultList();
-      OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
-      for (OnboardingVoucher onboardingVoucher : list) {
+       for (OnboardingVoucher onboardingVoucher : list) {
 
         OwnershipVoucher voucher = Mapper.INSTANCE.readValue(onboardingVoucher.getData(),
             OwnershipVoucher.class);
