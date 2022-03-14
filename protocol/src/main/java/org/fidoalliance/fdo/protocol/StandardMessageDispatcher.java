@@ -1113,7 +1113,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (maxSvi == null) {
       logger.info("max service info size is null (default)");
     } else {
-      logger.info("max service info size size is " + maxSvi);
+      logger.info("max service info size is " + maxSvi);
     }
 
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
