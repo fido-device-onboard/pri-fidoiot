@@ -151,18 +151,15 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 
 # Configuring OnDie (Optional)
 
-OnDie is a type of device that makes use of the MAROE prefix. If you need to support such devices then you will need to configure the FDO PRI demo components by adding/updating the following properties. The values can be specified via Java -Doptions, entries in application.properties or entries in the .env files.
+OnDie is a type of device with device RoT added during manufacturing. To support OnDie devices you will need to import the OnDie certificates into the database via the api on both the Manufacturer and Owner components.
 
-OnDie requires several certificates and CRLs. 
+    - `POST /api/v1/ondie` to upload OnDie certificates into the database.
 
-`ondie_cache`: (required if supporting OnDie, optional otherwise) Specifies the path to the directory containing the OnDie certificates and CRLs.
+      - Ex: `(curl -D - --digest -u ${api_user}:${api_passwd} --location --request POST "http://${ip}:8042/api/v1/ondie" --header 'Content-Type: text/plain' --data-raw "${cert-file}" `
 
-
-Finally, the `ondie_cache` directory needs to be copied into the docker/podman container, uncomment the following line in `Dockerfile/Podmanfile` of Manufacturer and Owner.
-```
-COPY ./ondie_cache ./ondie_cache/
-```
-
+      where ip = ip address of the manufacturer or the owner
+      cert-file = zip file containing the OnDie certificates (this file is located in the component-samples/demo/aio folder). If using any pre-prod devices then import the csme-debug.zip
+	  file. Otherwise, for production devices, import the csme.zip file. Example file reference on Windows: "file:///C:/FDO/component-samples/demo/aio/csme-debug.zip".
 
 # Configuring log messages
 
