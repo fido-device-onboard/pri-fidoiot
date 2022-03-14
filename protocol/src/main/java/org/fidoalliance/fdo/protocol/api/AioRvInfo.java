@@ -33,7 +33,7 @@ public class AioRvInfo extends RestApi {
     try {
       // Constructing the yaml structure of RvInfo Object.
       final String defaultRvi = "[[[5, \"%s\"], [3,%], [12, %s], [2, \"%s\"], [4, 8443]]]";
-      
+
       String port = Config.getWorker(HttpServer.class).getHttpPort();
       String securePort = Config.getWorker(HttpServer.class).getHttpsPort();
 
