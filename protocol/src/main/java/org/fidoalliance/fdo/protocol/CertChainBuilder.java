@@ -165,8 +165,6 @@ public class CertChainBuilder {
    */
   public Certificate[] build() throws IOException {
 
-    final Instant now = Instant.now();
-
     X500Name issuer = subject;
     if (issuerChain.length > 0) {
       try {
