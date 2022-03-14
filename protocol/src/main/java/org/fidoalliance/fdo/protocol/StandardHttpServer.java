@@ -167,6 +167,7 @@ public class StandardHttpServer implements HttpServer {
 
     Tomcat tomcat = new Tomcat();
 
+
     tomcat.setBaseDir(config.getBasePath());
 
     tomcat.setAddDefaultWebXmlToWebapp(false);
@@ -181,19 +182,21 @@ public class StandardHttpServer implements HttpServer {
     }
 
     StandardManager stdManager = new StandardManager();
-    ctx.setManager(stdManager);
     try {
       SecureRandom random = SecureRandom.getInstanceStrong();
       String alg = random.getAlgorithm();
 
-      std.setSecureRandomAlgorithm(random.getAlgorithm());
-
-      stdManager.setSecureRandomAlgorithm(random.getAlgorithm());
+      std.setSecureRandomClass(random.getClass().getName());
+      std.setSecureRandomAlgorithm(alg);
       stdManager.setSessionIdGenerator(std);
+      stdManager.setSecureRandomAlgorithm(alg);
+      stdManager.setSecureRandomClass(random.getClass().getName());
 
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
+    ctx.setManager(stdManager);
+    //tomcat.getEngine().getService().s
 
     if (config.getAuthConfig() != null) {
       AuthConfig authConfig = config.getAuthConfig();
@@ -211,17 +214,16 @@ public class StandardHttpServer implements HttpServer {
 
     for (String scheme : schemes) {
 
-      if (scheme.toLowerCase().equals("https")) {
+      if (scheme.toLowerCase().equals(HttpUtils.HTTPS_SCHEME)) {
         Connector httpsConnector = new Connector();
-        int httpsPort = 8443;
         try {
-          httpsPort = Integer.parseInt(config.getHttpsPort());
+          httpsConnector.setPort(Integer.parseInt(config.getHttpsPort()));
         } catch (NumberFormatException e) {
-          logger.error("Invalid HTTPS port. Defaulting to 8443 port.");
+          logger.error("Invalid HTTPS port.");
+          throw new RuntimeException(e);
         }
-        httpsConnector.setPort(httpsPort);
         httpsConnector.setSecure(true);
-        httpsConnector.setScheme("https");
+        httpsConnector.setScheme(HttpUtils.HTTPS_SCHEME);
         SSLHostConfig sslHostConfig = null;
 
         KeyStoreConfig storeConfig = config.getHttpsKeyStore();
@@ -265,17 +267,16 @@ public class StandardHttpServer implements HttpServer {
           logger.warn("SSL not configured - Failed to create keystore");
         }
 
-      } else if (scheme.toLowerCase().equals("http")) {
+      } else if (scheme.toLowerCase().equals(HttpUtils.HTTP_SCHEME)) {
         Connector httpsConnector = new Connector();
-        int httpPort = 8080;
         try {
-          httpPort = Integer.parseInt(config.getHttpPort());
+          httpsConnector.setPort(Integer.parseInt(config.getHttpPort()));
         } catch (NumberFormatException e) {
-          logger.error("Invalid HTTP port. Defaulting to 8080 port.");
+          logger.error("Invalid HTTP port");
+          throw new RuntimeException(e);
         }
 
-        httpsConnector.setPort(httpPort);
-        httpsConnector.setScheme("http");
+        httpsConnector.setScheme(HttpUtils.HTTP_SCHEME);
         httpsConnector.setProperty("protocol", "HTTP/1.1");
         httpsConnector.setProperty("connectionTimeout",
             config.getTimeout());

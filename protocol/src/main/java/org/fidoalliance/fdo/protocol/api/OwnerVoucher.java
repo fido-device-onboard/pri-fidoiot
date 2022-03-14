@@ -35,7 +35,7 @@ import org.hibernate.Session;
  */
 public class OwnerVoucher extends RestApi {
 
-  protected static LoggerService logger = new LoggerService(OwnerVoucher.class);
+  protected static final LoggerService logger = new LoggerService(OwnerVoucher.class);
 
   private void listVouchers() {
 

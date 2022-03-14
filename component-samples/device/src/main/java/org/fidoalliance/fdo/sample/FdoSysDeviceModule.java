@@ -39,8 +39,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 public class FdoSysDeviceModule implements ServiceInfoModule {
 
-  private final LoggerService logger = new LoggerService(DeviceApp.class);
-
+  private static final LoggerService logger = new LoggerService(FdoSysDeviceModule.class);
 
   private ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
   private Duration execTimeout = Duration.ofHours(2);
@@ -53,7 +52,6 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
 
   private ServiceInfoQueue queue = new ServiceInfoQueue();
-
 
   @Override
   public String getName() {

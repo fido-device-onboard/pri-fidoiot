@@ -18,7 +18,7 @@ import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
  */
 public class SviSizeApi extends RestApi {
 
-  LoggerService logger = new LoggerService(SviSizeApi.class);
+  private static final LoggerService logger = new LoggerService(SviSizeApi.class);
 
   @Override
   public void doGet() throws Exception {

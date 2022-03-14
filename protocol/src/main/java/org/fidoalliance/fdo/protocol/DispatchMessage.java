@@ -25,6 +25,16 @@ public class DispatchMessage {
   private String authToken;
   private SimpleStorage extra;
 
+  private static void findCause(ErrorMessage error, Throwable throwable) {
+    Throwable current = throwable;
+    throwable.printStackTrace();
+    while (current != null) {
+
+    }
+
+    //error.setErrorString();
+  }
+
   /**
    * Gets the authorization token that sent the cbor message.
    * @return The authorization token.
@@ -176,6 +186,8 @@ public class DispatchMessage {
     if (found != null) {
       error.setErrorCode(found.getErrorCode());
       error.setErrorString(found.getMessage());
+    } else {
+      findCause(error,throwable);
     }
 
     try {

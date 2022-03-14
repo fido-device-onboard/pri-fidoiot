@@ -16,7 +16,7 @@ import org.h2.tools.Server;
 public class StandardDatabaseServer implements DatabaseServer, Closeable {
 
 
-  private static LoggerService logger = new LoggerService(DatabaseServer.class);
+  private static final LoggerService logger = new LoggerService(DatabaseServer.class);
 
 
 

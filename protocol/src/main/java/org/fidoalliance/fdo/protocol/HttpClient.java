@@ -29,7 +29,7 @@ public abstract class HttpClient implements Runnable {
   private String tokenCache;
 
 
-  protected static LoggerService logger = new LoggerService(HttpClient.class);
+  protected static final LoggerService logger = new LoggerService(HttpClient.class);
 
   protected DispatchMessage getRequest() {
     return request;

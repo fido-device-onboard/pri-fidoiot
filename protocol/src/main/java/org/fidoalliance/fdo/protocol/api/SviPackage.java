@@ -14,7 +14,7 @@ import org.hibernate.engine.jdbc.ClobProxy;
  */
 public class SviPackage extends RestApi {
 
-  LoggerService logger =  new LoggerService(SviPackage.class);
+  private static final LoggerService logger =  new LoggerService(SviPackage.class);
 
   @Override
   public void doGet() throws Exception {

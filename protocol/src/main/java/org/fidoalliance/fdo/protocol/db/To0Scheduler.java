@@ -159,8 +159,7 @@ public class To0Scheduler implements Closeable {
       public void run() {
         onInterval();
       }
-    }, interval, interval,TimeUnit.SECONDS);
-
+    }, interval, interval, TimeUnit.SECONDS);
 
     logger.info("To0Scheduler will run every " + interval + " seconds");
   }

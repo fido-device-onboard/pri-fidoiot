@@ -48,13 +48,11 @@ import org.fidoalliance.fdo.protocol.message.To1dPayload;
 
 public class DeviceApp extends HttpClient {
 
-  private final LoggerService logger;
-  private final DeviceConfig config;
+  private static final LoggerService logger = new LoggerService(DeviceApp.class);
 
-  public DeviceApp() throws IOException {
-    logger = new LoggerService(DeviceApp.class);
-    config = Config.getConfig(RootConfig.class).getRoot();
-  }
+  private final DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
+
+
 
   /**
    * Main entry.
@@ -64,7 +62,7 @@ public class DeviceApp extends HttpClient {
   public static void main(String[] args) {
     try {
       new DeviceApp().run();
-    } catch (IOException e) {
+    } catch (Throwable e) {
       new RuntimeException(e);
     }
   }
@@ -78,6 +76,9 @@ public class DeviceApp extends HttpClient {
       super.run();
       logger.info("Starting Fdo Completed");
     } catch (Throwable throwable) {
+      DispatchMessage prevMessage = new DispatchMessage();
+      prevMessage.setMsgType(MsgType.DI_APP_START);
+      DispatchMessage.fromThrowable(throwable, prevMessage);
       logger.error(throwable);
     }
   }

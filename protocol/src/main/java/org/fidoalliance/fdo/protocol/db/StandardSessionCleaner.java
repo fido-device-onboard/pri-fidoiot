@@ -3,6 +3,8 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -17,7 +19,7 @@ import org.fidoalliance.fdo.protocol.entity.ProtocolSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-public class StandardSessionCleaner {
+public class StandardSessionCleaner implements Closeable {
 
   private static final LoggerService logger = new LoggerService(StandardSessionCleaner.class);
 
@@ -75,5 +77,10 @@ public class StandardSessionCleaner {
     } finally {
       session.close();
     }
+  }
+
+  @Override
+  public void close() throws IOException {
+    scheduler.shutdown();
   }
 }

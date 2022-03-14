@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
@@ -27,6 +28,7 @@ import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.ManufacturerKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.MaxServiceInfoSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerInfoSizeSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
@@ -107,9 +109,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.StandardServiceInfoSendFunction
 
 public class StandardMessageDispatcher implements MessageDispatcher {
 
-
-  LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
-
+  private static final LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
 
   protected StandardCryptoService getCryptoService() {
     return Config.getWorker(StandardCryptoService.class);
@@ -140,6 +140,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   protected String createSessionId() {
     return Hex.encodeHexString(getCryptoService().getRandomBytes(Long.BYTES * 2));
   }
+
 
 
   protected String createCwtSession(CwtTo1Id cwtTo1Id) throws IOException {
@@ -1107,8 +1108,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
     devInfoReady.setHmac(newMac);
 
-    devInfoReady.setMaxMessageSize(null);
-    logger.info("max message size is null (default)");
+    Integer maxSvi = getWorker(MaxServiceInfoSupplier.class).get();
+    devInfoReady.setMaxMessageSize(maxSvi);
+    if (maxSvi == null) {
+      logger.info("max service info size is null (default)");
+    } else {
+      logger.info("max service info size size is " + maxSvi);
+    }
 
     cipherText = Mapper.INSTANCE.writeValue(devInfoReady);
     response.setMessage(cs.encrypt(cipherText, es));
@@ -1135,6 +1141,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (devInfoReady.getMaxMessageSize() == null) {
       devInfoReady.setMaxMessageSize(BufferUtils.getServiceInfoMtuSize());
     }
+
     storage.put(To2DeviceInfoReady.class, devInfoReady);
 
     To2OwnerInfoReady ownerInfoReady = new To2OwnerInfoReady();
@@ -1161,7 +1168,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         state.setName(module.getName());
         state.setGuid(helloDevice.getGuid());
         state.setExtra(AnyType.fromObject(new NullValue()));
-        state.setMtu(devInfoReady.getMaxMessageSize());
+        state.setMtu(Math.min(devInfoReady.getMaxMessageSize(),
+                ownerInfoReady.getMaxMessageSize()));
         module.prepare(state);
         moduleList.add(state);
       }

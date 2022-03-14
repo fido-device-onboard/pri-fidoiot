@@ -21,7 +21,7 @@ import org.fidoalliance.fdo.protocol.message.HashType;
  */
 public class AllowList extends RestApi {
 
-  protected static LoggerService logger = new LoggerService(AllowList.class);
+  protected static final LoggerService logger = new LoggerService(AllowList.class);
 
   @Override
   public void doPost() throws Exception {

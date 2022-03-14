@@ -32,7 +32,7 @@ public class HibernateUtil {
 
   }
 
-  private static final SessionFactory sessionFactory = buildSessionFactory();
+  private static SessionFactory sessionFactory = buildSessionFactory();
 
   private static SessionFactory buildSessionFactory() {
     try {
@@ -95,6 +95,7 @@ public class HibernateUtil {
     // Close caches and connection pools
     try {
       getSessionFactory().close();
+      sessionFactory = null;
     } catch (Throwable throwable) {
       logger.error(throwable.getMessage());
     }

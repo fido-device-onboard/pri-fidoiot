@@ -15,7 +15,7 @@ import org.fidoalliance.fdo.protocol.message.MsgType;
 public class ProtocolServlet extends HttpServlet {
 
 
-  private static LoggerService logger = new LoggerService(ProtocolServlet.class);
+  private static final LoggerService logger = new LoggerService(ProtocolServlet.class);
 
   protected void logMessage(DispatchMessage msg) {
     StringBuilder builder = new StringBuilder();
