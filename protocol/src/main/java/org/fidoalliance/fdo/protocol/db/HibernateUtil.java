@@ -15,6 +15,7 @@ import java.util.Map;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DatabaseServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -23,7 +24,7 @@ import org.hibernate.cfg.Configuration;
  */
 public class HibernateUtil {
 
-  private static LoggerService logger;
+  private static LoggerService logger = new LoggerService(HibernateUtil.class);
 
   private static class RootConfig {
 
@@ -39,7 +40,7 @@ public class HibernateUtil {
 
       final File file = Path.of(Config.getPath(), "hibernate.cfg.xml").toFile();
       final Configuration cfg = new Configuration();
-      logger = new LoggerService(HibernateUtil.class);
+
       cfg.configure(file);
 
       final Map<String, String> map = Config.getConfig(RootConfig.class).hibernateProperties;
@@ -57,7 +58,7 @@ public class HibernateUtil {
     } catch (Throwable e) {
       // Make sure you log the exception, as it might be swallowed
       logger.error("database session factory setup failed");
-      throw new ExceptionInInitializerError(e);
+      return null;
     }
   }
 
@@ -87,24 +88,28 @@ public class HibernateUtil {
   }
 
 
+
+
   /**
    * Shutdown hibernate pools and database.
    */
   public static void shutdown() {
-    //sessionFactory.ge
-    // Close caches and connection pools
+
     try {
-      getSessionFactory().close();
-      sessionFactory = null;
+      if (sessionFactory != null) {
+        sessionFactory.close();
+      }
     } catch (Throwable throwable) {
       logger.error(throwable.getMessage());
     }
 
+    //sessionFactory.ge
+    // Close caches and connection pools
     for (Object worker : Config.getWorkers()) {
       if (worker instanceof Closeable) {
         try {
           ((Closeable) worker).close();
-        } catch (IOException e) {
+        } catch (Throwable e) {
           logger.error(e.getMessage());
         }
       }

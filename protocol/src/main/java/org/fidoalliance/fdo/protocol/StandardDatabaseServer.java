@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import org.h2.server.web.WebServer;
 import org.h2.tools.Server;
 
 

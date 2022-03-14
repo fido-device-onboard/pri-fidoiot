@@ -4,27 +4,27 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Duration;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
+import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-
-public class OnboardConfigSupplier
-    implements FailableSupplier<OnboardingConfig, IOException> {
+public class To2BlobSupplier implements FailableSupplier<To2AddressEntries, IOException> {
 
   @Override
-  public OnboardingConfig get() throws IOException {
+  public To2AddressEntries get() throws IOException {
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
       final Transaction trans = session.beginTransaction();
       OnboardingConfig onboardConfig =
-          session.find(OnboardingConfig.class,Long.valueOf(1));
+          session.find(OnboardingConfig.class, Long.valueOf(1));
 
       if (onboardConfig == null) {
         onboardConfig = new OnboardingConfig();
@@ -39,17 +39,22 @@ public class OnboardConfigSupplier
 
         final String defaultPort = Config.getWorker(HttpServer.class).getHttpPort();
         final String rviString = String.format(defaultBob, defaultPort);
-        Mapper.INSTANCE.readJsonValue(rviString, To2AddressEntries.class);
+
         onboardConfig.setRvBlob(session.getLobHelper().createClob(rviString));
 
         session.persist(onboardConfig);
 
 
       }
+      String body = onboardConfig.getRvBlob().getSubString(1,
+          Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
       trans.commit();
 
-      return onboardConfig;
+      return Mapper.INSTANCE.readJsonValue(body,To2AddressEntries.class);
 
+
+    } catch (SQLException throwables) {
+      throw new InternalServerErrorException(throwables);
     } finally {
       session.close();
     }

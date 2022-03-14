@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Duration;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
@@ -41,15 +42,18 @@ public class To0Starter extends RestApi {
           to0d.setWaitSeconds(Duration.ofDays(1).toSeconds());
 
           OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
+
+          String body = onboardConfig.getRvBlob().getSubString(1,
+              Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
           To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(), To2AddressEntries.class);
+              Mapper.INSTANCE.readValue(body, To2AddressEntries.class);
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
           to0Client.setTo0d(to0d);
           to0Client.run();
           logger.info("TO0 completed for GUID: " + guid);
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
           logger.error("TO0 failed for GUID: " + guid);
         }
 

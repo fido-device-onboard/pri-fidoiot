@@ -112,6 +112,7 @@ public class To0Scheduler implements Closeable {
       TypedQuery<OnboardingVoucher> allQuery = session.createQuery(all);
       List<OnboardingVoucher> list = allQuery.getResultList();
       Date now = new Date(System.currentTimeMillis());
+      To2AddressEntries addressEntries = new To2BlobSupplier().get();
       OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
       for (OnboardingVoucher onboardingVoucher : list) {
         if (onboardingVoucher.getTo0Expiry() == null
@@ -125,8 +126,6 @@ public class To0Scheduler implements Closeable {
           To0d to0d = new To0d();
           to0d.setVoucher(voucher);
 
-          To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(), To2AddressEntries.class);
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());

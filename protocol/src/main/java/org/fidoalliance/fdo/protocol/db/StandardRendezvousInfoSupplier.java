@@ -5,7 +5,9 @@ package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
+import java.sql.SQLException;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.entity.RvData;
@@ -84,16 +86,7 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
       if (rvData == null) {
         rvData = new RvData();
 
-        final String defaultRvi = "- - - 5\n"
-            + "    - \"%s\"\n"
-            + "  - - 3\n"
-            + "    - %s\n"
-            + "  - - 12\n"
-            + "    - %s\n"
-            + "  - - 2\n"
-            + "    - \"%s\"\n"
-            + "  - - 4\n"
-            + "    - %s";
+        final String defaultRvi = "[[[5, \"%s\"], [3,%s], [12, %s], [2, \"%s\"], [4, %s]]]";
 
 
         String rviString = String.format(defaultRvi, config.getDns(), config.getDevport(),
@@ -101,14 +94,19 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
 
         RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
-        rvData.setData(Mapper.INSTANCE.writeValue(rvi));
+        rvData.setData(session.getLobHelper().createClob(rviString));
 
         session.persist(rvData);
       }
+
+
+      String body = rvData.getData().getSubString(1,
+          Long.valueOf(rvData.getData().length()).intValue());
       trans.commit();
+      return Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);
 
-      return Mapper.INSTANCE.readValue(rvData.getData(), RendezvousInfo.class);
-
+    } catch (SQLException throwables) {
+      throw new InternalServerErrorException(throwables);
     } finally {
       session.close();
     }

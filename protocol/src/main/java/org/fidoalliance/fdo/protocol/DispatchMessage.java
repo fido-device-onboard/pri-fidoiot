@@ -26,13 +26,6 @@ public class DispatchMessage {
   private SimpleStorage extra;
 
   private static void findCause(ErrorMessage error, Throwable throwable) {
-    Throwable current = throwable;
-    throwable.printStackTrace();
-    while (current != null) {
-
-    }
-
-    //error.setErrorString();
   }
 
   /**

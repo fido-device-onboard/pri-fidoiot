@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
+import java.sql.Blob;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,7 @@ public class ProtocolSession {
 
   @Lob
   @Column(name = "data")
-  private byte[] data;
+  private Blob data;
 
   @Column(name = "created_on")
   @Temporal(TemporalType.TIMESTAMP)
@@ -32,7 +33,7 @@ public class ProtocolSession {
     return name;
   }
 
-  public byte[] getData() {
+  public Blob getData() {
     return data;
   }
 
@@ -44,7 +45,7 @@ public class ProtocolSession {
     this.name = name;
   }
 
-  public void setData(byte[] data) {
+  public void setData(Blob data) {
     this.data = data;
   }
 

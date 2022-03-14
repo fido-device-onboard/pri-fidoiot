@@ -4,6 +4,8 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.ResourceNotFoundException;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
@@ -26,8 +28,8 @@ public class StandardRvBlobQueryFunction implements RvBlobQueryFunction {
       if (rvBlob == null) {
         throw new ResourceNotFoundException("guid: " + s);
       }
-      return Mapper.INSTANCE.readValue(
-          rvBlob.getData(), To2RedirectEntry.class);
+
+      return Mapper.INSTANCE.readValue(rvBlob.getData(),To2RedirectEntry.class);
 
     } finally {
       session.close();

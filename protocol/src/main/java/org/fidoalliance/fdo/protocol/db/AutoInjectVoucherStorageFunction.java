@@ -57,6 +57,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
   @Override
   public UUID apply(String serialNo, OwnershipVoucher ownershipVoucher) throws IOException {
     super.apply(serialNo, ownershipVoucher);
+    final To2AddressEntries to2Entries = new To2BlobSupplier().get();
     final Session session = HibernateUtil.getSessionFactory().openSession();
     Transaction trans = null;
     try {
@@ -85,9 +86,8 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
       List<HttpInstruction> h1 = HttpUtils.getInstructions(header.getRendezvousInfo(),
           false);
 
-      OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
-      To2AddressEntries to2Entries = Mapper.INSTANCE.readValue(
-          onboardConfig.getRvBlob(), To2AddressEntries.class);
+
+
       List<HttpInstruction> h2 = HttpUtils.getInstructions(to2Entries);
 
       if (HttpUtils.containsAddress(h1, h2)) {

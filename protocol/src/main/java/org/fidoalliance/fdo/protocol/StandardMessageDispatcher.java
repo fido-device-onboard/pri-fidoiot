@@ -16,7 +16,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
@@ -423,6 +422,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     //save the voucher
     response.setMessage(Mapper.INSTANCE.writeValue(new DiDone()));
+    manager.expireSession(request.getAuthToken().get());
   }
 
   protected void doDiDone(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -1381,6 +1381,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2Done2 done2 = storage.get(To2Done2.class);
     cipherText = Mapper.INSTANCE.writeValue(done2);
     response.setMessage(getCryptoService().encrypt(cipherText, es));
+    manager.expireSession(request.getAuthToken().get());
 
 
   }

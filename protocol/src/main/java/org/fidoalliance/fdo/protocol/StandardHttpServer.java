@@ -167,7 +167,6 @@ public class StandardHttpServer implements HttpServer {
 
     Tomcat tomcat = new Tomcat();
 
-
     tomcat.setBaseDir(config.getBasePath());
 
     tomcat.setAddDefaultWebXmlToWebapp(false);
@@ -290,10 +289,9 @@ public class StandardHttpServer implements HttpServer {
 
     String serviceName = System.getProperty("service.name");
     try {
-
       tomcat.start();
       logger.info("Started " + serviceName + " Service.");
-    } catch (LifecycleException e) {
+    } catch (Throwable e) {
       logger.warn("Failed to start " + serviceName + " Service.");
       throw new RuntimeException(e);
     }
