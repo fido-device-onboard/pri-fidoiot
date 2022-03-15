@@ -117,26 +117,28 @@ public class OnDieCertificateManager {
 
     try {
       URLConnection urlConn = zipFileUrl.openConnection();
-      ZipInputStream zipInput = new ZipInputStream(urlConn.getInputStream());
-      ZipEntry zipEntry = zipInput.getNextEntry();
-      while (zipEntry != null) {
-        if (zipEntry.getName().startsWith("content/OnDieCA")
-            && (zipEntry.getName().endsWith(".crl")
-            || zipEntry.getName().endsWith(".cer"))) {
+      try (ZipInputStream zipInput = new ZipInputStream(urlConn.getInputStream())) {
+        ZipEntry zipEntry = zipInput.getNextEntry();
+        while (zipEntry != null) {
+          if (zipEntry.getName().startsWith("content/OnDieCA")
+              && (zipEntry.getName().endsWith(".crl")
+              || zipEntry.getName().endsWith(".cer"))) {
 
-          String artifactId = Paths.get(zipEntry.getName()).getFileName().toString();
+            String artifactId = Paths.get(zipEntry.getName()).getFileName().toString();
 
-          OnDieCertificateData certStoreEntry = session.get(OnDieCertificateData.class, artifactId);
-          if (certStoreEntry == null) {
-            certStoreEntry = new OnDieCertificateData();
-            certStoreEntry.setId(artifactId);
+            OnDieCertificateData certStoreEntry = session.get(OnDieCertificateData.class,
+                artifactId);
+            if (certStoreEntry == null) {
+              certStoreEntry = new OnDieCertificateData();
+              certStoreEntry.setId(artifactId);
+            }
+
+            Blob blob = session.getLobHelper().createBlob(zipInput.readAllBytes());
+            certStoreEntry.setData(blob);
+            session.persist(certStoreEntry);
           }
-
-          Blob blob = session.getLobHelper().createBlob(zipInput.readAllBytes());
-          certStoreEntry.setData(blob);
-          session.persist(certStoreEntry);
+          zipEntry = zipInput.getNextEntry();
         }
-        zipEntry = zipInput.getNextEntry();
       }
       trans.commit();
     } finally {
