@@ -1,12 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import org.apache.commons.codec.DecoderException;
@@ -28,7 +22,7 @@ public class HibernateTest {
       CriteriaQuery<?> cr = cb.createQuery(stgClass);
       //session.createQuery(stgClass);
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      System.out.println(e.getMessage());
 
     }
   }
