@@ -3,11 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
-import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
-import org.fidoalliance.fdo.protocol.entity.RvData;
-import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
-import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
 /**
  * Maintains To2Blob for owners.
@@ -15,23 +11,39 @@ import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 public class To2Blob extends RestApi {
 
   @Override
+  protected void doGet() throws Exception {
+    getTransaction();
+    OnboardingConfig onboardConfig =
+        getSession().get(OnboardingConfig.class, Long.valueOf(1));
+
+    if (onboardConfig != null) {
+
+      String body = onboardConfig.getRvBlob().getSubString(1,
+          Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
+
+      getResponse().getWriter().print(body);
+    }
+
+  }
+
+  @Override
   public void doPost() throws Exception {
     String body = getStringBody();
+
     getTransaction();
 
-    To2AddressEntries entries =
-        Mapper.INSTANCE.readJsonValue(body, To2AddressEntries.class);
-
     OnboardingConfig onboardingConfig =
-        getSession().get(OnboardingConfig.class,Long.valueOf(1));
+        getSession().get(OnboardingConfig.class, Long.valueOf(1));
 
     if (onboardingConfig == null) {
       onboardingConfig = new OnboardingConfig();
-      onboardingConfig.setRvBlob(Mapper.INSTANCE.writeValue(entries));
+      onboardingConfig.setRvBlob(getSession().getLobHelper()
+          .createClob(body));
       getSession().save(onboardingConfig);
 
     } else {
-      onboardingConfig.setRvBlob(Mapper.INSTANCE.writeValue(entries));
+      onboardingConfig.setRvBlob(getSession().getLobHelper()
+          .createClob(body));
       getSession().update(onboardingConfig);
     }
   }

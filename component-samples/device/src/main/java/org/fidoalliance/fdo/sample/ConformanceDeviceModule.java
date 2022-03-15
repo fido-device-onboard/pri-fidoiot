@@ -14,7 +14,7 @@ import org.fidoalliance.fdo.protocol.serviceinfo.FidoAlliance;
 
 public class ConformanceDeviceModule implements ServiceInfoModule {
 
-  private final LoggerService logger = new LoggerService(DeviceApp.class);
+  private final LoggerService logger = new LoggerService(ConformanceDeviceModule.class);
 
 
   @Override

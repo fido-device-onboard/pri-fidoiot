@@ -19,7 +19,7 @@ import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 
 public class MessageSizeApi extends RestApi {
 
-  LoggerService logger = new LoggerService(MessageSizeApi.class);
+  private static final LoggerService logger = new LoggerService(MessageSizeApi.class);
 
   @Override
   public void doGet() throws Exception {

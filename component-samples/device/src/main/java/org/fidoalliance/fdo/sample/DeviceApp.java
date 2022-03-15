@@ -48,22 +48,20 @@ import org.fidoalliance.fdo.protocol.message.To1dPayload;
 
 public class DeviceApp extends HttpClient {
 
-  private final LoggerService logger;
-  private final DeviceConfig config;
+  private static final LoggerService logger = new LoggerService(DeviceApp.class);
 
-  public DeviceApp() throws IOException {
-    logger = new LoggerService(DeviceApp.class);
-    config = Config.getConfig(RootConfig.class).getRoot();
-  }
+  private final DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
+
 
   /**
    * Main entry.
+   *
    * @param args Commandline arguments.
    */
   public static void main(String[] args) {
     try {
       new DeviceApp().run();
-    } catch (IOException e) {
+    } catch (Throwable e) {
       new RuntimeException(e);
     }
   }
@@ -77,6 +75,9 @@ public class DeviceApp extends HttpClient {
       super.run();
       logger.info("Starting Fdo Completed");
     } catch (Throwable throwable) {
+      DispatchMessage prevMessage = new DispatchMessage();
+      prevMessage.setMsgType(MsgType.DI_APP_START);
+      DispatchMessage.fromThrowable(throwable, prevMessage);
       logger.error(throwable);
     }
   }
@@ -97,6 +98,9 @@ public class DeviceApp extends HttpClient {
       if (devCredential == null) {
         generateDiHello();
       } else {
+        setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
+
+        storage.put(DeviceCredential.class, devCredential);
         logger.info("credentials loaded, GUID is " + devCredential.getGuid());
         generateTo1Hello(devCredential);
       }
@@ -109,9 +113,14 @@ public class DeviceApp extends HttpClient {
     generateTo2Hello(null);
   }
 
-  private void generateTo1Hello(DeviceCredential devCredential) throws IOException {
+  @Override
+  protected void clearByPass() throws IOException {
+    getRequest().setMsgType(MsgType.TO1_HELLO_RV);
+    DeviceCredential devCredential = getRequest().getExtra().get(DeviceCredential.class);
+    generateTo1Hello(devCredential);
+  }
 
-    setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
+  private void generateTo1Hello(DeviceCredential devCredential) throws IOException {
 
     HelloRv helloRv = new HelloRv();
     helloRv.setGuid(devCredential.getGuid());
@@ -126,6 +135,8 @@ public class DeviceApp extends HttpClient {
     DeviceCredential cred = Config.getWorker(DeviceCredentialSupplier.class).get();
     HelloDevice helloDevice = new HelloDevice();
     helloDevice.setMaxMessageSize(config.getMaxMessageSize());
+    logger.info("max message size is " + config.getMaxMessageSize());
+
     helloDevice.setGuid(cred.getGuid());
     Nonce nonceTO2ProveOv = Nonce.fromRandomUuid();
     helloDevice.setProveTo2Ov(nonceTO2ProveOv);
@@ -176,7 +187,6 @@ public class DeviceApp extends HttpClient {
     logger.info("Device Serial No:" + serialNo);
 
     byte[] csr = generateCsr(keyType, keySize);
-
 
     ManufacturingInfo mfgInfo = new ManufacturingInfo();
     mfgInfo.setKeyType(keyType);

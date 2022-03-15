@@ -15,8 +15,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 
 public class SelfSignedHttpClientSupplier implements HttpClientSupplier {
 
-  private static LoggerService logger = new LoggerService(SelfSignedHttpClientSupplier.class);
-  private static SSLConnectionSocketFactory socketFactory = buildFactory();
+  private static final LoggerService logger = new LoggerService(SelfSignedHttpClientSupplier.class);
+  private static final SSLConnectionSocketFactory socketFactory = buildFactory();
 
   static SSLConnectionSocketFactory buildFactory() {
 

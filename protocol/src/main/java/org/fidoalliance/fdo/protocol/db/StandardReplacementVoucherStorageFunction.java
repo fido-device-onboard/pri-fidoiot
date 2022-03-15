@@ -25,11 +25,9 @@ public class StandardReplacementVoucherStorageFunction implements
       Transaction trans = session.beginTransaction();
       OwnershipVoucherHeader header1 = Mapper.INSTANCE.readValue(voucher1.getHeader(),
           OwnershipVoucherHeader.class);
-      OwnershipVoucherHeader header2 = Mapper.INSTANCE.readValue(voucher2.getHeader(),
-          OwnershipVoucherHeader.class);
+
       OnboardingVoucher onboardingVoucher = session.find(OnboardingVoucher.class,
           header1.getGuid().toString());
-
       if (onboardingVoucher != null) {
         if (voucher2.getHmac() != null) {
           onboardingVoucher.setReplacement(Mapper.INSTANCE.writeValue(voucher2));
@@ -40,7 +38,15 @@ public class StandardReplacementVoucherStorageFunction implements
         session.update(onboardingVoucher);
         trans.commit();
       }
-      return header2.getGuid().toString();
+      if (voucher2.getHmac() != null) {
+        OwnershipVoucherHeader header2 = Mapper.INSTANCE.readValue(voucher2.getHeader(),
+            OwnershipVoucherHeader.class);
+        return header2.getGuid().toString();
+      } else {
+        return header1.getGuid().toString();
+      }
+
+
     } finally {
       session.close();
     }
