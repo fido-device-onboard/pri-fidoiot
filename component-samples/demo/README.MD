@@ -152,14 +152,15 @@ If no proxy needs to be specified, do not add these properties to your _JAVA_OPT
 # Configuring OnDie (Optional)
 
 OnDie is a type of device with device RoT added during manufacturing. To support OnDie devices you will need to import the OnDie certificates into the database via the api on both the Manufacturer and Owner components.
+In Ubuntu/RHEL, copy the csme.zip/csme-debug.zip to Manufacturer & Owner docker containers manually or by adding the below line to Dockerfile/Podmanfile of Manufacturer & Owner : `COPY ./csme.zip ./csme.zip`
+Restart Docker/Podman containers and execute the below CURL command to upload Ondie artifacts to DB.
 
     - `POST /api/v1/ondie` to upload OnDie certificates into the database.
 
       - Ex: `(curl -D - --digest -u ${api_user}:${api_passwd} --location --request POST "http://${ip}:8042/api/v1/ondie" --header 'Content-Type: text/plain' --data-raw "${cert-file}" `
 
       where ip = ip address of the manufacturer or the owner
-      cert-file = zip file containing the OnDie certificates (this file is located in the component-samples/demo/aio folder). If using any pre-prod devices then import the csme-debug.zip
-	  file. Otherwise, for production devices, import the csme.zip file. Example file reference on Windows: "file:///C:/FDO/component-samples/demo/aio/csme-debug.zip".
+      cert-file = zip file containing the OnDie certificates (this file is located in the component-samples/demo/aio folder). If using any pre-prod devices then import the csme-debug.zip file. Otherwise, for production devices, import the csme.zip file. Example file reference on Windows: "file:///C:/FDO/component-samples/demo/aio/csme-debug.zip" and on Ubuntu/RHEL : "file:///{path within docker container}/csme.zip".
 
 # Configuring log messages
 
