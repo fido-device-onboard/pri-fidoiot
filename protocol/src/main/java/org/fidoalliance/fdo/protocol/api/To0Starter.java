@@ -11,6 +11,7 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
+import org.fidoalliance.fdo.protocol.db.To2BlobSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
@@ -43,17 +44,15 @@ public class To0Starter extends RestApi {
 
           OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
 
-          String body = onboardConfig.getRvBlob().getSubString(1,
-              Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
-          To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(body, To2AddressEntries.class);
+          To2AddressEntries addressEntries = new To2BlobSupplier().get();
+
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
           to0Client.setTo0d(to0d);
           to0Client.run();
           logger.info("TO0 completed for GUID: " + guid);
-        } catch (IOException | SQLException e) {
+        } catch (IOException e) {
           logger.error("TO0 failed for GUID: " + guid);
         }
 

@@ -141,7 +141,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   }
 
 
-
   protected String createCwtSession(CwtTo1Id cwtTo1Id) throws IOException {
     final CwtToken cwtToken = new CwtToken();
     cwtToken.setIssuer("rvs");
@@ -1169,7 +1168,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         state.setGuid(helloDevice.getGuid());
         state.setExtra(AnyType.fromObject(new NullValue()));
         state.setMtu(Math.min(devInfoReady.getMaxMessageSize(),
-                ownerInfoReady.getMaxMessageSize()));
+            ownerInfoReady.getMaxMessageSize()));
         module.prepare(state);
         moduleList.add(state);
       }
@@ -1404,6 +1403,19 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     logger.info("TO2 completed successfully.");
   }
 
+  protected void doError(DispatchMessage request, DispatchMessage response) throws IOException {
+
+    for (Object worker : getWorkers()) {
+      if (worker instanceof SessionManager) {
+        if (request.getAuthToken().isPresent()) {
+          SessionManager manager = (SessionManager) worker;
+          manager.expireSession(request.getAuthToken().get());
+        }
+      }
+    }
+
+  }
+
 
   @Override
   public Optional<DispatchMessage> dispatch(DispatchMessage request) throws IOException {
@@ -1510,9 +1522,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         doTo2Done2(request, response);
         return Optional.empty();
       case ERROR:
-        return Optional.empty(); //never respond to error
+        doError(request, response);
+        return Optional.empty();
       default:
-        //response.setBody();
         break;
     }
 

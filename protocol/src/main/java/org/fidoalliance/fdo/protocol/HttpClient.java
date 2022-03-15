@@ -45,13 +45,6 @@ public abstract class HttpClient implements Runnable {
 
   protected int index = 0;
 
-  protected boolean isRepeatable(String uri) {
-    if (uri.endsWith("/30") || uri.endsWith("/20")) {
-      return true;
-    }
-    return false;
-  }
-
   protected void finishedOk() {
 
   }
@@ -71,6 +64,10 @@ public abstract class HttpClient implements Runnable {
   protected abstract void generateHello() throws IOException;
 
   protected void generateBypass() throws IOException {
+
+  }
+
+  protected void clearByPass() throws IOException {
 
   }
 
@@ -101,12 +98,13 @@ public abstract class HttpClient implements Runnable {
             || getRequest().getMsgType() == MsgType.TO0_HELLO) {
       index = 0;
     }
+    HttpInstruction httpInstruction = null;
     while (index <= getInstructions().size()) {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
         MsgType msgId = getRequest().getMsgType();
-        HttpInstruction httpInstruction = getInstructions().get(index);
+        httpInstruction = getInstructions().get(index);
         URIBuilder uriBuilder = new URIBuilder(
             httpInstruction.getAddress());
 
@@ -138,6 +136,8 @@ public abstract class HttpClient implements Runnable {
         segments.add(Integer.toString(msgId.toInteger()));
         uriBuilder.setPathSegments(segments);
 
+
+
         requestUri = uriBuilder.build();
 
         HttpPost httpRequest = new HttpPost(requestUri);
@@ -151,6 +151,7 @@ public abstract class HttpClient implements Runnable {
         }
 
         logMessage(getRequest());
+
 
         try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
           HttpEntity entity = httpResponse.getEntity();
@@ -190,6 +191,10 @@ public abstract class HttpClient implements Runnable {
             && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
             || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
             || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
+
+          if (httpInstruction.isRendezvousBypass()) {
+            clearByPass();
+          }
           logger.info("instruction failed " + e.getMessage());
           logger.info("moving to next instruction");
           index++;

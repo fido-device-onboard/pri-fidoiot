@@ -53,7 +53,6 @@ public class DeviceApp extends HttpClient {
   private final DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
 
 
-
   /**
    * Main entry.
    *
@@ -99,6 +98,9 @@ public class DeviceApp extends HttpClient {
       if (devCredential == null) {
         generateDiHello();
       } else {
+        setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
+
+        storage.put(DeviceCredential.class, devCredential);
         logger.info("credentials loaded, GUID is " + devCredential.getGuid());
         generateTo1Hello(devCredential);
       }
@@ -111,9 +113,14 @@ public class DeviceApp extends HttpClient {
     generateTo2Hello(null);
   }
 
-  private void generateTo1Hello(DeviceCredential devCredential) throws IOException {
+  @Override
+  protected void clearByPass() throws IOException {
+    getRequest().setMsgType(MsgType.TO1_HELLO_RV);
+    DeviceCredential devCredential = getRequest().getExtra().get(DeviceCredential.class);
+    generateTo1Hello(devCredential);
+  }
 
-    setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
+  private void generateTo1Hello(DeviceCredential devCredential) throws IOException {
 
     HelloRv helloRv = new HelloRv();
     helloRv.setGuid(devCredential.getGuid());
