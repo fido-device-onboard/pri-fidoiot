@@ -193,9 +193,7 @@ public class StandardCryptoService implements CryptoService {
       case SECP256R1:
 
         try {
-          if (keySize != KeySizeType.SIZE_256) {
-            new InvalidAlgorithmParameterException();
-          }
+
           final AlgorithmFinder algorithmFinder = new AlgorithmFinder();
           final CoseKeyCurveType coseKeyCurveType = algorithmFinder.getCoseKeyCurve(keyType);
           final String curveName = algorithmFinder.getAlgorithm(coseKeyCurveType);

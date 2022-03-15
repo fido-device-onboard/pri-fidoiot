@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
+import java.sql.Clob;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,11 +21,11 @@ public class OnboardingConfig {
 
   @Lob
   @Column(name = "rv_blob", nullable = false)
-  private byte[] rvBlob;
+  private Clob rvBlob;
 
   @Lob
   @Column(name = "replacement_rvInfo")
-  private byte[] replacementRvInfo;
+  private Clob replacementRvInfo;
 
   @Column(name = "max_message_size")
   private Integer maxMessageSize;
@@ -35,11 +36,11 @@ public class OnboardingConfig {
   @Column(name = "wait_seconds", nullable = false)
   private long waitSeconds;
 
-  public byte[] getRvBlob() {
+  public Clob getRvBlob() {
     return rvBlob;
   }
 
-  public byte[] getReplacementRvInfo() {
+  public Clob getReplacementRvInfo() {
     return replacementRvInfo;
   }
 
@@ -56,11 +57,11 @@ public class OnboardingConfig {
   }
 
 
-  public void setRvBlob(byte[] rvBlob) {
+  public void setRvBlob(Clob rvBlob) {
     this.rvBlob = rvBlob;
   }
 
-  public void setReplacementRvInfo(byte[] replacementRvInfo) {
+  public void setReplacementRvInfo(Clob replacementRvInfo) {
     this.replacementRvInfo = replacementRvInfo;
   }
 

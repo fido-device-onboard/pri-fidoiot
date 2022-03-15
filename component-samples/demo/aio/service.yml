@@ -39,9 +39,6 @@ http-server:
   subject_names:
     - DNS:localhost
     - IP:127.0.0.1
-  to0-scheduler:
-    thread-count: 5
-    interval: 120
 
 manufacturer:
    keystore: 

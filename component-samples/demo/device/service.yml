@@ -93,6 +93,7 @@ workers:
   - org.fidoalliance.fdo.sample.DeviceValidityDays
   - org.fidoalliance.fdo.sample.StandardDeviceKeySupplier 
   - org.fidoalliance.fdo.sample.StandardHmacFunction
+  - org.fidoalliance.fdo.sample.StandardMaxServiceInfoSupplier
   - org.fidoalliance.fdo.sample.StandardCredReuseFunction
   #- org.fidoalliance.fdo.sample.UnsupportedCredReuseFunction
   - org.fidoalliance.fdo.sample.StandardDeviceModule

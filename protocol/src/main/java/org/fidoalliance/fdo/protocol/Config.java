@@ -4,6 +4,8 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +42,7 @@ public class Config {
   private static String configPath;
   private static final String CONFIG_FILE = "service.yml";
 
+
   static {
 
     if (System.getProperty(CONFIG_HOME) != null) {
@@ -60,9 +63,12 @@ public class Config {
       loadSystemProperties();
       loadWorkerItems();
       loadEnvFiles();
-    } catch (IOException e) {
+    } catch (Throwable e) {
+      if (e instanceof MarkedYAMLException) {
+        MarkedYAMLException yamlException = (MarkedYAMLException)e;
+        System.out.println(yamlException.getMessage());
+      }
       System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
-      // todo : Replace with logger.
       System.exit(-1);
     }
   }

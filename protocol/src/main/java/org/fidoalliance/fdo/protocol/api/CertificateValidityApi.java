@@ -20,7 +20,7 @@ import org.fidoalliance.fdo.protocol.entity.CertificateValidity;
  */
 public class CertificateValidityApi extends RestApi {
 
-  LoggerService logger = new LoggerService(CertificateValidityApi.class);
+  private static final LoggerService logger = new LoggerService(CertificateValidityApi.class);
 
   @Override
   public void doGet() throws Exception {

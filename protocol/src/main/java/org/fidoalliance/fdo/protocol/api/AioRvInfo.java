@@ -32,28 +32,33 @@ public class AioRvInfo extends RestApi {
 
     try {
       // Constructing the yaml structure of RvInfo Object.
-      StringBuilder rvi = new StringBuilder("- - - 5\n");
-      String ip = getParamByValue("ip");
-      if (ip != null) {
-        rvi = rvi.append(String.format("    - \"%s\"\n  - - 2\n    - \"%s\"\n", ip, ip));
-      } else {
-        rvi = rvi.append("    - \"localhost\"\n  - - 2\n    - \"127.0.0.1\"\n");
-      }
-
-      String rvProt = getParamByValue("rvprot");
-      if (rvProt != null && rvProt.equals("https")) {
-        rvi = rvi.append("  - - 12\n    - 2\n");
-      } else {
-        // if invalid protocol specified, defaults to http.
-        rvi = rvi.append("  - - 12\n    - 1\n");
-      }
+      final String defaultRvi = "[[[5, \"%s\"], [3,%], [12, %s], [2, \"%s\"], [4, 8443]]]";
 
       String port = Config.getWorker(HttpServer.class).getHttpPort();
       String securePort = Config.getWorker(HttpServer.class).getHttpsPort();
-      rvi = rvi.append(String.format("  - - 3\n    - %s\n  - - 4\n    - %s", port, securePort));
+
+      String theDns = "localhost";
+      String theIp = "127.0.0.1";
+      String thePort = "8080";
+      String theProto = "1";
+      String rvprot = getParamByValue("rvprot");
+      if (rvprot != null) {
+        if (rvprot.equals("https")) {
+          thePort = "443";
+          theProto = "2";
+        }
+      }
+
+      String ip = getParamByValue("ip");
+      if (ip != null) {
+        theDns = ip;
+        thePort = ip;
+      }
+
+      String rvi = String.format(defaultRvi, theDns, thePort, theProto, theIp);
 
       // Creating RendezvousInfo object from yaml structure.
-      RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi.toString(), RendezvousInfo.class);
+      RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi, RendezvousInfo.class);
 
       // Querying DB for RVINFO_BLOB with id=1
       RvData rviData = getSession().get(RvData.class, Long.valueOf(1));
@@ -61,11 +66,11 @@ public class AioRvInfo extends RestApi {
       if (rviData == null) {
         // if data doesn't exist in DB, create new row and insert into RV_DATA table.
         rviData = new RvData();
-        rviData.setData(Mapper.INSTANCE.writeValue(rviObject));
+        rviData.setData(getSession().getLobHelper().createClob(rvi.toString()));
         getSession().save(rviData);
       } else {
         // if data exist in DB, update RV_INFO table with new RVInfo_blob.
-        rviData.setData(Mapper.INSTANCE.writeValue(rviObject));
+        rviData.setData(getSession().getLobHelper().createClob(rvi.toString()));
         getSession().update(rviData);
       }
     } catch (Exception e) {

@@ -33,7 +33,7 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 
 public class CertificateApi extends RestApi {
 
-  LoggerService logger = new LoggerService(CertificateApi.class);
+  private static final LoggerService logger = new LoggerService(CertificateApi.class);
 
   @Override
   public void doGet() throws Exception {

@@ -84,7 +84,7 @@ public class To0Scheduler implements Closeable {
       int threadCountValue;
       try {
         threadCountValue = Integer.parseInt(Config.resolve(threadCount));
-        if (threadCountValue <= 5) {
+        if (threadCountValue < 5) {
           logger.error("Received threadCount less than 5. Defaulting the thread-count to 5.");
           threadCountValue = 5;
         }
@@ -112,6 +112,7 @@ public class To0Scheduler implements Closeable {
       TypedQuery<OnboardingVoucher> allQuery = session.createQuery(all);
       List<OnboardingVoucher> list = allQuery.getResultList();
       Date now = new Date(System.currentTimeMillis());
+      To2AddressEntries addressEntries = new To2BlobSupplier().get();
       OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
       for (OnboardingVoucher onboardingVoucher : list) {
         if (onboardingVoucher.getTo0Expiry() == null
@@ -124,8 +125,6 @@ public class To0Scheduler implements Closeable {
           To0d to0d = new To0d();
           to0d.setVoucher(voucher);
 
-          To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(), To2AddressEntries.class);
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
@@ -158,8 +157,7 @@ public class To0Scheduler implements Closeable {
       public void run() {
         onInterval();
       }
-    }, interval, interval,TimeUnit.SECONDS);
-
+    }, interval, interval, TimeUnit.SECONDS);
 
     logger.info("To0Scheduler will run every " + interval + " seconds");
   }

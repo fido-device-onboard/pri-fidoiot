@@ -7,16 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import org.h2.server.web.WebServer;
 import org.h2.tools.Server;
 
 
 public class StandardDatabaseServer implements DatabaseServer, Closeable {
 
 
-  private static LoggerService logger = new LoggerService(DatabaseServer.class);
+  private static final LoggerService logger = new LoggerService(DatabaseServer.class);
 
 
 

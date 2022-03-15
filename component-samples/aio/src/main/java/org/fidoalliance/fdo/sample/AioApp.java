@@ -11,7 +11,7 @@ import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 
 public class AioApp {
 
-  static LoggerService logger = new LoggerService(AioApp.class);
+  private static LoggerService logger = new LoggerService(AioApp.class);
 
   /**
    * Main entry.
@@ -19,11 +19,14 @@ public class AioApp {
    */
   public static void main(String[] args) {
     try {
-      HibernateUtil.getSessionFactory();
-      Config.getWorker(HttpServer.class).run();
+      if (HibernateUtil.getSessionFactory() != null) {
+        Config.getWorker(HttpServer.class).run();
+      } else {
+        throw new IllegalStateException();
+      }
     } catch (Throwable throwable) {
       HibernateUtil.shutdown();
-      logger.error(throwable.getMessage());
     }
   }
+
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public class HttpOwnerSchemeSupplier implements OwnerSchemesSupplier {
 
 
-  private static LoggerService logger = new LoggerService(HttpOwnerSchemeSupplier.class);
+  private static final LoggerService logger = new LoggerService(HttpOwnerSchemeSupplier.class);
 
   public HttpOwnerSchemeSupplier() {
     logger.warn("Owner using http protocol for TO0. Should use HTTPS in production. ");

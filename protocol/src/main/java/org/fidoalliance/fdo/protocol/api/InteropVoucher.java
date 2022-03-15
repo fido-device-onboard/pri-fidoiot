@@ -4,8 +4,10 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -161,6 +163,7 @@ public class InteropVoucher extends RestApi {
 
       String id = getLastSegment();
 
+      id = null;
       if (id != null) {
 
         OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(id);
