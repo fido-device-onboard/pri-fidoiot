@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.db.FdoSysInstruction;
@@ -42,6 +43,8 @@ public class SviPackage extends RestApi {
       }
     } catch (Exception e) {
       logger.error("Received invalid SVI instruction.");
+      getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
     SystemPackage systemPackage =
