@@ -124,7 +124,6 @@ public class VoucherUtils {
     try {
       CoseSign1 nextEntry = cs.sign(payload, signingKey, prevOwnerPubKey);
       entries.add(nextEntry);
-      boolean bok = cs.verify(nextEntry, prevOwnerPubKey);
     } finally {
       cs.destroyKey(signingKey);
     }
