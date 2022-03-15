@@ -4,12 +4,14 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Duration;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
+import org.fidoalliance.fdo.protocol.db.To2BlobSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
@@ -41,8 +43,9 @@ public class To0Starter extends RestApi {
           to0d.setWaitSeconds(Duration.ofDays(1).toSeconds());
 
           OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
-          To2AddressEntries addressEntries =
-              Mapper.INSTANCE.readValue(onboardConfig.getRvBlob(), To2AddressEntries.class);
+
+          To2AddressEntries addressEntries = new To2BlobSupplier().get();
+
           to0Client.setAddressEntries(addressEntries);
 
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());

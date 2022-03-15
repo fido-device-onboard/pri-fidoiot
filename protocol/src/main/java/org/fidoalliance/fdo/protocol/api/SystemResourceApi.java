@@ -26,7 +26,7 @@ import org.fidoalliance.fdo.protocol.entity.SystemResource;
 
 public class SystemResourceApi extends RestApi {
 
-  LoggerService logger = new LoggerService(SystemResourceApi.class);
+  private static final LoggerService logger = new LoggerService(SystemResourceApi.class);
 
   @Override
   public void doGet() throws Exception {

@@ -15,7 +15,7 @@ import org.fidoalliance.fdo.protocol.message.MsgType;
 public class ProtocolServlet extends HttpServlet {
 
 
-  private static LoggerService logger = new LoggerService(ProtocolServlet.class);
+  private static final LoggerService logger = new LoggerService(ProtocolServlet.class);
 
   protected void logMessage(DispatchMessage msg) {
     StringBuilder builder = new StringBuilder();
@@ -76,17 +76,19 @@ public class ProtocolServlet extends HttpServlet {
       resp.setHeader(HttpUtils.HTTP_MESSAGE_TYPE,
           Integer.toString(MsgType.ERROR.toInteger()));
       if (reqMsg != null) {
-        DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, reqMsg);
 
         try {
+          DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, reqMsg);
+
           resp.setContentLength(errorMsg.getMessage().length);
           resp.getOutputStream().write(errorMsg.getMessage());
+          logMessage(errorMsg);
         } catch (Throwable throwable1) {
           logger.error("failed to write error response");
           // already in exception handler
         }
 
-        logMessage(errorMsg);
+
       }
 
     }

@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
+import java.sql.Clob;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,14 +21,14 @@ public class RvData {
 
   @Lob
   @Column(name = "data")
-  private byte[] data;
+  private Clob data;
 
 
-  public byte[] getData() {
+  public Clob getData() {
     return data;
   }
 
-  public void setData(byte[] data) {
+  public void setData(Clob data) {
     this.data = data;
   }
 

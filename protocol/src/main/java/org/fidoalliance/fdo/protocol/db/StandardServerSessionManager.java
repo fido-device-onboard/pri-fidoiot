@@ -28,7 +28,9 @@ public class StandardServerSessionManager implements SessionManager {
         throw new InvalidJwtTokenException(name);
       }
 
-      return Mapper.INSTANCE.readValue(protocolSession.getData(), SimpleStorage.class);
+      return Mapper.INSTANCE.readValue(
+          HibernateUtil.unwrap(protocolSession.getData()),
+          SimpleStorage.class);
 
 
     } finally {
@@ -49,7 +51,8 @@ public class StandardServerSessionManager implements SessionManager {
       final ProtocolSession protocolSession = new ProtocolSession();
       protocolSession.setName(name);
       protocolSession.setCreatedOn(Date.from(Instant.now()));
-      protocolSession.setData(Mapper.INSTANCE.writeValue(storage));
+      protocolSession.setData(session.getLobHelper().createBlob(
+          Mapper.INSTANCE.writeValue(storage)));
       session.save(protocolSession);
       trans.commit();
     } finally {
@@ -65,7 +68,8 @@ public class StandardServerSessionManager implements SessionManager {
       final ProtocolSession protocolSession = new ProtocolSession();
       protocolSession.setName(name);
       protocolSession.setCreatedOn(Date.from(Instant.now()));
-      protocolSession.setData(Mapper.INSTANCE.writeValue(storage));
+      protocolSession.setData(session.getLobHelper().createBlob(
+          Mapper.INSTANCE.writeValue(storage)));
       session.update(protocolSession);
       trans.commit();
     } finally {
@@ -78,12 +82,13 @@ public class StandardServerSessionManager implements SessionManager {
   public void expireSession(String name) {
     Session session = HibernateUtil.getSessionFactory().openSession();
     try {
+      Transaction trans = session.beginTransaction();
       ProtocolSession protocolSession = session.get(ProtocolSession.class, name);
-
       if (protocolSession != null) {
+
         session.delete(protocolSession);
       }
-
+      trans.commit();
 
     } finally {
       session.close();

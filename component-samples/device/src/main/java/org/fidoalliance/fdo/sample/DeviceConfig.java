@@ -51,8 +51,11 @@ public class DeviceConfig {
     return Config.resolve(value);
   }
 
-  private int resolveInt(String value) {
-    return Integer.parseInt(Config.resolve(value));
+  private Integer resolveInt(String value) {
+    if (value != null) {
+      return Integer.parseInt(Config.resolve(value));
+    }
+    return null;
   }
 
   public String getCredentialFile() {
@@ -61,10 +64,6 @@ public class DeviceConfig {
 
   public KeyStoreConfig getKeyStoreConfig() {
     return keystoreConfig;
-  }
-
-  public boolean getReuseSupported() {
-    return Boolean.getBoolean(resolve(reuseSupported));
   }
 
   public PublicKeyType getKeyType() {
@@ -87,7 +86,7 @@ public class DeviceConfig {
     return resolveInt(maxMessageSize);
   }
 
-  public int getSviMtu() {
+  public Integer getSviMtu() {
     return resolveInt(sviMtu);
   }
 
