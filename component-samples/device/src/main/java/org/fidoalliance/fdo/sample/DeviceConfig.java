@@ -112,11 +112,11 @@ public class DeviceConfig {
     try {
       value = resolveInt(sviMtu);
       if (value < 256) {
-        logger.error("maxSVISize less than 256. Defaulting maxMessageSize to 1300.");
-        value = 1300;
+        logger.error("service-info-mtu less than 256. Defaulting service-info-mtu to 256.");
+        value = 256;
       }
     } catch (NumberFormatException e) {
-      logger.error("Invalid maxMessageSize. Defaulting maxMessageSize to 1300.");
+      logger.error("Invalid service-info-mtu value. Defaulting service-info-mtu to 1300.");
     }
     return value;
   }
