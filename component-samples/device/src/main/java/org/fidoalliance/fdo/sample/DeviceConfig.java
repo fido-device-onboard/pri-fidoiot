@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.sample;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.message.CipherSuiteType;
 import org.fidoalliance.fdo.protocol.message.HashType;
 import org.fidoalliance.fdo.protocol.message.KeySizeType;
@@ -13,6 +14,8 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 
 public class DeviceConfig {
+
+  LoggerService logger =  new LoggerService(DeviceConfig.class);
 
   @JsonProperty("keystore")
   private KeyStoreConfig keystoreConfig;
@@ -82,12 +85,41 @@ public class DeviceConfig {
     return resolve(kexSuite);
   }
 
+  /**
+   * Returns the MaxMessageSize set in service.yml file.
+   * @return maxMessageSize
+   */
   public int getMaxMessageSize() {
-    return resolveInt(maxMessageSize);
+    int value = 0;
+    try {
+      value = resolveInt(maxMessageSize);
+      if (value < 0) {
+        logger.error("maxMessageSize less than 0. Defaulting maxMessageSize to 0.");
+        value = 0;
+      }
+    } catch (NumberFormatException e) {
+      logger.error("Invalid maxMessageSize. Defaulting maxMessageSize to 0.");
+    }
+    return value;
   }
 
-  public Integer getSviMtu() {
-    return resolveInt(sviMtu);
+
+  /**
+   * Returns the maxSviSize set in service.yml file.
+   * @return maxSviSize
+   */
+  public int getSviMtu() {
+    int value = 1300;
+    try {
+      value = resolveInt(sviMtu);
+      if (value < 256) {
+        logger.error("service-info-mtu less than 256. Defaulting service-info-mtu to 256.");
+        value = 256;
+      }
+    } catch (NumberFormatException e) {
+      logger.error("Invalid service-info-mtu value. Defaulting service-info-mtu to 1300.");
+    }
+    return value;
   }
 
   public String getDiUri() {
