@@ -103,6 +103,7 @@ public class DeviceConfig {
     return value;
   }
 
+
   /**
    * Returns the maxSviSize set in service.yml file.
    * @return maxSviSize

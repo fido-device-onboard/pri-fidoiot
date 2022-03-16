@@ -122,6 +122,7 @@ public class To0Scheduler implements Closeable {
               OwnershipVoucher.class);
 
           StandardTo0Client to0Client = new StandardTo0Client();
+
           To0d to0d = new To0d();
           to0d.setVoucher(voucher);
 
