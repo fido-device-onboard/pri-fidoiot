@@ -10,7 +10,11 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        use_remote : ${use_remote}
+        - use_remote
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - _JAVA_OPTIONS
     image: pri-fdo-build
     container_name: pri-fdo-build
     # Mapping to the user workspace of 'fdouser' as created in the Dockerfile.
@@ -19,11 +23,11 @@ services:
       - ./../../pri-fidoiot:/home/fdouser/pri-fidoiot:rw
       - fdo-m2:/home/fdouser/.m2:rw
     environment:
+      - _JAVA_OPTIONS=${_JAVA_OPTIONS}
       - use_remote=${use_remote}
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-
     mem_limit: 1500m
     mem_reservation: 1000m
     cpu_shares: 5
