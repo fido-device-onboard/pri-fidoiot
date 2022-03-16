@@ -641,6 +641,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (voucher.getEntries().size() > 255) {
       throw new InvalidMessageException("too many voucher entries");
     }
+    VoucherUtils.verifyVoucher(voucher);
     To2ProveHeaderPayload hdrPayload = new To2ProveHeaderPayload();
 
     hdrPayload.setHeader(voucher.getHeader());
