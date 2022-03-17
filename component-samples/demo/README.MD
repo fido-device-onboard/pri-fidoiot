@@ -234,6 +234,12 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
      {"write": "sample.txt"},
      {"exec" :"/bin/bash cat sample.txt"}`
 
+    or
+  
+     `{"filedesc" : "sample.txt","resource" : "database resource"},
+      {"write": "sample.txt"},
+      {"exec" :"/bin/bash cat sample.txt"}`
+
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
