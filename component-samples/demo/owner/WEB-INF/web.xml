@@ -211,6 +211,19 @@
         <url-pattern>/api/v1/owner/svisize</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>Reseller</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.ResellApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Reseller</servlet-name>
+        <url-pattern>/api/v1/resell/*</url-pattern>
+    </servlet-mapping>
+
   <security-constraint>
     <web-resource-collection>
         <web-resource-name>apis</web-resource-name>
