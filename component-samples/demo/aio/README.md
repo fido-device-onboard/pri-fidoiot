@@ -195,14 +195,14 @@ Alias values that can be used for GET /api/v1/certificate?alias={alias}
 # Service info filters
 
 Service info is a single json document store in the database. To define different service info instructions for a given set of device info properties you can use filters.
-Every service info following a filter will only be returned if the filter matches. If not filter is specified or if the filter is empty then the service info following the empty filter will apply to all devices.
+Every service info following a filter will only be returned if the filter matches. If no filter is specified or if the filter is empty then the service info following the empty filter will apply to all devices.
 
-The following filter will only return service info instructions if the device info reports the device is a "Pri-Device"
+The following filter will only return service info instructions if the device info reports the device is a "FDO-Pri-Device"
 
 [
 {"filter": {"device" : "FDO-Pri-Device"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
-{"exec" : ["base","setup.sh"] },
+{"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
 ]
 
