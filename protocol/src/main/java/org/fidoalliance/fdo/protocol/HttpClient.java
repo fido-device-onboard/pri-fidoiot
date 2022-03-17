@@ -195,7 +195,7 @@ public abstract class HttpClient implements Runnable {
           if (httpInstruction.isRendezvousBypass()) {
             clearByPass();
           }
-          logger.info("instruction failed " + e.getMessage());
+          logger.info("instruction failed.");
           logger.info("moving to next instruction");
           index++;
           continue;
