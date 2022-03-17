@@ -234,6 +234,12 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
      {"write": "sample.txt"},
      {"exec" :"/bin/bash cat sample.txt"}`
 
+    or
+  
+     `{"filedesc" : "sample.txt","resource" : "database resource"},
+      {"write": "sample.txt"},
+      {"exec" :"/bin/bash cat sample.txt"}`
+
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification, that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
@@ -311,5 +317,15 @@ h2-database:
 **NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://localhost:<webport>`.
 
 IMPORTANT: Not recommended to enable this setting especially on production systems.
+
+
+# Certificate Validity checks
+
+The Device certificate chain is checked during TO0 by the rendezvous server and by the owner during TO2.  This check includes verifying the certificate chain hash and if the leaf certificate has expired. 
+Owner certificates with X5Chain encoding are not analyzed by this implementation.
+
+The FDO spec states "When processing an Ownership Voucher with X5CHAIN encoding, the Rendezvous Server and Device SHOULD verify the certificate chain as much as possible, and MAY decide to accept or reject the Ownership Voucher based on a trust analysis of the X5CHAIN".
+
+This implementation will trust Ownership vouchers with X5Chain encoding without verifying the ownership chain. 
 
 

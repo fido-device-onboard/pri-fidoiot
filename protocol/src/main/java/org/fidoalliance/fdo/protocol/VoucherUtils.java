@@ -23,6 +23,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -314,7 +315,7 @@ public class VoucherUtils {
           out.write(cert.getEncoded());
         }
       } catch (CertificateEncodingException e) {
-        e.printStackTrace();
+        throw new InvalidOwnershipVoucherException("invalid certificate chain");
       }
 
       Hash hash1 = header.getCertHash();
@@ -328,6 +329,7 @@ public class VoucherUtils {
 
   /**
    * Gets the alias of the public key of a voucher.
+   *
    * @param voucher An ownership voucher.
    * @return The alias name.
    * @throws IOException An error occurred.
@@ -373,6 +375,15 @@ public class VoucherUtils {
         throw new InvalidOwnershipVoucherException(
             "Digital signature is not allowed for the device certificate");
       }
+    }
+
+    if (cert.getNotAfter() != null) {
+      Date current = new Date(System.currentTimeMillis());
+      if (current.after(cert.getNotAfter())) {
+        throw new InvalidOwnershipVoucherException(
+            "Certificate expired");
+      }
+
     }
   }
 }
