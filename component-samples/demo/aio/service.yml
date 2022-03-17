@@ -11,11 +11,11 @@ system-properties:
   application.version: 1.1-SNAPSHOT
   service.name: "All-in-one demo"
   # set system proxy information
-  #http.proxyHost: proxy-chain.intel.com 
-  #http.proxyPort: 911
-  #https.proxyHost: proxy-chain.intel.com 
-  #https.proxyPort: 912
-  #http.nonProxyHosts: localhost|host.example.com
+  #http.proxyHost:
+  #http.proxyPort:
+  #https.proxyHost:
+  #https.proxyPort:
+  #http.nonProxyHosts:
   
 
 http-server:
@@ -106,7 +106,6 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
-  #- org.fidoalliance.fdo.protocol.db.ReuseVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
