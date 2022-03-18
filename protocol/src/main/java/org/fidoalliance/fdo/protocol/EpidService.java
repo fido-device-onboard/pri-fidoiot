@@ -357,7 +357,8 @@ public class EpidService {
     try {
       httpClient = java.net.http.HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-          HttpRequest.newBuilder().header("Accept", "application/octet-stream");
+          HttpRequest.newBuilder().header("Accept", "application/octet-stream")
+              .version(HttpClient.Version.HTTP_1_1);
       final HttpRequest httpRequest = httpRequestBuilder.uri(URI.create(url)).GET().build();
       final Future<HttpResponse<byte[]>> future =
           executor.submit(
@@ -388,7 +389,8 @@ public class EpidService {
     try {
       httpClient = HttpClient.newBuilder().build();
       final HttpRequest.Builder httpRequestBuilder =
-          HttpRequest.newBuilder().header("Content-Type", "application/json");
+          HttpRequest.newBuilder().header("Content-Type", "application/json")
+              .version(HttpClient.Version.HTTP_1_1);
       final HttpRequest httpRequest =
           httpRequestBuilder.uri(URI.create(url)).POST(HttpRequest.BodyPublishers.ofString(payload))
               .build();
