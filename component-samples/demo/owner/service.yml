@@ -103,6 +103,7 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
+  #- org.fidoalliance.fdo.protocol.db.ReuseVoucherReplacementFunction
   - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction 
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
