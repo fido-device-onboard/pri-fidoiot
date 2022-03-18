@@ -34,6 +34,8 @@ public class SviPackage extends RestApi {
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();
+    logger.info("api/v1/owner/svi");
+    logger.info("Body:" + body);
     getTransaction();
     try {
       FdoSysInstruction[] instructions =

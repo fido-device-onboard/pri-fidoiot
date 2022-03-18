@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.RvData;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
@@ -12,6 +13,8 @@ import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
  * Maintains RV Info.
  */
 public class RvInfo extends RestApi {
+
+  public static LoggerService logger = new LoggerService(RvInfo.class);
 
   @Override
   protected void doGet() throws Exception {
@@ -30,6 +33,8 @@ public class RvInfo extends RestApi {
   public void doPost() throws Exception {
 
     String body = getStringBody();
+    logger.info("api/v1/rvinfo");
+    logger.info("Body:" + body);
     getTransaction();
 
     RendezvousInfo info = Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);

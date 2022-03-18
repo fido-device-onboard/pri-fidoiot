@@ -3,12 +3,14 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 
 /**
  * Maintains To2Blob for owners.
  */
 public class To2Blob extends RestApi {
+  public static LoggerService logger = new LoggerService(To2Blob.class);
 
   @Override
   protected void doGet() throws Exception {
@@ -29,7 +31,8 @@ public class To2Blob extends RestApi {
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();
-
+    logger.info("api/v1/owner/svi");
+    logger.info("Body:" + body);
     getTransaction();
 
     OnboardingConfig onboardingConfig =
