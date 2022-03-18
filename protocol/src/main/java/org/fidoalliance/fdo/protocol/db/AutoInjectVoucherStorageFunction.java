@@ -86,8 +86,6 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
       List<HttpInstruction> h1 = HttpUtils.getInstructions(header.getRendezvousInfo(),
           false);
 
-
-
       List<HttpInstruction> h2 = HttpUtils.getInstructions(to2Entries);
 
       if (HttpUtils.containsAddress(h1, h2)) {
@@ -129,6 +127,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
           onboardingVoucher.setTo0Expiry(expiry);
 
           session.persist(blob);
+          logger.info("TO0 completed for guid:" + header.getGuid().toString());
 
         } finally {
           cs.destroyKey(privateKey);
