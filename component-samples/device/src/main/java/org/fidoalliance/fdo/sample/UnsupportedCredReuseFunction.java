@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
+import org.fidoalliance.fdo.protocol.CredentialReuseException;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 
 public class UnsupportedCredReuseFunction implements CredReuseFunction {
@@ -11,7 +12,7 @@ public class UnsupportedCredReuseFunction implements CredReuseFunction {
   @Override
   public Boolean apply(Boolean reuseFlag) throws IOException {
     if (reuseFlag) {
-      return false;
+      throw new CredentialReuseException();
     }
     return true;
   }

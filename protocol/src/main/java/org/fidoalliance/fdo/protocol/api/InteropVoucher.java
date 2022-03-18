@@ -163,7 +163,6 @@ public class InteropVoucher extends RestApi {
 
       String id = getLastSegment();
 
-      id = null;
       if (id != null) {
 
         OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(id);

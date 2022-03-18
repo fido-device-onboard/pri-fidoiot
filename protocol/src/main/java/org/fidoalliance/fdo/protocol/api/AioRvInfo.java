@@ -32,19 +32,19 @@ public class AioRvInfo extends RestApi {
 
     try {
       // Constructing the yaml structure of RvInfo Object.
-      final String defaultRvi = "[[[5, \"%s\"], [3,%], [12, %s], [2, \"%s\"], [4, 8443]]]";
+      final String defaultRvi = "[[[5, \"%s\"], [3,%s], [12, %s], [2, \"%s\"], [4, %s]]]";
 
       String port = Config.getWorker(HttpServer.class).getHttpPort();
       String securePort = Config.getWorker(HttpServer.class).getHttpsPort();
 
       String theDns = "localhost";
       String theIp = "127.0.0.1";
-      String thePort = "8080";
+      String thePort = port;
       String theProto = "1";
       String rvprot = getParamByValue("rvprot");
       if (rvprot != null) {
         if (rvprot.equals("https")) {
-          thePort = "443";
+          thePort = securePort;
           theProto = "2";
         }
       }
@@ -52,10 +52,10 @@ public class AioRvInfo extends RestApi {
       String ip = getParamByValue("ip");
       if (ip != null) {
         theDns = ip;
-        thePort = ip;
+        theIp = ip;
       }
 
-      String rvi = String.format(defaultRvi, theDns, thePort, theProto, theIp);
+      String rvi = String.format(defaultRvi, theDns, thePort, theProto, theIp, thePort);
 
       // Creating RendezvousInfo object from yaml structure.
       RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi, RendezvousInfo.class);

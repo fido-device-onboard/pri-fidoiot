@@ -135,17 +135,16 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | POST /api/v1/owner/svi | Uploads SVI instructions to `SYSTEM_PACKAGE` table. |  | text/plain | SVI Instruction |   | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svi' --header 'Content-Type: text/plain' --data-raw '[{"filedesc" : "setup.sh","resource" : "URL"}, {"exec" : ["bash","setup.sh"] }]' |
 | GET /api/v1/owner/vouchers | Returns a list of all Ownership Voucher GUIDs. | | | | line separated list of GUIDs | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' |
 | GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
-| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request POST "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-binary '${voucher}' |
-| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' | 
+| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request POST "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-raw '${voucher}' || GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' | 
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' |
 | GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health'|
 | GET /api/v1/ondie | Serves the stored certs & crls files | || Ondie certs & crl files |
 | POST /api/v1/ondie | To download onDie certs and crls zip file url. | | text/plain | Ondie certs/crls URL |
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' |
 | GET /api/v1/certificate?alias={alias} | Returns the owner certificate of the given alias type | Path - alias | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?alias=SECP256R1' --header 'Content-Type: text/plain' |
 | GET /api/v1/certificate?uuid=uuid | Returns the owner alias type for the given voucher| Path - uuid | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?uuid=cc60f0aa-56d0-492e-8c8d-9a1fe55cb60 --header 'Content-Type: text/plain' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | |  |  | | |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
 | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' |
 | GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
 | GET /api/v1/owner/messagesize | Collects the max message size from `ONBOARDING_CONFIG` table | | |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain'|
@@ -195,14 +194,15 @@ Alias values that can be used for GET /api/v1/certificate?alias={alias}
 # Service info filters
 
 Service info is a single json document store in the database. To define different service info instructions for a given set of device info properties you can use filters.
-Every service info following a filter will only be returned if the filter matches. If not filter is specified or if the filter is empty then the service info following the empty filter will apply to all devices.
 
-The following filter will only return service info instructions if the device info reports the device is a "Pri-Device"
+Every service info following a filter will only be returned if the filter matches. If no filter is specified or if the filter is empty then the service info following the empty filter will apply to all devices.
+
+The following filter will only return service info instructions if the device info reports the device is a "FDO-Pri-Device"
 
 [
 {"filter": {"device" : "FDO-Pri-Device"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
-{"exec" : ["base","setup.sh"] },
+{"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
 ]
 
