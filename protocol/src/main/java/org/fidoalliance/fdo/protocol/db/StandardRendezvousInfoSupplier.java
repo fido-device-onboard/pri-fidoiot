@@ -92,7 +92,7 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
         String rviString = String.format(defaultRvi, config.getDns(), config.getDevport(),
                 config.getProtocol(), config.getIp(), config.getOwnerport());
 
-        RendezvousInfo rvi = Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
+        Mapper.INSTANCE.readValue(rviString, RendezvousInfo.class);
 
         rvData.setData(session.getLobHelper().createClob(rviString));
 
