@@ -7,7 +7,7 @@ The FDO manufacturer service is designed to generate new ownership vouchers by i
 # Getting Started with the FDO Manufacturer
 
 The following are the system requirements for the FDO Manufacturer.
-- Operating System: Ubuntu* 20.04
+- Operating System: Ubuntu* 20.04 / RHEL 8.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
@@ -34,7 +34,7 @@ This will copy the required executables and libraries into \<fdo-pri-src\>/compo
 
 # Configuring the FDO Manufacturer Service
 
-All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` & `WEB-INF/web.xml` and are present in `<fdo-pri-src>/component-samples/demo/manufacturer/`.
 
 `service.env`: consists of all the credentials used by the Manufacturer service. These credential configurations are to be generated freshly for each deployment.
 
@@ -61,7 +61,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 # Running FDO Manufacturer
 
-The FDO Manufacturer can be executed as a standalone service as well as a docker service. At the
+The FDO manufacturer can be executed as a standalone service as well as a docker service. At the
 end of initialization of all services, you will see following statement on the console.
 
 `[INFO] Started Manufacturer Service.`
@@ -69,7 +69,7 @@ end of initialization of all services, you will see following statement on the c
 Follow the below steps to start All-In-One demo.
 
 ##  Run as Standalone service.
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/manufacturer/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
 
 ```shell
 java -jar manufacturer.jar
@@ -79,13 +79,15 @@ Make sure to export the credential environment variables set in `service.env` fi
 
 ##  Run as Docker Service
 
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/manufacturer/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
 
 ```
 docker-compose up --build
 ```
 
 In case you need super user access, prefix 'sudo -E' to above command.
+
+***NOTE :*** To configure OnDie [REFER](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#configuring-ondie-optional).
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
@@ -94,7 +96,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
 | GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
 | POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
@@ -102,8 +104,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'| 
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'|
 | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
-| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' --header 'Content-Type: text/plain' |
-| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' |
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
 
@@ -112,10 +114,10 @@ Following is the list of REST response error codes and it's possible causes :
 |     Error Code     |             Possible Causes               |
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
-| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
-| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `404 Not Found`     | When an invalid REST request is sent to MFG. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, MFG supports GET, PUT and DELETE only. |
 | `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
-| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
+| `500 Internal Server Error` | Due to internal error, MFG unable to fetch/copy/delete the requested file. |
 
 # Troubleshooting
 

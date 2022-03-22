@@ -7,7 +7,7 @@ The FDO Rendezvous Service is designed to acts as a rendezvous point between a n
 # Getting Started with the FDO Rendezvous Service
 
 The following are the system requirements for the All-in-One demo.
-- Operating System: Ubuntu* 20.04
+- Operating System: Ubuntu* 20.04 / RHEL 8.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
@@ -34,7 +34,7 @@ This will copy the required executables and libraries into \<fdo-pri-src\>/compo
 
 # Configuring the FDO Rendezvous Service
 
-All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` & `WEB-INF/web.xml` and are present in `<fdo-pri-src>/component-samples/demo/rv/`.
 
 `service.env`: consists of all the credentials used by the FDO Rendezvous service. These credential configurations are to be generated freshly for each deployment.
 
@@ -72,7 +72,7 @@ end of initialization of all services, you will see following statement on the c
 Follow the below steps to start All-In-One demo.
 
 ##  Run as Standalone service.
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/rv/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.
 
 ```shell
 java -jar rv.jar
@@ -82,7 +82,7 @@ Make sure to export the credential environment variables set in `service.env` fi
 
 ##  Run as Docker Service
 
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/rv/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.
 
 ```
 docker-compose up --build
@@ -97,16 +97,16 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 # FDO PRI Rendezvous REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  |
-| GET /api/v1/logs | Serves the log from the manufacturer service | || Manufacturer logs|
-| DELETE /api/v1/logs | Deletes the log from the manufacturer service | |||
-| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | |
-| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |s |  | | Number of Days|
-| GET /health | Returns the health status | || Current version |
+| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
+| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' | 
+| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health'|
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
 
@@ -115,10 +115,10 @@ Following is the list of REST response error codes and it's description :
 |     Error Code     |             Possible Causes               |
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
-| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
-| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `404 Not Found`     | When an invalid REST request is sent to RV. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, RV supports GET, PUT and DELETE only. |
 | `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
-| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
+| `500 Internal Server Error` | Due to internal error, RV unable to fetch/copy/delete the requested file. |
 
 
 # Troubleshooting

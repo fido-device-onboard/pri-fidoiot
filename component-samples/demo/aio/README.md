@@ -3,12 +3,12 @@
 The FDO All-In-One demo is designed to run multiple FDO services like Manufacturer, Rendezvous and Owner Service in a single
 **docker** instance. The purpose of this demo is to fast-track demonstration of FDO protocol using different client implementations.
 
-***NOTE***: The All-In-One demo is provided to demonstrate out-of-box operation of FDO components.  Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
+***NOTE***: The All-In-One demo is provided to demonstrate out-of-the-box operation of FDO components.  Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
 
 # Getting Started with the FDO All-In-One Demo
 
 The following are the system requirements for the All-in-One demo.
-- Operating System: Ubuntu* 20.04
+- Operating System: Ubuntu* 20.04 / RHEL 8.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
@@ -35,7 +35,7 @@ This will copy the required executables and libraries into \<fdo-pri-src\>/compo
 
 # Configuring the FDO All-In-One Demo Service
 
-All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` & `WEB-INF/web.xml` and are present in `<fdo-pri-src>/component-samples/demo/aio/`.
 
 `service.env`: consists of all the credentials used by the All-in-one demo service. These credential configurations are to be generated freshly for each deployment.
 
@@ -76,7 +76,7 @@ end of initialization of all services, you will see following statement on the c
 Follow the below steps to start All-In-One demo.
 
 ##  Run as Standalone service.
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/aio/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/aio/` and execute following command.
 
 ```shell
 java -jar aio.jar
@@ -86,7 +86,7 @@ Make sure to export the credential environment variables set in `service.env` fi
 
 ##  Run as Docker Service
 
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/aio/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/aio/` and execute following command.
 
 ```
 docker-compose up --build
@@ -115,9 +115,9 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
 | POST /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | The Ownership voucher in PEM format |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' | 
 | POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
 | GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds |  |  |  | JSON array of Serial No, GUID and DI Timestamp. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30'  | 
 | GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' | 
@@ -136,14 +136,13 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/owner/vouchers | Returns a list of all Ownership Voucher GUIDs. | | | | line separated list of GUIDs | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' |
 | GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8042/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
 | POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request POST "http://localhost:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-raw '${voucher}' |
-| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' | 
-
+| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' |
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' |
 | GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health'|
 | GET /api/v1/ondie | Serves the stored certs & crls files | || Ondie certs & crl files |
 | POST /api/v1/ondie | To download onDie certs and crls zip file url. | | text/plain | Ondie certs/crls URL |
 | GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' |
-| GET /api/v1/certificate?alias={alias} | Returns the owner certificate of the given alias type | Path - alias | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?alias=SECP256R1' --header 'Content-Type: text/plain' |
+| GET /api/v1/certificate?alias={alias} | Returns the owner certificate of the given alias type | Path - alias | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?alias=SECP256R1' |
 | GET /api/v1/certificate?uuid=uuid | Returns the owner alias type for the given voucher| Path - uuid | | | Certificate PEM format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?uuid=cc60f0aa-56d0-492e-8c8d-9a1fe55cb60 --header 'Content-Type: text/plain' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' |
