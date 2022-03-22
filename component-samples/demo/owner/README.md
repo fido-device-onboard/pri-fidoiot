@@ -1,14 +1,13 @@
 # About
 
-The FDO Owner Service is designed to onboard the client device to a Management service. Owner participates during TO0 and T02 FDO protocols and is responsible for ServiceInfo transfer & initializing the device to working state.
-
+The FDO Owner Service is designed to onboard the client device to a management service. Owner participates during TO0 and T02 FDO protocols and is responsible for ServiceInfo transfer & initializing the device to working state.
 
 ***NOTE***: Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
 
 # Getting Started with the FDO Owner Service
 
 The following are the system requirements for the FDO Owner Service.
-- Operating System: Ubuntu* 20.04
+- Operating System: Ubuntu* 20.04 / RHEL 8.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
@@ -35,7 +34,7 @@ This will copy the required executables and libraries into \<fdo-pri-src\>/compo
 
 # Configuring the FDO Owner Service
 
-All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` and `WEB-INF/web.xml`.
+All the runtime configurations for the services are specified in four files: `service.env`, `hibernate.cfg.xml`, `service.yml` & `WEB-INF/web.xml` and are present in `<fdo-pri-src>/component-samples/demo/owner/`.
 
 `service.env`: consists of all the credentials used by the Owner Service demo service. These credential configurations are to be generated freshly for each deployment.
 
@@ -82,7 +81,7 @@ end of initialization of all services, you will see following statement on the c
 Follow the below steps to start Owner Service.
 
 ##  Run as Standalone service.
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/owner/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/owner/` and execute following command.
 
 ```shell
 java -jar owner.jar
@@ -92,7 +91,7 @@ Make sure to export the credential environment variables set in `service.env` fi
 
 ##  Run as Docker Service
 
-Open a terminal, change directory to `<fdo-pri-src>/component-samples/owner/` and execute following command.
+Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/owner/` and execute following command.
 
 ```
 docker-compose up --build
@@ -100,14 +99,12 @@ docker-compose up --build
 
 In case you need super user access, prefix 'sudo -E' to above command.
 
-***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/owner/ondiecache` folder.
+***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/demo/owner/ondiecache` folder.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/owner/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Owner REST APIs
 
-| Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
-| ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
 | POST /api/v1/owner/redirect    | Updates TO2 RVBlob in `ONBOARDING_CONFIG` table. | | text/plain | RVTO2Addr in diagnostic form | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/redirect' --header 'Content-Type: text/plain'  --data-raw '[["localhost","127.0.0.1",8042,3]]' |
@@ -129,9 +126,9 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' |
 | GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
 | GET /api/v1/owner/messagesize | Collects the max message size from `ONBOARDING_CONFIG` table | | |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain'|
-| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize?size=1400' --header 'Content-Type: text/plain'|
+| POST /api/v1/owner/messagesize | Updates the max message size in `ONBOARDING_CONFIG` table | | | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/messagesize' --header 'Content-Type: text/plain' --data-raw '10000'|
 | GET /api/v1/owner/svisize | Collects the owner svi size from `ONBOARDING_CONFIG` table | | text/plain |  | MAX_MESSAGE_SIZE | curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' |
-| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize?size=1400' --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/svisize | Updates the owner svi size in `ONBOARDING_CONFIG` table | | text/plain | MAX_MESSAGE_SIZE | | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/svisize' --header 'Content-Type: text/plain' --data-raw '10000' |
 | GET /api/v1/owner/resource?filename=fileName | Returns the file based on filename from `SYSTEM_RESOURCE` table | Path - filename | | | file |  curl -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'  |
 | POST /api/v1/owner/resource?filename=fileName | Adds the file to DB based on filename  from `SYSTEM_RESOURCE` table  | Path - filename | text/plain| file in Binary format |  |  curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain' --data-binary '@< path to file >' |
 | DELETE /api/v1/owner/resource?filename=fileName | Delete the  file from DB based on filename from `SYSTEM_RESOURCE` table   | Path - filename | | |  |  curl -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/owner/resource?filename=fileName' --header 'Content-Type: text/plain'|
@@ -144,10 +141,10 @@ Following is the list of REST response error codes and it's possible causes :
 |     Error Code     |             Possible Causes               |
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
-| `404 Not Found`     | When an invalid REST request is sent to AIO. Make sure to use the correct REST API endpoint. |
-| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, AIO supports GET, PUT and DELETE only. |
+| `404 Not Found`     | When an invalid REST request is sent to Owner. Make sure to use the correct REST API endpoint. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, Owner supports GET, PUT and DELETE only. |
 | `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
-| `500 Internal Server Error` | Due to internal error, AIO unable to fetch/copy/delete the requested file. |
+| `500 Internal Server Error` | Due to internal error, Owner unable to fetch/copy/delete the requested file. |
 
 
 # Troubleshooting
@@ -168,7 +165,7 @@ Owner Service can generate its own certificate and if you want to override the d
 
 - Update the SSL keystore password & subject_names in `service.yml` file.
 
-# Configuring AIO workers
+# Configuring Owner workers
 
 Workers are java classes the implement various behavioral aspects of an FDO service.  Workers are defined in the workers section of the service.yml.
 
