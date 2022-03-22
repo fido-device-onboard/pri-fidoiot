@@ -87,7 +87,7 @@ docker-compose up --build
 
 In case you need super user access, prefix 'sudo -E' to above command.
 
-***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/owner/ondiecache` folder.
+***NOTE :*** To configure OnDie [REFER](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#configuring-ondie-optional).
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
