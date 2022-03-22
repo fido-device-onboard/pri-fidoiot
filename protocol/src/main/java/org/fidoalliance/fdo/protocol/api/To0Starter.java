@@ -51,7 +51,6 @@ public class To0Starter extends RestApi {
           to0d.setWaitSeconds(onboardConfig.getWaitSeconds());
           to0Client.setTo0d(to0d);
           to0Client.run();
-          logger.info("TO0 completed for GUID: " + guid);
         } catch (IOException e) {
           logger.error("TO0 failed for GUID: " + guid);
         }
