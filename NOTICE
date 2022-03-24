@@ -244,8 +244,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following components are used for development and test under the
 Eclipse Public License, Version 1.0:
 
-H2 Database Engine
- 
+H2 Database Engine 
 
 The source code for these components is available here - https://github.com/secure-device-onboard/release-fidoiot/releases/download/v1.1.0/third-party-components.tar.gz
 
