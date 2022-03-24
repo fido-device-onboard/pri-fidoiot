@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -94,8 +95,8 @@ public abstract class HttpClient implements Runnable {
   protected void sendMessage() throws IOException {
     URI requestUri = null;
     if (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
-            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
-            || getRequest().getMsgType() == MsgType.TO0_HELLO) {
+        || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+        || getRequest().getMsgType() == MsgType.TO0_HELLO) {
       index = 0;
     }
     HttpInstruction httpInstruction = null;
@@ -136,8 +137,6 @@ public abstract class HttpClient implements Runnable {
         segments.add(Integer.toString(msgId.toInteger()));
         uriBuilder.setPathSegments(segments);
 
-
-
         requestUri = uriBuilder.build();
 
         HttpPost httpRequest = new HttpPost(requestUri);
@@ -151,7 +150,6 @@ public abstract class HttpClient implements Runnable {
         }
 
         logMessage(getRequest());
-
 
         try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
           HttpEntity entity = httpResponse.getEntity();
@@ -186,7 +184,10 @@ public abstract class HttpClient implements Runnable {
 
       } catch (Exception e) {
 
-        logger.info(e);
+        e.printStackTrace();
+
+        logger.info(ExceptionUtils.getStackTrace(e));
+
         if (getInstructions().size() > 0
             && index < getInstructions().size()
             && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
