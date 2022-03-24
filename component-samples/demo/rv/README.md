@@ -97,18 +97,23 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 # FDO PRI Rendezvous REST APIs
 
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
+
+
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8042/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
-| GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/api/v1/logs' | 
-| DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8042/api/v1/logs' |
-| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' |
-| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
-| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8042/health'|
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the RV service | | | | RV logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8040/api/v1/logs' | 
+| DELETE /api/v1/logs | Deletes the log from the RV service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8040/api/v1/logs' |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain|  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8040/api/v1/certificate/validity?days=10' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8040/api/v1/certificate/validity' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8040/health'|
+| POST /api/v1/rv/allow | Adds public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
+| DELETE /api/v1/rv/allow | delete public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
+| POST /api/v1/rv/deny | Adds public key to denied list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/deny` --data-raw  "$owner_certificate" |
 
-***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
 
 Following is the list of REST response error codes and it's description :
 
