@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fidoalliance.fdo.protocol.BufferUtils;
 import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -25,6 +27,9 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 public class RestApi implements AutoCloseable {
 
   private static final int READ_SIZE = 1024;
+  private static LoggerService logger = new LoggerService(RestApi.class);
+
+
   private HttpServletRequest request;
   private HttpServletResponse response;
   private List<String> uriSegments = new ArrayList<>();
@@ -97,6 +102,9 @@ public class RestApi implements AutoCloseable {
 
       StringWriter stringWriter = new StringWriter();
       reader.transferTo(stringWriter);
+
+      logger.info("API Post body received");
+      logger.info(stringWriter.toString());
       return stringWriter.toString();
     } catch (IOException e) {
       throw new InternalServerErrorException(e);
@@ -109,7 +117,10 @@ public class RestApi implements AutoCloseable {
     this.request = req;
     this.response = resp;
 
+    logger.info("API call received: " + req.getMethod() + " + " + req.getRequestURI());
+    logger.info("API content length: " + request.getContentLength());
     if (request.getContentType() != null) {
+      logger.info("API content type: " + request.getContentType());
       if (!request.getContentType().equals(getRequestContentType())) {
         throw new UnsupportedMediaTypeException(req.getContentType());
       }

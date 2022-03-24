@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.LoggerService;
 
 
 /**
@@ -15,6 +16,7 @@ import org.fidoalliance.fdo.protocol.Config;
 public class RestApiServlet extends HttpServlet {
 
   protected static final String API_CLASS = "Api-Class";
+  private static LoggerService logger = new LoggerService(RestApiServlet.class);
 
 
   @Override
@@ -37,6 +39,7 @@ public class RestApiServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
+    logger.info("api returning " + Integer.toString(resp.getStatus()));
 
   }
 
@@ -60,6 +63,7 @@ public class RestApiServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
+    logger.info("api returning " + Integer.toString(resp.getStatus()));
   }
 
   @Override
@@ -81,6 +85,7 @@ public class RestApiServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
+    logger.info("api returning " + Integer.toString(resp.getStatus()));
   }
 
   @Override
@@ -101,6 +106,7 @@ public class RestApiServlet extends HttpServlet {
     } catch (Exception e) {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
+    logger.info("api returning " + Integer.toString(resp.getStatus()));
 
   }
 }

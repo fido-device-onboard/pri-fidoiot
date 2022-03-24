@@ -186,6 +186,7 @@ public abstract class HttpClient implements Runnable {
 
       } catch (Exception e) {
 
+        logger.info(e);
         if (getInstructions().size() > 0
             && index < getInstructions().size()
             && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
