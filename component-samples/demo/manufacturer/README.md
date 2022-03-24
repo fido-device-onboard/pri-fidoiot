@@ -93,21 +93,21 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 # FDO PRI Manufacturer REST APIs
 
+***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
+
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| GET /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Path - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Path - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Path - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
-| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain; charset=us-ascii | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8040]]]' |
-| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds |  |  |  | JSON array of Serial No, GUID and DI Timestamp. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
+| POST /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | Extended Voucher |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | |  | Keystore file in binary format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8039/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"localhost"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8041]]]' |
+| GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | Path - `n` seconds |  |  | JSON array of Serial No, GUID ,DI Timestamp and Attestion type. | curl -D - --digest -u apiUser:  --location --request GET 'http://localhost:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
 | GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'| 
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8039/api/v1/logs' --header 'Content-Type: text/plain'|
-| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain; charset=us-ascii |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | Query - days | text/plain |  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8039/api/v1/certificate/validity?days=10' --header 'Content-Type: text/plain' |
 | GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8039/api/v1/certificate/validity' |
 | GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8039/health' |
-
-***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
 
 Following is the list of REST response error codes and it's possible causes :
 
@@ -115,13 +115,13 @@ Following is the list of REST response error codes and it's possible causes :
 | -------------------:|:----------------------------------------:|
 | `401 Unauthorized`  | When an invalid Authentication header is present with the REST Request. Make sure to use the correct REST credentials. |
 | `404 Not Found`     | When an invalid REST request is sent to MFG. Make sure to use the correct REST API endpoint. |
-| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, MFG supports GET, PUT and DELETE only. |
+| `405 Method Not Allowed` | When an unsupported REST method is requested. Currently, MFG supports GET, POST and DELETE only. |
 | `406 Not Acceptable` | When an invalid filename is passed through the REST endpoints. |
 | `500 Internal Server Error` | Due to internal error, MFG unable to fetch/copy/delete the requested file. |
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately to avoid heap size issue.
 
 # Configuring FDO Manufacturer for HTTPS/TLS Communication
 
