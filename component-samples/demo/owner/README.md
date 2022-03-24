@@ -61,14 +61,25 @@ All the runtime configurations for the services are specified in four files: `se
 
 # Configuring Owner Proxy Settings
 
-To configure Owner proxy resolution, add the following properties to `demo/owner/service.env` file:
+To configure Owner's proxy settings uncomment the following code section in `service.yml` file and replace the fields with proper proxy details.
 
+```yaml
+  # Uncomment the below properties for proxy setup
+  #http.proxyHost: $(http_host)
+  #http.proxyPort: $(http_port)
+  #https.proxyHost: $(https_host)
+  #https.proxyPort: $(https_port)
+  #http.nonProxyHosts: $(no_proxy)
 ```
-http_host=<value>
-https_host=<value>
-http_port=<value>
-https_port=<value>
-no_proxy=<value>
+
+Sample proxy setup:
+
+```yaml
+  http.proxyHost: proxy.mycompany.com
+  http.proxyPort: 8119
+  https.proxyHost: proxy.mycompany.com
+  https.proxyPort: 8129
+  http.nonProxyHosts: localhost | some-ip | *.mycompany.com
 ```
 
 # Running FDO Owner Service

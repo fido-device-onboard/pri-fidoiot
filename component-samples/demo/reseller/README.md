@@ -1,7 +1,6 @@
 # About
 
-The FDO Reseller is designed to resell a client before or after being sold. Manufacturer, Rendezvous and Owner Service in a single
-**docker** instance. The purpose of this demo is to fast-track demonstration of FDO protocol using different client implementations.
+The FDO Reseller Service is designed to act as a intermediary between an Owner and Manufacturer of the Device.
 
 ***NOTE***: The Reseller service is provided to demonstrate operation of FDO components.  Appropriate security measures with respect to key-store management and credential management should be considered while performing production deployment of any FDO component.
 
