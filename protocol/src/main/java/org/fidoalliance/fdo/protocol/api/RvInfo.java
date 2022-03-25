@@ -32,7 +32,7 @@ public class RvInfo extends RestApi {
     String body = getStringBody();
     getTransaction();
 
-    RendezvousInfo info = Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);
+    Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);
 
     RvData rviData =
         getSession().get(RvData.class, Long.valueOf(1));

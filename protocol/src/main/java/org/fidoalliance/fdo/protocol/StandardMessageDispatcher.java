@@ -1093,16 +1093,14 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
-    if (!getWorker(CredReuseFunction.class).apply(credReuse)) {
-      throw new CredentialReuseException();
-    }
+
 
     if (credReuse) {
       newMac = null;
+      getWorker(CredReuseFunction.class).apply(true);
     } else {
       cred.setGuid(newHeader.getGuid());
       cred.setRvInfo(newHeader.getRendezvousInfo());
-      //cred.setPubKeyHash();
     }
 
     To2DeviceInfoReady devInfoReady = new To2DeviceInfoReady();
