@@ -44,8 +44,6 @@ public class HibernateTest {
     int port = DEFAULT_PORT;
     //Server server = null;
 
-    System.setProperty("derby.system.home", "C:\\Users\\RFTEMPLE\\OneDrive - Intel Corporation\\Documents\\cri\\demos\\spike\\src\\main\\webapp\\config");
-
     // variables
     //String dbURL = "jdbc:derby:testdb;create=true;user=me;password=mine";
     String dbURL = "jdbc:derby:testdb";
