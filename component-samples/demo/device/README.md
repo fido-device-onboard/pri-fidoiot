@@ -50,19 +50,6 @@ The device will be onboarded.
 
 The rendezvous and owner servers must be available during this step.
 
-# Configuring AIO for HTTPS/TLS Communication
-
-By default, the AIO uses HTTP for all communications on port 8080. In addition to that, the AIO can be configured to handle HTTPS requests from the device.
-
-AIO can generate its own certificate and if you want to override the default certificate, follow these steps:
-
-- Generate the Keystore/Certificate for the AIO. [REFER](https://docs.oracle.com/cd/E19509-01/820-3503/6nf1il6er/index.html)
-
-    * Ensure that the web certificate is issued to the resolvable domain of the AIO server.
-
-- Copy the generated Keystore/Certificate to `.app-data` folder and update credentials in `service.yml` file.
-
-- Update the SSL keystore password & subject_names in `service.yml` file.
 
 
 

@@ -127,7 +127,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
           onboardingVoucher.setTo0Expiry(expiry);
 
           session.persist(blob);
-          logger.info("TO0 completed for guid:" + header.getGuid().toString());
+          logger.info("Voucher auto injected for guid:" + header.getGuid().toString());
 
         } finally {
           cs.destroyKey(privateKey);
