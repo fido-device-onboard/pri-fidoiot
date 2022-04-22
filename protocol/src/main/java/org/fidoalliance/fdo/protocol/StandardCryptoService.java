@@ -63,15 +63,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.modes.CCMBlockCipher;
-import org.bouncycastle.crypto.params.AEADParameters;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AsymKex;
@@ -108,7 +100,7 @@ public class StandardCryptoService implements CryptoService {
 
 
   protected static final SecureRandom random = getInitializedRandom();
-  private static final Provider BCPROV = getInitializedProvider();
+  private static final Provider BCFIPS = getInitializedProvider();
 
 
   private static SecureRandom getInitializedRandom() {
@@ -121,7 +113,7 @@ public class StandardCryptoService implements CryptoService {
   }
 
   private static Provider getInitializedProvider() {
-    Provider result = new BouncyCastleProvider();
+    Provider result = new BouncyCastleFipsProvider();
     Security.addProvider(result);
     return result;
   }
@@ -152,16 +144,16 @@ public class StandardCryptoService implements CryptoService {
 
   @Override
   public Provider getProvider() {
-    return BCPROV;
+    return BCFIPS;
   }
 
   @Override
   public byte[] createHmacKey(HashType hashType) throws IOException {
     switch (hashType) {
       case HMAC_SHA256:
-        return getRandomBytes(new SHA256Digest().getDigestSize());
+        return getRandomBytes(32);
       case HMAC_SHA384:
-        return getRandomBytes(new SHA384Digest().getDigestSize());
+        return getRandomBytes(48);
       default:
         throw new IOException(new IllegalArgumentException("not a hmac type"));
     }
@@ -473,7 +465,7 @@ public class StandardCryptoService implements CryptoService {
         byte[] xb;
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
-              BCPROV);
+              BCFIPS);
           cipher.init(Cipher.ENCRYPT_MODE, decodeKey(ownerKey), getSecureRandom());
           xb = cipher.doFinal(b);
         } catch (GeneralSecurityException e) {
@@ -675,7 +667,7 @@ public class StandardCryptoService implements CryptoService {
         byte[] b;
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
-              BCPROV);
+              BCFIPS);
           cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
           b = cipher.doFinal(message);
         } catch (GeneralSecurityException e) {
@@ -1087,21 +1079,22 @@ public class StandardCryptoService implements CryptoService {
   protected byte[] ccmEncrypt(boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv,
       byte[] aad) throws IOException {
 
-    final int macSize = 128; // All CCM cipher modes use this size
-
-    BlockCipher engine = new AESEngine();
-    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
-    CCMBlockCipher cipher = new CCMBlockCipher(engine);
-    cipher.init(forEncryption, params);
-    byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
-    int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-    try {
-      cipher.doFinal(outputText, outputLen);
-    } catch (InvalidCipherTextException e) {
-      throw new IOException(e);
-    }
-
-    return outputText;
+//    final int macSize = 128; // All CCM cipher modes use this size
+//
+//    BlockCipher engine = new AESEngine();
+//    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
+//    CCMBlockCipher cipher = new CCMBlockCipher(engine);
+//    cipher.init(forEncryption, params);
+//    byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
+//    int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
+//    try {
+//      cipher.doFinal(outputText, outputLen);
+//    } catch (InvalidCipherTextException e) {
+//      throw new IOException(e);
+//    }
+//
+//    return outputText;
+    return null;
   }
 
   protected byte[] encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv,
@@ -1160,7 +1153,7 @@ public class StandardCryptoService implements CryptoService {
 
         case COSE_AES128_CBC:
         case COSE_AES256_CBC:
-          return Cipher.getInstance("AES/CBC/PKCS7Padding", BCPROV);
+          return Cipher.getInstance("AES/CBC/PKCS7Padding", BCFIPS);
 
         case A128GCM:
         case A256GCM:
@@ -1235,7 +1228,7 @@ public class StandardCryptoService implements CryptoService {
           new ASN1Integer(new BigInteger(1, message.getSignature(), size, size));
       DLSequence sequence = new DLSequence(new ASN1Encodable[]{r, s});
       ByteArrayOutputStream sigBytes = new ByteArrayOutputStream();
-      ASN1OutputStream asn1out = ASN1OutputStream.create(sigBytes);
+      ASN1OutputStream asn1out = new ASN1OutputStream(sigBytes);
       asn1out.writeObject(sequence);
       byte[] b = sigBytes.toByteArray();
       derSig = Arrays.copyOf(b, b.length);
