@@ -34,9 +34,11 @@
 //    public static final SecretKey SampleAesKey =
 //            new SecretKeySpec(Hex.decode("000102030405060708090a0b0c0d0e0f"), "AES");
 //    public static final SecretKey SampleTripleDesKey =
-//            new SecretKeySpec(Hex.decode("000102030405060708090a0b0c0d0e0f1011121314151617"), "TripleDES");
+//            new SecretKeySpec(Hex.decode("000102030405060708090a0b0c0d0e0f1011121314151617"),
+//            "TripleDES");
 //    public static final SecretKey SampleHMacKey =
-//            new SecretKeySpec(Hex.decode("000102030405060708090a0b0c0d0e0f10111213"), "HmacSHA512");
+//            new SecretKeySpec(Hex.decode("000102030405060708090a0b0c0d0e0f10111213"),
+//            "HmacSHA512");
 //    public static final byte[] SampleInput = Strings.toByteArray("Hello World!");
 //    public static final byte[] SampleTwoBlockInput
 //            = Strings.toByteArray("Some cipher modes require more than one block");
@@ -111,7 +113,8 @@
 //    }
 //
 //    @Override
-//    public KeyPair createKeyPair(PublicKeyType keyType, KeySizeType keySize) throws IOException {
+//    public KeyPair createKeyPair(PublicKeyType keyType,
+//    KeySizeType keySize) throws IOException {
 //
 //        switch (keyType) {
 //
@@ -123,12 +126,14 @@
 //                            new AlgorithmFinder().getAlgorithm(keyType), "BCFIPS");
 //
 //                    RSAKeyGenParameterSpec rsaSpec =
-//                            new RSAKeyGenParameterSpec(keySize.toInteger(), RSAKeyGenParameterSpec.F4);
+//                            new RSAKeyGenParameterSpec(keySize.toInteger(),
+//                            RSAKeyGenParameterSpec.F4);
 //
 //                    kg.initialize(rsaSpec, getSecureRandom());
 //
 //                    return kg.generateKeyPair();
-//                } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+//                } catch (NoSuchAlgorithmException |
+//                InvalidAlgorithmParameterException | NoSuchProviderException e) {
 //                    throw new IOException(e);
 //                }
 //
@@ -138,14 +143,16 @@
 //                try {
 //
 //                    final AlgorithmFinder algorithmFinder = new AlgorithmFinder();
-//                    final CoseKeyCurveType coseKeyCurveType = algorithmFinder.getCoseKeyCurve(keyType);
+//                    final CoseKeyCurveType coseKeyCurveType =
+//                    algorithmFinder.getCoseKeyCurve(keyType);
 //                    final String curveName = algorithmFinder.getAlgorithm(coseKeyCurveType);
 //                    final KeyPairGenerator kg = KeyPairGenerator.getInstance(
 //                            algorithmFinder.getAlgorithm(keyType), "BCFIPS");
 //                    ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
 //                    kg.initialize(ecSpec, getSecureRandom());
 //                    return kg.generateKeyPair();
-//                } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
+//                } catch (InvalidAlgorithmParameterException
+//                | NoSuchAlgorithmException | NoSuchProviderException e) {
 //                    throw new IOException(e);
 //                }
 //
@@ -201,7 +208,8 @@
 //    }
 //
 //    @Override
-//    public OwnerPublicKey encodeKey(PublicKeyType keyType, PublicKeyEncoding encType, Certificate[] chain) {
+//    public OwnerPublicKey encodeKey(PublicKeyType keyType,
+//    PublicKeyEncoding encType, Certificate[] chain) {
 //        OwnerPublicKey ownerKey = new OwnerPublicKey();
 //        ownerKey.setType(keyType);
 //        ownerKey.setEnc(encType);
@@ -262,19 +270,22 @@
 //
 //                    final RSAPublicKeySpec rsaPkSpec = new RSAPublicKeySpec(mod, exp);
 //                    final KeyFactory factory = KeyFactory.getInstance(
-//                            new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), BCFIPS);
+//                            new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()),
+//                            BCFIPS);
 //                    return factory.generatePublic(rsaPkSpec);
 //                }
 //                case X509: {
 //                    final byte[] x509body = ownerPublicKey.getBody().covertValue(byte[].class);
 //                    final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(x509body);
 //                    final KeyFactory factory = KeyFactory.getInstance(
-//                            new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), BCFIPS);
+//                            new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()),
+//                            BCFIPS);
 //
 //                    return factory.generatePublic(keySpec);
 //                }
 //                case COSEX5CHAIN: {
-//                    final CertChain chain = ownerPublicKey.getBody().covertValue(CertChain.class);
+//                    final CertChain chain =
+//                      ownerPublicKey.getBody().covertValue(CertChain.class);
 //                    return chain.getChain().get(0).getPublicKey();
 //                }
 //                case COSEKEY: {
@@ -285,15 +296,17 @@
 //
 //                    CoseKey coseKey = ownerPublicKey.getBody().covertValue(CoseKey.class);
 //
-//                    params.init(new ECGenParameterSpec(algFinder.getAlgorithm(coseKey.getCrv())));
+//                    params.init(
+//                    new ECGenParameterSpec(algFinder.getAlgorithm(coseKey.getCrv())));
 //
-//                    ECParameterSpec ecParameterSpec = params.getParameterSpec(ECParameterSpec.class);
+//                    ECParameterSpec ecParameterSpec =
+//                    params.getParameterSpec(ECParameterSpec.class);
 //
 //                    ECPoint ecPoint = new ECPoint(new BigInteger(1, coseKey.getX()),
 //                            new BigInteger(1, coseKey.getY()));
 //
 //                    final KeyFactory factory = KeyFactory.getInstance(
-//                            new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), BCFIPS);
+//                      new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), BCFIPS);
 //
 //                    return factory.generatePublic(
 //                            new ECPublicKeySpec(ecPoint, ecParameterSpec));
@@ -301,7 +314,8 @@
 //                default:
 //                    throw new IOException(new IllegalArgumentException("key not valid"));
 //            }
-//        } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidParameterSpecException e) {
+//        } catch (InvalidKeySpecException |
+//        NoSuchAlgorithmException | InvalidParameterSpecException e) {
 //            throw new IOException(e);
 //        }
 //    }
@@ -323,7 +337,8 @@
 //    }
 //
 //    @Override
-//    public CoseSign1 sign(byte[] payload, PrivateKey signingKey, OwnerPublicKey ownerKey) throws IOException {
+//    public CoseSign1 sign(byte[] payload,
+//    PrivateKey signingKey, OwnerPublicKey ownerKey) throws IOException {
 //        PublicKey publicKey = decodeKey(ownerKey);
 //
 //        AlgorithmFinder finder = new AlgorithmFinder();
@@ -363,7 +378,8 @@
 //                    s = ((ASN1Integer) sequence.getObjectAt(1)).getPositiveValue();
 //                }
 //
-//                // PKCS11 keys cannot be directly interrogated, guess key size from associated algorithm IDs
+//                // PKCS11 keys cannot be directly interrogated,
+//                //guess key size from associated algorithm IDs
 //                final int size;
 //                switch (ownerKey.getType()) {
 //                    case SECP256R1:
@@ -373,7 +389,8 @@
 //                        size = 48;
 //                        break;
 //                    default:
-//                        throw new InvalidParameterException("coseSignatureAlg " + ownerKey.getType());
+//                        throw new InvalidParameterException("coseSignatureAlg "
+//                        + ownerKey.getType());
 //                }
 //                finalSign = new byte[2 * size];
 //                BufferUtils.writeBigInteger(r, finalSign, 0, size);
@@ -479,17 +496,20 @@
 //    }
 //
 //    @Override
-//    public KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party, OwnerPublicKey ownerKey) throws IOException {
+//    public KexMessage getKeyExchangeMessage(String kexSuiteName,
+//    KexParty party, OwnerPublicKey ownerKey) throws IOException {
 //        return null;
 //    }
 //
 //    @Override
-//    public KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState, Key decryptionKey) throws IOException {
+//    public KeyExchangeResult getSharedSecret(String suiteName,
+//    byte[] message, KexMessage ownState, Key decryptionKey) throws IOException {
 //        return null;
 //    }
 //
 //    @Override
-//    public EncryptionState getEncryptionState(KeyExchangeResult kxResult, CipherSuiteType cipherType) throws IOException {
+//    public EncryptionState getEncryptionState(KeyExchangeResult kxResult,
+//    CipherSuiteType cipherType) throws IOException {
 //        return null;
 //    }
 //

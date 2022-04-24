@@ -110,7 +110,8 @@ public class PemLoader {
           PKCS8EncryptedPrivateKeyInfo epki = (PKCS8EncryptedPrivateKeyInfo) obj;
 
           JcePKCSPBEInputDecryptorProviderBuilder builder =
-              new JcePKCSPBEInputDecryptorProviderBuilder().setProvider(new BouncyCastleFipsProvider());
+              new JcePKCSPBEInputDecryptorProviderBuilder()
+                      .setProvider(new BouncyCastleFipsProvider());
 
           InputDecryptorProvider idp = builder.build(password.toCharArray());
 

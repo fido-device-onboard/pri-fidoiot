@@ -63,6 +63,13 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DLSequence;
+import org.bouncycastle.crypto.fips.FipsAES;
+import org.bouncycastle.crypto.internal.BlockCipher;
+import org.bouncycastle.crypto.internal.InvalidCipherTextException;
+import org.bouncycastle.crypto.internal.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.internal.modes.CCMBlockCipher;
+import org.bouncycastle.crypto.internal.params.AEADParameters;
+import org.bouncycastle.crypto.internal.params.KeyParameter;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.message.AnyType;
@@ -1077,23 +1084,22 @@ public class StandardCryptoService implements CryptoService {
   }
 
   protected byte[] ccmEncrypt(boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv,
-      byte[] aad) throws IOException {
+                              byte[] aad) throws IOException {
 
-//    final int macSize = 128; // All CCM cipher modes use this size
-//
-//    BlockCipher engine = new AESEngine();
-//    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
-//    CCMBlockCipher cipher = new CCMBlockCipher(engine);
-//    cipher.init(forEncryption, params);
-//    byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
-//    int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-//    try {
-//      cipher.doFinal(outputText, outputLen);
-//    } catch (InvalidCipherTextException e) {
-//      throw new IOException(e);
-//    }
-//
-//    return outputText;
+    //  final int macSize = 128; // All CCM cipher modes use this size
+
+    //  BlockCipher engine = new AESE;
+    //  AEADParameters params = new AEADParameters(() -> sek, macSize, iv, aad);
+    //  CCMBlockCipher cipher = new CCMBlockCipher(engine);
+    //  cipher.init(forEncryption, params);
+    //  byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
+    //  int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
+    //  try {
+    //    cipher.doFinal(outputText, outputLen);
+    //  } catch (InvalidCipherTextException e) {
+    //    throw new IOException(e);
+    //  }
+    ////  return outputText;
     return null;
   }
 
