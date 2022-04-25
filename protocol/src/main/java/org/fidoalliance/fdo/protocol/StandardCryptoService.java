@@ -63,13 +63,16 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DLSequence;
+import org.bouncycastle.crypto.EntropySourceProvider;
 import org.bouncycastle.crypto.fips.FipsAES;
+import org.bouncycastle.crypto.fips.FipsDRBG;
 import org.bouncycastle.crypto.internal.BlockCipher;
 import org.bouncycastle.crypto.internal.InvalidCipherTextException;
 import org.bouncycastle.crypto.internal.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.internal.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.internal.params.AEADParameters;
 import org.bouncycastle.crypto.internal.params.KeyParameter;
+import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.message.AnyType;
@@ -105,18 +108,18 @@ public class StandardCryptoService implements CryptoService {
   public static final String X509_ALG_NAME = "X.509";
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
-
-  protected static final SecureRandom random = getInitializedRandom();
   private static final Provider BCFIPS = getInitializedProvider();
+  protected static final SecureRandom random = getInitializedRandom();
 
 
   private static SecureRandom getInitializedRandom() {
 
-    try {
-      return SecureRandom.getInstanceStrong();
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Strong secure random required", e);
-    }
+    EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+    FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
+            .setSecurityStrength(256)
+            .setEntropyBitsRequired(256);
+    return drgbBldr.build("nonce".getBytes(StandardCharsets.UTF_8), false);
+
   }
 
   private static Provider getInitializedProvider() {
@@ -1088,7 +1091,7 @@ public class StandardCryptoService implements CryptoService {
 
     //  final int macSize = 128; // All CCM cipher modes use this size
 
-    //  BlockCipher engine = new AESE;
+    //  BlockCipher engine = Cipher.getInstance("", BCFIPS);
     //  AEADParameters params = new AEADParameters(() -> sek, macSize, iv, aad);
     //  CCMBlockCipher cipher = new CCMBlockCipher(engine);
     //  cipher.init(forEncryption, params);
