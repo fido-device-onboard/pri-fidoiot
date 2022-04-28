@@ -65,14 +65,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.crypto.EntropySourceProvider;
-import org.bouncycastle.crypto.fips.FipsAES;
 import org.bouncycastle.crypto.fips.FipsDRBG;
-import org.bouncycastle.crypto.internal.BlockCipher;
-import org.bouncycastle.crypto.internal.InvalidCipherTextException;
-import org.bouncycastle.crypto.internal.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.internal.modes.CCMBlockCipher;
-import org.bouncycastle.crypto.internal.params.AEADParameters;
-import org.bouncycastle.crypto.internal.params.KeyParameter;
 import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -115,6 +108,7 @@ public class StandardCryptoService implements CryptoService {
 
   private static SecureRandom getInitializedRandom() {
 
+    // DRBG -- Discrete Random Bit Generator.
     EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
     FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
             .setSecurityStrength(256)
@@ -928,10 +922,14 @@ public class StandardCryptoService implements CryptoService {
         aad = new byte[0];
       }
 
-      final byte[] ciphered;
+      byte[] ciphered = null;
       if (isCcmCipher(cipherType)) {
 
-        ciphered = ccmEncrypt(true, payload, sek, iv, aad);
+        try {
+          ciphered = ccmEncrypt(Cipher.ENCRYPT_MODE, payload, keySpec, iv, aad);
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
 
       } else {
 
@@ -1031,8 +1029,12 @@ public class StandardCryptoService implements CryptoService {
 
       if (isCcmCipher(cipherType)) {
 
-        final byte[] ciphered = encrypt0.getCipherText();
-        return ccmEncrypt(false, ciphered, sek, iv, aad);
+        try {
+          final byte[] ciphered = encrypt0.getCipherText();
+          return ccmEncrypt(Cipher.DECRYPT_MODE, ciphered, keySpec, iv, aad);
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
 
       } else {
 
@@ -1095,24 +1097,16 @@ public class StandardCryptoService implements CryptoService {
     }
   }
 
-  protected byte[] ccmEncrypt(boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv,
-                              byte[] aad) throws IOException {
-
-    //  final int macSize = 128; // All CCM cipher modes use this size
-
-    //  BlockCipher engine = Cipher.getInstance("", BCFIPS);
-    //  AEADParameters params = new AEADParameters(() -> sek, macSize, iv, aad);
-    //  CCMBlockCipher cipher = new CCMBlockCipher(engine);
-    //  cipher.init(forEncryption, params);
-    //  byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
-    //  int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-    //  try {
-    //    cipher.doFinal(outputText, outputLen);
-    //  } catch (InvalidCipherTextException e) {
-    //    throw new IOException(e);
-    //  }
-    ////  return outputText;
-    return null;
+  protected byte[] ccmEncrypt(int encryptMode, byte[] payload, Key keySpec, byte[] iv,
+                              byte[] aad) throws InvalidAlgorithmParameterException,
+          InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException,
+          IllegalBlockSizeException, BadPaddingException {
+    AlgorithmParameterSpec cipherParams;
+    cipherParams = new GCMParameterSpec(128, iv);
+    final Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding", getProvider());
+    cipher.init(encryptMode, keySpec, cipherParams);
+    cipher.updateAAD(aad, 0, aad.length);
+    return cipher.doFinal(payload);
   }
 
   protected byte[] encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv,
@@ -1139,7 +1133,7 @@ public class StandardCryptoService implements CryptoService {
         || cipherType.equals(CipherSuiteType.COSE_AES128_CBC)) {
       hmacType = HashType.HMAC_SHA256;
     } else if (cipherType.equals(CipherSuiteType.COSE_AES256_CBC)
-        || cipherType.equals(CipherSuiteType.COSE_AES256_CTR)) {
+            || cipherType.equals(CipherSuiteType.COSE_AES256_CTR)) {
       hmacType = HashType.SHA384;
     } else {
       throw new IOException(new NoSuchAlgorithmException());
