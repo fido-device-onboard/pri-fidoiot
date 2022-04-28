@@ -9,9 +9,14 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.Map;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 
@@ -54,7 +59,35 @@ public class SelfSignedHttpClientSupplier implements HttpClientSupplier {
 
   @Override
   public CloseableHttpClient get() throws IOException {
-    return HttpClients.custom().setSSLSocketFactory(
-        socketFactory).useSystemProperties().build();
+
+    CredentialsProvider provider = new BasicCredentialsProvider();
+    String user = "apiUser";
+    try {
+      user = Config.resolve("$(api_user)");
+    } catch (Exception err) {
+      //nothing to do
+    }
+
+    String apiPassword = null;
+    try {
+      apiPassword = Config.resolve("$(api_password)");
+    } catch (Exception err) {
+      //nothing to do
+    }
+
+    if (apiPassword != null) {
+      UsernamePasswordCredentials credentials
+          = new UsernamePasswordCredentials(user, apiPassword);
+      provider.setCredentials(AuthScope.ANY, credentials);
+    }
+
+    HttpClientBuilder builder = HttpClients.custom()
+        .setSSLSocketFactory(
+            socketFactory).useSystemProperties();
+
+    if (provider != null) {
+      builder.setDefaultCredentialsProvider(provider);
+    }
+    return builder.build();
   }
 }

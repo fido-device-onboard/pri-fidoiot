@@ -15,8 +15,10 @@
     </RollingFile>
   </Appenders>
   <Loggers>
+    <logger name="org.apache.commons.httpclient" level="debug"/>
+    <logger name="httpclient.wire" level="debug"/>
     <Logger name="org.hibernate.SQL" level="info"/>
-    <Root level="info">
+    <Root level="debug">
       <AppenderRef ref="STDOUT"/>
       <AppenderRef ref="RollingFile"/>
     </Root>

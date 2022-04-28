@@ -10,11 +10,17 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
 import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpClientSupplier;
+import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -318,17 +324,18 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     String resource = instruction.getResource();
     resource = resource.replace("$(guid)", state.getGuid().toString());
 
-
     try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
 
       logger.info("HTTP(S) GET: " + resource);
       HttpGet httpRequest = new HttpGet(resource);
       try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
         logger.info(httpResponse.getStatusLine().toString());
+        if (httpResponse.getStatusLine().getStatusCode() != 200) {
+          throw new InternalServerErrorException(httpResponse.getStatusLine().toString());
+        }
         HttpEntity entity = httpResponse.getEntity();
         if (entity != null) {
           logger.info("content length is " + entity.getContentLength());
-
 
           try (InputStream input = entity.getContent()) {
             logger.info("reading data");
