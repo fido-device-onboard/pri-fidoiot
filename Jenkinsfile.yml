@@ -11,11 +11,11 @@ node('ubuntu18.04-OnDemand'){
   stage('build'){
     sh 'mvn clean install'
     print "Archive the artifacts"
-    sh 'cd component-samples && cp -r demo pri-fidoiot-v1.1.0 && tar -czvf demo.tar.gz demo
-        && tar -czvf pri-fidoiot-v1.1.0.tar.gz pri-fidoiot-v1.1.0
-        && cp demo.tar.gz ../pri-fidoiot-v1.1.0.tar.gz && mv demo.tar.gz ..'
+    sh 'cd component-samples '
+    sh 'cp -r component-samples/demo pri-fidoiot-v1.1.0 '
+    sh 'tar -czvf pri-fidoiot-v1.1.0.tar.gz pri-fidoiot-v1.1.0 '
 
-    archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
+    //    archiveArtifacts artifacts: 'demo.tar.gz', fingerprint: true, allowEmptyArchive: false
     archiveArtifacts artifacts: 'pri-fidoiot-v1.1.0.tar.gz', fingerprint: true, allowEmptyArchive: false
   }
 
