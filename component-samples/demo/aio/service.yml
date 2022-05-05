@@ -10,6 +10,9 @@ system-properties:
   app-data.dir: ./app-data
   application.version: 1.1.0
   service.name: "All-in-one demo"
+  log4j.logger.org.apache.http.impl.conn: DEBUG
+  log4j.logger.org.apache.http.impl.client: DEBUG
+  log4j.logger.org.apache.http.client: DEBUG
   # set system proxy information
   #http.proxyHost:
   #http.proxyPort:
@@ -112,6 +115,8 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction
   #- org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction
+  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+  #- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
   - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
@@ -134,7 +139,3 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
-
-
-
-
