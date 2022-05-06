@@ -18,7 +18,7 @@ import org.fidoalliance.fdo.protocol.message.Nonce;
 public class EatPayloadBaseDeserializer extends StdDeserializer<EatPayloadBase> {
 
   private static final String EAT_NONCE = "10";
-  private static final String EAT_UEID = "256";
+  private static final String EAT_UEID = "11";
   private static final String EAT_FDO = "-257";
 
   public EatPayloadBaseDeserializer() {
