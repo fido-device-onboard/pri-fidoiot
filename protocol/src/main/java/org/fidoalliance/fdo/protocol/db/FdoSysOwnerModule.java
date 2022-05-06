@@ -318,17 +318,19 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     String resource = instruction.getResource();
     resource = resource.replace("$(guid)", state.getGuid().toString());
 
-
-    try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
+    try (CloseableHttpClient httpClient = Config.getWorker(ServiceInfoHttpClientSupplier.class)
+        .get()) {
 
       logger.info("HTTP(S) GET: " + resource);
       HttpGet httpRequest = new HttpGet(resource);
       try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
         logger.info(httpResponse.getStatusLine().toString());
+        if (httpResponse.getStatusLine().getStatusCode() != 200) {
+          throw new InternalServerErrorException(httpResponse.getStatusLine().toString());
+        }
         HttpEntity entity = httpResponse.getEntity();
         if (entity != null) {
           logger.info("content length is " + entity.getContentLength());
-
 
           try (InputStream input = entity.getContent()) {
             logger.info("reading data");

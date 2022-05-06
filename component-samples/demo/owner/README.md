@@ -196,6 +196,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier | Provides owner signing keys  |
 | org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier | Tells the owner to use HTTPS for TO0 protocol |
 | org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier | Provides Owner2 keys for for credential replacement during TO2
+| org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier| Uses BASIC auth with api_user api_password from service.env for serivceinfo urls (NOT Recommended) |
 | org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule | Provides the implementation of Fido Conformance Module for Interop|
 | org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule | Provides the implementation of the FdoSys Module |
 | org.fidoalliance.fdo.protocol.db.OnDieCertificateManager | Provides Root certificate chains for Intel OnDie hardware ECDSA keys|
@@ -208,6 +209,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier | Gets the Wait Seconds amount the rv server is willing to accept  |
 | org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction | Stores the replacement ownership voucher at the end to TO2 |
 | org.fidoalliance.fdo.protocol.db.StandardServerSessionManager | Provides session storage and management for service side protocols |
+| org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier| Standard HTTP(S) client with system properties for service info URL requests |
 | org.fidoalliance.fdo.protocol.db.StandardSessionCleaner | Removes incomplete session from the database after a couple of hours |
 | org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier | Provides the validity days for certificate generation |
 | org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction | Provides ownership vouchers from the owner database |
