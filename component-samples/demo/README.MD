@@ -346,6 +346,23 @@ NOTE: Not recommended to enable this setting especially on production systems.
 
 # Certificate Validity checks
 
+For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+
+In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of respective component.
+
+Sample `service.yml` file:
+
+Disable the following workers
+```
+#- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+```
+and enable
+```
+- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+```
+
 The Device certificate chain is checked during TO0 by the rendezvous server and by the owner during TO2.  This check includes verifying the certificate chain hash and if the leaf certificate has expired. 
 Owner certificates with X5Chain encoding are not analyzed by this implementation.
 
