@@ -343,6 +343,14 @@ h2-database:
 
 NOTE: Not recommended to enable this setting especially on production systems.
 
+# Disk Usage by the embedded database
+
+It is observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
+
+This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
+While shutting down, H2 "compacts" the file in order to reduce the file size.
+
+If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
 
 # Certificate Validity checks
 
