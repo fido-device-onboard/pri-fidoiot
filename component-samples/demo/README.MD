@@ -343,6 +343,14 @@ h2-database:
 
 NOTE: Not recommended to enable this setting especially on production systems.
 
+# Disk Usage by the embedded database
+
+In our performance testing, we observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
+
+Please note that, it's not a limitation from FDO services, but this is due to the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown. When shutting down, H2 "compacts" the file in order to reduce the file size.
+The solution is to stop the FDO services, and start the H2 Database independently to execute `SHUTDOWN COMPACT` SQL command.
+
+Additionally, We recommend to use a more robust RDBMS (MariaDB, Derby, etc) if your FDO services has to handle a big number of session.
 
 # Certificate Validity checks
 
