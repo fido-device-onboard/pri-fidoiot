@@ -350,7 +350,7 @@ It is observed that with the increased number of transactions, the disk space ut
 This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
 While shutting down, H2 "compacts" the file in order to reduce the file size.
 
-Additionally, We recommend to use a more robust RDBMS (MariaDB, Derby, etc) if your FDO services has to handle a large number of session.
+If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
 
 # Certificate Validity checks
 
