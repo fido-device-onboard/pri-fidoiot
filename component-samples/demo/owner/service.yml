@@ -83,7 +83,7 @@ h2-database:
 
 #  *********************** NOTE **********************************************
 #
-# For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+# For out of the box demo purposes, FDO services can be configured to trust self-signed certificates.
 # In production environments, the configurators should disable the trust for these self-signed certificates
 # by updating the worker list in `service.yml` file of respective component.
 #
@@ -110,13 +110,13 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   # Disable SelfSignedHttpClientSupplier in Production Environment to perform SSL certificate verification.
   # Use HttpOwnerSchemeSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
-  #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+  #- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  - org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
-  #- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
   # Disable BasicServiceInfoClientSupplier in Production Environment to perform SSL certificate verification.
   # Use StandardServiceInfoClientSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+  #- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
