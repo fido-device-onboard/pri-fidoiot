@@ -367,7 +367,7 @@ Disable the following workers
 ```
 and enable
 ```
-- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
 - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
 ```
 
