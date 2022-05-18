@@ -216,3 +216,23 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction | Tells the owner to replace the device credentials during TO2 |
 | org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction | Stores voucher in the database without performing To0 protocol |
 | org.fidoalliance.fdo.protocol.db.To0Scheduler | Performs To0 for vouchers that have expired wait seconds at regular intervals |
+
+
+# Certificate Validity checks
+
+For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+
+In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of owner component.
+
+Sample `service.yml` file:
+
+Disable the following workers
+```
+#- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+```
+and enable
+```
+- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+```
