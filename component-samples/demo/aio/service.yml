@@ -10,9 +10,9 @@ system-properties:
   app-data.dir: ./app-data
   application.version: 1.1.0.1-SNAPSHOT
   service.name: "All-in-one demo"
-  log4j.logger.org.apache.http.impl.conn: DEBUG
-  log4j.logger.org.apache.http.impl.client: DEBUG
-  log4j.logger.org.apache.http.client: DEBUG
+  #log4j.logger.org.apache.http.impl.conn: DEBUG
+  #log4j.logger.org.apache.http.impl.client: DEBUG
+  #log4j.logger.org.apache.http.client: DEBUG
   # set system proxy information
   #http.proxyHost:
   #http.proxyPort:
