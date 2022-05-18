@@ -94,7 +94,7 @@ h2-database:
 #
 # and enable
 #
-#  - org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier
+#  - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
 #  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
 #
 # *****************************************************************************
@@ -109,8 +109,9 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   # Disable SelfSignedHttpClientSupplier in Production Environment to perform SSL certificate verification.
-  # Use HttpOwnerSchemeSupplier for secure Production configurations.
+  # Use StandardHttpClientSupplier for secure Production configurations.
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  #- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
   #- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
