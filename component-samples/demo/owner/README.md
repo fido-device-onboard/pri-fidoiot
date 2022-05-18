@@ -188,6 +188,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier | Tells the owner to use HTTP instead of HTTPS for TO0 protocol|
 | org.fidoalliance.fdo.protocol.RemoteDatabaseServer | Provides access to an external database  |
 | org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier | Tells HTTPS Clients to trust self-signed certificates  |
+| org.fidoalliance.fdo.protocol.StandardHttpClientSupplier | Provides standard HTTP/HTTPS Client object for communication |
 | org.fidoalliance.fdo.protocol.StandardCryptoService | Provides cryptographic services  (e.g. sign, verify, random number generation etc) |
 | org.fidoalliance.fdo.protocol.StandardDatabaseServer | Provides an embedded H2 Database server |
 | org.fidoalliance.fdo.protocol.StandardHttpServer | Provides an embedded Tomcat HTTP server for handling messages |
