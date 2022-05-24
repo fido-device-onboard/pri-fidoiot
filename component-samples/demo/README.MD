@@ -253,6 +253,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *exec-cb* - This command returns the status / progress of the process running.
 
+    *url* - The specified URL resource will be downloaded from the client application.
+
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
@@ -264,6 +266,10 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
      `{"filedesc" : "sample.txt","resource" : "database resource"},
       {"write": "sample.txt"},
       {"exec" :"cat sample.txt"}`
+
+   or
+
+     `{"filedesc" : "sample.sh","url" : "http/https resource"}`
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 

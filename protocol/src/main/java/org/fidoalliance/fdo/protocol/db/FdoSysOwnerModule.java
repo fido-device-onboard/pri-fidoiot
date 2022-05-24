@@ -227,6 +227,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             getExecCb(state, extra, instruction);
           } else if (instruction.getFetch() != null) {
             getFetch(state, extra, instruction);
+          } else if (instruction.getUrl() != null) {
+            getUrl(state, extra, instruction);
           }
         }
 
@@ -373,10 +375,25 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     extra.getQueue().add(kv);
 
     String resource = instruction.getResource();
-    if (resource.startsWith("https://") || resource.startsWith("http://")) {
-      getUrlFile(state, extra, instruction);
-    } else {
-      getDbFile(state, extra, instruction);
+    if (resource != null) {
+      if (resource.startsWith("https://") || resource.startsWith("http://")) {
+        getUrlFile(state, extra, instruction);
+      } else {
+        getDbFile(state, extra, instruction);
+      }
+    } else if (instruction.getUrl() != null) {
+      getUrl(state, extra, instruction);
     }
   }
+
+  protected void getUrl(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction)
+          throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.FILEDOWNLOAD);
+    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getUrl()));
+    extra.getQueue().add(kv);
+  }
+
 }

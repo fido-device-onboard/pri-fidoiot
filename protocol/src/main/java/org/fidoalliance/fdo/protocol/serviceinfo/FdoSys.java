@@ -18,6 +18,7 @@ public final class FdoSys {
   public static final String EOT = NAME + ":eot";
   public static final String FILEDESC = NAME + ":filedesc";
   public static final String WRITE = NAME + ":write";
+  public static final String FILEDOWNLOAD = NAME + ":download";
   public static final String KEEP_ALIVE = NAME + ":keepalive";
   public static final String RET_CODE = NAME + ":retcode";
 }

@@ -5,9 +5,13 @@ package org.fidoalliance.fdo.sample;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -83,6 +87,12 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
         if (state.isActive()) {
           byte[] data = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
           writeFile(data);
+        }
+        break;
+      case FdoSys.FILEDOWNLOAD:
+        if (state.isActive()) {
+          String url = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          downloadFile(url);
         }
         break;
       case FdoSys.EXEC:
@@ -187,6 +197,22 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     } catch (IOException e) {
       throw new InternalServerErrorException(e);
     }
+  }
+
+  private void downloadFile(String url) throws IOException {
+
+    String filename;
+    if (null == currentFile) {
+      filename = "download.file";
+    } else {
+      filename = currentFile.toString();
+    }
+
+    logger.info("Downloading URL:" + url);
+    URL website = new URL(url);
+    ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+    FileOutputStream fos = new FileOutputStream(filename);
+    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
   }
 
 

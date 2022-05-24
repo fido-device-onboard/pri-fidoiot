@@ -27,6 +27,9 @@ public class FdoSysInstruction {
   @JsonProperty("fetch")
   private String fetch;
 
+  @JsonProperty("url")
+  private String url;
+
   @JsonIgnore
   public Map<String, String> getFilter() {
     return filter;
@@ -55,4 +58,7 @@ public class FdoSysInstruction {
   public String getFetch() {
     return fetch;
   }
+
+  @JsonIgnore
+  public String getUrl() { return url; }
 }
