@@ -60,5 +60,7 @@ public class FdoSysInstruction {
   }
 
   @JsonIgnore
-  public String getUrl() { return url; }
+  public String getUrl() {
+    return url;
+  }
 }
