@@ -31,6 +31,18 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>cloudhsm</artifactId>
+      <version>${cloudhsmVersion}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-cloudhsm</artifactId>
+      <version>1.12.227</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit-jupiter.version}</version>
@@ -64,11 +76,11 @@
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.bouncycastle/bc-fips -->
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bc-fips</artifactId>
-      <version>1.0.2.3</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.bouncycastle</groupId>-->
+<!--      <artifactId>bc-fips</artifactId>-->
+<!--      <version>1.0.2.3</version>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.bouncycastle</groupId>

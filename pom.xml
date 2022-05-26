@@ -22,6 +22,20 @@
 
   mvn versions:update-properties
   -->
+
+  <profiles>
+    <profile>
+      <id>default-profile</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <cloudhsmVersion>5.5.0</cloudhsmVersion>
+        <cloudhsmJarPath>/opt/cloudhsm/java/cloudhsm-jce-${cloudhsmVersion}.jar</cloudhsmJarPath>
+      </properties>
+    </profile>
+  </profiles>
+
   <properties>
     <!-- FDO Dependency Version -->
     <fdo.version>1.1.0</fdo.version>
@@ -96,6 +110,29 @@
   <build>
     <pluginManagement>
       <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.1</version>
+          <executions>
+            <execution>
+              <id>install-cloudhsm-jce</id>
+              <goals>
+                <goal>install-file</goal>
+              </goals>
+              <phase>validate</phase>
+              <configuration>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>cloudhsm</artifactId>
+                <version>${cloudhsmVersion}</version>
+                <packaging>jar</packaging>
+                <file>${cloudhsmJarPath}</file>
+                <generatePom>true</generatePom>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

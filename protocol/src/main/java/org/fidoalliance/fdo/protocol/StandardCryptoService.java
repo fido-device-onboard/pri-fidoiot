@@ -59,15 +59,13 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.crypto.EntropySourceProvider;
-import org.bouncycastle.crypto.fips.FipsDRBG;
-import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
+import javax.security.auth.login.LoginException;
+
+import com.amazonaws.cloudhsm.jce.jni.exception.ProviderInitializationException;
+import com.amazonaws.cloudhsm.jce.provider.CloudHsmProvider;
+
+import org.bouncycastle.asn1.*;
+
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AsymKex;
@@ -109,18 +107,26 @@ public class StandardCryptoService implements CryptoService {
   private static SecureRandom getInitializedRandom() {
 
     // DRBG -- Discrete Random Bit Generator.
-    EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
-    FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
-            .setSecurityStrength(256)
-            .setEntropyBitsRequired(256);
-    return drgbBldr.build("nonce".getBytes(StandardCharsets.UTF_8), false);
+    try {
+      return SecureRandom.getInstanceStrong();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("Strong secure random required", e);
+    }
 
   }
 
   private static Provider getInitializedProvider() {
-    Provider result = new BouncyCastleFipsProvider();
-    Security.addProvider(result);
-    return result;
+
+    try {
+      if (Security.getProvider(CloudHsmProvider.PROVIDER_NAME) == null) {
+        Provider provider =  new CloudHsmProvider();
+        Security.addProvider(provider);
+        return provider;
+      }
+    } catch (IOException | ProviderInitializationException | LoginException ex) {
+      // Intentional fall through.
+    }
+    return null;
   }
 
   /**
