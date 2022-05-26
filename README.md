@@ -17,6 +17,11 @@ deploying the example implementation for these components.
 * **Docker engine (minimum version 18.09, Supported till version 20.10.7) / Podman engine (For RHEL)**
 * **Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)**
 
+***NOTE***: FDO service require strong random number generation in order to perform the required cryptographic functions.  The FDO servers will hang on startup waiting for sufficient entropy unless the system continuously supplied random data.
+- `sudo apt-get install -y haveged` will ensure the system fdo services are running on have sufficient entropy.
+
+
+
 ## Source Layout
 
 For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
