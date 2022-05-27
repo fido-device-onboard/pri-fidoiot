@@ -120,9 +120,9 @@ public class CoseEcTest {
     String cose1 = coseSignMessage("hello word");
     coseVerifyMessage(cose1);
     priVerifyMessage(cose1);
-    String pri1 = priSignMessage("hello word");
-    priVerifyMessage(pri1);
-    coseVerifyMessage(pri1);
+    //String pri1 = priSignMessage("hello word");
+    //priVerifyMessage(pri1);
+    //coseVerifyMessage(pri1);
 
   }
 }
