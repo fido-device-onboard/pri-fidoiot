@@ -18,7 +18,7 @@ http-server:
   https_port: 8038
   http_schemes:
   - http
-  - https
+  #- https
   http_timeout: 20000
   keystore: 
     path: ssl.p12
@@ -37,7 +37,7 @@ http-server:
 manufacturer:
    keystore: 
      path: manufacturer.p12
-     store-type: PKCS12
+     store-type: CloudHSM
      password: $(encrypt_password)
    rv-instruction:
      dns: localhost

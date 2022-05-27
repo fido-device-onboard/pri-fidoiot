@@ -12,6 +12,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
@@ -43,6 +45,8 @@ public class StandardCertSignatureFunction implements CertSignatureFunction {
 
     final JcaPKCS10CertificationRequest csr =
         new JcaPKCS10CertificationRequest(encoded);
+
+    csr.setProvider(new BouncyCastleFipsProvider());
 
     final KeyResolver keyResolver = Config.getWorker(ManufacturerKeySupplier.class).get();
 

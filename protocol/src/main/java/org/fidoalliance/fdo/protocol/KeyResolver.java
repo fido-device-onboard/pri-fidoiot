@@ -50,7 +50,7 @@ public class KeyResolver {
   protected char[] getPasswordArray() {
     String pass = config.getPassword();
     if (pass != null) {
-      return pass.toCharArray();
+      return null;
     }
     return "".toCharArray();
   }
@@ -104,21 +104,17 @@ public class KeyResolver {
       this.keyStore = KeyStore.getInstance(config.getStoreType());
 
       String path = config.getPath();
-      if (path != null) { // we have a stream path to load from
-        try (InputStream input =
-            Config.getWorker(KeyStoreInputStreamFunction.class).apply(path)) {
-          keyStore.load(input, getPasswordArray());
-        }
-        buildKeyStore();
-      } else {
         //assumed to be PKSC11/HSM store
         keyStore.load(null, getPasswordArray());
-      }
+        buildKeyStore();
     } catch (KeyStoreException e) {
+      e.printStackTrace();
       throw new IOException(e);
     } catch (CertificateException e) {
+      e.printStackTrace();
       throw new IOException(e);
     } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
       throw new IOException(e);
     }
   }
@@ -134,14 +130,10 @@ public class KeyResolver {
 
     try {
       String path = config.getPath();
-      if (path != null) { // we have a stream path to load from
         try (OutputStream out =
             Config.getWorker(KeyStoreOutputStreamFunction.class).apply(path)) {
           keyStore.store(out, getPasswordArray());
-        }
-      } else {
-        //assumed to be PKSC11/HSM store
-        keyStore.store(null, getPasswordArray());
+          System.out.println("Stored keys");
       }
     } catch (KeyStoreException e) {
       throw new IOException(e);
@@ -166,7 +158,7 @@ public class KeyResolver {
     try {
       if (!keyStore.aliases().hasMoreElements()) {
         if (config.getPath() != null) {
-          generateKey(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_2048);
+          //generateKey(PublicKeyType.RSA2048RESTR, KeySizeType.SIZE_2048);
           generateKey(PublicKeyType.RSAPKCS, KeySizeType.SIZE_2048);
           generateKey(PublicKeyType.RSAPKCS, KeySizeType.SIZE_3072);
           generateKey(PublicKeyType.SECP256R1, KeySizeType.SIZE_256);
