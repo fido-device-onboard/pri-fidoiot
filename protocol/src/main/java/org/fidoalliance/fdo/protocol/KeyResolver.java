@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -104,9 +105,17 @@ public class KeyResolver {
       this.keyStore = KeyStore.getInstance(config.getStoreType());
 
       String path = config.getPath();
+        if (path.contains("device")) { // we have a stream path to load from
+          try (InputStream input =
+              Config.getWorker(KeyStoreInputStreamFunction.class).apply(path)) {
+            keyStore.load(input, getPasswordArray());
+          }
+          buildKeyStore();
+        } else {
         //assumed to be PKSC11/HSM store
         keyStore.load(null, getPasswordArray());
         buildKeyStore();
+      }
     } catch (KeyStoreException e) {
       e.printStackTrace();
       throw new IOException(e);
@@ -130,10 +139,17 @@ public class KeyResolver {
 
     try {
       String path = config.getPath();
+      if (path.contains("device")) { // we have a stream path to load from
         try (OutputStream out =
             Config.getWorker(KeyStoreOutputStreamFunction.class).apply(path)) {
           keyStore.store(out, getPasswordArray());
-          System.out.println("Stored keys");
+        }
+      } else {
+        //assumed to be PKSC11/HSM store
+        try (OutputStream out =
+                     Config.getWorker(KeyStoreOutputStreamFunction.class).apply(path)) {
+          keyStore.store(out, getPasswordArray());
+        }
       }
     } catch (KeyStoreException e) {
       throw new IOException(e);
@@ -164,6 +180,7 @@ public class KeyResolver {
           generateKey(PublicKeyType.SECP256R1, KeySizeType.SIZE_256);
           generateKey(PublicKeyType.SECP384R1, KeySizeType.SIZE_384);
           store();
+
         }
       }
     } catch (KeyStoreException e) {
