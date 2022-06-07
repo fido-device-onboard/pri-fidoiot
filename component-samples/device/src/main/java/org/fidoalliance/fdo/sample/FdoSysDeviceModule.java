@@ -3,15 +3,13 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.FileSystems;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -24,6 +22,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import net.lingala.zip4j.exception.ZipException;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -35,6 +37,7 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.message.StatusCb;
 import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
+import net.lingala.zip4j.ZipFile;
 
 
 public class FdoSysDeviceModule implements ServiceInfoModule {
@@ -45,6 +48,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private Duration execTimeout = Duration.ofHours(2);
   private Predicate<Integer> exitValueTest = val -> (0 == val);
   private static final int DEFAULT_STATUS_TIMEOUT = 5; //seconds
+  private static String modelApplication = "model_loader.zip";
 
   private Path currentFile;
   private Process execProcess;
@@ -116,6 +120,38 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
           fetch(fetchFileName, state.getMtu());
         } else {
           logger.warn("fdo_sys module not active. Ignoring fdo_sys:fetch.");
+        }
+        break;
+      case FdoSys.APPLICATION:
+        if (state.isActive()) {
+          String application = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+
+          logger.info("Downloading Loader Application:" + application);
+          if (application.equals("unzip")) {
+            logger.info("Unzip application file");
+            unzipFolder(modelApplication,"modelApplication");
+          }
+          else {
+            modelApplication = application;
+            createFile(Path.of(application));
+          }
+
+
+        }
+        break;
+      case FdoSys.MODEL:
+        if (state.isActive()) {
+          String model = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          logger.info("Downloading AI Model:" + model);
+          createFile(Path.of(model));
+          logger.info("Unzip application file");
+        }
+        break;
+      case FdoSys.MODEL_DEPLOY:
+        if (state.isActive()) {
+          String deploy = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          logger.info("Deploying AI Model");
+          logger.info("Unzip application file");
         }
         break;
       default:
@@ -341,6 +377,17 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private Duration getExecTimeout() {
     return execTimeout;
   }
+
+  public static void unzipFolder(String source, String destination) {
+    try {
+      ZipFile zipFile = new ZipFile(source);
+      zipFile.extractAll(destination);
+    } catch (ZipException e) {
+      e.printStackTrace();
+    }
+
+  }
+
 
   private Predicate<Integer> getExitValueTest() {
     return exitValueTest;

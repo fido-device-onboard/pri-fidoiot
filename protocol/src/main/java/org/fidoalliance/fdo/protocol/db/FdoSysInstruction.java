@@ -24,8 +24,17 @@ public class FdoSysInstruction {
   @JsonProperty("resource")
   private String resource;
 
+  @JsonProperty("application")
+  private String application;
+
   @JsonProperty("fetch")
   private String fetch;
+
+  @JsonProperty("model")
+  private String model;
+
+  @JsonProperty("deploy")
+  private String deploy;
 
   @JsonIgnore
   public Map<String, String> getFilter() {
@@ -54,5 +63,20 @@ public class FdoSysInstruction {
 
   public String getFetch() {
     return fetch;
+  }
+
+  @JsonIgnore
+  public String getApplication() {
+    return application;
+  }
+
+  @JsonIgnore
+  public String getModel() {
+    return model;
+  }
+
+  @JsonIgnore
+  public String getDeploy() {
+    return deploy;
   }
 }

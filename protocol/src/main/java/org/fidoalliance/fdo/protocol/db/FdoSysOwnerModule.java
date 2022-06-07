@@ -227,6 +227,12 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             getExecCb(state, extra, instruction);
           } else if (instruction.getFetch() != null) {
             getFetch(state, extra, instruction);
+          } else if (instruction.getApplication() != null) {
+            getApplication(state, extra, instruction);
+          } else if (instruction.getModel() != null) {
+            getModel(state, extra, instruction);
+          } else if (instruction.getDeploy() != null) {
+            getDeploy(state, extra, instruction);
           }
         }
 
@@ -247,6 +253,57 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
     extra.getQueue().add(kv);
   }
+
+  protected void getApplication(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction) throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.APPLICATION);
+    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getApplication()));
+    extra.getQueue().add(kv);
+    getDbFile(state,extra,instruction,instruction.getApplication());
+    kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.APPLICATION);
+    kv.setValue(Mapper.INSTANCE.writeValue("unzip"));
+    extra.getQueue().add(kv);
+  }
+
+  protected void getModel(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction) throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.MODEL);
+    String model = instruction.getModel()+".h5";
+    kv.setValue(Mapper.INSTANCE.writeValue(model));
+    extra.getQueue().add(kv);
+
+    if (model.equals("MOBILENET_V2")) {
+      System.out.println("Sending MOBILENET V2 Model");
+      getDbFile(state,extra,instruction,model);
+    } else if (model.equals("RESNET-50.h5")) {
+      System.out.println("Sending RESNET-50 Model");
+      getDbFile(state,extra,instruction,model);
+    } else {
+      System.out.println("Sending INIST Model");
+      getDbFile(state,extra,instruction,model);
+    }
+  }
+
+  protected void getDeploy(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction) throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.EXEC);
+    String deploy = instruction.getDeploy();
+    if (deploy.equals("python")) {
+      String[] command = new String[2];
+      command[0] = "bash";
+      command[1] = "pwd";
+      kv.setValue(Mapper.INSTANCE.writeValue(command));
+    }
+    extra.getQueue().add(kv);
+  }
+
 
   protected void getExecCb(ServiceInfoModuleState state,
       FdoSysModuleExtra extra,
@@ -270,6 +327,51 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       FdoSysModuleExtra extra,
       FdoSysInstruction instruction) throws IOException {
     String resource = instruction.getResource();
+    final Session session = HibernateUtil.getSessionFactory().openSession();
+    try {
+      Transaction trans = session.beginTransaction();
+      resource = resource.replace("$(guid)", state.getGuid().toString());
+
+      // Query database table SYSTEM_RESOURCE for filename Key
+      SystemResource sviResource = session.get(SystemResource.class, resource);
+
+      if (sviResource != null) {
+        Blob blobData = sviResource.getData();
+        try (InputStream input = blobData.getBinaryStream()) {
+          for (; ; ) {
+            byte[] data = new byte[state.getMtu() - 26];
+            int br = input.read(data);
+            if (br == -1) {
+              break;
+            }
+            ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(FdoSys.WRITE);
+
+            if (br < data.length) {
+              byte[] temp = data;
+              data = new byte[br];
+              System.arraycopy(temp, 0, data, 0, br);
+            }
+            kv.setValue(Mapper.INSTANCE.writeValue(data));
+            extra.getQueue().add(kv);
+          }
+        } catch (SQLException throwables) {
+          throw new InternalServerErrorException(throwables);
+        }
+      } else {
+        throw new InternalServerErrorException("svi resource missing " + resource);
+      }
+      trans.commit();
+
+    } finally {
+      session.close();
+    }
+
+  }
+
+  protected void getDbFile(ServiceInfoModuleState state,
+                           FdoSysModuleExtra extra,
+                           FdoSysInstruction instruction, String resource) throws IOException {
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
       Transaction trans = session.beginTransaction();
