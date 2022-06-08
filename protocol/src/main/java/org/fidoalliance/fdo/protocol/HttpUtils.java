@@ -51,6 +51,7 @@ public class HttpUtils {
 
   /**
    * Builds a dispatch message from an uri.
+   *
    * @param uri A fdo spec URI.
    * @return A dispatch message representing the uri.
    * @throws IOException An error occurred.
@@ -131,8 +132,7 @@ public class HttpUtils {
               }
               //check for IPv6 address string
               pos = ipAddress.indexOf((':'));
-              if (pos >0)
-              {
+              if (pos > 0) {
                 // add brackets for IP address
                 ipAddress = "[" + ipAddress + "]";
               }
@@ -249,9 +249,9 @@ public class HttpUtils {
     for (To2AddressEntry entry : entries) {
 
       if (entry.getProtocol() == TransportProtocol.PROT_HTTP) {
-        scheme =  HTTP_SCHEME;
+        scheme = HTTP_SCHEME;
       } else if (entry.getProtocol() == TransportProtocol.PROT_HTTPS) {
-        scheme =  HTTPS_SCHEME;
+        scheme = HTTPS_SCHEME;
       } else {
         continue;
       }
