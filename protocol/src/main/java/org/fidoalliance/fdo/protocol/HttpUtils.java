@@ -129,6 +129,13 @@ public class HttpUtils {
               if (pos >= 0) {
                 ipAddress = ipAddress.substring(pos + 1);
               }
+              //check for IPv6 address string
+              pos = ipAddress.indexOf((':'));
+              if (pos >0)
+              {
+                // add brackets for IP address
+                ipAddress = "[" + ipAddress + "]";
+              }
             } catch (UnknownHostException e) {
               throw new InvalidIpAddressException(e);
             }
