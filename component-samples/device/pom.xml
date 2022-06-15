@@ -14,7 +14,7 @@
   <parent>
     <artifactId>component-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>1.1.0.2</version>
+    <version>1.1.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>device</artifactId>
