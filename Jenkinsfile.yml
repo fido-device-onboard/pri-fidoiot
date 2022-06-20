@@ -5,6 +5,7 @@ node('ubuntu18.04-OnDemand'){
   stage('scm checkout'){
     cleanWs()
     checkout scm
+    sh 'export var1="hello world"'
   }
 
   // Stage to build the project
@@ -26,6 +27,8 @@ node('ubuntu18.04-OnDemand'){
 
      // Creating the required directories
      sh '''
+       echo $var1
+       echo "Mic testing"
        mkdir -p test-fidoiot/binaries
        mkdir -p test-fidoiot/binaries/pri-fidoiot
      '''
