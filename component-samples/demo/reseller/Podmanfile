@@ -4,9 +4,9 @@
 FROM registry.access.redhat.com/ubi8/ubi
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-RUN yum -y install java-11-openjdk-devel wget haveged
-RUN yum clean all
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
+    && yum -y install java-11-openjdk-devel wget haveged \
+    && yum clean all
 
 RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
