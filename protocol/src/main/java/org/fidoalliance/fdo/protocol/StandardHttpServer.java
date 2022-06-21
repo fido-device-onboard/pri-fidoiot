@@ -93,6 +93,8 @@ public class StandardHttpServer implements HttpServer {
     private String httpPort;
     @JsonProperty("https_port")
     private String httpsPort;
+    @JsonProperty("address")
+    private String address;
     @JsonProperty("http_schemes")
     private String[] httpSchemes;
     @JsonProperty("http_timeout")
@@ -124,6 +126,11 @@ public class StandardHttpServer implements HttpServer {
     public String getHttpsPort() {
       return resolve(httpsPort);
     }
+
+    public String getAddress() {
+      return resolve(address);
+    }
+
 
     public String[] getHttpSchemes() {
       return Config.resolve(httpSchemes);
@@ -210,11 +217,15 @@ public class StandardHttpServer implements HttpServer {
     //service.addExecutor(new StandardThreadExecutor());
 
     String[] schemes = config.getHttpSchemes();
+    String ipAddress = config.getAddress();
 
     for (String scheme : schemes) {
 
       if (scheme.toLowerCase().equals(HttpUtils.HTTPS_SCHEME)) {
         Connector httpsConnector = new Connector();
+        if (ipAddress != null) {
+          httpsConnector.setProperty("address", ipAddress);
+        }
         try {
           httpsConnector.setPort(Integer.parseInt(config.getHttpsPort()));
         } catch (NumberFormatException e) {
@@ -268,6 +279,10 @@ public class StandardHttpServer implements HttpServer {
 
       } else if (scheme.toLowerCase().equals(HttpUtils.HTTP_SCHEME)) {
         Connector httpsConnector = new Connector();
+
+        if (ipAddress != null) {
+          httpsConnector.setProperty("address", ipAddress);
+        }
         try {
           httpsConnector.setPort(Integer.parseInt(config.getHttpPort()));
         } catch (NumberFormatException e) {
