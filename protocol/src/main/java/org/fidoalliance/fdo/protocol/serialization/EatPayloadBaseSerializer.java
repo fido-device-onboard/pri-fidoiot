@@ -14,7 +14,7 @@ public class EatPayloadBaseSerializer extends StdSerializer<EatPayloadBase> {
 
 
   private static final int EAT_NONCE = 10;
-  private static final int EAT_UEID = 11;
+  private static final int EAT_UEID = 256;
   private static final int EAT_RAND = 1;
   private static final int EAT_FDO = -257;
 

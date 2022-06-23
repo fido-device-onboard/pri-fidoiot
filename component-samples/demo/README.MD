@@ -269,8 +269,6 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
-- Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. The device will ignore all ServiceInfo module messages if module_name:active doesn't precede the messages of the module.
-
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo Transfer
@@ -343,8 +341,33 @@ h2-database:
 
 NOTE: Not recommended to enable this setting especially on production systems.
 
+# Disk Usage by the embedded database
+
+It is observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
+
+This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
+While shutting down, H2 "compacts" the file in order to reduce the file size.
+
+If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
 
 # Certificate Validity checks
+
+For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+
+In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of respective component.
+
+Sample `service.yml` file:
+
+Disable the following workers
+```
+#- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+```
+and enable
+```
+- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+```
 
 The Device certificate chain is checked during TO0 by the rendezvous server and by the owner during TO2.  This check includes verifying the certificate chain hash and if the leaf certificate has expired. 
 Owner certificates with X5Chain encoding are not analyzed by this implementation.

@@ -143,7 +143,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8080/api/v1/certificate/validity' |
 | GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8080/health'|
 | POST /api/v1/rv/allow | Adds public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8080/api/v1/rv/allow` --data-raw  "$owner_certificate" |
-| DELETE /api/v1/rv/allow | delete public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8080/api/v1/rv/allow` --data-raw  "$owner_certificate" |
+| DELETE /api/v1/rv/allow | delete public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8080/api/v1/rv/allow` --data-raw  "$owner_certificate" |
 | POST /api/v1/rv/deny | Adds public key to denied list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8080/api/v1/rv/deny` --data-raw  "$owner_certificate" |
 
 # FDO PRI Owner REST APIs
@@ -229,16 +229,16 @@ The following filter will only return service info instructions if the device in
 The following filter will only return service info instructions if the device info reports the os is linux
 
 [
-{"filter": {"os" : "linux"}},
+{"filter": {"devmod-os" : "linux"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
 {"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
 ]
 
-The following filter will only return service info instructions if the device info reports the os is linux and verion is 16.04
+The following filter will only return service info instructions if the device info reports the os is linux and verion is 20.04
 
 [
-{"filter": {"os" : "linux", "version" : "Ubuntu 16.0.4LTS"}},
+{"filter": {"devmod-os" : "linux", "devmod-version" : "Ubuntu 20.04 LTS"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
 {"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
@@ -286,6 +286,10 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier | Provides Owner2 keys for for credential replacement during TO2
 | org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction | Tells the RV server to allow TO0 with untrusted ownership keys
 | org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction | Automatically extends the voucher to the AIO owner and performs To0 protocol |
+| org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier| Uses BASIC auth with api_user api_password from service.env for serivceinfo urls (NOT Recommended) |
+
+#- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
 | org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule | Provides the implementation of Fido Conformance Module for Interop|
 | org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule | Provides the implementation of the FdoSys Module |
 | org.fidoalliance.fdo.protocol.db.OnDieCertificateManager | Provides Root certificate chains for Intel OnDie hardware ECDSA keys|

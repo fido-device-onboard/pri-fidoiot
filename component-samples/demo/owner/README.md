@@ -188,6 +188,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier | Tells the owner to use HTTP instead of HTTPS for TO0 protocol|
 | org.fidoalliance.fdo.protocol.RemoteDatabaseServer | Provides access to an external database  |
 | org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier | Tells HTTPS Clients to trust self-signed certificates  |
+| org.fidoalliance.fdo.protocol.StandardHttpClientSupplier | Provides standard HTTP/HTTPS Client object for communication |
 | org.fidoalliance.fdo.protocol.StandardCryptoService | Provides cryptographic services  (e.g. sign, verify, random number generation etc) |
 | org.fidoalliance.fdo.protocol.StandardDatabaseServer | Provides an embedded H2 Database server |
 | org.fidoalliance.fdo.protocol.StandardHttpServer | Provides an embedded Tomcat HTTP server for handling messages |
@@ -196,6 +197,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier | Provides owner signing keys  |
 | org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier | Tells the owner to use HTTPS for TO0 protocol |
 | org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier | Provides Owner2 keys for for credential replacement during TO2
+| org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier| Uses BASIC auth with api_user api_password from service.env for serivceinfo urls (NOT Recommended) |
 | org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule | Provides the implementation of Fido Conformance Module for Interop|
 | org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule | Provides the implementation of the FdoSys Module |
 | org.fidoalliance.fdo.protocol.db.OnDieCertificateManager | Provides Root certificate chains for Intel OnDie hardware ECDSA keys|
@@ -208,9 +210,30 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier | Gets the Wait Seconds amount the rv server is willing to accept  |
 | org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction | Stores the replacement ownership voucher at the end to TO2 |
 | org.fidoalliance.fdo.protocol.db.StandardServerSessionManager | Provides session storage and management for service side protocols |
+| org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier| Standard HTTP(S) client with system properties for service info URL requests |
 | org.fidoalliance.fdo.protocol.db.StandardSessionCleaner | Removes incomplete session from the database after a couple of hours |
 | org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier | Provides the validity days for certificate generation |
 | org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction | Provides ownership vouchers from the owner database |
 | org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction | Tells the owner to replace the device credentials during TO2 |
 | org.fidoalliance.fdo.protocol.db.StandardVoucherStorageFunction | Stores voucher in the database without performing To0 protocol |
 | org.fidoalliance.fdo.protocol.db.To0Scheduler | Performs To0 for vouchers that have expired wait seconds at regular intervals |
+
+
+# Certificate Validity checks
+
+For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+
+In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of owner component.
+
+Sample `service.yml` file:
+
+Disable the following workers
+```
+#- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+```
+and enable
+```
+- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+```
