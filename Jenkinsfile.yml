@@ -1,4 +1,3 @@
-// This job is restricted to run only on 'ubuntu18.04-OnDemand' Build machine
 node('ubuntu18.04-OnDemand'){
 
   // Stage for checking out the source code
