@@ -14,7 +14,7 @@ public enum PublicKeyEncoding {
   COSEX5CHAIN(2),
   COSEKEY(3);
 
-  private int id;
+  private final int id;
 
   PublicKeyEncoding(int id) {
     this.id = id;

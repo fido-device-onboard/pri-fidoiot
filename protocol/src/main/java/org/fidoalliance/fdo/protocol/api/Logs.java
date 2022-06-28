@@ -6,8 +6,28 @@ package org.fidoalliance.fdo.protocol.api;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.fidoalliance.fdo.protocol.BufferUtils;
+import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.DispatchMessage;
+import org.fidoalliance.fdo.protocol.HttpClientSupplier;
 import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.MessageBodyException;
+import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
+import org.fidoalliance.fdo.protocol.message.MsgType;
+import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 
 public class Logs extends RestApi {
 
@@ -18,11 +38,9 @@ public class Logs extends RestApi {
   @Override
   public void doGet() throws Exception {
 
-    getResponse().setContentType(HttpUtils.HTTP_PLAIN_TEXT);
-
     File file = getLogFile();
     try (BufferedReader br
-        = new BufferedReader(new FileReader(file));) {
+        = new BufferedReader(new FileReader(file))) {
 
       String line;
       while ((line = br.readLine()) != null) {

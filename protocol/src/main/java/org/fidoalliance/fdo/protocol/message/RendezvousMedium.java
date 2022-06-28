@@ -32,7 +32,7 @@ public enum RendezvousMedium {
   WIFI_ALL(21);
 
 
-  private int id;
+  private final int id;
 
   RendezvousMedium(int id) {
     this.id = id;

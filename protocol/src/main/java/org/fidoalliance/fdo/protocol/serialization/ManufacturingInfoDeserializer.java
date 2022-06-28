@@ -30,7 +30,7 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
 
   @Override
   public ManufacturingInfo deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     int index = 0;

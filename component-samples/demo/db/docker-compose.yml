@@ -1,0 +1,17 @@
+# Copyright 2020 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  fdo-db:
+    image: mariadb
+    restart: always
+    ports:
+      - 3306:3306   
+    env_file:
+      - service.env
+    volumes:
+      - ./app-data:/var/lib/mysql

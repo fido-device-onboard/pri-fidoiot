@@ -12,7 +12,7 @@ public enum ProtocolVersion {
   V100(100),
   V101(101);
 
-  private int id;
+  private final int id;
 
   ProtocolVersion(int id) {
     this.id = id;

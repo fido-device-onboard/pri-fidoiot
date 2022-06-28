@@ -1,19 +1,37 @@
 hibernate-properties:
-  connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:8049/./app-data/emdb
-  hibernate.dialect: org.hibernate.dialect.H2Dialect
+  hibernate.connection.url: jdbc:mariadb://host.docker.internal:3306/emdb?useSSL=$(useSSL)
+  hibernate.connection.requireSSL: $(requireSSL)
+  hibernate.connection.autoReconnect: true
+  hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
   application.version: 1.1.1-SNAPSHOT
   service.name: "Manufacturer"
+  javax.net.debug: ssl:handshake
+  #javax.net.ssl.keyStore: ./app-data/client-store.jks
+  #javax.net.ssl.keyStorePassword: $(store_password)
+  #javax.net.ssl.trustStorePassword: $(store_password)
+  #javax.net.ssl.trustStore: ./app-data/ca-certs.jks
+  #javax.net.ssl.keyStoreType: PEMS
+  #javax.net.ssl.trustStoreType: PEM
+  #log4j.logger.org.apache.http.impl.conn: DEBUG
+  #log4j.logger.org.apache.http.impl.client: DEBUG
+  #log4j.logger.org.apache.http.client: DEBUG
+  # set system proxy information
+  #http.proxyHost:
+  #http.proxyPort:
+  #https.proxyHost:
+  #https.proxyPort:
+  #http.nonProxyHosts:
+  server.api.user: $(api_user)
+  server.api.password: "$(api_password)"
   
-
 http-server:
-  base_path: app-data
+  base_path: .
   http_port: 8039
   https_port: 8038
   http_schemes:
@@ -21,18 +39,13 @@ http-server:
   - https
   http_timeout: 20000
   keystore: 
-    path: ssl.p12
-    store-type: PKCS12
-    password: $(ssl_password)
+    path: ./app-data/ssl-host.pem
+    store-type: PEM
+    password: ''
     alias: ssl
-  auth:
-    method: DIGEST
-    role: api
-    user_name: apiUser
-    user_password: $(api_password)
-  subject_names:
-    - DNS:localhost
-    - IP:127.0.0.1
+  truststore: ./app-data/ca-certs.pem
+  certificate_verification: want
+  certificate_verification_depth: 2  
 
 manufacturer:
    keystore: 
@@ -40,23 +53,11 @@ manufacturer:
      store-type: PKCS12
      password: $(encrypt_password)
    rv-instruction:
-     dns: localhost
-     ip: 127.0.0.1
+     dns: host.docker.internal
+     ip: 172.17.0.1
      protocol: 1
      ownerport: 8041
      devport: 8040
-
-h2-database:
-   tcp-server:
-     - "-ifNotExists"
-     - "-tcpPort"
-     - "8049"
-   web-server:
-      # - "-webAllowOthers"
-      # - "-webExternalNames"
-      # - "serverfqdn"
-      - "-webPort"
-      - "8083" 
 
 epid:
   # WARNING: do not set testmode to true in production environments

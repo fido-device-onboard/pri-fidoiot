@@ -40,7 +40,7 @@ import org.hibernate.Transaction;
 public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
-  private LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+  private final LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
 
   @Override
   public String getName() {
@@ -323,7 +323,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
       logger.info("HTTP(S) GET: " + resource);
       HttpGet httpRequest = new HttpGet(resource);
-      try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
+      try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest)) {
         logger.info(httpResponse.getStatusLine().toString());
         if (httpResponse.getStatusLine().getStatusCode() != 200) {
           throw new InternalServerErrorException(httpResponse.getStatusLine().toString());

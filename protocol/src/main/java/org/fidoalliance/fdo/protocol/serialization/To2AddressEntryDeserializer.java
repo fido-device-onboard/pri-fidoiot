@@ -28,7 +28,7 @@ public class To2AddressEntryDeserializer extends StdDeserializer<To2AddressEntry
 
   @Override
   public To2AddressEntry deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     To2AddressEntry entry = new To2AddressEntry();

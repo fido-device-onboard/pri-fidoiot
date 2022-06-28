@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -36,10 +37,11 @@ public class Config {
 
   private static Root ROOT;
   private static final Properties env = new Properties();
+  private static final Properties secrets = new Properties();
   private static List<Object> workers = new ArrayList<>();
   private static final List<Object> configs = new ArrayList<>();
 
-  private static String configPath;
+  private static final String configPath;
   private static final String CONFIG_FILE = "service.yml";
 
 
@@ -60,9 +62,10 @@ public class Config {
 
     try {
       ROOT = Mapper.INSTANCE.readStringValue(file, Root.class);
+      loadEnvFiles();
       loadSystemProperties();
       loadWorkerItems();
-      loadEnvFiles();
+
     } catch (Throwable e) {
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
@@ -111,10 +114,6 @@ public class Config {
     }
 
 
-    public void store(KeyStore keyStore) throws IOException {
-
-    }
-
   }
 
 
@@ -127,8 +126,10 @@ public class Config {
     private String[] workers = new String[0];
 
     @JsonProperty("system-properties")
-    private Map<String, String> systemProperties = new HashMap<>();
+    private final Map<String, String> systemProperties = new HashMap<>();
 
+    @JsonProperty("secrets")
+    private final String[] secrets = new String[0];
 
   }
 
@@ -149,7 +150,7 @@ public class Config {
   private static void loadConfig(File file) {
     Properties props = new Properties();
 
-    try (FileInputStream fin = new FileInputStream(file);) {
+    try (FileInputStream fin = new FileInputStream(file)) {
       props.load(fin);
     } catch (FileNotFoundException e) {
       throw new RuntimeException(file.getName(), e);
@@ -250,6 +251,13 @@ public class Config {
             }
           }
           result = result.substring(0, start) + envValue + value.substring(end + 1);
+          if (secrets.containsKey(envName)) {
+            try {
+              result = Files.readString(Path.of(result));
+            } catch (IOException e) {
+              throw  new RuntimeException(e);
+            }
+          }
         } else {
           break;
         }
@@ -257,6 +265,7 @@ public class Config {
         break;
       }
     }
+
     return result;
   }
 
@@ -295,7 +304,7 @@ public class Config {
         throw new RuntimeException(
             new InstantiationException("class requires constructor with no args."));
       }
-      return ctor.newInstance(new Object[]{});
+      return ctor.newInstance();
 
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -312,7 +321,7 @@ public class Config {
     Map<String, String> map = ROOT.systemProperties;
     for (Map.Entry<String, String> entry : map.entrySet()) {
       if (!System.getProperties().containsKey(entry.getKey())) {
-        System.setProperty(entry.getKey(), entry.getValue());
+        System.setProperty(entry.getKey(), resolve(entry.getValue()));
       }
     }
   }
@@ -369,7 +378,7 @@ public class Config {
       }
     }
     try {
-      T result = (T) Mapper.INSTANCE.readStringValue(new File(getFileName()), clazz);
+      T result = Mapper.INSTANCE.readStringValue(new File(getFileName()), clazz);
       configs.add(result);
       return result;
     } catch (IOException e) {
@@ -393,7 +402,7 @@ public class Config {
         while (currentClass != null) {
           Type[] interfaces = currentClass.getInterfaces();
           for (Type type : interfaces) {
-            if (type.equals((Type) clazz)) {
+            if (type.equals(clazz)) {
               return (T) item;
             }
           }

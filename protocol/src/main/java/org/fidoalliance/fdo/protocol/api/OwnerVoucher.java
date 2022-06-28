@@ -3,31 +3,22 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
-
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
-import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
-import org.fidoalliance.fdo.protocol.entity.CertificateData;
-import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
-import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
-import org.fidoalliance.fdo.protocol.message.To0d;
-import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.hibernate.Session;
 
 /**
@@ -84,14 +75,14 @@ public class OwnerVoucher extends RestApi {
         header.getGuid().toString());
     if (onboardingVoucher != null) {
 
-      onboardingVoucher.setGuid(guid.toString());
+      onboardingVoucher.setGuid(guid);
       onboardingVoucher.setData(data);
       getSession().update(onboardingVoucher);
       getTransaction().commit();
     } else {
 
       onboardingVoucher = new OnboardingVoucher();
-      onboardingVoucher.setGuid(guid.toString());
+      onboardingVoucher.setGuid(guid);
       onboardingVoucher.setData(data);
       onboardingVoucher.setTo0Expiry(new Date(System.currentTimeMillis()));
       onboardingVoucher.setCreatedOn(new Date(System.currentTimeMillis()));

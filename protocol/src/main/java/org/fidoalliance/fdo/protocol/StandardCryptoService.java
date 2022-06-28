@@ -1200,16 +1200,13 @@ public class StandardCryptoService implements CryptoService {
     byte[] groupId = sigInfo.getInfo();
 
     EpidService epidService = new EpidService();
-    if (!epidService.verifyEpidSignature(
+    return epidService.verifyEpidSignature(
         signature,
         maroePrefix,
         message.getUnprotectedHeader().getEatNonce().getNonce(),
         sigData,
         groupId,
-        sigInfoType)) {
-      return false;
-    }
-    return true;
+        sigInfoType);
   }
 
   @Override

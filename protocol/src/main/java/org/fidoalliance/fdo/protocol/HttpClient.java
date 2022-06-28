@@ -15,6 +15,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
@@ -94,8 +95,8 @@ public abstract class HttpClient implements Runnable {
   protected void sendMessage() throws IOException {
     URI requestUri = null;
     if (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
-            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
-            || getRequest().getMsgType() == MsgType.TO0_HELLO) {
+        || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+        || getRequest().getMsgType() == MsgType.TO0_HELLO) {
       index = 0;
     }
     HttpInstruction httpInstruction = null;
@@ -115,7 +116,7 @@ public abstract class HttpClient implements Runnable {
             msgId = MsgType.TO2_HELLO_DEVICE;
           } else {
             logger.info("RVBypass flag not set, Starting TO1.");
-            logger.info("TO1 URL is " + uriBuilder.toString());
+            logger.info("TO1 URL is " + uriBuilder);
           }
 
         }
@@ -123,9 +124,9 @@ public abstract class HttpClient implements Runnable {
           if (httpInstruction.isRendezvousBypass()) {
             logger.info("RVBypass flag is set, Skipped T01.");
           }
-          logger.info("TO2 URL is " + uriBuilder.toString());
+          logger.info("TO2 URL is " + uriBuilder);
         } else if (msgId == MsgType.TO0_HELLO) {
-          logger.info("TO0 URL is " + uriBuilder.toString());
+          logger.info("TO0 URL is " + uriBuilder);
         }
 
         List<String> segments = new ArrayList<>();
@@ -135,8 +136,6 @@ public abstract class HttpClient implements Runnable {
         segments.add(HttpUtils.MSG_COMPONENT);
         segments.add(Integer.toString(msgId.toInteger()));
         uriBuilder.setPathSegments(segments);
-
-
 
         requestUri = uriBuilder.build();
 
@@ -152,8 +151,7 @@ public abstract class HttpClient implements Runnable {
 
         logMessage(getRequest());
 
-
-        try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);) {
+        try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest)) {
           HttpEntity entity = httpResponse.getEntity();
           if (entity != null) {
             if (entity.getContentLength() == 0 && getRequest().getMsgType() == MsgType.ERROR) {
@@ -185,6 +183,12 @@ public abstract class HttpClient implements Runnable {
         break; // success
 
       } catch (Exception e) {
+
+        try {
+          Config.getWorker(ExceptionConsumer.class).accept(e);
+        } catch (Exception innerException) {
+          logger.error("failed log exception");
+        }
 
         if (getInstructions().size() > 0
             && index < getInstructions().size()

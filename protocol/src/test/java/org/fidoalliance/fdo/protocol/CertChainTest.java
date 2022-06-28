@@ -50,7 +50,6 @@ public class CertChainTest {
     chain2.getPath();
 
 
-    str.toString();
   }
 
 }

@@ -1,25 +1,38 @@
 hibernate-properties:
-  connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:8051/./app-data/emdb
-  hibernate.dialect: org.hibernate.dialect.H2Dialect
+  hibernate.connection.url: jdbc:mariadb://host.docker.internal:3306/emdb?useSSL=$(useSSL)
+  hibernate.connection.requireSSL: $(requireSSL)
+  hibernate.connection.autoReconnect: true
+  hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
   application.version: 1.1.1-SNAPSHOT
+  server.api.user: $(api_user)
+  server.api.password: "$(api_password)"
   service.name: "Owner"
-  # Uncomment the below properties for proxy setup
-  #http.proxyHost: $(http_host)
-  #http.proxyPort: $(http_port)
-  #https.proxyHost: $(https_host)
-  #https.proxyPort: $(https_port)
-  #http.nonProxyHosts: $(no_proxy)
+  javax.net.debug: ssl:handshake
+  #javax.net.ssl.keyStore: ./app-data/client-store.jks
+  #javax.net.ssl.keyStorePassword: $(store_password)
+  #javax.net.ssl.trustStorePassword: $(store_password)
+  #javax.net.ssl.trustStore: ./app-data/ca-certs.jks
+  #javax.net.ssl.keyStoreType: PEMS
+  #javax.net.ssl.trustStoreType: PEM
+  #log4j.logger.org.apache.http.impl.conn: DEBUG
+  #log4j.logger.org.apache.http.impl.client: DEBUG
+  #log4j.logger.org.apache.http.client: DEBUG
+  # set system proxy information
+  #http.proxyHost:
+  #http.proxyPort:
+  #https.proxyHost:
+  #https.proxyPort:
+  #http.nonProxyHosts:
   
 
 http-server:
-  base_path: app-data
+  base_path: .
   http_port: 8042
   https_port: 8043
   http_schemes:
@@ -27,19 +40,15 @@ http-server:
   - https
   http_timeout: 20000
   keystore: 
-    path: ssl.p12
-    store-type: PKCS12
-    password: $(ssl_password)
+    path: ./app-data/ssl-host.pem
+    store-type: PEM
+    password: ''
     alias: ssl
-  auth:
-    method: DIGEST
-    role: api
-    user_name: apiUser
-    user_password: $(api_password)
-  subject_names:
-    - DNS:localhost
-    - IP:127.0.0.1
-  to0-scheduler:
+  truststore: ./app-data/ca-certs.pem
+  certificate_verification: want
+  certificate_verification_depth: 2
+
+to0-scheduler:
     thread-count: 5
     interval: 120
 
@@ -53,9 +62,7 @@ owner:
        path: replacement.p12
        store-type: PKCS12
        password: $(encrypt_password)
-   to0-scheduler:
-     thread-count: 5
-     interval: 120
+   
 
 epid:
   # WARNING: do not set testmode to true in production environments
@@ -68,18 +75,6 @@ epid:
   url: http://verify.epid-sbx.trustedservices.intel.com
 
 
-h2-database:
-   tcp-server:
-     - "-ifNotExists"
-     - "-tcpPort" 
-     - "8051"
-   web-server:
-     # - "-webAllowOthers"
-     # - "-webExternalNames"
-     # - "serverfqdn"
-     - "-webPort"
-     - "8085"
- 
 
 #  *********************** NOTE **********************************************
 #
@@ -108,16 +103,14 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
-  # Disable SelfSignedHttpClientSupplier in Production Environment to perform SSL certificate verification.
-  # Use StandardHttpClientSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
-  #- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+  #- Use StandardHttpClientSupplier for secure Production configurations.
+  - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
-  #- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
   # Disable BasicServiceInfoClientSupplier in Production Environment to perform SSL certificate verification.
   # Use StandardServiceInfoClientSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+  #- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream

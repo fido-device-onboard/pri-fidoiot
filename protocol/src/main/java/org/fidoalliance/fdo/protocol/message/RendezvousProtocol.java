@@ -16,7 +16,7 @@ public enum RendezvousProtocol {
   PROT_COAP_TCP(5),
   PROT_COAP_UDP(6);
 
-  private int id;
+  private final int id;
 
   RendezvousProtocol(int id) {
     this.id = id;

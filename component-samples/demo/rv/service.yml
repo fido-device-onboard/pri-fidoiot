@@ -1,19 +1,38 @@
 hibernate-properties:
-  connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:8050/./app-data/emdb
-  hibernate.dialect: org.hibernate.dialect.H2Dialect
+  hibernate.connection.url: jdbc:mariadb://host.docker.internal:3306/emdb?useSSL=$(useSSL)
+  hibernate.connection.requireSSL: $(requireSSL)
+  hibernate.connection.autoReconnect: true
+  hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
   application.version: 1.1.1-SNAPSHOT
+  server.api.user: $(api_user)
+  server.api.password: "$(api_password)"
   service.name: "Rendezvous"
+  javax.net.debug: ssl:handshake
+  #javax.net.ssl.keyStore: ./app-data/client-store.jks
+  #javax.net.ssl.keyStorePassword: $(store_password)
+  #javax.net.ssl.trustStorePassword: $(store_password)
+  #javax.net.ssl.trustStore: ./app-data/ca-certs.jks
+  #javax.net.ssl.keyStoreType: PEMS
+  #javax.net.ssl.trustStoreType: PEM
+  #log4j.logger.org.apache.http.impl.conn: DEBUG
+  #log4j.logger.org.apache.http.impl.client: DEBUG
+  #log4j.logger.org.apache.http.client: DEBUG
+  # set system proxy information
+  #http.proxyHost:
+  #http.proxyPort:
+  #https.proxyHost:
+  #https.proxyPort:
+  #http.nonProxyHosts:
   
 
 http-server:
-  base_path: app-data
+  base_path: .
   http_port: 8040
   https_port: 8041
   http_schemes:
@@ -21,18 +40,13 @@ http-server:
   - https
   http_timeout: 20000
   keystore: 
-    path: ssl.p12
-    store-type: PKCS12
-    password: $(ssl_password)
+    path: ./app-data/ssl-host.pem
+    store-type: PEM
+    password: ''
     alias: ssl
-  auth:
-    method: DIGEST
-    role: api
-    user_name: apiUser
-    user_password: $(api_password)
-  subject_names:
-    - DNS:localhost
-    - IP:127.0.0.1
+  truststore: ./app-data/ca-certs.pem
+  certificate_verification: want
+  certificate_verification_depth: 2
 
 manufacturer:
    keystore: 
