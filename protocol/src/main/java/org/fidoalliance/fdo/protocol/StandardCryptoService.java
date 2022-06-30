@@ -121,6 +121,7 @@ public class StandardCryptoService implements CryptoService {
   }
 
   private static Provider getInitializedProvider() {
+    Security.addProvider(new PemProvider());
     Provider result = new BouncyCastleProvider();
     Security.addProvider(result);
     return result;

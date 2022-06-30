@@ -21,7 +21,7 @@ public class RvRedirect {
   private String guid;
 
   @Lob
-  @Column(name = "data", nullable = false)
+  @Column(name = "data", length = 65535, nullable = false)
   private byte[] data;
 
   @Column(name = "expiry", nullable = false)

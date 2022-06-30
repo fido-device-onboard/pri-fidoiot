@@ -10,8 +10,10 @@ services:
     container_name: pri-fdo-aio
     expose:
       - "8080"
+      - "8443"
     ports:
       - "8080:8080"
+      - "8443:8443"
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,6 +22,11 @@ services:
     restart: on-failure:5
     env_file:
       - service.env
+    secrets:
+      - ssl-host.pem
+      - ca-certs.pem
+      - api-user.pem
+      - db_password.txt
     volumes:
       - ./app-data:/home/fdo/app-data 
     extra_hosts:
@@ -29,3 +36,12 @@ services:
     cpu_shares: 1024
     pids_limit: 500
 
+secrets:
+  ssl-host.pem:
+    file: ./secrets/ssl-host.pem
+  ca-certs.pem:
+    file: ./secrets/ca-certs.pem
+  api-user.pem:
+    file: ./secrets/api-user.pem
+  db_password.txt:
+    file: ./secrets/db_password.txt

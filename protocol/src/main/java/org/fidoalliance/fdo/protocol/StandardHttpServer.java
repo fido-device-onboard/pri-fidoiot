@@ -6,13 +6,10 @@ package org.fidoalliance.fdo.protocol;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -21,41 +18,22 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.net.ssl.X509TrustManager;
 import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.Realm;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.deploy.NamingResourcesImpl;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.util.StandardSessionIdGenerator;
-import org.apache.tomcat.util.descriptor.web.ContextResource;
-import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate.Type;
 import org.apache.tomcat.util.scan.StandardJarScanner;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
-import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
-import org.fidoalliance.fdo.protocol.dispatch.KeyStoreInputStreamFunction;
-import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
-import org.fidoalliance.fdo.protocol.dispatch.ValidityDaysSupplier;
-import org.fidoalliance.fdo.protocol.message.KeySizeType;
-import org.fidoalliance.fdo.protocol.message.PublicKeyType;
-
 
 /**
  * Defines a FDO server.
@@ -107,8 +85,20 @@ public class StandardHttpServer implements HttpServer {
     private String httpsPort;
     @JsonProperty("address")
     private String address;
-    @JsonProperty("truststore")
-    private String trustStore;
+    @JsonProperty("truststore_file")
+    private String trustStoreFile;
+    @JsonProperty("truststore_type")
+    private String trustStoreType;
+    @JsonProperty("truststore_password")
+    private String trustStorePassword;
+    @JsonProperty("server_cert")
+    private String serverCert;
+    @JsonProperty("server_key")
+    private String serverKey;
+    @JsonProperty("protocols")
+    private String protocols;
+    @JsonProperty("ciphers")
+    private String ciphers;
     @JsonProperty("certificate_verification")
     private String certVerification;
     @JsonProperty("certificate_verification_depth")
@@ -118,8 +108,6 @@ public class StandardHttpServer implements HttpServer {
     private String[] httpSchemes;
     @JsonProperty("http_timeout")
     private String timeout;
-    @JsonProperty("keystore")
-    private KeyStoreConfig httpsKeyStore;
     @JsonProperty("context_parameters")
     private final Map<String, String> additionalParameters = new HashMap<>();
 
@@ -146,8 +134,33 @@ public class StandardHttpServer implements HttpServer {
       return resolve(address);
     }
 
-    public String getTrustStore() {
-      return resolve(trustStore);
+    public String getTrustStoreFile() {
+      return resolve(trustStoreFile);
+    }
+
+    public String getTrustStoreType() {
+      return resolve(trustStoreType);
+    }
+
+    public String getTrustStorePassword() {
+      return resolve(trustStorePassword);
+    }
+
+    public String getServerCert() {
+      return resolve(serverCert);
+    }
+
+    public String getServerKey() {
+      return resolve(serverKey);
+    }
+
+
+    public String getProtocols() {
+      return resolve(protocols);
+    }
+
+    public String getCiphers() {
+      return resolve(ciphers);
     }
 
     public String[] getHttpSchemes() {
@@ -156,10 +169,6 @@ public class StandardHttpServer implements HttpServer {
 
     public String getTimeout() {
       return resolve(timeout);
-    }
-
-    public KeyStoreConfig getHttpsKeyStore() {
-      return httpsKeyStore;
     }
 
     public String getCertificateVerification() {
@@ -247,13 +256,11 @@ public class StandardHttpServer implements HttpServer {
         httpsConnector.setScheme(HttpUtils.HTTPS_SCHEME);
         SSLHostConfig sslHostConfig = null;
 
-        KeyStoreConfig storeConfig = config.getHttpsKeyStore();
-
         try {
           KeyStore ks = loadKeystore();
           SSLHostConfigCertificate certConfig = null;
 
-          Certificate cert = ks.getCertificate(storeConfig.getAlias());
+          Certificate cert = ks.getCertificate("0");
 
           if (cert != null) {
             PublicKey publicKey = cert.getPublicKey();
@@ -270,26 +277,23 @@ public class StandardHttpServer implements HttpServer {
           }
           if (certConfig != null) {
             certConfig.setCertificateKeystore(ks);
-            certConfig.setCertificateKeyAlias(storeConfig.getAlias());
-            certConfig.setCertificateKeyPassword(storeConfig.getPassword());
+            certConfig.setCertificateKeyPassword("");
+            certConfig.setCertificateKeyAlias("0");
             sslHostConfig.addCertificate(certConfig);
 
-            String pemString = Files.readString(Path.of(config.getTrustStore()));
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(null, null);
-            List<Certificate> certs = PemLoader.loadCerts(pemString);
-            int index = 1;
-            for (Certificate trustCert : certs) {
-              trustStore.setCertificateEntry("client" + index++, trustCert);
-            }
-            sslHostConfig.setTrustStore(trustStore);
+            sslHostConfig.setTruststoreFile(config.getTrustStoreFile());
+            sslHostConfig.setTruststoreType(config.getTrustStoreType());
+            sslHostConfig.setTruststorePassword(config.getTrustStorePassword());
+
             sslHostConfig.setCertificateVerificationDepth(
                 Integer.parseInt(config.getCertificateVerificationDepth()));
             sslHostConfig.setCertificateVerification(config.getCertificateVerification());
-
-            boolean depth = sslHostConfig.isCertificateVerificationDepthConfigured();
-
-            Boolean.toString(depth);
+            if (config.ciphers != null) {
+              sslHostConfig.setCiphers(config.getCiphers());
+            }
+            if (config.protocols != null) {
+              sslHostConfig.setSslProtocol(config.getProtocols());
+            }
 
             httpsConnector.addSslHostConfig(sslHostConfig);
           }
@@ -297,6 +301,7 @@ public class StandardHttpServer implements HttpServer {
 
           logger.error(e.getMessage());
         }
+
         httpsConnector.setProperty("sslProtocol", "TLS");
         httpsConnector.setProperty("SSLEnabled", "true");
         httpsConnector.setProperty("connectionTimeout", config.getTimeout());
@@ -355,12 +360,22 @@ public class StandardHttpServer implements HttpServer {
 
   protected KeyStore loadKeystore() throws IOException {
 
-    KeyStoreConfig storeConfig = config.getHttpsKeyStore();
-    KeyResolver resolver = new KeyResolver();
-    resolver.load(storeConfig);
+    try {
+      KeyStore ks = KeyStore.getInstance("PEM");
+      ks.load(null,"".toCharArray());
 
-    return resolver.getKeyStore();
+      String pemString = Files.readString(Path.of(config.getServerKey()));
+      PrivateKey privateKey = PemLoader.loadPrivateKey(pemString,"");
+      pemString = Files.readString(Path.of(config.getServerCert()));
+      List<Certificate> certs = PemLoader.loadCerts(pemString);
 
+      ks.setKeyEntry("0",privateKey,"".toCharArray(),
+          certs.stream().toArray(Certificate[]::new));
+
+      return ks;
+    } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+      throw new IOException(e);
+    }
   }
 
 

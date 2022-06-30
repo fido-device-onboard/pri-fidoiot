@@ -11,7 +11,24 @@ services:
     restart: always
     ports:
       - 3306:3306   
-    env_file:
-      - service.env
+    environment:
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_password.txt
+      - MARIADB_DATABASE=emdb
+    secrets:
+      - ca-cert.pem
+      - server-cert.pem
+      - server-key.pem
+      - db_password.txt
     volumes:
       - ./app-data:/var/lib/mysql
+      - ./custom:/etc/mysql/conf.d
+
+secrets:
+  ca-cert.pem:
+    file: ./secrets/ca-cert.pem
+  server-cert.pem:
+    file: ./secrets/server-cert.pem
+  server-key.pem:
+    file: ./secrets/server-key.pem
+  db_password.txt:
+    file: ./secrets/db_password.txt

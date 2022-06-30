@@ -18,7 +18,7 @@ public class CertificateData {
   private String name;
 
   @Lob
-  @Column(name = "data")
+  @Column(name = "data", length = 65535)
   private byte[] data;
 
   public String getName() {

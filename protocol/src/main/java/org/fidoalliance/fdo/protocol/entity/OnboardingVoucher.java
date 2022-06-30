@@ -22,11 +22,11 @@ public class OnboardingVoucher {
   private String guid;
 
   @Lob
-  @Column(name = "data", nullable = false)
+  @Column(name = "data", length = 65535, nullable = false)
   private byte[] data;
 
   @Lob
-  @Column(name = "replacement")
+  @Column(name = "replacement",length = 65535)
   private byte[] replacement;
 
 

@@ -24,7 +24,7 @@ public class OnboardingConfig {
   private Clob rvBlob;
 
   @Lob
-  @Column(name = "replacement_rvInfo")
+  @Column(name = "replacement_rvInfo",length = 65535)
   private Clob replacementRvInfo;
 
   @Column(name = "max_message_size")

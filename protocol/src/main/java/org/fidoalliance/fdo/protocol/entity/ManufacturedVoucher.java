@@ -22,7 +22,7 @@ public class ManufacturedVoucher {
   private String serialNo;
 
   @Lob
-  @Column(name = "data", nullable = false)
+  @Column(name = "data", length = 65535, nullable = false)
   private byte[] data;
 
   @Column(name = "created_on")

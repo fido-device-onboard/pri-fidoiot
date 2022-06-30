@@ -34,10 +34,10 @@ public class Config {
   private static final String ENV_PARAM_START = "$(";
   private static final String ENV_PARAM_END = ")";
   private static final String CONFIG_HOME = "fdo.config.home";
+  private static final String SECRETS_PATH = "secrets.path";
 
   private static Root ROOT;
   private static final Properties env = new Properties();
-  private static final Properties secrets = new Properties();
   private static List<Object> workers = new ArrayList<>();
   private static final List<Object> configs = new ArrayList<>();
 
@@ -66,11 +66,22 @@ public class Config {
       loadSystemProperties();
       loadWorkerItems();
 
+
+
     } catch (Throwable e) {
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
         System.out.println(yamlException.getMessage());
+      } else  {
+        if (e.getCause() != null) {
+          System.out.println(e.getCause().getClass().getName());
+          System.out.println(e.getCause().getMessage());
+        } else {
+          System.out.println(e.getClass().getName());
+          System.out.println(e.getMessage());
+        }
       }
+
       System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
       System.exit(-1);
     }
@@ -144,7 +155,21 @@ public class Config {
         loadConfig(file);
       }
     }
+    try {
+      env.put(SECRETS_PATH,Files.readString(Path.of(SECRETS_PATH)));
+    } catch (IOException e) {
+      throw new RuntimeException(SECRETS_PATH, e);
+    }
 
+  }
+
+  private static boolean isSecret(String secret) {
+    for (String s : ROOT.secrets) {
+      if (s.equals(secret)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void loadConfig(File file) {
@@ -250,14 +275,16 @@ public class Config {
               }
             }
           }
-          result = result.substring(0, start) + envValue + value.substring(end + 1);
-          if (secrets.containsKey(envName)) {
+          if (isSecret(envName)) {
             try {
-              result = Files.readString(Path.of(result));
+              final String secretPath = Files.readString(Path.of(SECRETS_PATH));
+              envValue = Files.readString(Path.of(secretPath,envValue));
             } catch (IOException e) {
               throw  new RuntimeException(e);
             }
           }
+          result = result.substring(0, start) + envValue + value.substring(end + 1);
+
         } else {
           break;
         }
