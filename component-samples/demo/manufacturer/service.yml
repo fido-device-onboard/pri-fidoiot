@@ -11,13 +11,15 @@ system-properties:
   app-data.dir: ./app-data
   application.version: 1.1.1-SNAPSHOT
   service.name: "Manufacturer"
-  javax.net.debug: ssl:handshake
-  #javax.net.ssl.keyStore: ./app-data/client-store.jks
-  #javax.net.ssl.keyStorePassword: $(store_password)
-  #javax.net.ssl.trustStorePassword: $(store_password)
-  #javax.net.ssl.trustStore: ./app-data/ca-certs.jks
-  #javax.net.ssl.keyStoreType: PEMS
-  #javax.net.ssl.trustStoreType: PEM
+  server.api.user: $(api_user)
+  server.api.password: "null"
+  javax.net.ssl.keyStorePassword: default
+  javax.net.ssl.trustStorePassword: default
+  javax.net.ssl.keyStore: $(secrets.path)/api-user.pem
+  javax.net.ssl.trustStore: $(secrets.path)/ca-cert.pem
+  javax.net.ssl.keyStoreType: PEM
+  javax.net.ssl.trustStoreType: PEM
+  #javax.net.debug: ssl:handshake
   #log4j.logger.org.apache.http.impl.conn: DEBUG
   #log4j.logger.org.apache.http.impl.client: DEBUG
   #log4j.logger.org.apache.http.client: DEBUG
@@ -27,9 +29,12 @@ system-properties:
   #https.proxyHost:
   #https.proxyPort:
   #http.nonProxyHosts:
-  server.api.user: $(api_user)
-  server.api.password: "$(api_password)"
-  
+
+
+secrets:
+  - db_password
+
+
 http-server:
   base_path: .
   http_port: 8039
@@ -38,14 +43,15 @@ http-server:
   - http
   - https
   http_timeout: 20000
-  keystore: 
-    path: ./app-data/ssl-host.pem
-    store-type: PEM
-    password: ''
-    alias: ssl
-  truststore: ./app-data/ca-certs.pem
+  server_cert: $(secrets.path)/server-cert.pem
+  server_key: $(secrets.path)/server-key.pem
+  truststore_file: $(secrets.path)/ca-cert.pem
+  truststore_type: PEM
   certificate_verification: want
-  certificate_verification_depth: 2  
+  protocols: TLSv1.3
+  certificate_verification_depth: 2
+  
+
 
 manufacturer:
    keystore: 
@@ -70,6 +76,7 @@ epid:
   url: http://verify.epid-sbx.trustedservices.intel.com
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.StandardHttpServer

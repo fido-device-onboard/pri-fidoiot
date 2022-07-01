@@ -13,13 +13,13 @@ system-properties:
   server.api.user: $(api_user)
   server.api.password: "null"
   service.name: "All-in-one demo"
-  javax.net.debug: ssl:handshake
   javax.net.ssl.keyStorePassword: default
   javax.net.ssl.trustStorePassword: default
   javax.net.ssl.keyStore: $(secrets.path)/api-user.pem
   javax.net.ssl.trustStore: $(secrets.path)/ca-cert.pem
   javax.net.ssl.keyStoreType: PEM
   javax.net.ssl.trustStoreType: PEM
+  #javax.net.debug: ssl:handshake
   #log4j.logger.org.apache.http.impl.conn: DEBUG
   #log4j.logger.org.apache.http.impl.client: DEBUG
   #log4j.logger.org.apache.http.client: DEBUG
@@ -50,9 +50,6 @@ http-server:
   protocols: TLSv1.3
   certificate_verification_depth: 2
 
-to0-scheduler:
-    thread-count: 5
-    interval: 120
 
 manufacturer:
    keystore: 
@@ -118,7 +115,8 @@ cwt:
 
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
-  - org.fidoalliance.fdo.protocol.DebugExceptionConsumer
+  #- org.fidoalliance.fdo.protocol.DebugExceptionConsumer
+  - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.StandardHttpServer

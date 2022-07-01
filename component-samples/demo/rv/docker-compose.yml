@@ -22,10 +22,26 @@ services:
     restart: on-failure:5
     env_file:
       - service.env
+    secrets:
+      - ca-cert.pem
+      - server-cert.pem
+      - server-key.pem
+      - api-user.pem
+      - db_password.txt
     volumes:
       - ./app-data:/home/fdo/app-data 
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
     pids_limit: 500
-
+secrets:
+  ca-cert.pem:
+    file: ./secrets/ca-cert.pem
+  server-cert.pem:
+    file: ./secrets/server-cert.pem
+  server-key.pem:
+    file: ./secrets/server-key.pem
+  api-user.pem:
+    file: ./secrets/api-user.pem
+  db_password.txt:
+    file: ./secrets/db_password.txt

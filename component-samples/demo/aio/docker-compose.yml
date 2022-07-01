@@ -23,8 +23,9 @@ services:
     env_file:
       - service.env
     secrets:
-      - ssl-host.pem
-      - ca-certs.pem
+      - ca-cert.pem
+      - server-cert.pem
+      - server-key.pem
       - api-user.pem
       - db_password.txt
     volumes:
@@ -37,10 +38,12 @@ services:
     pids_limit: 500
 
 secrets:
-  ssl-host.pem:
-    file: ./secrets/ssl-host.pem
-  ca-certs.pem:
-    file: ./secrets/ca-certs.pem
+  ca-cert.pem:
+    file: ./secrets/ca-cert.pem
+  server-cert.pem:
+    file: ./secrets/server-cert.pem
+  server-key.pem:
+    file: ./secrets/server-key.pem
   api-user.pem:
     file: ./secrets/api-user.pem
   db_password.txt:
