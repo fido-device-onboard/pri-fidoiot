@@ -1,3 +1,5 @@
+
+
 # Table of Contents
 1. [System Requirements](#system-requirements)
 2. [Docker Commands](#docker-commands)
@@ -14,11 +16,11 @@
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04 / RHEL 8.4
+* Operating System: Ubuntu 20.04 / RHEL 8
 
 * Linux packages:
 
-  - Docker engine (minimum version 18.09, Supported till version 20.10.7) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.7, Supported till version 20.10.17) / Podman engine (For RHEL)
 
   - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
 
@@ -85,48 +87,48 @@ sudo docker system prune -a
 ## Start Podman
 * Use the following command to start the podman container.
 ```
-podman-compose up -d --build
+sudo podman-compose up -d --build
 ```
 
 ## Stop Podman
 
 * Use the following command to stop a specific podman container.
 ```
-podman stop <container-name>
+sudo podman stop <container-name>
 ```
 OR
 ```
-podman stop <container-id>
+sudo podman stop <container-id>
 ```
 
 * Use the following command to stop all running podman containers.
 ```
-podman stop -a
+sudo podman stop -a
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-podman rm <container-name>
+sudo podman rm <container-name>
 ```
 OR
 ```
-podman rm <container-id>
+sudo podman rm <container-id>
 ```
 
 * Use the following command to remove the podman image.
 ```
-podman rmi <image-name>
+sudo podman rmi <image-name>
 ```
 OR
 ```
-podman rmi <image-id>
+sudo podman rmi <image-id>
 ```
 
 * Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
 ```
-podman system prune -a
+sudo podman system prune -a
 ```
 # Configuring Proxies
 
@@ -202,6 +204,8 @@ bash scripts/enable_podman_support.sh
 grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+***NOTE***:  **Before starting the containers on RHEL, replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
