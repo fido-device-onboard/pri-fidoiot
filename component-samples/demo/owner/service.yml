@@ -37,8 +37,8 @@ http-server:
     user_name: apiUser
     user_password: $(api_password)
   subject_names:
-    - DNS:localhost
-    - IP:127.0.0.1
+    - DNS:host.docker.internal
+#    - IP:127.0.0.1
   to0-scheduler:
     thread-count: 5
     interval: 120

@@ -139,7 +139,7 @@ The subject name of the self-signed certificate is defined in the service.yml un
 ```
 http-server:
     subject_names:
-    - DNS:localhost
+    - DNS:host.docker.internal
     - IP:127.0.0.1
 ```
 
@@ -148,8 +148,8 @@ Replace or add new DNS and IP entries with the ones required by the HTTPs/Web Se
 ```
 http-server:
     subject_names:
-    - DNS:localhost
-    - DNS:localhost2
+    - DNS:myhost
+    - DNS:myhost2
     - IP:127.0.0.1
     - IP:127.0.0.2
 ```
@@ -176,7 +176,7 @@ $ java -jar aio.jar
 The server will listen for FDO PRI http & https messages on port 8080 and 8443 respectively.
 
 The H2 database will listen on TCP port 9092.
-The H2 Web Console will be available at http://localhost:8082
+The H2 Web Console will be available at http://host.docker.internal:8082
 
 The all-in-one supports all FDO protocols in a single service by default. 
 
@@ -199,7 +199,7 @@ $ java -jar aio.jar
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8040 and 8041 respectively.
 The H2 database will listen on TCP port 8050.
-The H2 Web Console will be available at http://localhost:8084
+The H2 Web Console will be available at http://host.docker.internal:8084
 
 #### Starting the FDO PRI Owner HTTP Server
 
@@ -217,7 +217,7 @@ $ java -jar aio.jar
 
 The server will listen for FDO PRI HTTP & HTTPS messages on port 8042 and 8043 respectively.
 The H2 database will listen on TCP port 8051.
-The H2 Web Console will be available at http://localhost:8085
+The H2 Web Console will be available at http://host.docker.internal:8085
 
 #### Starting the FDO PRI Manufacturer Server
 
@@ -235,7 +235,7 @@ $ java -jar aio.jar
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8039 and 8038 respectively.
 The H2 database will listen on TCP port 8049.
-The H2 Web Console will be available at http://localhost:8083
+The H2 Web Console will be available at http://host.docker.internal:8083
 
 You can allow remote database console connections by uncommenting the line containing "-webAllowOthers" in the service.yml
 
@@ -279,15 +279,15 @@ Before running the device for the first time start the demo manufacturer.
 
 Use the following REST api to specify the rendezvous instructions for demo rv server.
 
-POST https://localhost:8038/api/v1/rvinfo (or http://localhost:8039/api/v1/rvinfo)
+POST https://host.docker.internal:8038/api/v1/rvinfo (or http://host.docker.internal:8039/api/v1/rvinfo)
 The post body content-type header `text/plain`
 Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
 POST content
 ```
-[[[5,"localhost"],[3,8041],[12,2],[2,"127.0.0.1"],[4,8041]]]
+[[[5,"host.docker.internal"],[3,8041],[12,2],[2,"127.0.0.1"],[4,8041]]]
 ```
 
-Change the `di-url: http://localhost:8080` in the demo device service.yml to `di-url: http://localhost:8039`
+Change the `di-url: http://host.docker.internal:8080` in the demo device service.yml to `di-url: http://host.docker.internal:8039`
 
 After Running the device the successful output would be as follows:
 
@@ -302,7 +302,7 @@ $ java -jar device.jar
 
 Next get the owners public key by starting the demo owner service and use the following REST API.
 
-GET https://localhost:8043/api/v1/certificate?alias=SECP256R1 (or http://localhost:8042/api/v1/certificate?alias=SECP256R1)
+GET https://host.docker.internal:8043/api/v1/certificate?alias=SECP256R1 (or http://host.docker.internal:8042/api/v1/certificate?alias=SECP256R1)
 Authorization DIGEST with "apiUser" and api_password defined in the Owner's service.env
 Response body will be the Owner's certificate in PEM format
 
@@ -316,7 +316,7 @@ Response body will be the Owner's certificate in PEM format
 
 For EC384 based vouchers use the following API:
 
-GET https://localhost:8043/api/v1/certificate?alias=SECP384R1 (or http://localhost:8042/api/v1/certificate?alias=SECP384R1)
+GET https://host.docker.internal:8043/api/v1/certificate?alias=SECP384R1 (or http://host.docker.internal:8042/api/v1/certificate?alias=SECP384R1)
 Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
 Result body will be the owners certificate in PEM format
 
@@ -324,7 +324,7 @@ Result body will be the owners certificate in PEM format
 
 Next, collect the serial number of the last manufactured voucher
 
-GET https://localhost:8038/api/v1/deviceinfo/{seconds} (or http://localhost:8039/api/v1/deviceinfo/100000)
+GET https://host.docker.internal:8038/api/v1/deviceinfo/{seconds} (or http://host.docker.internal:8039/api/v1/deviceinfo/100000)
 Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
 Result will contain the device info
 ```
@@ -332,7 +332,7 @@ Result will contain the device info
 ```
 
 Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
-POST https://localhost:8038/api/v1/mfg/vouchers/43FF320A(or http://localhost:8039api/v1/mfg/vouchers/43FF320A)
+POST https://host.docker.internal:8038/api/v1/mfg/vouchers/43FF320A(or http://host.docker.internal:8039api/v1/mfg/vouchers/43FF320A)
 Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
 POST content-type `text\plain` 
 
@@ -350,7 +350,7 @@ Response will contain the ownership voucher
 ```
 
 Post the extended ownership found obtained from the manufacturer to the owner
-POST https://localhost:8043/api/v1/owner/vouchers (or http://localhost:8042/api/v1/owner/vouchers)
+POST https://host.docker.internal:8043/api/v1/owner/vouchers (or http://host.docker.internal:8042/api/v1/owner/vouchers)
 Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
 POST content-type `text\plain`
 
@@ -364,19 +364,19 @@ Eg: 24275cd7-f9f5-4d34-a2a5-e233ac38db6c
 
 Configure the Owners TO2 address using the following API:
 
-POST https://localhost:8043/api/v1/owner/redirect (or http://localhost:8042/api/v1/owner/redirect)
+POST https://host.docker.internal:8043/api/v1/owner/redirect (or http://host.docker.internal:8042/api/v1/owner/redirect)
 Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
 POST content-type `text\plain`
 
 In the request body add Owner T02RedirectAddress.
 ```
-[[null,"localhost",8043,5]]
+[[null,"host.docker.internal",8043,5]]
 ```
 Response `200 OK`
 
 Trigger owner to perform To0 with the voucher and post the extended ownership found obtained from the manufacturer to the owner
 
-GET https://localhost:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://localhost:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
+GET https://host.docker.internal:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://host.docker.internal:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
 Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
 Response `200 OK`
 
@@ -385,7 +385,7 @@ Response `200 OK`
 #### Configure the owner service info package
 
 Use the following API to configure a service info package.
-POST https://localhost:8043/api/v1/owner/svi (or http://localhost:8042/api/v1/owner/svi)
+POST https://host.docker.internal:8043/api/v1/owner/svi (or http://host.docker.internal:8042/api/v1/owner/svi)
 Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
 POST content
 ```

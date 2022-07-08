@@ -3,7 +3,7 @@
 
 device:
 
-  di-url: http://localhost:8080
+  di-url: http://host.docker.internal:8080
 
   credential-file: credentials.bin
  
