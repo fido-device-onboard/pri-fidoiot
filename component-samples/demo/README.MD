@@ -1,3 +1,5 @@
+
+
 # Table of Contents
 1. [System Requirements](#system-requirements)
 2. [Docker Commands](#docker-commands)
@@ -14,11 +16,11 @@
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04 / RHEL 8.4
+* Operating System: Ubuntu 20.04 / RHEL 8
 
 * Linux packages:
 
-  - Docker engine (minimum version 18.09, Supported till version 20.10.7) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.7, Supported till version 20.10.17) / Podman engine (For RHEL)
 
   - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
 
@@ -85,48 +87,48 @@ sudo docker system prune -a
 ## Start Podman
 * Use the following command to start the podman container.
 ```
-podman-compose up -d --build
+sudo podman-compose up -d --build
 ```
 
 ## Stop Podman
 
 * Use the following command to stop a specific podman container.
 ```
-podman stop <container-name>
+sudo podman stop <container-name>
 ```
 OR
 ```
-podman stop <container-id>
+sudo podman stop <container-id>
 ```
 
 * Use the following command to stop all running podman containers.
 ```
-podman stop -a
+sudo podman stop -a
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-podman rm <container-name>
+sudo podman rm <container-name>
 ```
 OR
 ```
-podman rm <container-id>
+sudo podman rm <container-id>
 ```
 
 * Use the following command to remove the podman image.
 ```
-podman rmi <image-name>
+sudo podman rmi <image-name>
 ```
 OR
 ```
-podman rmi <image-id>
+sudo podman rmi <image-id>
 ```
 
 * Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
 ```
-podman system prune -a
+sudo podman system prune -a
 ```
 # Configuring Proxies
 
@@ -203,6 +205,8 @@ grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USE
 source ~/.bashrc
 ```
 
+***NOTE***:  **Before starting the containers on RHEL, replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
+
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
 2. Complete Device Initialization (DI) by starting the FDO HTTP Java Device Sample as per the steps outlined in [Device README](device/README.md). Delete any existing 'credentials.bin' before starting the device.
@@ -269,8 +273,6 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
-- Ensure that before each module the `module_name:active` message is sent as `true` for a successful ServiceInfo transfer. The device will ignore all ServiceInfo module messages if module_name:active doesn't precede the messages of the module.
-
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Enabling ServiceInfo Transfer
@@ -287,22 +289,22 @@ curl -D - --digest -u apiUser:${api_password} --location --request POST 'http://
 
 # Customize for multi-machine setup
 
-While customizing the system configuration for multi machine setup, ensure that all `localhost` and `127.0.0.1` references are replaced with respective DNS and IP address of the host machine. The required changes includes :
+While customizing the system configuration for multi machine setup, ensure that all `host.docker.internal` and `172.17.0.1` references are replaced with respective DNS and IP address of the host machine. The required changes includes :
 
 - Updating RVInfo blob in Manufacturer
 
-  - Sample cURL command to update RVInfo in Manufacturer running in the localhost.
+  - Sample cURL command to update RVInfo in Manufacturer running in the host.docker.internal.
     ```shell
-    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://localhost:8039/api/v1/rvinfo' \
+    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
     --header 'Content-Type: text/plain' \
     --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
     ```
 
 - Updating T02RVBlob in Owner
 
-    - Sample cURL command to update T02RVBlob in Owner running in the localhost.
+    - Sample cURL command to update T02RVBlob in Owner running in the host.docker.internal.
       ```shell
-      curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://localhost:8042/api/v1/owner/redirect' \
+      curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8042/api/v1/owner/redirect' \
       --header 'Content-Type: text/plain' \
       --data-raw '[["{owner-ip}","{owner-dns}",8042,3]]'
       ```
@@ -339,12 +341,37 @@ h2-database:
      - "8083"
 ```
 
-**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://localhost:<webport>`.
+**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://host.docker.internal:<webport>`.
 
 NOTE: Not recommended to enable this setting especially on production systems.
 
+# Disk Usage by the embedded database
+
+It is observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
+
+This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
+While shutting down, H2 "compacts" the file in order to reduce the file size.
+
+If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
 
 # Certificate Validity checks
+
+For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+
+In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of respective component.
+
+Sample `service.yml` file:
+
+Disable the following workers
+```
+#- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+```
+and enable
+```
+- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+```
 
 The Device certificate chain is checked during TO0 by the rendezvous server and by the owner during TO2.  This check includes verifying the certificate chain hash and if the leaf certificate has expired. 
 Owner certificates with X5Chain encoding are not analyzed by this implementation.

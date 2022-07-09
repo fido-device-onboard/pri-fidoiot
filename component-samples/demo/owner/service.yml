@@ -8,7 +8,7 @@ hibernate-properties:
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
-  application.version: 1.1.0.1-SNAPSHOT
+  application.version: 1.1.1-SNAPSHOT
   service.name: "Owner"
   # Uncomment the below properties for proxy setup
   #http.proxyHost: $(http_host)
@@ -37,8 +37,8 @@ http-server:
     user_name: apiUser
     user_password: $(api_password)
   subject_names:
-    - DNS:localhost
-    - IP:127.0.0.1
+    - DNS:host.docker.internal
+#    - IP:127.0.0.1
   to0-scheduler:
     thread-count: 5
     interval: 120
@@ -81,6 +81,24 @@ h2-database:
      - "8085"
  
 
+#  *********************** NOTE **********************************************
+#
+# For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
+# In production environments, the configurators should disable the trust for these self-signed certificates
+# by updating the worker list in `service.yml` file of respective component.
+#
+# Disable the following workers
+#
+#  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+#  - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+#
+# and enable
+#
+#  - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+#  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+#
+# *****************************************************************************
+
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
@@ -90,10 +108,15 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
+  # Disable SelfSignedHttpClientSupplier in Production Environment to perform SSL certificate verification.
+  # Use StandardHttpClientSupplier for secure Production configurations.
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
+  #- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
   #- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+  # Disable BasicServiceInfoClientSupplier in Production Environment to perform SSL certificate verification.
+  # Use StandardServiceInfoClientSupplier for secure Production configurations.
   - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
