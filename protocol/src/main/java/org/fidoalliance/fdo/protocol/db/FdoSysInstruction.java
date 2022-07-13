@@ -30,6 +30,9 @@ public class FdoSysInstruction {
   @JsonProperty("url")
   private String url;
 
+  @JsonProperty("sha")
+  private String sha;
+
   @JsonIgnore
   public Map<String, String> getFilter() {
     return filter;
@@ -62,5 +65,10 @@ public class FdoSysInstruction {
   @JsonIgnore
   public String getUrl() {
     return url;
+  }
+
+  @JsonIgnore
+  public String getSha() {
+    return sha;
   }
 }

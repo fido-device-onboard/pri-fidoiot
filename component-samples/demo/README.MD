@@ -255,6 +255,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *url* - The specified URL resource will be downloaded from the client application.
 
+    *sha* - To verify the integrity of the downloaded file using url message.
+
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
@@ -269,7 +271,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
    or
 
-     `{"filedesc" : "sample.sh","url" : "http/https resource"}`
+     `{"filedesc" : "sample.sh","url" : "http/https resource", "sha": "sha-256 value of the downloaded resource"}`
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 

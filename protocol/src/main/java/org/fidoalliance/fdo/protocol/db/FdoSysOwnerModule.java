@@ -394,6 +394,20 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     kv.setKeyName(FdoSys.FILEDOWNLOAD);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getUrl()));
     extra.getQueue().add(kv);
+
+    if (instruction.getSha() != null) {
+      getSha(state, extra, instruction);
+    }
+  }
+
+  protected void getSha(ServiceInfoModuleState state,
+                        FdoSysModuleExtra extra,
+                        FdoSysInstruction instruction)
+          throws IOException {
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(FdoSys.SHACHECK);
+    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getSha()));
+    extra.getQueue().add(kv);
   }
 
 }

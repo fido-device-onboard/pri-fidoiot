@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,6 +20,8 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -93,6 +97,12 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
         if (state.isActive()) {
           String url = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
           downloadFile(url);
+        }
+        break;
+      case FdoSys.SHACHECK:
+        if (state.isActive()) {
+          String shaReceived = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          fileIntegrityCheck("SHA-256", shaReceived);
         }
         break;
       case FdoSys.EXEC:
@@ -213,6 +223,39 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     ReadableByteChannel rbc = Channels.newChannel(website.openStream());
     FileOutputStream fos = new FileOutputStream(filename);
     fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+  }
+
+
+  private void fileIntegrityCheck(String shaInstance, String receivedSha) {
+
+    String filename;
+    if (null == currentFile) {
+      filename = "download.file";
+    } else {
+      filename = currentFile.toString();
+    }
+
+    try {
+      byte[] buffer = new byte[8192];
+      int count;
+      MessageDigest digest = MessageDigest.getInstance(shaInstance);
+      BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filename));
+      while ((count = bis.read(buffer)) > 0) {
+        digest.update(buffer, 0, count);
+      }
+      bis.close();
+
+      byte[] hash = digest.digest();
+      String calculatedHash = Hex.encodeHexString(hash);
+      if (calculatedHash.equals(receivedSha)) {
+        logger.info("Verified " + shaInstance + " value.");
+      } else {
+        throw new IllegalStateException();
+      }
+    } catch (Exception e) {
+      logger.error("Failed to match " + shaInstance + " value.");
+      throw new RuntimeException(e);
+    }
   }
 
 
