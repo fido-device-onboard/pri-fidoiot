@@ -16,7 +16,7 @@
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04 / RHEL 8
+* Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 
 * Linux packages:
 
