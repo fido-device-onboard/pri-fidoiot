@@ -95,7 +95,7 @@ Follow the below steps to start Owner Service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/owner/` and execute following command.
 
 ```shell
-java -jar owner.jar
+java -jar aio.jar
 ```
 
 Make sure to export the credential environment variables set in `service.env` file.

@@ -66,13 +66,13 @@ end of initialization of all services, you will see following statement on the c
 
 `[INFO] Started Manufacturer Service.`
 
-Follow the below steps to start All-In-One demo.
+Follow the below steps to start FDO Manufacturer demo.
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
 
 ```shell
-java -jar manufacturer.jar
+java -jar aio.jar
 ```
 
 Make sure to export the credential environment variables set in `service.env` file.
