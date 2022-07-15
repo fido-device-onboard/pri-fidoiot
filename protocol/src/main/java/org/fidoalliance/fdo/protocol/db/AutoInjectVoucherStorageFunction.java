@@ -88,50 +88,53 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
 
       List<HttpInstruction> h2 = HttpUtils.getInstructions(to2Entries);
 
-      if (HttpUtils.containsAddress(h1, h2)) {
-        To0d to0d = new To0d();
-        to0d.setVoucher(ownershipVoucher);
-        to0d.setWaitSeconds(Duration.ofDays(360 * 10).toSeconds());
-        to0d.setNonce(Nonce.fromRandomUuid());
+      if (!HttpUtils.containsAddress(h1, h2)) {
+        logger.warn("RVInfo and T02Blob addresses is not matching."
+                + " Make sure both entries are correct.");
+      }
 
-        HashType hashType = new AlgorithmFinder().getCompatibleHashType(
-            ownershipVoucher.getHmac().getHashType());
+      To0d to0d = new To0d();
+      to0d.setVoucher(ownershipVoucher);
+      to0d.setWaitSeconds(Duration.ofDays(360 * 10).toSeconds());
+      to0d.setNonce(Nonce.fromRandomUuid());
 
-        CryptoService cs = Config.getWorker(CryptoService.class);
-        byte[] to0dBytes = Mapper.INSTANCE.writeValue(to0d);
-        Hash to0dHash = cs.hash(hashType, to0dBytes);
+      HashType hashType = new AlgorithmFinder().getCompatibleHashType(
+          ownershipVoucher.getHmac().getHashType());
 
-        To1dPayload to1dPayload = new To1dPayload();
-        to1dPayload.setAddressEntries(to2Entries);
-        to1dPayload.setTo1ToTo0Hash(to0dHash);
+      CryptoService cs = Config.getWorker(CryptoService.class);
+      byte[] to0dBytes = Mapper.INSTANCE.writeValue(to0d);
+      Hash to0dHash = cs.hash(hashType, to0dBytes);
 
-        PrivateKey privateKey = ownerResolver.getPrivateKey(newOwnerChain[0].getPublicKey());
-        try {
-          CoseSign1 sign1 = cs.sign(
-              Mapper.INSTANCE.writeValue(to1dPayload),
-              privateKey,
-              lastOwner
-          );
-          RvRedirect blob = new RvRedirect();
-          blob.setGuid(header.getGuid().toString());
+      To1dPayload to1dPayload = new To1dPayload();
+      to1dPayload.setAddressEntries(to2Entries);
+      to1dPayload.setTo1ToTo0Hash(to0dHash);
 
-          To2RedirectEntry redirectEntry = new To2RedirectEntry();
-          redirectEntry.setTo1d(sign1);
-          redirectEntry.setCertChain(ownershipVoucher.getCertChain());
-          blob.setData(Mapper.INSTANCE.writeValue(redirectEntry));
+      PrivateKey privateKey = ownerResolver.getPrivateKey(newOwnerChain[0].getPublicKey());
+      try {
+        CoseSign1 sign1 = cs.sign(
+            Mapper.INSTANCE.writeValue(to1dPayload),
+            privateKey,
+            lastOwner
+        );
+        RvRedirect blob = new RvRedirect();
+        blob.setGuid(header.getGuid().toString());
 
-          Date expiry = new Date(System.currentTimeMillis()
-              + Duration.ofSeconds(to0d.getWaitSeconds()).toMillis());
-          blob.setCreatedOn(new Date(System.currentTimeMillis()));
-          blob.setExpiry(expiry);
-          onboardingVoucher.setTo0Expiry(expiry);
+        To2RedirectEntry redirectEntry = new To2RedirectEntry();
+        redirectEntry.setTo1d(sign1);
+        redirectEntry.setCertChain(ownershipVoucher.getCertChain());
+        blob.setData(Mapper.INSTANCE.writeValue(redirectEntry));
 
-          session.persist(blob);
-          logger.info("Voucher auto injected for guid:" + header.getGuid().toString());
+        Date expiry = new Date(System.currentTimeMillis()
+            + Duration.ofSeconds(to0d.getWaitSeconds()).toMillis());
+        blob.setCreatedOn(new Date(System.currentTimeMillis()));
+        blob.setExpiry(expiry);
+        onboardingVoucher.setTo0Expiry(expiry);
 
-        } finally {
-          cs.destroyKey(privateKey);
-        }
+        session.persist(blob);
+        logger.info("Voucher auto injected for guid:" + header.getGuid().toString());
+
+      } finally {
+        cs.destroyKey(privateKey);
       }
 
       session.persist(onboardingVoucher);
