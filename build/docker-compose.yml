@@ -32,6 +32,5 @@ services:
     mem_reservation: 1000m
     cpu_shares: 5
     pids_limit: 100
-    network_mode: host
 volumes:
   fdo-m2:

@@ -5,7 +5,7 @@ Docker/Podman Script for building `pri-fidoiot` repository. Using this script yo
 
 ## Prerequisites
 
-- Operating system: **Ubuntu 20.04. / RHEL 8.4.**
+- Operating system: **Ubuntu (20.04, 22.04) / RHEL 8.4.**
 
 - Docker engine : **18.09** (Supported till version 20.10.7) / Podman engine (For RHEL).
 
