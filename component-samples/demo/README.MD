@@ -286,7 +286,7 @@ curl -D - --digest -u apiUser:${api_password} --location --request POST 'http://
 --header 'Content-Type: text/plain' --data-binary '@<path-to-file>'
 ```
 
-**NOTE:** If a failure is observed in the middle of SVI file transmission, there is a possibility that runnning container might hit memory limit set in the respective docker-compose.yml file.
+**NOTE:** In case of transferring large payload file via ServiceInfo, there is a possibility that runnning container might hit memory limit set in the respective docker-compose.yml file.
 This can be confirmed using the `docker stats` command that shows live resource statistics for running containers.
 
 During SVI Transfer, observe the column `MEM USAGE / LIMIT` for respective container when SVI transmission is in progress.
