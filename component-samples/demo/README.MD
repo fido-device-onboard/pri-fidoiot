@@ -16,7 +16,7 @@
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04 / RHEL 8
+* Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 
 * Linux packages:
 
@@ -286,6 +286,12 @@ curl -D - --digest -u apiUser:${api_password} --location --request POST 'http://
 --header 'Content-Type: text/plain' --data-binary '@<path-to-file>'
 ```
 
+**NOTE:** In case of transferring large payload file via ServiceInfo, there is a possibility that runnning container might hit memory limit set in the respective docker-compose.yml file.
+This can be confirmed using the `docker stats` command that shows live resource statistics for running containers.
+
+During SVI Transfer, observe the column `MEM USAGE / LIMIT` for respective container when SVI transmission is in progress.
+If the failure is observed when MEM USAGE reaches the LIMIT, it is due to the memory limit we have allocated for the container.
+To resolve this, edit fields `mem_limit` and `mem_reservation` in the respective docker-compose.yml according to the needs and restart the container.
 
 # Customize for multi-machine setup
 

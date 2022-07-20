@@ -7,11 +7,11 @@ The FDO manufacturer service is designed to generate new ownership vouchers by i
 # Getting Started with the FDO Manufacturer
 
 The following are the system requirements for the FDO Manufacturer.
-- Operating System: Ubuntu* 20.04 / RHEL 8.4
+- Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 18.09
+- Docker 20.10.X
 - Docker compose 1.21.2
 - Haveged
 
@@ -66,13 +66,13 @@ end of initialization of all services, you will see following statement on the c
 
 `[INFO] Started Manufacturer Service.`
 
-Follow the below steps to start All-In-One demo.
+Follow the below steps to start FDO Manufacturer demo.
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
 
 ```shell
-java -jar manufacturer.jar
+java -jar aio.jar
 ```
 
 Make sure to export the credential environment variables set in `service.env` file.
