@@ -72,11 +72,11 @@ $ cd <fdo-pri-src>
 $ mvn clean install
 ```
 
-or FDO PRI source can be built using docker container. [REFER](./build/README.MD)
+or FDO PRI source can be built using docker container. [REFER](./build/README.md)
 
 The build creates artifacts which will be used in the rest of this guide.
 
-The runnable artifacts can be found in /<fdo-pri-src/>/component-samples/demo/
+The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ### Credential storage
 
