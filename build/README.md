@@ -35,11 +35,11 @@ When you want to build the latest upstream of the repository.
 #### Podman Commands
 When you want to build a local copy of the repository.
 
-``` podman-compose up --build ```
+``` sudo podman-compose up --build ```
 
 When you want to build the latest upstream of the repository.
 
-``` use_remote=1 podman-compose up --build ```
+``` sudo use_remote=1 podman-compose up --build ```
 
 You also have the option to change the remote repository address as well as the remote repository branch in build.sh file.
 
