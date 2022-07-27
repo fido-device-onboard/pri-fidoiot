@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+     version="2.5">
+ 
+
+   <servlet>
+      <servlet-name>FdoProtocol</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.ProtocolServlet</servlet-class>
+   </servlet>
+
+
+
+   <servlet-mapping> 
+      <servlet-name>FdoProtocol</servlet-name>
+      <url-pattern>/fdo/101/msg/10</url-pattern>
+      <url-pattern>/fdo/101/msg/12</url-pattern>
+      <url-pattern>/fdo/101/msg/20</url-pattern>
+      <url-pattern>/fdo/101/msg/22</url-pattern>
+      <url-pattern>/fdo/101/msg/30</url-pattern>
+      <url-pattern>/fdo/101/msg/32</url-pattern>
+      <url-pattern>/fdo/101/msg/60</url-pattern>
+      <url-pattern>/fdo/101/msg/62</url-pattern>
+      <url-pattern>/fdo/101/msg/64</url-pattern>
+      <url-pattern>/fdo/101/msg/66</url-pattern>
+      <url-pattern>/fdo/101/msg/68</url-pattern>
+      <url-pattern>/fdo/101/msg/70</url-pattern>
+      <url-pattern>/fdo/101/msg/255</url-pattern>
+   </servlet-mapping>
+
+   
+   <servlet>
+      <servlet-name>RvInfo</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.RvInfo</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>RvInfo</servlet-name>
+      <url-pattern>/api/v1/rvinfo</url-pattern>
+   </servlet-mapping>
+
+  <servlet>
+      <servlet-name>Redirect</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.To2Blob</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Redirect</servlet-name>
+      <url-pattern>/api/v1/owner/redirect</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>To0Starter</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.To0Starter</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>To0Starter</servlet-name>
+      <url-pattern>/api/v1/to0/*</url-pattern>
+   </servlet-mapping>
+
+
+   <servlet>
+      <servlet-name>SviPackage</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.SviPackage</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>SviPackage</servlet-name>
+      <url-pattern>/api/v1/owner/svi</url-pattern>
+   </servlet-mapping>
+
+
+  <servlet>
+      <servlet-name>OwnerVoucher</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.OwnerVoucher</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>OwnerVoucher</servlet-name>
+      <url-pattern>/api/v1/owner/vouchers/*</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>Logs</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.Logs</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Logs</servlet-name>
+      <url-pattern>/api/v1/logs</url-pattern>
+   </servlet-mapping>
+   
+
+  <servlet>
+      <servlet-name>Interop</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.InteropVoucher</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>Interop</servlet-name>
+      <url-pattern>/api/v1/interop/vouchers/*</url-pattern>
+   </servlet-mapping>
+   
+   <servlet>
+      <servlet-name>OnDie</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+         <param-name>Api-Class</param-name>
+         <param-value>org.fidoalliance.fdo.protocol.api.OnDie</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping>
+      <servlet-name>OnDie</servlet-name>
+      <url-pattern>/api/v1/ondie</url-pattern>
+   </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AioRvInfo</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.AioRvInfo</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AioRvInfo</servlet-name>
+        <url-pattern>/api/v1/aio/rvinfo</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Health</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.HealthApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Health</servlet-name>
+        <url-pattern>/health</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateValidity</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateValidityApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateValidity</servlet-name>
+        <url-pattern>/api/v1/certificate/validity/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeviceInfo</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.DeviceInfo</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeviceInfo</servlet-name>
+        <url-pattern>/api/v1/deviceinfo/*</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>MfgVoucher</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MfgVoucher</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MfgVoucher</servlet-name>
+        <url-pattern>/api/v1/mfg/vouchers/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CertificateApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.CertificateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CertificateApi</servlet-name>
+        <url-pattern>/api/v1/certificate/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MessageSizeApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MessageSizeApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MessageSizeApi</servlet-name>
+        <url-pattern>/api/v1/owner/messagesize</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServiceInfoSizeApi</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.SviSizeApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceInfoSizeApi</servlet-name>
+        <url-pattern>/api/v1/owner/svisize</url-pattern>
+    </servlet-mapping>
+
+   <servlet>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.SystemResourceApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceInfoResource</servlet-name>
+        <url-pattern>/api/v1/owner/resource</url-pattern>
+    </servlet-mapping>
+
+   <servlet>
+        <servlet-name>OwnerState</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.DeviceStateApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OwnerState</servlet-name>
+        <url-pattern>/api/v1/owner/state/*</url-pattern>
+    </servlet-mapping>
+
+   <servlet>
+      <servlet-name>AllowList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.AllowList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>AllowList</servlet-name>
+      <url-pattern>/api/v1/rv/allow</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+      <servlet-name>DenyList</servlet-name>
+      <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+      <init-param>
+        <param-name>Api-Class</param-name>
+        <param-value>org.fidoalliance.fdo.protocol.api.DenyList</param-value>
+      </init-param>
+   </servlet>
+   <servlet-mapping> 
+      <servlet-name>DenyList</servlet-name>
+      <url-pattern>/api/v1/rv/deny</url-pattern>
+   </servlet-mapping>
+
+   <servlet>
+        <servlet-name>Reseller</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.ResellApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Reseller</servlet-name>
+        <url-pattern>/api/v1/resell/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
