@@ -50,7 +50,7 @@ manufacturer:
      password: $(encrypt_password)
    rv-instruction:
      dns: host.docker.internal
-     ip: 172.17.0.1
+     ip: 127.0.0.1
      protocol: 1
      ownerport: 8443
      devport: 8080

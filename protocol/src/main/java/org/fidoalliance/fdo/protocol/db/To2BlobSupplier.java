@@ -35,7 +35,7 @@ public class To2BlobSupplier implements FailableSupplier<To2AddressEntries, IOEx
         onboardConfig.setReplacementRvInfo(null);
 
         //3=http or 5=https
-        final String defaultBob = "[[null,\"host.docker.internal\",%s,3]]";
+        final String defaultBob = "[[\"127.0.0.1\",\"host.docker.internal\",%s,3]]";
 
         final String defaultPort = Config.getWorker(HttpServer.class).getHttpPort();
         final String rviString = String.format(defaultBob, defaultPort);
