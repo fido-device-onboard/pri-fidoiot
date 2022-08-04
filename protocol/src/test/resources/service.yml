@@ -78,7 +78,6 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.StandardHttpServer
-  - org.fidoalliance.fdo.protocol.StandardDatabaseServer
   - org.fidoalliance.fdo.protocol.StandardCertSignatureFunction
   - org.fidoalliance.fdo.protocol.StandardManufacturerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
@@ -92,8 +91,9 @@ workers:
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
   - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
-  - org.fidoalliance.fdo.protocol.TestHmacFunction
   - org.fidoalliance.fdo.protocol.TestCredentialConsumer
+  - org.fidoalliance.fdo.protocol.TestDatabaseServer
+  - org.fidoalliance.fdo.protocol.TestHmacFunction
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousInfoSupplier

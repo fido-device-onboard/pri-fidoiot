@@ -1,5 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.function.Failable;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -15,7 +16,9 @@ import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialConsumer;
 import org.fidoalliance.fdo.protocol.dispatch.HmacFunction;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.message.*;
+import org.h2.tools.Server;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,8 +27,43 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+class TestDatabaseServer implements DatabaseServer, Closeable {
+
+    private Server webServer;
+    private Server tcpServer;
+
+    @Override
+    public void start() throws IOException {
+        try {
+            String[] tcpArgs = {"-ifNotExists"};
+            tcpServer = Server.createTcpServer(tcpArgs).start();
+
+            String[] webArgs = {"-webPort", "8082"};
+            if (webArgs != null) {
+                webServer = Server.createWebServer(webArgs).start();
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (webServer != null && webServer.isRunning(true)) {
+            webServer.stop();
+            webServer = null;
+        }
+        if (tcpServer != null && tcpServer.isRunning(true)) {
+            tcpServer.stop();
+            tcpServer = null;
+        }
+    }
+}
+
 
 class TestCredentialConsumer implements DeviceCredentialConsumer {
 
