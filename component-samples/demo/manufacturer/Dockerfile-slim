@@ -1,0 +1,27 @@
+# Copyright 2022 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+FROM alpine:3.16
+ARG _JAVA_OPTIONS
+ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
+
+RUN apk add openjdk11-jre-headless --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+RUN adduser --disabled-password -hs fdo
+WORKDIR /home/fdo/
+RUN mkdir -p /home/fdo/lib /home/fdo/WEB-INF /home/fdo/app-data
+
+# Setup service dependencies
+COPY ./lib ./lib/
+COPY ./WEB-INF ./WEB-INF
+COPY log4j2.xml .
+COPY aio.jar .
+COPY hibernate.cfg.xml .
+COPY service.yml .
+
+
+RUN chown -R fdo:fdo /home/fdo
+USER fdo
+
+# Configure and start all-in-one
+CMD ["/usr/lib/jvm/java-11-openjdk/bin/java", "-jar", "aio.jar"]
