@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
+import org.fidoalliance.fdo.protocol.db.To0Scheduler;
 import org.fidoalliance.fdo.protocol.dispatch.AcceptOwnerFunction;
 
 import org.fidoalliance.fdo.protocol.message.MsgType;
@@ -18,6 +19,7 @@ public class StandardTo0Client extends HttpClient {
 
   private To0d to0d;
   private To2AddressEntries addressEntries;
+  private static final LoggerService logger = new LoggerService(StandardTo0Client.class);
 
   public To0d getTo0d() {
     return to0d;
@@ -50,6 +52,17 @@ public class StandardTo0Client extends HttpClient {
     }
 
   }
+
+  @Override
+  public void run() {
+    try {
+      super.run();
+    } catch (Exception e) {
+      logger.error("To0 client error " + e.getMessage());
+    }
+
+  }
+
 
   @Override
   public void initializeSession() {
