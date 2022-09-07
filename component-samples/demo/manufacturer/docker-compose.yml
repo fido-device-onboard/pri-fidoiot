@@ -30,6 +30,8 @@ services:
       - db_password.txt
     volumes:
       - ./app-data:/home/fdo/app-data 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
