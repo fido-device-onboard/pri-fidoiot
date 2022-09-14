@@ -313,7 +313,14 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private void fetch(String fetchFileName, int mtu) throws IOException {
     EotResult result = new EotResult();
     result.setResult(0);
-    try (FileInputStream in = new FileInputStream(fetchFileName)) {
+
+    String fileName = fetchFileName;
+    if (!Path.of(fetchFileName).isAbsolute()) {
+      fileName = Path.of(getAppData(), fetchFileName).toString();
+    }
+
+
+    try (FileInputStream in = new FileInputStream(fileName)) {
 
       byte[] data = new byte[mtu - 100];
 
