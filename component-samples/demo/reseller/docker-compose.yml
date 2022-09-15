@@ -37,7 +37,6 @@ services:
     cpu_shares: 1024
     pids_limit: 500
 
-
 secrets:
   ca-cert.pem:
     file: ./secrets/ca-cert.pem

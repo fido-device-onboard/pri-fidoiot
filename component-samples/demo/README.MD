@@ -1,3 +1,5 @@
+
+
 # Table of Contents
 1. [System Requirements](#system-requirements)
 2. [Docker Commands](#docker-commands)
@@ -14,11 +16,11 @@
 
 # System Requirements
 
-* Operating System: Ubuntu 20.04 / RHEL 8.4
+* Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 
 * Linux packages:
 
-  - Docker engine (minimum version 18.09, Supported till version 20.10.7) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.7, Supported till version 20.10.17) / Podman engine (For RHEL)
 
   - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
 
@@ -85,48 +87,48 @@ sudo docker system prune -a
 ## Start Podman
 * Use the following command to start the podman container.
 ```
-podman-compose up -d --build
+sudo podman-compose up -d --build
 ```
 
 ## Stop Podman
 
 * Use the following command to stop a specific podman container.
 ```
-podman stop <container-name>
+sudo podman stop <container-name>
 ```
 OR
 ```
-podman stop <container-id>
+sudo podman stop <container-id>
 ```
 
 * Use the following command to stop all running podman containers.
 ```
-podman stop -a
+sudo podman stop -a
 ```
 
 ## Clean up Containers
 
 * Use the following command to remove a specific container.
 ```
-podman rm <container-name>
+sudo podman rm <container-name>
 ```
 OR
 ```
-podman rm <container-id>
+sudo podman rm <container-id>
 ```
 
 * Use the following command to remove the podman image.
 ```
-podman rmi <image-name>
+sudo podman rmi <image-name>
 ```
 OR
 ```
-podman rmi <image-id>
+sudo podman rmi <image-id>
 ```
 
 * Use the following command to delete all the podman artifacts. (**Note:** podman containers must be stopped before deleting them)
 ```
-podman system prune -a
+sudo podman system prune -a
 ```
 # Configuring Proxies
 
@@ -202,6 +204,8 @@ bash scripts/enable_podman_support.sh
 grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+***NOTE***:  **Before starting the containers on RHEL, replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
@@ -282,25 +286,31 @@ curl -D - --digest -u apiUser:${api_password} --location --request POST 'http://
 --header 'Content-Type: text/plain' --data-binary '@<path-to-file>'
 ```
 
+**NOTE:** In case of transferring large payload file via ServiceInfo, there is a possibility that runnning container might hit memory limit set in the respective docker-compose.yml file.
+This can be confirmed using the `docker stats` command that shows live resource statistics for running containers.
+
+During SVI Transfer, observe the column `MEM USAGE / LIMIT` for respective container when SVI transmission is in progress.
+If the failure is observed when MEM USAGE reaches the LIMIT, it is due to the memory limit we have allocated for the container.
+To resolve this, edit fields `mem_limit` and `mem_reservation` in the respective docker-compose.yml according to the needs and restart the container.
 
 # Customize for multi-machine setup
 
-While customizing the system configuration for multi machine setup, ensure that all `localhost` and `127.0.0.1` references are replaced with respective DNS and IP address of the host machine. The required changes includes :
+While customizing the system configuration for multi machine setup, ensure that all `host.docker.internal` and `172.17.0.1` references are replaced with respective DNS and IP address of the host machine. The required changes includes :
 
 - Updating RVInfo blob in Manufacturer
 
-  - Sample cURL command to update RVInfo in Manufacturer running in the localhost.
+  - Sample cURL command to update RVInfo in Manufacturer running in the host.docker.internal.
     ```shell
-    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://localhost:8039/api/v1/rvinfo' \
+    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
     --header 'Content-Type: text/plain' \
     --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
     ```
 
 - Updating T02RVBlob in Owner
 
-    - Sample cURL command to update T02RVBlob in Owner running in the localhost.
+    - Sample cURL command to update T02RVBlob in Owner running in the host.docker.internal.
       ```shell
-      curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://localhost:8042/api/v1/owner/redirect' \
+      curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8042/api/v1/owner/redirect' \
       --header 'Content-Type: text/plain' \
       --data-raw '[["{owner-ip}","{owner-dns}",8042,3]]'
       ```
@@ -337,7 +347,7 @@ h2-database:
      - "8083"
 ```
 
-**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://localhost:<webport>`.
+**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://host.docker.internal:<webport>`.
 
 NOTE: Not recommended to enable this setting especially on production systems.
 

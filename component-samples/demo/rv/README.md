@@ -7,11 +7,11 @@ The FDO Rendezvous Service is designed to acts as a rendezvous point between a n
 # Getting Started with the FDO Rendezvous Service
 
 The following are the system requirements for the All-in-One demo.
-- Operating System: Ubuntu* 20.04 / RHEL 8.4
+- Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 18.09
+- Docker 20.10.X
 - Docker compose 1.21.2
 - Haveged
 
@@ -69,13 +69,13 @@ end of initialization of all services, you will see following statement on the c
 
 `[INFO] Started Rendezvous Service.`
 
-Follow the below steps to start All-In-One demo.
+Follow the below steps to start FDO Rendezvous demo.
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.
 
 ```shell
-java -jar rv.jar
+java -jar aio.jar
 ```
 
 Make sure to export the credential environment variables set in `service.env` file.
@@ -102,17 +102,17 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
-| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://localhost:8040/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
-| GET /api/v1/logs | Serves the log from the RV service | | | | RV logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8040/api/v1/logs' | 
-| DELETE /api/v1/logs | Deletes the log from the RV service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://localhost:8040/api/v1/logs' |
-| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain|  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://localhost:8040/api/v1/certificate/validity?days=10' |
-| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://localhost:8040/api/v1/certificate/validity' |
-| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://localhost:8040/health'|
-| POST /api/v1/rv/allow | Adds public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
-| DELETE /api/v1/rv/allow | delete public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
-| POST /api/v1/rv/deny | Adds public key to denied list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://localhost:8040/api/v1/rv/deny` --data-raw  "$owner_certificate" |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
+| DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
+| GET /api/v1/logs | Serves the log from the RV service | | | | RV logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8040/api/v1/logs' | 
+| DELETE /api/v1/logs | Deletes the log from the RV service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8040/api/v1/logs' |
+| POST /api/v1/certificate/validity?days=no_of_days | Updates certificate validity in `CERTIFICATE_VALIDITY` table | | text/plain|  | | curl  -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8040/api/v1/certificate/validity?days=10' |
+| GET /api/v1/certificate/validity | Collects certificate validity days from  `CERTIFICATE_VALIDITY` table | |  | | Number of Days| curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8040/api/v1/certificate/validity' |
+| GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8040/health'|
+| POST /api/v1/rv/allow | Adds public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://host.docker.internal:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
+| DELETE /api/v1/rv/allow | delete public key to allowed list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://host.docker.internal:8040/api/v1/rv/allow` --data-raw  "$owner_certificate" |
+| POST /api/v1/rv/deny | Adds public key to denied list of Owners in RV |  |  text/plain |  certificate in pem format | |   curl  -D - --digest -u ${api_user}:  --location --request POST 'http://host.docker.internal:8040/api/v1/rv/deny` --data-raw  "$owner_certificate" |
 
 
 Following is the list of REST response error codes and it's description :

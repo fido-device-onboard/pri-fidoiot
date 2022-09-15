@@ -3,7 +3,7 @@
 
 device:
 
-  di-url: http://host.docker.internal:8039
+  di-url: http://host.docker.internal:8080
 
   credential-file: ./app-data/credentials.bin
  

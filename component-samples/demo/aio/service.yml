@@ -9,7 +9,7 @@ hibernate-properties:
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
-  application.version: 1.1.1-SNAPSHOT
+  application.version: 1.1.3-SNAPSHOT
   server.api.user: $(api_user)
   server.api.password: "null"
   service.name: "All-in-one demo"
@@ -49,7 +49,6 @@ http-server:
   certificate_verification: want
   protocols: TLSv1.3
   certificate_verification_depth: 2
-
 
 manufacturer:
    keystore: 

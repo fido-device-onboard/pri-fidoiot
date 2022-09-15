@@ -7,11 +7,11 @@ The FDO Reseller Service is designed to act as a intermediary between an Owner a
 # Getting Started with the FDO Reseller
 
 The following are the system requirements for the All-in-One demo.
-- Operating System: Ubuntu* 20.04 / RHEL 8.4
+- Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 18.09
+- Docker 20.10.X
 - Docker compose 1.21.2
 - Haveged
 
@@ -96,10 +96,10 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| POST /api/v1/resell/{guid} | Gets extended resell Ownership Voucher with the guid. | Path - guid of the device to resell | | Owner Certificate | The Ownership voucher in PEM format |   curl -D - --digest -u ${api_user}: --location --request POST "http://localhost:8070/api/v1/resell/${guid}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
-| GET /api/v1/owner/vouchers | Returns a list of all Ownership Voucher GUIDs. | | | | line separated list of GUIDs | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8070/api/v1/owner/vouchers" --header 'Content-Type: text/plain' |
-| GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://localhost:8070/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
-| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request POST "http://localhost:8070/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-binary '${voucher}' |
+| POST /api/v1/resell/{guid} | Gets extended resell Ownership Voucher with the guid. | Path - guid of the device to resell | | Owner Certificate | The Ownership voucher in PEM format |   curl -D - --digest -u ${api_user}: --location --request POST "http://host.docker.internal:8070/api/v1/resell/${guid}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
+| GET /api/v1/owner/vouchers | Returns a list of all Ownership Voucher GUIDs. | | | | line separated list of GUIDs | curl  -D - --digest -u ${api_user}: --location --request GET "http://host.docker.internal:8070/api/v1/owner/vouchers" --header 'Content-Type: text/plain' |
+| GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Query - id: Device GUID | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://host.docker.internal:8070/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | |  curl  -D - --digest -u ${api_user}: --location --request POST "http://host.docker.internal:8070/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-binary '${voucher}' |
 
  
 Following is the list of REST response error codes and it's possible causes :
