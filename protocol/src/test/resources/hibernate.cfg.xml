@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.show_sql">true</property>
+        <property name="current_session_context_class">thread</property>
+        <property name="hbm2ddl.auto">create-drop</property>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.AllowDenyList"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateValidity"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.CertificateData"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnboardingVoucher"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnboardingConfig"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.OnDieCertificateData"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.ProtocolSession"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.ManufacturedVoucher"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.RvRedirect"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.RvData"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.ConformanceData"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.SystemResource"></mapping>
+        <mapping class="org.fidoalliance.fdo.protocol.entity.SystemPackage"></mapping>
+</session-factory>
+</hibernate-configuration>
+
