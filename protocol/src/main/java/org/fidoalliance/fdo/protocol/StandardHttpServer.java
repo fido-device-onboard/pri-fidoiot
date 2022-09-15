@@ -217,7 +217,11 @@ public class StandardHttpServer implements HttpServer {
 
     StandardManager stdManager = new StandardManager();
     try {
-      ctx.setConfigFile(Paths.get("context.xml").toUri().toURL());
+      if (Paths.get("context.xml").toFile().exists()) {
+        ctx.setConfigFile(Paths.get("context.xml").toUri().toURL());
+      } else {
+        ctx.setConfigFile(Paths.get(Config.getPath(),"context.xml").toUri().toURL());
+      }
       SecureRandom random = SecureRandom.getInstanceStrong();
       String alg = random.getAlgorithm();
 

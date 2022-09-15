@@ -156,7 +156,11 @@ public class Config {
       }
     }
     try {
-      env.put(SECRETS_PATH,Files.readString(Path.of(SECRETS_PATH)));
+      if (Path.of(SECRETS_PATH).toFile().exists()) {
+        env.put(SECRETS_PATH, Files.readString(Path.of(SECRETS_PATH)));
+      } else {
+        env.put(SECRETS_PATH, Files.readString(Path.of(Config.getPath(), SECRETS_PATH)));
+      }
     } catch (IOException e) {
       throw new RuntimeException(SECRETS_PATH, e);
     }
