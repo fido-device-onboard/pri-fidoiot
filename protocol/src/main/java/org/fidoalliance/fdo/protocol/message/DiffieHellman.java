@@ -79,9 +79,9 @@ public final class DiffieHellman {
   public static final class KeyExchange implements Destroyable {
 
     @JsonProperty("myP")
-    private BigInteger myP;
+    private final BigInteger myP;
     @JsonProperty("myG")
-    private BigInteger myG;
+    private final BigInteger myG;
     @JsonProperty("mySecret")
     private BigInteger mySecret;
 

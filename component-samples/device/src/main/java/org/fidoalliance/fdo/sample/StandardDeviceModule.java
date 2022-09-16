@@ -20,9 +20,9 @@ import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 
 public class StandardDeviceModule implements ServiceInfoModule {
 
-  private List<String> moduleNames = new ArrayList<>();
-  private List<String> unknownModules = new ArrayList<>();
-  private ServiceInfoQueue queue = new ServiceInfoQueue();
+  private final List<String> moduleNames = new ArrayList<>();
+  private final List<String> unknownModules = new ArrayList<>();
+  private final ServiceInfoQueue queue = new ServiceInfoQueue();
 
 
   @Override

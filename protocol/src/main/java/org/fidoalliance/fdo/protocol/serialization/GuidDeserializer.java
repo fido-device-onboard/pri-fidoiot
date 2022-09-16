@@ -24,7 +24,7 @@ public class GuidDeserializer extends StdDeserializer<Guid> {
 
   @Override
   public Guid deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     return Guid.fromBytes(node.binaryValue());

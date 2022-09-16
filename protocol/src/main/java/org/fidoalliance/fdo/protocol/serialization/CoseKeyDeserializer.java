@@ -29,7 +29,7 @@ public class CoseKeyDeserializer extends StdDeserializer<CoseKey> {
 
   @Override
   public CoseKey deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     CoseKey coseKey = new CoseKey();

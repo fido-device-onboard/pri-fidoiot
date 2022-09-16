@@ -31,7 +31,7 @@ public class EatPayloadBaseDeserializer extends StdDeserializer<EatPayloadBase> 
 
   @Override
   public EatPayloadBase deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     EatPayloadBase eat = new EatPayloadBase();

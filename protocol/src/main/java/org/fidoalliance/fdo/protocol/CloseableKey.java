@@ -12,7 +12,7 @@ import javax.security.auth.DestroyFailedException;
  */
 public class CloseableKey implements AutoCloseable {
 
-  private PrivateKey key;
+  private final PrivateKey key;
 
   /**
    * Constructs a ClosableKey resource.

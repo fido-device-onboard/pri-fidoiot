@@ -73,7 +73,7 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
 
   @Override
   public RendezvousInstruction deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     RendezvousInstruction rvi = new RendezvousInstruction();

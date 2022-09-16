@@ -15,6 +15,7 @@ import java.util.Map;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DatabaseServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -24,16 +25,16 @@ import org.hibernate.cfg.Configuration;
  */
 public class HibernateUtil {
 
-  private static LoggerService logger = new LoggerService(HibernateUtil.class);
+  private static final LoggerService logger = new LoggerService(HibernateUtil.class);
 
   private static class RootConfig {
 
     @JsonProperty("hibernate-properties")
-    private Map<String, String> hibernateProperties = new HashMap<>();
+    private final Map<String, String> hibernateProperties = new HashMap<>();
 
   }
 
-  private static SessionFactory sessionFactory = buildSessionFactory();
+  private static final SessionFactory sessionFactory = buildSessionFactory();
 
   private static SessionFactory buildSessionFactory() {
     try {
@@ -56,6 +57,11 @@ public class HibernateUtil {
       return factory;
 
     } catch (Throwable e) {
+      try {
+        Config.getWorker(ExceptionConsumer.class).accept(e);
+      } catch (Exception innerException) {
+        logger.error("failed log exception");
+      }
       // Make sure you log the exception, as it might be swallowed
       logger.error("database session factory setup failed");
       return null;

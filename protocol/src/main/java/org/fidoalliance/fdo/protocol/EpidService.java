@@ -31,14 +31,14 @@ import org.fidoalliance.fdo.protocol.message.SigInfoType;
 
 public class EpidService {
 
-  private static ExecutorService executor = Executors.newCachedThreadPool(r -> {
+  private static final ExecutorService executor = Executors.newCachedThreadPool(r -> {
     Thread t = Executors.defaultThreadFactory().newThread(r);
     t.setDaemon(true);
     return t;
   });
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
 
-  private static String defaultEpidOnlineUrl = "http://verify.epid-sbx.trustedservices.intel.com/";
+  private static final String defaultEpidOnlineUrl = "http://verify.epid-sbx.trustedservices.intel.com/";
   private static URI epidOnlineUrl = null;
 
   private static final int EpidGroupLength = 4;

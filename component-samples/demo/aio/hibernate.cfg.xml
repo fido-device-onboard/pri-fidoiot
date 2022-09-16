@@ -5,6 +5,8 @@
 <hibernate-configuration>
     <session-factory>
 
+        <property name = "hibernate.connection.driver_class">org.mariadb.jdbc.Driver</property>
+
         <!--
         <property name="hibernate.connection.username"></property>
         <property name="hibernate.connection.password"></property>
@@ -15,7 +17,7 @@
          -->
         <!-- for maria databse
 	<property name="hibernate.connection.url">jdbc:mariadb://localhost:3306/fdo</property>
-         -->
+        -->
 
         <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">true</property>

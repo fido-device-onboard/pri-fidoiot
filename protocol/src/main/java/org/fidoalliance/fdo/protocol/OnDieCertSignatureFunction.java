@@ -40,7 +40,7 @@ import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
 
 public class OnDieCertSignatureFunction implements CertSignatureFunction {
 
-  private CertificateFactory certFactory;
+  private final CertificateFactory certFactory;
   private static final LoggerService logger = new LoggerService(OnDieCertSignatureFunction.class);
 
   /**
