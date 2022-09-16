@@ -627,7 +627,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     for (HttpInstruction instruction : HttpUtils.getInstructions(to1dPayload.getAddressEntries())) {
       httpInstruction.add(instruction.getAddress());
     }
-    logger.info("TO1 complete, owner is at " + httpInstruction.toString());
+    logger.info("TO1 complete, owner is at " + httpInstruction);
 
   }
 
@@ -1071,10 +1071,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         Mapper.INSTANCE.writeValue(newHeader));
 
     //check cred resuse
-    boolean credReuse = true;
-    if (!oldHeader.getGuid().equals(newHeader.getGuid())) {
-      credReuse = false;
-    }
+    boolean credReuse = oldHeader.getGuid().equals(newHeader.getGuid());
 
     if (credReuse) {
       byte[] rv1 = Mapper.INSTANCE.writeValue(oldHeader.getRendezvousInfo());

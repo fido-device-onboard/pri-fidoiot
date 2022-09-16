@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class CoseEcTest {
 
 
-  private static String sampleOwnerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
+  private static final String sampleOwnerKeyPemEC256 = "-----BEGIN CERTIFICATE-----\n"
       + "MIIB9DCCAZmgAwIBAgIJANpFH5JBylZhMAoGCCqGSM49BAMCMGoxJjAkBgNVBAMM\n"
       + "HVNkbyBEZW1vIE93bmVyIFJvb3QgQXV0aG9yaXR5MQ8wDQYDVQQIDAZPcmVnb24x\n"
       + "EjAQBgNVBAcMCUhpbGxzYm9ybzELMAkGA1UEBhMCVVMxDjAMBgNVBAoMBUludGVs\n"

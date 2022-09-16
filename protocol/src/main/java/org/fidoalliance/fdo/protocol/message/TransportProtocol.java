@@ -16,7 +16,7 @@ public enum TransportProtocol {
   PROT_COAPS(6);
 
 
-  private int id;
+  private final int id;
 
   TransportProtocol(int id) {
     this.id = id;

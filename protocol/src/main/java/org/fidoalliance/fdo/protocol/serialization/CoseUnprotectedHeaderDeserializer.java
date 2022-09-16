@@ -35,7 +35,7 @@ public class CoseUnprotectedHeaderDeserializer extends StdDeserializer<CoseUnpro
 
   @Override
   public CoseUnprotectedHeader deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     CoseUnprotectedHeader uph = new CoseUnprotectedHeader();

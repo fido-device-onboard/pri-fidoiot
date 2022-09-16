@@ -24,7 +24,7 @@ public class CwtTokenDeserializer extends StdDeserializer<CwtToken> {
 
   @Override
   public CwtToken deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
 
     JsonNode node = jp.getCodec().readTree(jp);
     CwtToken cwtToken = new CwtToken();

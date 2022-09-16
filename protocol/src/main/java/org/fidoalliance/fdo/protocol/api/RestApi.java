@@ -27,7 +27,7 @@ public class RestApi implements AutoCloseable {
   private static final int READ_SIZE = 1024;
   private HttpServletRequest request;
   private HttpServletResponse response;
-  private List<String> uriSegments = new ArrayList<>();
+  private final List<String> uriSegments = new ArrayList<>();
 
   private Session session;
   private Transaction transaction;

@@ -66,11 +66,11 @@ public class AioRvInfo extends RestApi {
       if (rviData == null) {
         // if data doesn't exist in DB, create new row and insert into RV_DATA table.
         rviData = new RvData();
-        rviData.setData(getSession().getLobHelper().createClob(rvi.toString()));
+        rviData.setData(getSession().getLobHelper().createClob(rvi));
         getSession().save(rviData);
       } else {
         // if data exist in DB, update RV_INFO table with new RVInfo_blob.
-        rviData.setData(getSession().getLobHelper().createClob(rvi.toString()));
+        rviData.setData(getSession().getLobHelper().createClob(rvi));
         getSession().update(rviData);
       }
     } catch (Exception e) {

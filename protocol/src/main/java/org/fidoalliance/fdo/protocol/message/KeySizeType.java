@@ -14,7 +14,7 @@ public enum KeySizeType {
   SIZE_384(384);
 
 
-  private int id;
+  private final int id;
 
   KeySizeType(int id) {
     this.id = id;

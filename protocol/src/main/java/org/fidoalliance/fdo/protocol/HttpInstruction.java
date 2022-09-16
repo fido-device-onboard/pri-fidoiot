@@ -39,8 +39,6 @@ public class HttpInstruction {
     return rendezvousBypass;
   }
 
-  ;
-
   /**
    * Sets the http url string.
    *
