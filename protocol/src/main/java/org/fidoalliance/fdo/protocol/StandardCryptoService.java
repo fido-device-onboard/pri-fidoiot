@@ -121,6 +121,7 @@ public class StandardCryptoService implements CryptoService {
   }
 
   private static Provider getInitializedProvider() {
+    Security.addProvider(new PemProvider());
     Provider result = new BouncyCastleProvider();
     Security.addProvider(result);
     return result;
@@ -1200,16 +1201,13 @@ public class StandardCryptoService implements CryptoService {
     byte[] groupId = sigInfo.getInfo();
 
     EpidService epidService = new EpidService();
-    if (!epidService.verifyEpidSignature(
+    return epidService.verifyEpidSignature(
         signature,
         maroePrefix,
         message.getUnprotectedHeader().getEatNonce().getNonce(),
         sigData,
         groupId,
-        sigInfoType)) {
-      return false;
-    }
-    return true;
+        sigInfoType);
   }
 
   @Override

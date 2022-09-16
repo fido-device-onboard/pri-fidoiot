@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -70,7 +71,7 @@ class TestCredentialConsumer implements DeviceCredentialConsumer {
     @Override
     public void accept(DeviceCredential deviceCredential) {
         try {
-            File credFile = new File("credentials.bin");
+            File credFile = new File(Path.of(Config.getPath(), "credentials.bin").toString());
             byte[] data = Mapper.INSTANCE.writeValue(deviceCredential);
             try (FileOutputStream out = new FileOutputStream(credFile)) {
                 out.write(data);

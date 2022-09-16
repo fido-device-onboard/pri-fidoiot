@@ -33,7 +33,7 @@ public enum Mapper {
   private final ObjectMapper yamlMapper;
   private final ObjectMapper jsonMapper;
 
-  private Mapper() {
+  Mapper() {
     cborMapper = new ObjectMapper(new CBORFactory());
     yamlMapper = new ObjectMapper(new YAMLFactory());
     yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -80,7 +80,7 @@ public enum Mapper {
       output.append(StringEscapeUtils.escapeJson(node.asText()));
       output.append("\"");
     } else if (node.isNumber()) {
-      output.append(Long.toString(node.asLong()));
+      output.append(node.asLong());
     } else if (node.isBoolean()) {
       if (node.asBoolean()) {
         output.append("true");
@@ -117,7 +117,7 @@ public enum Mapper {
    */
   public byte[] writeValue(Object value) throws IOException {
     ObjectWriter writer = cborMapper.writerFor(value.getClass());
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream();) {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       writer.writeValue(out, value);
       return out.toByteArray();
     }
@@ -236,7 +236,7 @@ public enum Mapper {
    * @return The converted result.
    */
   public <T> T covertValue(JsonNode fromValue, Class<T> t) {
-    return (T) cborMapper.convertValue(fromValue, t);
+    return cborMapper.convertValue(fromValue, t);
   }
 
   /**

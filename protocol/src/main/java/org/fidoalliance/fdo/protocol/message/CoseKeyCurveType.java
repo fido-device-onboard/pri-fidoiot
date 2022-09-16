@@ -15,7 +15,7 @@ public enum CoseKeyCurveType {
   P256EC2(1),
   P384EC2(2);
 
-  private int id;
+  private final int id;
 
   CoseKeyCurveType(int id) {
     this.id = id;

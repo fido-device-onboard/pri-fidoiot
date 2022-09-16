@@ -32,7 +32,7 @@ public class CertChainDeserializer extends StdDeserializer<CertChain> {
 
   @Override
   public CertChain deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     List<Certificate> list = new LinkedList<>();
@@ -44,7 +44,7 @@ public class CertChainDeserializer extends StdDeserializer<CertChain> {
     }
     for (int i = 0; i < node.size(); i++) {
       JsonNode element = node.get(i);
-      try (InputStream in = new ByteArrayInputStream(element.binaryValue());) {
+      try (InputStream in = new ByteArrayInputStream(element.binaryValue())) {
         list.add(cf.generateCertificate(in));
       } catch (CertificateException e) {
         throw new JsonParseException(jp, "parsing X509", e);

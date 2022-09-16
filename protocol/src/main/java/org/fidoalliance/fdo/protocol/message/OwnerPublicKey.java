@@ -35,8 +35,6 @@ public class OwnerPublicKey {
     return type;
   }
 
-  ;
-
 
   @JsonIgnore
   public void setEnc(PublicKeyEncoding enc) {

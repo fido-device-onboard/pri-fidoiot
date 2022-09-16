@@ -5,10 +5,10 @@ device:
 
   di-url: http://host.docker.internal:8080
 
-  credential-file: credentials.bin
+  credential-file: ./app-data/credentials.bin
  
   keystore: 
-     path: device.p12
+     path: ./app-data/device.p12
      store-type: PKCS12
      password: ''
 
@@ -83,6 +83,7 @@ device:
 # The worker items the device will use when handling requests
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.DebugExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
@@ -104,4 +105,4 @@ workers:
 
 system-properties:
   log4j.configurationFile: log4j2.xml
-
+  app-data.dir: ./app-data

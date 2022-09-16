@@ -18,7 +18,7 @@ import org.fidoalliance.fdo.protocol.serialization.GuidSerializer;
 @JsonDeserialize(using = GuidDeserializer.class)
 public class Guid {
 
-  private UUID uuid;
+  private final UUID uuid;
 
   private Guid(UUID uuid) {
     this.uuid = uuid;
@@ -36,7 +36,7 @@ public class Guid {
    */
   public static Guid fromBytes(byte[] data) throws IOException {
     try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
-        DataInputStream in = new DataInputStream(bis);) {
+        DataInputStream in = new DataInputStream(bis)) {
       long mostSig = in.readLong();
       long leastSig = in.readLong();
       return new Guid(new UUID(mostSig, leastSig));

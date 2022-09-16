@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.http.protocol.HTTP;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
@@ -27,7 +25,6 @@ import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntry;
 import org.fidoalliance.fdo.protocol.message.TransportProtocol;
-import org.hibernate.type.AnyType;
 
 public class HttpUtils {
 
@@ -197,7 +194,14 @@ public class HttpUtils {
         schemes = devSchemes;
         port = devPort;
       } else {
-        schemes = Config.getWorker(OwnerSchemesSupplier.class).get();
+        if (ownerPort.equals((devPort)) && devSchemes.contains(HTTP_SCHEME)
+            && devSchemes.size() == 1
+            && !ownerOnly) {
+          schemes = new ArrayList<>();
+          schemes.add(HTTP_SCHEME);
+        } else {
+          schemes = Config.getWorker(OwnerSchemesSupplier.class).get();
+        }
 
         port = ownerPort;
       }

@@ -157,7 +157,7 @@ public interface CryptoService {
    * @param ownerKey     The owner key, required for some asymmetric exchanges
    * @return A KexMessage.
    */
-  public KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party,
+  KexMessage getKeyExchangeMessage(String kexSuiteName, KexParty party,
       OwnerPublicKey ownerKey) throws IOException;
 
   /**
@@ -169,7 +169,7 @@ public interface CryptoService {
    * @param decryptionKey The decryption key for use in asymmetric exchanges
    * @return The shared secret based on the state and message.
    */
-  public KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState,
+  KeyExchangeResult getSharedSecret(String suiteName, byte[] message, KexMessage ownState,
       Key decryptionKey) throws IOException;
 
   /**
@@ -198,7 +198,7 @@ public interface CryptoService {
    * @param state   The crypto state.
    * @return The decrypted message.
    */
-  public byte[] decrypt(byte[] message, EncryptionState state) throws IOException;
+  byte[] decrypt(byte[] message, EncryptionState state) throws IOException;
 
   /**
    * Destroys the private key in the keypair.

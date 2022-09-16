@@ -1,8 +1,8 @@
 package org.fidoalliance.fdo.protocol;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.io.IOException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import org.apache.commons.codec.DecoderException;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 public class HibernateTest {
 
-  private String dbName = "test"; //will be test.mv.db
+  private final String dbName = "test"; //will be test.mv.db
   private static final int DEFAULT_PORT = 9092;
 
   private void test(String className, Session session) {

@@ -21,7 +21,7 @@ public class DeviceStateApi extends RestApi {
       builder.append("{\"to2CompletedOn\" : ");
       if (to2CompletedOn != null) {
         builder.append("\"");
-        builder.append(to2CompletedOn.toString());
+        builder.append(to2CompletedOn);
         builder.append("\"");
       } else {
         builder.append("null");
@@ -31,14 +31,14 @@ public class DeviceStateApi extends RestApi {
       Date to0Expiry = onboardingVoucher.getTo0Expiry();
       if (to0Expiry != null) {
         builder.append("\"");
-        builder.append(to0Expiry.toString());
+        builder.append(to0Expiry);
         builder.append("\"");
       } else {
         builder.append("null");
       }
       builder.append("}");
 
-      getResponse().getWriter().print(builder.toString());
+      getResponse().getWriter().print(builder);
 
     } else {
       throw new NotFoundException(path);

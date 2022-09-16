@@ -36,7 +36,7 @@ public enum MsgType {
   TO2_DONE(70),
   TO2_DONE2(71);
 
-  private int id;
+  private final int id;
 
   MsgType(int id) {
     this.id = id;

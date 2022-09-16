@@ -25,7 +25,7 @@ public class AnyTypeDeserializer extends StdDeserializer<AnyType> {
 
   @Override
   public AnyType deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     final JsonNode node = jp.getCodec().readTree(jp);
     if (node.isNull()) {
       return AnyType.fromObject(new NullValue());

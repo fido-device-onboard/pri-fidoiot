@@ -3,24 +3,22 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.io.IOException;
 import java.security.PublicKey;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.bouncycastle.util.encoders.Hex;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousAcceptFunction;
 import org.fidoalliance.fdo.protocol.entity.AllowDenyList;
-import org.fidoalliance.fdo.protocol.entity.ProtocolSession;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.HashType;

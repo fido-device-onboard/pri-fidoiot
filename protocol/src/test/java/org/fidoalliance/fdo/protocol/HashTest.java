@@ -23,7 +23,6 @@ public class HashTest {
 
     Hash hash2 = Mapper.INSTANCE.readValue(data,Hash.class);
     assertTrue(hash1.equals(hash2));
-    str.toString();
 
   }
 }
