@@ -10,6 +10,8 @@ import jakarta.persistence.criteria.Root;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import org.bouncycastle.util.encoders.Hex;
 import org.fidoalliance.fdo.protocol.Config;
@@ -35,13 +37,16 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
     List<String> hashList = new ArrayList<>();
     CryptoService cs = Config.getWorker(CryptoService.class);
 
+    String hashKey = null;
     OwnershipVoucherEntries entries = voucher.getEntries();
     for (CoseSign1 sign1 : entries) {
       OwnershipVoucherEntryPayload payload =
           Mapper.INSTANCE.readValue(sign1.getPayload(), OwnershipVoucherEntryPayload.class);
       PublicKey publicKey = cs.decodeKey(payload.getOwnerPublicKey());
-      Hash hash = cs.hash(HashType.SHA384,publicKey.getEncoded());
-      hashList.add(Hex.toHexString(hash.getHashValue()));
+      byte[] encoded = publicKey.getEncoded();
+      Hash hash = cs.hash(HashType.SHA384, encoded);
+      hashKey = Base64.getEncoder().encodeToString(hash.getHashValue());
+      hashList.add(hashKey);
     }
 
     return hashList;
