@@ -50,11 +50,8 @@ The list of ports that are used for unit tests and sample code:
 | 8041 | rv https port |
 | 8042 | owner http port |
 | 8043 | owner https port |
-| 8049 | manufacturer database port |
-| 8050 | rv database port |
-| 8051 | owner database port |
+| 3306 | PRI Service Database port |
 | 8070 | reseller http port |
-| 8071 | reseller database port |
 | 8072 | reseller https port |
 | 8080 | aio http port |
 | 8082 | aio H2 Console port |
@@ -63,7 +60,6 @@ The list of ports that are used for unit tests and sample code:
 | 8085 | owner H2 Console port |
 | 8073 | reseller H2 Console port |
 | 8443 | aio https port |
-| 9092 | aio database port |
 
 
 Use the following commands to build FDO PRI source.
@@ -97,8 +93,15 @@ The following passwords are defined in each service.env:
 | api_password         | defines the DIGEST REST API password |
 | encrypt_password     | keystore encryption password         |
 | ssl_password         | Https/web server keystore password   |
+| user-cert            | File containing Client keypair (mTLS)   |
+| ssl-ca               | File containing the CA certificate of Server (mTLS) |
+| api_user             | Field containing Client's certificate details (mTLS) |
+| useSSL               | Boolean value specifying SSL connection with Database |
+| requireSSL           | Boolean value specifying SSL connection with Hibernate ORM |
 
-Keystores containing private keys are stored in the H2 database - `<fdo-pri-src>/component-sample/demo/{component}/app-data/emdb.mv.db` file.
+
+Keystores containing private keys can be stored in the database - `<fdo-pri-src>/component-sample/demo/{component}/app-data/emdb.mv.db` 
+as well as in the mounted file system. During runtime, the deployer can decide the mode of Keystore IO by activating the required worker class. 
 
 keys_gen.sh can be used to generate random passwords for each service.env.
 
@@ -177,9 +180,6 @@ $ java -jar aio.jar
 
 The server will listen for FDO PRI http & https messages on port 8080 and 8443 respectively.
 
-The H2 database will listen on TCP port 9092.
-The H2 Web Console will be available at http://host.docker.internal:8082
-
 The all-in-one supports all FDO protocols in a single service by default. 
 
 
@@ -200,8 +200,6 @@ $ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8040 and 8041 respectively.
-The H2 database will listen on TCP port 8050.
-The H2 Web Console will be available at http://host.docker.internal:8084
 
 #### Starting the FDO PRI Owner HTTP Server
 
@@ -218,8 +216,6 @@ $ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI HTTP & HTTPS messages on port 8042 and 8043 respectively.
-The H2 database will listen on TCP port 8051.
-The H2 Web Console will be available at http://host.docker.internal:8085
 
 #### Starting the FDO PRI Manufacturer Server
 
@@ -236,11 +232,6 @@ $ java -jar aio.jar
 ```
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8039 and 8038 respectively.
-The H2 database will listen on TCP port 8049.
-The H2 Web Console will be available at http://host.docker.internal:8083
-
-You can allow remote database console connections by uncommenting the line containing "-webAllowOthers" in the service.yml
-
 
 ### Running the FDO PRI HTTP Device
 
@@ -254,7 +245,7 @@ To start the PRI device as a standalone java application.
 $ cd <fdo-pri-src>/component-samples/demo/device
 $ java -jar device.jar
 ```
-Running the device for the first time will result in device keys being generated and stored in the current directory in the device.p12 file.
+Running the device for the first time will result in device keys being generated and is stored in the `app-data` directory.
 Once device keys are generated the device will run the DI protocol and store the DI credentials in a file called `credentials.bin`.
 
 Running device for a second time will result in the device performing TO1/TO2 protocols.
