@@ -68,4 +68,6 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreInputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier

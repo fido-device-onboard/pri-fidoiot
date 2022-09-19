@@ -121,6 +121,8 @@ workers:
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreInputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
   - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardAcceptOwnerFunction
