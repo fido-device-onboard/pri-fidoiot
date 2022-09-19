@@ -33,3 +33,18 @@ sed -i 's/Dockerfile/Podmanfile/' aio/docker-compose.yml
 grep -q '/fdo/app-data:Z' aio/docker-compose.yml || sed -i 's/fdo\/app-data/fdo\/app-data:Z/' aio/docker-compose.yml
 grep -q '_JAVA_OPTIONS=${_JAVA_OPTIONS}' aio/docker-compose.yml || sed -i 's/_JAVA_OPTIONS/_JAVA_OPTIONS=${_JAVA_OPTIONS}/' aio/docker-compose.yml
 grep -q 'networks:' aio/docker-compose.yml || sed -i '5a networks:\n \ default:\n \  name: podman\n \  external: true\n' aio/docker-compose.yml
+
+#device
+sed -i 's/Dockerfile/Podmanfile/' device/docker-compose.yml
+grep -q '/fdo/app-data:Z' device/docker-compose.yml || sed -i 's/fdo\/app-data/fdo\/app-data:Z/' device/docker-compose.yml
+grep -q '_JAVA_OPTIONS=${_JAVA_OPTIONS}' device/docker-compose.yml || sed -i 's/_JAVA_OPTIONS/_JAVA_OPTIONS=${_JAVA_OPTIONS}/' device/docker-compose.yml
+grep -q 'networks:' device/docker-compose.yml || sed -i '5a networks:\n \ default:\n \  name: podman\n \  external: true\n' device/docker-compose.yml
+
+#db
+grep -q '/var/lib/mysql:Z' db/docker-compose.yml || sed -i 's/var\/lib\/mysql/var\/lib\/mysql:Z/' db/docker-compose.yml
+grep -q '/etc/mysql/conf.d:Z' db/docker-compose.yml || sed -i 's/etc\/mysql\/conf.d/etc\/mysql\/conf.d:Z/' db/docker-compose.yml
+grep -q 'networks:' db/docker-compose.yml || sed -i '5a networks:\n \ default:\n \  name: podman\n \  external: true\n' db/docker-compose.yml
+
+#update .bashrc
+grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
+source ~/.bashrc
