@@ -3,11 +3,10 @@
 
 package org.fidoalliance.fdo.protocol;
 
-import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import org.fidoalliance.fdo.protocol.dispatch.KeyStoreOutputStreamFunction;
 
 public class FileKeyStoreOutputStream implements KeyStoreOutputStreamFunction {
 
