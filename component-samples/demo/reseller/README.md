@@ -159,4 +159,6 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier | Provides null as owner extra data in ownership voucher entries |
 | org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream | Provides Keystore loading from a database table |
 | org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream | Provides Keystore storage to a database table |
+| org.fidoalliance.fdo.FileKeyStoreInputStream | Loads PRI Service keys from disk |
+| org.fidoalliance.fdo.FileKeyStoreOutputStream | Save PRI Service keys to disk |
 | org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier | Provides the validity days for certificate generation |
