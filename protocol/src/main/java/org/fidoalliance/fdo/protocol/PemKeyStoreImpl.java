@@ -187,7 +187,6 @@ public class PemKeyStoreImpl extends KeyStoreSpi {
             final String line = scanner.nextLine();
             final File file = new File(line);
             if (file.exists()) {
-              final String pemValue = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
               final List<Certificate> dirCerts = PemLoader.loadCerts(pemString);
               final PrivateKey dirKey = PemLoader.loadPrivateKey(pemString, passString);
               if (dirKey != null && dirCerts != null) {
