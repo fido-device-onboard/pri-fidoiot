@@ -14,8 +14,8 @@ deploying the example implementation for these components.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
-* **Docker engine (minimum version 20.10.X, Supported till version 20.10.7) / Podman engine (For RHEL)**
-* **Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)**
+* **Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL)**
+* **Docker-compose (minimum version 1.29.2) / Podman-compose (For RHEL)**
 
 +Supported list of Host operating systems.
 
@@ -110,54 +110,79 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
 ### Generating random passwords using keys_gen.sh
 
-Running keys_gen.sh will generate random passwords for the all http servers.
+1. Generating demo certificate authority KeyPair and certificate
 
-```
-$ cd <fdo-pri-src>/component-samples/demo/scripts
-$ ./keys_gen.sh
-```
+    ```shell
+      bash demo-ca.sh
+    ```
 
-A message "Key generation completed." will be displayed on the console.
+    **NOTE**: Configure the properties of `demo-CA` by updating `root-ca.conf`.
 
-Credentials for each service will be generated the creds directory `<fdo-pri-src>/component-sample/demo/`.
+2. Generating Server and Client Keypair and certificates.
 
-```
-creds/aio/service.env
-creds/manufacturer/service.env
-creds/owner/service.env
-creds/reseller/service.env
-creds/rv/service.env
-```
+    ```shell
+    bash web_csr_req.sh
+    bash user_csr_req.sh
+    ```
 
-Replace the service.env in the demo folders with the generated ones in the creds folder.
+    **NOTE**: Both Server and Client certificate are signed by the previous generated demo-CA. Moreover, we can configure the properties of Server and Client certificate by updating `web-server.conf` and `client.conf` respectively.
 
-```
-$ cd <fdo-pri-src>/component-samples/demo/scripts
-$ cp -r ./creds/. ../
-```
+
+3. Running keys_gen.sh will generate random passwords for the all http servers and creates `secrets` folder containing all the required `.pem` files of Client, CA and Server component.
+
+    ```
+    $ cd <fdo-pri-src>/component-samples/demo/scripts
+    $ ./keys_gen.sh
+    ```
+
+    A message "Key generation completed." will be displayed on the console.
+
+    Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
+
+4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components.
+
+    ```
+    $ cd <fdo-pri-src>/component-samples/demo/scripts
+    $ cp -r ./secrets/. ../replace-with-FDO-component
+    $ cp service.env ../replace-with-FDO-component
+    ```
+
+    **NOTE:** Don't replace `service.env` present in the database component with generated `service.env` in `scripts` folder.
+
 
 ### Specifying Subject alternate names for the Web/HTTPS self-signed certificate.
 
 When the http server starts for the first time it will generate a self-signed certificate for https protocol.
 
-The subject name of the self-signed certificate is defined in the service.yml under 
+The subject name of the self-signed certificate is defined in the  `web-server.conf` under
 ```
-http-server:
-    subject_names:
-    - DNS:host.docker.internal
-    - IP:127.0.0.1
+#[ req_ext ]
+  subjectAltName = @alt_names
+
+[ alt_names ]
+  #Replace or add new DNS and IP entries with the ones required by the HTTPs/Web Service.
+  DNS.1 = www.example.com
+  DNS.2 = test.example.com
+  DNS.3 = mail.example.com
+  DNS.4 = www.example.net
+  IP.1 = 192.0.0.0
+  IP.2 = 200.200.200.200
+  IP.3 = 2001:DB8::1
 ```
 
-Replace or add new DNS and IP entries with the ones required by the HTTPs/Web Service.
+**NOTE**: Self-signed certificates created using the script is not recommended for use in production environments.
 
+### Starting Standalone Database for PRI servers
+
+1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](#Generating-random-passwords-using-keys_gen.sh)
+
+2. Start the Database service
+```shell
+cd <fdo-pri-src>/component-samples/demo/db
+docker-compose up --build -d/ podman-compose up --build -d
 ```
-http-server:
-    subject_names:
-    - DNS:myhost
-    - DNS:myhost2
-    - IP:127.0.0.1
-    - IP:127.0.0.2
-```
+
+**NOTE**: By default, Database uses mTLS connetion for jdbc. MariaDB* is used as the default database.
 
 ### Starting FDO PRI HTTP Servers
 
@@ -173,14 +198,14 @@ $ docker-compose up --build  -d / podman-compose up --build -d
 
 To start the server as a standalone java application.
 
-```
-$ cd <fdo-pri-src>/component-samples/demo/aio
-$ java -jar aio.jar
-```
+  ```
+  $ cd <fdo-pri-src>/component-samples/demo/aio
+  $ java -jar aio.jar
+  ```
 
-The server will listen for FDO PRI http & https messages on port 8080 and 8443 respectively.
+  The server will listen for FDO PRI http & https messages on port 8080 and 8443 respectively.
 
-The all-in-one supports all FDO protocols in a single service by default. 
+  The all-in-one supports all FDO protocols in a single service by default.
 
 
 #### Starting the FDO PRI Rendezvous (RV) HTTP Server
@@ -239,7 +264,12 @@ The server will listen for FDO PRI HTTP & HTTPS  messages on port 8039 and 8038 
 
 ***NOTE***: By default the device is configured to run with the All-In-One (AIO) ports.  You must edit the service.yml in the demo device directory to run with the  manufacturer demo.
 
-To start the PRI device as a standalone java application.
+```shell
+$ cd <fdo-pri-src>/component-samples/demo/device
+$ docker-compose up --build -d
+```
+
+To start the Client as a standalone java application.
 
 ```
 $ cd <fdo-pri-src>/component-samples/demo/device
@@ -264,7 +294,31 @@ Before running the device for the first time start the demo aio server.
 
 Run the demo device
 
-As auto injection is enable in AIO by default; the ownership voucher is extended and stored in `ONBOARDING_CONFIG` table and the device is ready for TO1/2.
+As auto injection of ownership Voucher is enable in AIO by default; the ownership voucher is extended and stored in `ONBOARDING_CONFIG` table and the device is ready for TO1/2.
+
+#### Switching between mTLS and Digest Authentication for REST endpoints
+
+1. Update `WEB-INF/web.xml` to support Digest authentication
+    ```
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>apis</web-resource-name>
+            <url-pattern>/api/v1/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>api</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+          <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+      </security-constraint>
+
+      <login-config>
+          <auth-method>DIGEST</auth-method>
+      </login-config>
+    ```
+
+2. Update `{server.api.user}` and `{server.api.password}` in `demo/<component>/tomcat-users.xml` file.
 
 #### Creating Ownership Vouchers using Individual Component Demos
 
@@ -274,7 +328,9 @@ Use the following REST api to specify the rendezvous instructions for demo rv se
 
 POST https://host.docker.internal:8038/api/v1/rvinfo (or http://host.docker.internal:8039/api/v1/rvinfo)
 The post body content-type header `text/plain`
-Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
+Authorization DIGEST AUTH with "apiUser" and api_password defined in the manufacturer's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 POST content
 ```
 [[[5,"host.docker.internal"],[3,8041],[12,2],[2,"127.0.0.1"],[4,8041]]]
@@ -296,7 +352,9 @@ $ java -jar device.jar
 Next get the owners public key by starting the demo owner service and use the following REST API.
 
 GET https://host.docker.internal:8043/api/v1/certificate?alias=SECP256R1 (or http://host.docker.internal:8042/api/v1/certificate?alias=SECP256R1)
-Authorization DIGEST with "apiUser" and api_password defined in the Owner's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the Owner's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 Response body will be the Owner's certificate in PEM format
 
 
@@ -310,7 +368,9 @@ Response body will be the Owner's certificate in PEM format
 For EC384 based vouchers use the following API:
 
 GET https://host.docker.internal:8043/api/v1/certificate?alias=SECP384R1 (or http://host.docker.internal:8042/api/v1/certificate?alias=SECP384R1)
-Authorization DIGEST with "apiUser" and api_password defined in the owners service.env
+Authorization DIGEST with "apiUser" and api_password defined in the owners service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 Result body will be the owners certificate in PEM format
 
 [REFER](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo/aio#list-of-key-store-alias-values) for the other supported attestation type.
@@ -318,7 +378,9 @@ Result body will be the owners certificate in PEM format
 Next, collect the serial number of the last manufactured voucher
 
 GET https://host.docker.internal:8038/api/v1/deviceinfo/{seconds} (or http://host.docker.internal:8039/api/v1/deviceinfo/100000)
-Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 Result will contain the device info
 ```
 [{"serial_no":"43FF320A","timestamp":"2022-02-18 21:50:21.838","uuid":"24275cd7-f9f5-4d34-a2a5-e233ac38db6c"}]
@@ -326,7 +388,9 @@ Result will contain the device info
 
 Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
 POST https://host.docker.internal:8038/api/v1/mfg/vouchers/43FF320A(or http://host.docker.internal:8039api/v1/mfg/vouchers/43FF320A)
-Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the manufacturer's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 POST content-type `text\plain` 
 
 In the request body add owner's certificate.
@@ -344,7 +408,9 @@ Response will contain the ownership voucher
 
 Post the extended ownership found obtained from the manufacturer to the owner
 POST https://host.docker.internal:8043/api/v1/owner/vouchers (or http://host.docker.internal:8042/api/v1/owner/vouchers)
-Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 POST content-type `text\plain`
 
 In the request body add extended ownership voucher
@@ -358,7 +424,9 @@ Eg: 24275cd7-f9f5-4d34-a2a5-e233ac38db6c
 Configure the Owners TO2 address using the following API:
 
 POST https://host.docker.internal:8043/api/v1/owner/redirect (or http://host.docker.internal:8042/api/v1/owner/redirect)
-Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 POST content-type `text\plain`
 
 In the request body add Owner T02RedirectAddress.
@@ -370,7 +438,9 @@ Response `200 OK`
 Trigger owner to perform To0 with the voucher and post the extended ownership found obtained from the manufacturer to the owner
 
 GET https://host.docker.internal:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://host.docker.internal:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
-Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 Response `200 OK`
 
 
@@ -379,7 +449,9 @@ Response `200 OK`
 
 Use the following API to configure a service info package.
 POST https://host.docker.internal:8043/api/v1/owner/svi (or http://host.docker.internal:8042/api/v1/owner/svi)
-Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env
+Authorization DIGEST with "apiUser" and api_password defined in the owner's service.env  or
+Authorization using CLIENT-CERT AUTH (mTLS).
+
 POST content
 ```
 [ 

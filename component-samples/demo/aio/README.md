@@ -12,8 +12,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.X
-- Docker compose 1.21.2
+- Docker 20.10.10+
+- Docker compose 1.29.2
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -69,7 +69,7 @@ All the runtime configurations for the services are specified in four files: `se
 # Running All-In-One Demo
 
 The All-In-One demo can be executed as a standalone service as well as a docker service. At the
-end of initialization of all services, you will see following statement on the console.
+end of initialization of all services, you will see following statement on the console. Generate the required credentials Keypair and certificates using the 'keys_gen.sh' script present  in `<fdo-pri-src>/component-samples/demo/scripts/`
 
 `[INFO] Started All-in-one demo Service.`
 
@@ -96,11 +96,11 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/aio/ondiecache` folder.
 
-***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/aio/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
-
 # FDO PRI AIO REST APIs
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
+
+***NOTE***: Follow the steps to port DIGEST auth calls with mTLS enabled cURL requests. [READ MORE](../README.MD#executing-curl-request-with-mtls)
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
