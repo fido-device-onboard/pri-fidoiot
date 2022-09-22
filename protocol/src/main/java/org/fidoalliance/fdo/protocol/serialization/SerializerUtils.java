@@ -27,7 +27,7 @@ public class SerializerUtils {
 
       for (Field field : fields) {
         JsonProperty[] properties =
-            (JsonProperty[]) field.getDeclaredAnnotationsByType(JsonProperty.class);
+            field.getDeclaredAnnotationsByType(JsonProperty.class);
         for (JsonProperty property : properties) {
           if (property.value().equals(name)) {
 

@@ -25,7 +25,7 @@ public class SimpleStorageDeserializer extends StdDeserializer<SimpleStorage> {
 
   @Override
   public SimpleStorage deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     SimpleStorage storage = new SimpleStorage();

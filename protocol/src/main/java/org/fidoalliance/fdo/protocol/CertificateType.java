@@ -10,7 +10,7 @@ public enum CertificateType {
   EC2_P256(3),
   EC2_P384(4);
 
-  private int id;
+  private final int id;
 
   CertificateType(int id) {
     this.id = id;

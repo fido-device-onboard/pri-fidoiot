@@ -25,7 +25,7 @@ public class ProtocolInfoDeserializer extends StdDeserializer<ProtocolInfo> {
 
   @Override
   public ProtocolInfo deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     ProtocolInfo info = new ProtocolInfo();

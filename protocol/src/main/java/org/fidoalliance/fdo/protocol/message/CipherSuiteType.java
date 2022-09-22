@@ -19,7 +19,7 @@ public enum CipherSuiteType {
   COSE_AES256_CBC(-17760705),
   COSE_AES256_CTR(-17760706);
 
-  private int id;
+  private final int id;
 
   CipherSuiteType(int id) {
     this.id = id;

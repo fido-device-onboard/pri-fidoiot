@@ -1,11 +1,10 @@
-# Copyright 2021 Intel Corporation
+# Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
 FROM registry.access.redhat.com/ubi8/ubi
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-RUN yum -y install java-11-openjdk-devel wget haveged
+RUN yum -y install java-11-openjdk-devel
 RUN yum clean all
 
 RUN useradd -ms /bin/bash fdo
@@ -19,6 +18,9 @@ COPY log4j2.xml .
 COPY aio.jar .
 COPY hibernate.cfg.xml .
 COPY service.yml .
+COPY context.xml .
+COPY tomcat-users.xml .
+COPY secrets.run.path /home/fdo/secrets.path
 
 
 RUN chown -R fdo:fdo /home/fdo

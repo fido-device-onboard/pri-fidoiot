@@ -2,6 +2,7 @@ package org.fidoalliance.fdo.protocol;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
+import org.fidoalliance.fdo.protocol.dispatch.ValidityDaysSupplier;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -73,7 +74,7 @@ public class ApiTest {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
     HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    Files.writeString(Path.of(fileName), response.body().toString());
+    Files.writeString(Path.of(Config.getPath(), fileName), response.body().toString());
     assert (resp == response.statusCode());
   }
 
@@ -101,25 +102,17 @@ public class ApiTest {
     assert (resp == response.statusCode());
   }
 
-  public int doPostFileApi(String url,String filename) throws IOException, InterruptedException {
-    HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.ofMinutes(1))
-            .header("Content-Type", "text/plain")
-            .POST(HttpRequest.BodyPublishers.ofFile(Path.of(filename)))
-            .build();
-    HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    return response.statusCode();
-  }
-
   public void doPostFileApi(String url, String filename, int resp) throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
+    Path path = Path.of(filename);
+    if (!Path.of(filename).toFile().exists()) {
+       path = Path.of(Config.getPath(), filename);
+    }
     HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .timeout(Duration.ofMinutes(1))
             .header("Content-Type", "text/plain")
-            .POST(HttpRequest.BodyPublishers.ofFile(Path.of(filename)))
+            .POST(HttpRequest.BodyPublishers.ofFile(path))
             .build();
     HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
     assert (resp == response.statusCode());
@@ -165,11 +158,9 @@ public class ApiTest {
   public void certificateValidityTest() throws IOException, InterruptedException {
     doPostApi("http://localhost:8080/api/v1/certificate/validity?days=abcd", "",
             HttpServletResponse.SC_BAD_REQUEST);
-    doPostApi("http://localhost:8080/api/v1/certificate/validity?days=-100", "",
-            HttpServletResponse.SC_OK);
-    doPostApi("http://localhost:8080/api/v1/certificate/validity?days=100", "",
-            HttpServletResponse.SC_OK);
-    doGetApi("http://localhost:8080/api/v1/certificate/validity", "100",
+
+    Config.getWorker(ValidityDaysSupplier.class).get();
+    doGetApi("http://localhost:8080/api/v1/certificate/validity", "10800",
             HttpServletResponse.SC_OK);
   }
 
@@ -221,8 +212,6 @@ public class ApiTest {
 
   @Test
   public void logTest() throws IOException, InterruptedException {
-    doGetApi("http://localhost:8080/api/v1/logs", "",
-            HttpServletResponse.SC_OK);
     doDeleteApi("http://localhost:8080/api/v1/logs", "",
             HttpServletResponse.SC_OK);
   }
@@ -256,8 +245,6 @@ public class ApiTest {
 
   @Test
   public void certificateTest() throws IOException, InterruptedException {
-    doGetFileApi("http://localhost:8080/api/v1/certificate?filename=ssl.p12", "ssl.p12",
-            HttpServletResponse.SC_OK);
     doGetApi("http://localhost:8080/api/v1/certificate?alias=axb12-dsad-das", "",
             HttpServletResponse.SC_NOT_FOUND);
     doGetFileApi("http://localhost:8080/api/v1/certificate?alias=SECP256R1", "owner_pub_key",

@@ -26,7 +26,7 @@ public class CoseProtectedHeaderDeserializer extends StdDeserializer<CoseProtect
 
   @Override
   public CoseProtectedHeader deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     CoseProtectedHeader cph = new CoseProtectedHeader();

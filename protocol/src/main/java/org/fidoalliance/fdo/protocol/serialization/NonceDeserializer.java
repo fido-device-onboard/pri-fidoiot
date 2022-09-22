@@ -23,7 +23,7 @@ public class NonceDeserializer extends StdDeserializer<Nonce> {
 
   @Override
   public Nonce deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     Nonce nonce = new Nonce();

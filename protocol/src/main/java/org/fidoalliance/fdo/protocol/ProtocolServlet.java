@@ -6,8 +6,10 @@ package org.fidoalliance.fdo.protocol;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Optional;
+import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.fidoalliance.fdo.protocol.dispatch.MessageDispatcher;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.MsgType;
@@ -72,6 +74,14 @@ public class ProtocolServlet extends HttpServlet {
       }
 
     } catch (Throwable throwable) {
+
+      try {
+        Config.getWorker(ExceptionConsumer.class).accept(throwable);
+      } catch (IOException e) {
+        logger.error("failed log exception");
+        // already in exception handler
+      }
+
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       resp.setHeader(HttpUtils.HTTP_MESSAGE_TYPE,
           Integer.toString(MsgType.ERROR.toInteger()));
@@ -83,6 +93,9 @@ public class ProtocolServlet extends HttpServlet {
           resp.setContentLength(errorMsg.getMessage().length);
           resp.getOutputStream().write(errorMsg.getMessage());
           logMessage(errorMsg);
+
+
+
         } catch (Throwable throwable1) {
           logger.error("failed to write error response");
           // already in exception handler

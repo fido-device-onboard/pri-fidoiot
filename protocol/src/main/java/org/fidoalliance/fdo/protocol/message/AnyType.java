@@ -17,7 +17,7 @@ import org.fidoalliance.fdo.protocol.serialization.AnyTypeSerializer;
 public class AnyType {
 
   @JsonIgnore
-  private Object object;
+  private final Object object;
 
   @JsonIgnore
   private AnyType(final Object object) {

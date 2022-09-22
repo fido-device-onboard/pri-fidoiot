@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+    <role rolename="api"/>
+    <user username="${server.api.user}" password="${server.api.password}" roles="api"/>
+</tomcat-users>

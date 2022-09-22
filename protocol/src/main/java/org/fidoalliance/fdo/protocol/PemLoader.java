@@ -113,7 +113,12 @@ public class PemLoader {
           JcePKCSPBEInputDecryptorProviderBuilder builder =
               new JcePKCSPBEInputDecryptorProviderBuilder().setProvider(new BouncyCastleProvider());
 
-          InputDecryptorProvider idp = builder.build(password.toCharArray());
+          InputDecryptorProvider idp = null;
+          if (password != null) {
+            idp = builder.build(password.toCharArray());
+          } else {
+            idp = builder.build(null);
+          }
 
           PrivateKeyInfo pki = epki.decryptPrivateKeyInfo(idp);
           return new JcaPEMKeyConverter().getPrivateKey(pki);
@@ -129,7 +134,7 @@ public class PemLoader {
     } catch (IOException | PKCSException e) {
       throw new RuntimeException(e);
     }
-    throw new RuntimeException(new CertStoreException());
+    return null;
   }
 
   /**

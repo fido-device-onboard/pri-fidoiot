@@ -26,7 +26,7 @@ public enum RendezvousVariable {
   BYPASS(14),
   EXT_RV(15);
 
-  private int id;
+  private final int id;
 
   RendezvousVariable(int id) {
     this.id = id;

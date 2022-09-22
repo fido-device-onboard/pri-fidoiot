@@ -3,15 +3,11 @@
 
 package org.fidoalliance.fdo.protocol.entity;
 
-// Copyright 2022 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "certificate_data")
@@ -22,7 +18,7 @@ public class CertificateData {
   private String name;
 
   @Lob
-  @Column(name = "data")
+  @Column(name = "data", length = 65535)
   private byte[] data;
 
   public String getName() {

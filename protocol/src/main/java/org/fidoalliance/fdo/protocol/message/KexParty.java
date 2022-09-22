@@ -11,7 +11,7 @@ public enum KexParty {
   A(0),
   B(1);
 
-  private int id;
+  private final int id;
 
   KexParty(int id) {
     this.id = id;

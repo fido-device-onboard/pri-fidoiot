@@ -23,7 +23,7 @@ public class DevModListDeserializer extends StdDeserializer<DevModList> {
 
   @Override
   public DevModList deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
 
     DevModList modList = new DevModList();
@@ -35,7 +35,6 @@ public class DevModListDeserializer extends StdDeserializer<DevModList> {
     modList.setCount(count);
     modList.setIndex(storedIndex);
     modList.setModulesNames(names);
-    ;
     for (int i = 0; i < count; i++) {
       names[i] = node.get(index++).textValue();
     }
