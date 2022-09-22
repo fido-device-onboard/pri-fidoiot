@@ -166,7 +166,7 @@ Following is the list of REST response error codes and it's possible causes :
 
 # Troubleshooting
 
-The default configured heap size is `256 MB`. Increase the heap size appropriately to avoid heap size issue
+Increase the heap size appropriately to avoid heap size issue.
 
 # Configuring FDO Owner Service for HTTPS/TLS Communication
 

@@ -131,7 +131,7 @@ Alias values that can be used for GET /api/v1/certificate?alias={alias}
 
 # Troubleshooting
 
-The default configured heap size is `256 MB`. Increase the heap size appropriately to avoid heap size issue
+Increase the heap size appropriately to avoid heap size issue.
 
 # Configuring Reseller for HTTPS/TLS Communication
 

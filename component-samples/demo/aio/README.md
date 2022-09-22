@@ -69,7 +69,7 @@ All the runtime configurations for the services are specified in four files: `se
 # Running All-In-One Demo
 
 The All-In-One demo can be executed as a standalone service as well as a docker service. At the
-end of initialization of all services, you will see following statement on the console. Generate the required credentials Keypair and certificates using the 'keys_gen.sh' script present  in `<fdo-pri-src>/component-samples/demo/scripts/`
+end of initialization of all services, you will see following statement on the console. Generate the required credentials keypair and certificates using the 'keys_gen.sh' script present  in `<fdo-pri-src>/component-samples/demo/scripts/`
 
 `[INFO] Started All-in-one demo Service.`
 
@@ -247,7 +247,7 @@ The following filter will only return service info instructions if the device in
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+Increase the heap size appropriately to avoid heap size issue.
 
 # Configuring AIO for HTTPS/TLS Communication
 

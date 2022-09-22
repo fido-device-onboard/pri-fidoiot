@@ -319,7 +319,7 @@ To resolve this, edit fields `mem_limit` and `mem_reservation` in the respective
 
 # Connecting to external resources during SVI
 
-When connecting to the external signed resource, the application should be using the default java ca-certs instead of the custom truststore. The following properties in `service.yml` ought to be commented out to pick the default java ca-certs.
+When connecting to the external signed resource, the application should be using the default java ca-certs instead of the custom truststore. The following properties in `service.yml` need to be commented out to pick the default java ca-certs.
 
   ```
     #javax.net.ssl.keyStorePassword: default
