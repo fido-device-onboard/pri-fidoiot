@@ -263,6 +263,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
     try {
       ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.directory(new File(getAppData()));
       builder.redirectErrorStream(true);
       builder.redirectOutput(getExecOutputRedirect());
       execProcess = builder.start();

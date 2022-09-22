@@ -83,7 +83,8 @@ device:
 # The worker items the device will use when handling requests
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
-  - org.fidoalliance.fdo.protocol.DebugExceptionConsumer
+  #- org.fidoalliance.fdo.protocol.DebugExceptionConsumer
+  - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier

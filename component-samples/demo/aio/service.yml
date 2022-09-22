@@ -59,7 +59,7 @@ manufacturer:
      dns: host.docker.internal
      ip: 172.17.0.1
      protocol: 1
-     ownerport: 8080
+     ownerport: 8443
      devport: 8080
 
 owner:
@@ -136,6 +136,8 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreInputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousInfoSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServerSessionManager

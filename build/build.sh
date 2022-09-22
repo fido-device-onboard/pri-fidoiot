@@ -20,7 +20,7 @@ REMOTE_BRANCH=master
 # signature verification is disabled here. In case this is used to create
 # production build, it is recommended to update ~/.m2/settings.xml to include
 # proxy configurations.
-MVN_CONFIG="-Dpgpverify.skip=true"
+MVN_CONFIG="-Dpgpverify.skip=true -Dmaven.test.skip=true"
 
 if [ "$use_remote" = "1" ]; then
   echo "Building $REMOTE_URL : $REMOTE_BRANCH"
