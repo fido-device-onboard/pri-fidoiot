@@ -205,7 +205,7 @@ grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USE
 source ~/.bashrc
 ```
 
-***NOTE***:  **Before starting the containers on RHEL, replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
+***NOTE***:  **Before starting the containers on RHEL, assign your machine IP to host.docker.internal in "/etc/hosts" and replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
