@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * FDO Configuration Object.
  */
@@ -44,6 +47,7 @@ public class Config {
   private static final String configPath;
   private static final String CONFIG_FILE = "service.yml";
 
+  private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
   static {
 
@@ -71,18 +75,18 @@ public class Config {
     } catch (Throwable e) {
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
-        System.out.println(yamlException.getMessage());
+        logger.debug(yamlException.getMessage());
       } else  {
         if (e.getCause() != null) {
-          System.out.println(e.getCause().getClass().getName());
-          System.out.println(e.getCause().getMessage());
+          logger.debug(e.getCause().getClass().getName());
+          logger.debug(e.getCause().getMessage());
         } else {
-          System.out.println(e.getClass().getName());
-          System.out.println(e.getMessage());
+          logger.debug(e.getClass().getName());
+          logger.debug(e.getMessage());
         }
       }
 
-      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
+      logger.error("Invalid service.yml file. Restart service with correct yaml file.");
       System.exit(-1);
     }
   }

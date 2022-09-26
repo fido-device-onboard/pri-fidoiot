@@ -15,9 +15,6 @@
     </RollingFile>
   </Appenders>
   <Loggers>
-    <Logger name="org.apache.test" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
     <Logger name="org.hibernate.SQL" level="info"/>
     <Root level="info">
       <AppenderRef ref="STDOUT"/>
