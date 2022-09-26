@@ -171,7 +171,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
   }
 
   protected boolean checkFilter(Map<String, String> devMap, Map<String, String> filterMap) {
-    return devMap.entrySet().containsAll(filterMap.entrySet());
+    return !devMap.entrySet().containsAll(filterMap.entrySet());
   }
 
   protected void onStatusCb(ServiceInfoModuleState state, FdoSysModuleExtra extra,

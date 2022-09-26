@@ -34,6 +34,7 @@ import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate.Type;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
+import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 
 /**
  * Defines a FDO server.
@@ -364,12 +365,13 @@ public class StandardHttpServer implements HttpServer {
 
   protected KeyStore loadKeystore() throws IOException {
 
+    PrivateKey privateKey = null;
     try {
       KeyStore ks = KeyStore.getInstance("PEM");
       ks.load(null,"".toCharArray());
 
       String pemString = Files.readString(Path.of(config.getServerKey()));
-      PrivateKey privateKey = PemLoader.loadPrivateKey(pemString,"");
+      privateKey = PemLoader.loadPrivateKey(pemString,"");
       pemString = Files.readString(Path.of(config.getServerCert()));
       List<Certificate> certs = PemLoader.loadCerts(pemString);
 
@@ -379,6 +381,8 @@ public class StandardHttpServer implements HttpServer {
       return ks;
     } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
       throw new IOException(e);
+    } finally {
+      Config.getWorker(CryptoService.class).destroyKey(privateKey);
     }
   }
 
