@@ -125,8 +125,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
     bash user_csr_req.sh
     ```
 
-    **NOTE**: Both Server and Client certificate are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificate by updating `web-server.conf` and `client.conf` respectively.
-
+    **NOTE**: Both Server and Client certificate are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificate by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
 
 3. Running keys_gen.sh will generate random passwords for the all http servers and creates `secrets` folder containing all the required `.pem` files of Client, CA and Server component.
 
@@ -157,7 +156,10 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
 When the http server starts for the first time it will generate a self-signed certificate for https protocol.
 
-The subject name of the self-signed certificate is defined in the  `web-server.conf` under
+The   subject name of the self-signed certificate is defined in the  `web-server.conf` and `client.conf`.
+
+Uncomment `subjectAltName` and allowed list of IP and DNS in `[alt_names]` section. Example:
+
 ```
 #[ req_ext ]
   subjectAltName = @alt_names
@@ -186,6 +188,8 @@ docker-compose up --build -d/ podman-compose up --build -d
 ```
 
 **NOTE**: By default, Database uses mTLS connection for jdbc. MariaDB* is used as the default database. For non-mTLS jdbc connection, set `use_ssl` and `require_ssl` property to `false` in `service.yml` of individual services.
+
+**NOTE**: Follow the steps to [Enable embedded H2 database](./component-samples/demo/README.MD#enable-embedded-h2-database-server)
 
 ### Starting FDO PRI HTTP Servers
 

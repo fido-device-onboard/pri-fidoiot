@@ -131,7 +131,7 @@ Alias values that can be used for GET /api/v1/certificate?alias={alias}
 
 # Troubleshooting
 
-Increase the heap size appropriately to avoid heap size issue.
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring Reseller for HTTPS/TLS Communication
 

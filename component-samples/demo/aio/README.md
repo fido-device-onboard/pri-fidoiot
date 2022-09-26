@@ -247,7 +247,7 @@ The following filter will only return service info instructions if the device in
 
 # Troubleshooting
 
-Increase the heap size appropriately to avoid heap size issue.
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring AIO for HTTPS/TLS Communication
 

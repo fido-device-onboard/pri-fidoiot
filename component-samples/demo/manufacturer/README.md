@@ -125,7 +125,7 @@ Following is the list of REST response error codes and it's possible causes :
 
 # Troubleshooting
 
-Increase the heap size appropriately to avoid heap size issue.
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring FDO Manufacturer for HTTPS/TLS Communication
 
