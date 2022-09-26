@@ -371,6 +371,33 @@ While customizing the system configuration for multi machine setup, ensure that 
       IP:<IP-address-of-host-machine>
     ```
 
+# Enable Embedded H2 Database Server
+
+1. Activate `org.fidoalliance.fdo.protocol.EmbeddedDatabaseServer` worker in `service.yml` file.
+
+2. Change hibernate properties in `service.yml` to connect with H2 database:
+
+    ```
+    hibernate-properties:
+      connection.driver_class: org.h2.Driver
+      hibernate.connection.username: $(db_user)
+      hibernate.connection.password: $(db_password)
+      hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./app-data/emdb
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+    ```
+
+3. Append the following `h2-database` configuration to `service.yml` file.
+
+    ```
+    h2-database:
+       tcp-server:
+         - "-ifNotExists"
+       web-server:
+         - "-webPort"
+         - "8082"
+    ```
+
+4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
 
 # Certificate Validity checks
 
