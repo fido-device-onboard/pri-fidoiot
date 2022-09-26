@@ -121,7 +121,7 @@ public class KeyResolver {
       try {
         String pemString = Files.readString(Path.of(config.getPath()));
         List<Certificate> certs = PemLoader.loadCerts(pemString);
-        String keyPass = config.getPassword();
+        final String keyPass = config.getPassword();
         PrivateKey privateKey = PemLoader.loadPrivateKey(pemString,keyPass);
 
         this.keyStore = KeyStore.getInstance("JKS");
