@@ -20,9 +20,9 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 20.10.7, Supported till version 20.10.17) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL)
 
-  - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
+  - Docker-compose (minimum version 1.29.2) / Podman-compose (For RHEL)
 
   - Haveged
 
@@ -257,6 +257,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *exec-cb* - This command returns the status / progress of the process running.
 
+    *fetch* - This command returns the fetched file from client filesystem.
+
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
@@ -275,6 +277,28 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
+# Executing cURL request with mTLS
+
+Generic sample Digest authentication call:
+
+  ```shell
+    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
+    --header 'Content-Type: text/plain' \
+    --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
+  ```
+
+Replace `-D - --digest -u ${apiUser}:${api_password}` with `--cacert path-to-CA --cert path-to-client-Certificate`
+
+Finally, the mTLS enabled cURL request will be:
+
+  ```shell
+    curl \
+    --cacert scripts/secrets/ca-cert.pem --cert scripts/secrets/api-user.pem \
+     --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
+    --header 'Content-Type: text/plain' \
+    --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
+  ```
+
 # Enabling ServiceInfo Transfer
 
 To enable ServiceInfo transfer to a Device with a given GUID, follow the steps below:
@@ -292,6 +316,28 @@ This can be confirmed using the `docker stats` command that shows live resource 
 During SVI Transfer, observe the column `MEM USAGE / LIMIT` for respective container when SVI transmission is in progress.
 If the failure is observed when MEM USAGE reaches the LIMIT, it is due to the memory limit we have allocated for the container.
 To resolve this, edit fields `mem_limit` and `mem_reservation` in the respective docker-compose.yml according to the needs and restart the container.
+
+# Connecting to external resources during SVI
+
+When connecting to the external signed resource, the application should be using the default java ca-certs instead of the custom truststore. The following properties in `service.yml` need to be commented out to pick the default java ca-certs.
+
+  ```
+    #javax.net.ssl.keyStorePassword: default
+    #javax.net.ssl.trustStorePassword: default
+    #javax.net.ssl.keyStore: $(secrets.path)/api-user.pem
+    #javax.net.ssl.trustStore: $(secrets.path)/ca-cert.pem
+    #javax.net.ssl.keyStoreType: PEM
+    #javax.net.ssl.trustStoreType: PEM
+  ```
+
+To support external signed resources along with self-signed resource, add the self-signed certificate to the default java ca-certs. Add following lines to the `Dockerfile` of individual component.
+
+```
+COPY secrets/ca-cert.pem /home/fdo/ca-cert.pem
+
+RUN keytool -import -trustcacerts -noprompt -keystore "/usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts" -storepass changeit -alias tomcat -file /home/fdo/ca-cert.pem
+```
+
 
 # Customize for multi-machine setup
 
@@ -353,44 +399,9 @@ While customizing the system configuration for multi machine setup, ensure that 
 
 4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
 
-# Enabling access to the Embedded database
-
-Remote access to H2 Storage DB has been disabled by default. Enabling the remote access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
-
-To enable remote access to DB update the webAllowOthers properties in the `service.yml` :
-
-```shell
-# sample H2 DB configurations
-h2-database:
-   tcp-server:
-     - "-ifNotExists"
-     - "-tcpPort"
-     - "9093"
-   web-server:
-     - "-webAllowOthers"
-     - "-webExternalNames"
-     - "-ifNotExists"
-     - "-webPort"
-     - "8083"
-```
-
-**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://host.docker.internal:<webport>`.
-
-NOTE: Not recommended to enable this setting especially on production systems.
-
-# Disk Usage by the embedded database
-
-It is observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
-
-This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
-While shutting down, H2 "compacts" the file in order to reduce the file size.
-
-If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
-
 # Certificate Validity checks
 
 For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
-
 In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of respective component.
 
 Sample `service.yml` file:
