@@ -47,7 +47,7 @@ public class Config {
   private static final String configPath;
   private static final String CONFIG_FILE = "service.yml";
 
-  private static final Logger logger = LoggerFactory.getLogger(Config.class);
+  private static Logger logger;
 
   static {
 
@@ -73,16 +73,17 @@ public class Config {
 
 
     } catch (Throwable e) {
+      logger = LoggerFactory.getLogger(Config.class);
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
-        logger.debug(yamlException.getMessage());
+        logger.error(yamlException.getMessage());
       } else  {
         if (e.getCause() != null) {
-          logger.debug(e.getCause().getClass().getName());
-          logger.debug(e.getCause().getMessage());
+          logger.error(e.getCause().getClass().getName());
+          logger.error(e.getCause().getMessage());
         } else {
-          logger.debug(e.getClass().getName());
-          logger.debug(e.getMessage());
+          logger.error(e.getClass().getName());
+          logger.error(e.getMessage());
         }
       }
 
