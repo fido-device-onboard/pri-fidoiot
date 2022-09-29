@@ -30,7 +30,7 @@ device:
   # | Name         | Value | Description                            |
   # +---------------------------------------------------------------+
   # | X509         | 5     | RSA key, PKCS1, v1.5                   |
-  # | X5CHAIN      | 10    | ECDSA secp256r1 NIST-P-256 prime256v1  |
+  # | COSEX5CHAIN  | 10    | ECDSA secp256r1 NIST-P-256 prime256v1  |
   # | COSEKEY      | 11    | ECDSA secp384r1 NIST-P-384             |
   # +--------------+-------+----------------------------------------+
   

@@ -125,7 +125,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
     bash user_csr_req.sh
     ```
 
-    **NOTE**: Both Server and Client certificate are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificate by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
+    **NOTE**: Both Server and Client certificates are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificates by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
 
 3. Running keys_gen.sh will generate random passwords for the all http servers and creates `secrets` folder containing all the required `.pem` files of Client, CA and Server component.
 

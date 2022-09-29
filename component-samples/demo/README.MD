@@ -399,6 +399,10 @@ While customizing the system configuration for multi machine setup, ensure that 
 
 4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
 
+***NOTE:*** H2 database is flagged for a known vulnerability. To be remotely exploitable, the affected application must be 
+configured with the non-default setting webAllowOthers=true, either in a config file or as a parameter passed in when the servlet is invoked.
+The vulnerability can be avoided by setting a password on the database and/or restricting access to localhost using the above setting.
+
 # Certificate Validity checks
 
 For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
