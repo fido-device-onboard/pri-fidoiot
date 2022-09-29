@@ -97,7 +97,7 @@ cwt:
 #  *********************** NOTE **********************************************
 #
 # Out of the box, FDO services are configured to use trusted certificates.
-# In test environments, the configurators can enable the trust for self-signed certificates
+# In test environments, the user can enable the trust for self-signed certificates
 # by updating the worker list in `service.yml` file of respective component.
 #
 # Enable the following workers
