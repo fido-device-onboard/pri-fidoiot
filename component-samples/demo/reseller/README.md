@@ -11,8 +11,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.10+
-- Docker compose 1.29.2
+- Docker 20.10.10+ / Podman engine (For RHEL)
+- Docker compose 1.29.2 / Podman-compose (For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -50,6 +50,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 - `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
+- `secrets:` - This section contains path to the service credentials.
 
 - `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 

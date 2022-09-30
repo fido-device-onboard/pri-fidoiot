@@ -11,8 +11,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.10+
-- Docker compose 1.29.2
+- Docker 20.10.10+ / Podman engine (For RHEL)
+- Docker compose 1.29.2 / Podman-compose (For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -96,6 +96,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/rv/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
+***NOTE***: By default, `TrustedRendezvousAcceptFunction` worker is enabled. So we need to add the Owner's certificate to RV via `api/v1/rv/allow` endpoint to accept TO0 requests from Owner.
 
 # FDO PRI Rendezvous REST APIs
 
