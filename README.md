@@ -14,8 +14,8 @@ deploying the example implementation for these components.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
-* **Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL)**
-* **Docker-compose (minimum version 1.29.2) / Podman-compose (For RHEL)**
+* **Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+**
+* **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
 +Supported list of Host operating systems.
 
@@ -125,7 +125,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
     bash user_csr_req.sh
     ```
 
-    **NOTE**: Both Server and Client certificate are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificate by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
+    **NOTE**: Both Server and Client certificates are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificates by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
 
 3. Running keys_gen.sh will generate random passwords for the all http servers and creates `secrets` folder containing all the required `.pem` files of Client, CA and Server component.
 

@@ -12,8 +12,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.10+
-- Docker compose 1.29.2
+- Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
+- Docker compose 1.29.2 / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -57,6 +57,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 - `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 
+- `secrets:` - This section contains path to the service credentials.
 
 - `cwt:` - This section contains the configuration related to CBOR web token (cwt) keystore path, type and credentials.
 
@@ -122,7 +123,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | |  | Keystore file in binary format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
-| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"host.docker.internal"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8041]]]' |
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"host.docker.internal"],[3,8080],[12,1],[2,"127.0.0.1"],[4,8443]]]' |
 | GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | Path - `n` seconds |  |  | JSON array of Serial No, GUID ,DI Timestamp and Attestion type. | curl -D - --digest -u apiUser:  --location --request GET 'http://host.docker.internal:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
 | GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8080/api/v1/logs' --header 'Content-Type: text/plain'| 
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8080/api/v1/logs' --header 'Content-Type: text/plain'|
@@ -134,8 +135,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
 | GET /api/v1/logs | Serves the log from the RV service | | | | RV logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8080/api/v1/logs' | 
 | DELETE /api/v1/logs | Deletes the log from the RV service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8080/api/v1/logs' |
