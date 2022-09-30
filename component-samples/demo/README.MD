@@ -20,9 +20,9 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+
 
-  - Docker-compose (minimum version 1.29.2) / Podman-compose (For RHEL)
+  - Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)
 
   - Haveged
 
@@ -262,16 +262,16 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
-     {"write": "sample.txt"},
      {"exec" :"cat sample.txt"}`
 
     or
   
      `{"filedesc" : "sample.txt","resource" : "database resource"},
-      {"write": "sample.txt"},
       {"exec" :"cat sample.txt"}`
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
+
+***NOTE***: You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
@@ -298,6 +298,33 @@ Finally, the mTLS enabled cURL request will be:
     --header 'Content-Type: text/plain' \
     --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
   ```
+
+# Loading Keystores from FileSystem
+
+1. Copy the required Keystores into `demo/<fdo-component>/app-data` folder.
+
+2. Disable the following workers.
+
+```
+org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
+org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+```
+
+3. Enable the following workers.
+
+```
+org.fidoalliance.fdo.FileKeyStoreInputStream
+org.fidoalliance.fdo.FileKeyStoreOutputStream
+```
+
+4. Update `service.yml` with the new Keystore filename and credentials in `service.env`
+
+```
+   keystore:
+     path: new-keystore-filename
+     store-type: PKCS12
+     password: $(encrypt_password)
+```
 
 # Enabling ServiceInfo Transfer
 
@@ -398,6 +425,8 @@ While customizing the system configuration for multi machine setup, ensure that 
     ```
 
 4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
+
+***NOTE:*** It is recommended to configure H2 DB with the default settings for properties like webAllowOthers, either in a config file or as a parameter passed in, when the servlet is invoked
 
 # Certificate Validity checks
 
