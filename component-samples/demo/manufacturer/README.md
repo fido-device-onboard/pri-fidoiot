@@ -11,8 +11,8 @@ The following are the system requirements for the FDO Manufacturer.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.10+ / Podman engine (For RHEL)
-- Docker compose 1.29.2  / Podman-compose (For RHEL)
+- Docker 20.10.10+ / Podman engine  3.4.2+(For RHEL)
+- Docker compose 1.29.2  / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment

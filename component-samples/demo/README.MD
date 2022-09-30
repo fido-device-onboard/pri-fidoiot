@@ -20,9 +20,9 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+
 
-  - Docker-compose (minimum version 1.29.2) / Podman-compose (For RHEL)
+  - Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)
 
   - Haveged
 
@@ -426,9 +426,7 @@ While customizing the system configuration for multi machine setup, ensure that 
 
 4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
 
-***NOTE:*** H2 database is flagged for a known vulnerability. To be remotely exploitable, the affected application must be 
-configured with the non-default setting webAllowOthers=true, either in a config file or as a parameter passed in when the servlet is invoked.
-The vulnerability can be avoided by setting a password on the database and/or restricting access to localhost using the above setting.
+***NOTE:*** It is recommended to configure H2 DB with the default settings for properties like webAllowOthers, either in a config file or as a parameter passed in, when the servlet is invoked
 
 # Certificate Validity checks
 

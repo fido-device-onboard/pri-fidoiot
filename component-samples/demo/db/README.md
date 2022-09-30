@@ -8,8 +8,8 @@ The FDO DB is designed to run database service in a containerized **docker** env
 
 The following are the system requirements for FDO DB.
 - Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
-- Docker 20.10.10+ / Podman engine (For RHEL)
-- Docker compose 1.29.2 / Podman-compose (For RHEL)
+- Docker 20.10.10+ / Podman engine 3.4.2+ (For RHEL)
+- Docker compose 1.29.2 / Podman-compose 1.0.3(For RHEL)
 
 # Running FDO DB
 
