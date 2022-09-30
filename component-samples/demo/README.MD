@@ -162,6 +162,8 @@ http_proxy_port: 900
 non_proxy_host: myproxy.com | ip 
 ```
 
+***NOTE:*** For RHEL, proxy variables need to be configured in `/etc/environment`.
+
 If no proxy needs to be specified, do not add these properties to your _JAVA_OPTIONS.
 
 # Configuring OnDie (Optional)
