@@ -30,7 +30,7 @@ public class DenyList extends RestApi {
     if (certList.size() > 0) {
       CryptoService cs = Config.getWorker(CryptoService.class);
       byte[] encoded = certList.get(0).getPublicKey().getEncoded();
-      Hash hash = cs.hash(HashType.HMAC_SHA384, encoded);
+      Hash hash = cs.hash(HashType.SHA384, encoded);
       hashKey = Base64.getEncoder().encodeToString(hash.getHashValue());
     } else {
       hashKey = UUID.fromString(getStringBody()).toString();

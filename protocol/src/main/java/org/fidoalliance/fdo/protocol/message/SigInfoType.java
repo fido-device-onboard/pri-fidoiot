@@ -15,7 +15,7 @@ public enum SigInfoType {
   EPID10(90),
   EPID11(91);
 
-  private int id;
+  private final int id;
 
   SigInfoType(int id) {
     this.id = id;

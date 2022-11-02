@@ -224,7 +224,7 @@
         <url-pattern>/api/v1/resell/*</url-pattern>
     </servlet-mapping>
 
-  <security-constraint>
+ <security-constraint>
     <web-resource-collection>
         <web-resource-name>apis</web-resource-name>
         <url-pattern>/api/v1/*</url-pattern>
@@ -233,9 +233,13 @@
         <role-name>api</role-name>
     </auth-constraint>
     <user-data-constraint>
-        <transport-guarantee>NONE</transport-guarantee>
+       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
+
+  <login-config>
+       <auth-method>CLIENT-CERT</auth-method>
+  </login-config>
 
   <security-role>
     <role-name>api</role-name>

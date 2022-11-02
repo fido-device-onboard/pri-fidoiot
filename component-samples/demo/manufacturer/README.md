@@ -11,8 +11,8 @@ The following are the system requirements for the FDO Manufacturer.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.X
-- Docker compose 1.21.2
+- Docker 20.10.10+ / Podman engine  3.4.2+(For RHEL)
+- Docker compose 1.29.2  / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -50,6 +50,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 - `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
+- `secrets:` - This section contains path to the service credentials.
 
 - `manufacturer:` - This section contains the configuration related to manufacturer keystore path, type and credentials.
 
@@ -67,6 +68,8 @@ end of initialization of all services, you will see following statement on the c
 `[INFO] Started Manufacturer Service.`
 
 Follow the below steps to start FDO Manufacturer demo.
+
+***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
@@ -95,6 +98,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
 
+***NOTE***: Follow the steps to port DIGEST auth calls with mTLS enabled cURL requests. [READ MORE](../README.MD#executing-curl-request-with-mtls)
+
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
 | POST /api/v1/mfg/vouchers/<serial_no> | Gets extended Ownership Voucher with the serial number. | Path - Device Serial Number | | Owner Certificate | Extended Voucher |   curl -D - --digest -u ${api_user}: --location --request POST "http://host.docker.internal:8039/api/v1/mfg/vouchers/${serial_no}" --header 'Content-Type: text/plain' --data-raw  "$owner_certificate" -o ${serial_no}_voucher.txt |
@@ -121,7 +126,7 @@ Following is the list of REST response error codes and it's possible causes :
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately to avoid heap size issue.
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring FDO Manufacturer for HTTPS/TLS Communication
 

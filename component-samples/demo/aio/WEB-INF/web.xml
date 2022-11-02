@@ -316,9 +316,13 @@
         <role-name>api</role-name>
     </auth-constraint>
     <user-data-constraint>
-        <transport-guarantee>NONE</transport-guarantee>
+       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
+
+  <login-config>
+       <auth-method>CLIENT-CERT</auth-method>
+  </login-config>
 
   <security-role>
     <role-name>api</role-name>

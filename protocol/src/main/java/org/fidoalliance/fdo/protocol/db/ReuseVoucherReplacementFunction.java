@@ -12,7 +12,8 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 
 public class ReuseVoucherReplacementFunction implements VoucherReplacementFunction {
 
-  private static LoggerService logger = new LoggerService(ReuseVoucherReplacementFunction.class);
+  private static final LoggerService logger =
+      new LoggerService(ReuseVoucherReplacementFunction.class);
 
   /**
    * Worker constructor.

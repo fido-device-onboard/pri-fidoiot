@@ -11,8 +11,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.X
-- Docker compose 1.21.2
+- Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
+- Docker compose 1.29.2 / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -71,6 +71,8 @@ end of initialization of all services, you will see following statement on the c
 
 Follow the below steps to start FDO Rendezvous demo.
 
+***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
+
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.
 
@@ -94,11 +96,13 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/rv/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
+***NOTE***: By default, `TrustedRendezvousAcceptFunction` worker is enabled. So we need to add the Owner's certificate to RV via `api/v1/rv/allow` endpoint to accept TO0 requests from Owner.
 
 # FDO PRI Rendezvous REST APIs
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls.
 
+***NOTE***: Follow the steps to port DIGEST auth calls with mTLS enabled cURL requests. [READ MORE](../README.MD#executing-curl-request-with-mtls)
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
@@ -128,7 +132,7 @@ Following is the list of REST response error codes and it's description :
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring FDO Rendezvous service for HTTPS/TLS Communication
 

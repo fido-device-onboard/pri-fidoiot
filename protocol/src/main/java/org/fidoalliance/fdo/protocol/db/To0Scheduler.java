@@ -4,6 +4,10 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Date;
@@ -12,10 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -23,7 +23,6 @@ import org.fidoalliance.fdo.protocol.StandardTo0Client;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
-import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 import org.hibernate.Session;
@@ -97,7 +96,8 @@ public class To0Scheduler implements Closeable {
   }
 
 
-  private static To0SchedulerConfig config = Config.getConfig(RootConfig.class).config.scheduler;
+  private static final To0SchedulerConfig config = Config.getConfig(
+      RootConfig.class).config.scheduler;
 
   private void onInterval() {
 

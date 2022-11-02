@@ -50,10 +50,7 @@ public class Hash {
       if (hash.hashType != hashType) {
         return false;
       }
-      if (ByteBuffer.wrap(hash.hashValue).compareTo(ByteBuffer.wrap(hashValue)) != 0) {
-        return false;
-      }
-      return true;
+      return ByteBuffer.wrap(hash.hashValue).compareTo(ByteBuffer.wrap(hashValue)) == 0;
     }
     return false;
   }

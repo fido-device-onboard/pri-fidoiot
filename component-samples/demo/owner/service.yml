@@ -1,45 +1,57 @@
 hibernate-properties:
-  connection.driver_class: org.h2.Driver
   hibernate.connection.username: $(db_user)
   hibernate.connection.password: $(db_password)
-  hibernate.connection.url: jdbc:h2:tcp://localhost:8051/./app-data/emdb
-  hibernate.dialect: org.hibernate.dialect.H2Dialect
+  hibernate.connection.url: jdbc:mariadb://host.docker.internal:3306/emdb?useSSL=$(useSSL)
+  hibernate.connection.requireSSL: $(requireSSL)
+  hibernate.connection.autoReconnect: true
+  hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
-  application.version: 1.1.3-SNAPSHOT
+  application.version: 1.1.3
   service.name: "Owner"
-  # Uncomment the below properties for proxy setup
-  #http.proxyHost: $(http_host)
-  #http.proxyPort: $(http_port)
-  #https.proxyHost: $(https_host)
-  #https.proxyPort: $(https_port)
-  #http.nonProxyHosts: $(no_proxy)
-  
+  server.api.user: $(api_user)
+  server.api.password: "null"
+  javax.net.ssl.keyStorePassword: default
+  javax.net.ssl.trustStorePassword: default
+  javax.net.ssl.keyStore: $(secrets.path)/api-user.pem
+  javax.net.ssl.trustStore: $(secrets.path)/ca-cert.pem
+  javax.net.ssl.keyStoreType: PEM
+  javax.net.ssl.trustStoreType: PEM
+  #javax.net.debug: ssl:handshake
+  #log4j.logger.org.apache.http.impl.conn: DEBUG
+  #log4j.logger.org.apache.http.impl.client: DEBUG
+  #log4j.logger.org.apache.http.client: DEBUG
+  # set system proxy information
+  #http.proxyHost:
+  #http.proxyPort:
+  #https.proxyHost:
+  #https.proxyPort:
+  #http.nonProxyHosts:
+
+
+secrets:
+  - db_password
+
 
 http-server:
-  base_path: app-data
+  base_path: .
   http_port: 8042
   https_port: 8043
   http_schemes:
   - http
   - https
   http_timeout: 20000
-  keystore: 
-    path: ssl.p12
-    store-type: PKCS12
-    password: $(ssl_password)
-    alias: ssl
-  auth:
-    method: DIGEST
-    role: api
-    user_name: apiUser
-    user_password: $(api_password)
-  subject_names:
-    - DNS:host.docker.internal
-#    - IP:127.0.0.1
-  to0-scheduler:
+  server_cert: $(secrets.path)/server-cert.pem
+  server_key: $(secrets.path)/server-key.pem
+  truststore_file: $(secrets.path)/ca-cert.pem
+  truststore_type: PEM
+  certificate_verification: want
+  protocols: TLSv1.3
+  certificate_verification_depth: 2
+  
+to0-scheduler:
     thread-count: 5
     interval: 120
 
@@ -54,8 +66,9 @@ owner:
        store-type: PKCS12
        password: $(encrypt_password)
    to0-scheduler:
-     thread-count: 5
-     interval: 120
+    thread-count: 5
+    interval: 120
+   
 
 epid:
   # WARNING: do not set testmode to true in production environments
@@ -68,31 +81,19 @@ epid:
   url: http://verify.epid-sbx.trustedservices.intel.com
 
 
-h2-database:
-   tcp-server:
-     - "-ifNotExists"
-     - "-tcpPort" 
-     - "8051"
-   web-server:
-     # - "-webAllowOthers"
-     # - "-webExternalNames"
-     # - "serverfqdn"
-     - "-webPort"
-     - "8085"
- 
 
 #  *********************** NOTE **********************************************
 #
-# For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
-# In production environments, the configurators should disable the trust for these self-signed certificates
+# Out of the box, FDO services are configured to use trusted certificates.
+# In test environments, the user can enable the trust for self-signed certificates
 # by updating the worker list in `service.yml` file of respective component.
 #
-# Disable the following workers
+# Enable the following workers
 #
 #  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
 #  - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
 #
-# and enable
+# and Disable
 #
 #  - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
 #  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
@@ -101,6 +102,7 @@ h2-database:
 
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
+  - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.StandardHttpServer
@@ -108,19 +110,19 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
-  # Disable SelfSignedHttpClientSupplier in Production Environment to perform SSL certificate verification.
-  # Use StandardHttpClientSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
-  #- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
+  #- Use StandardHttpClientSupplier for secure Production configurations.
+  - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
-  #- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
+  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
   # Disable BasicServiceInfoClientSupplier in Production Environment to perform SSL certificate verification.
   # Use StandardServiceInfoClientSupplier for secure Production configurations.
-  - org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+  #- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
   - org.fidoalliance.fdo.protocol.db.OnDieCertificateManager
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
   - org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreInputStream
+  #- org.fidoalliance.fdo.protocol.FileKeyStoreOutputStream
   - org.fidoalliance.fdo.protocol.db.To0Scheduler
   - org.fidoalliance.fdo.protocol.db.StandardSessionCleaner
   - org.fidoalliance.fdo.protocol.db.StandardAcceptOwnerFunction

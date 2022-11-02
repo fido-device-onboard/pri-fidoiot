@@ -58,7 +58,7 @@ public class PemFormatter {
    */
   public static String format(Certificate cert) throws IOException {
     try (StringWriter writer = new StringWriter();
-        PemWriter pemWriter = new PemWriter(writer);) {
+        PemWriter pemWriter = new PemWriter(writer)) {
 
       pemWriter.writeObject(new JcaMiscPEMGenerator(cert));
 
@@ -78,7 +78,7 @@ public class PemFormatter {
    */
   public static String format(PublicKey publicKey) throws IOException {
     try (StringWriter writer = new StringWriter();
-        PemWriter pemWriter = new PemWriter(writer);) {
+        PemWriter pemWriter = new PemWriter(writer)) {
 
       pemWriter.writeObject(new JcaMiscPEMGenerator(publicKey));
 
@@ -101,7 +101,7 @@ public class PemFormatter {
       throws IOException {
 
     try (StringWriter writer = new StringWriter();
-        PemWriter pemWriter = new PemWriter(writer);) {
+        PemWriter pemWriter = new PemWriter(writer)) {
 
       JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
           PKCS8Generator.AES_256_CBC);
@@ -116,7 +116,7 @@ public class PemFormatter {
         throw new IOException(e);
       }
 
-      pemWriter.writeObject(new JcaPKCS8Generator((PrivateKey) key, oe));
+      pemWriter.writeObject(new JcaPKCS8Generator(key, oe));
 
       pemWriter.flush();
       pemWriter.close();

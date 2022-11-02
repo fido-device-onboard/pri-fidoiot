@@ -18,7 +18,7 @@ import org.hibernate.Transaction;
  */
 public class StandardAcceptOwnerFunction implements AcceptOwnerFunction {
 
-  private static LoggerService logger = new LoggerService(StandardAcceptOwnerFunction.class);
+  private static final LoggerService logger = new LoggerService(StandardAcceptOwnerFunction.class);
 
   @Override
   public Date apply(String guid, Long ws) throws IOException {

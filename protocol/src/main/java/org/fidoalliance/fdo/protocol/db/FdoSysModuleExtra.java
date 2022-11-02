@@ -11,7 +11,7 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
 public class FdoSysModuleExtra {
   @JsonProperty("filter")
-  private Map<String,String> filter = new HashMap<>();
+  private final Map<String,String> filter = new HashMap<>();
 
   @JsonProperty("queue")
   private ServiceInfoQueue queue = new ServiceInfoQueue();

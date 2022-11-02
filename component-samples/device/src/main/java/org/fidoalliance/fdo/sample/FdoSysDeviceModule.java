@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.sample;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -41,9 +43,9 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
   private static final LoggerService logger = new LoggerService(FdoSysDeviceModule.class);
 
-  private ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
-  private Duration execTimeout = Duration.ofHours(2);
-  private Predicate<Integer> exitValueTest = val -> (0 == val);
+  private final ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
+  private final Duration execTimeout = Duration.ofHours(2);
+  private final Predicate<Integer> exitValueTest = val -> (0 == val);
   private static final int DEFAULT_STATUS_TIMEOUT = 5; //seconds
 
   private Path currentFile;
@@ -51,7 +53,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private int statusTimeout = DEFAULT_STATUS_TIMEOUT;
 
 
-  private ServiceInfoQueue queue = new ServiceInfoQueue();
+  private final ServiceInfoQueue queue = new ServiceInfoQueue();
 
   @Override
   public String getName() {
@@ -88,7 +90,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.EXEC:
         if (state.isActive()) {
           String[] args = Mapper.INSTANCE.readValue(kvPair.getValue(), String[].class);
-          logger.info("Executing command: " + Arrays.asList(args).toString());
+          logger.info("Executing command: " + Arrays.asList(args));
           exec(args);
         }
         break;
@@ -137,9 +139,18 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
   }
 
+  private String getAppData() {
+    DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
+    File file = new File(config.getCredentialFile());
+    return file.getParent();
+  }
 
   private void createFile(Path path) {
 
+    currentFile = path;
+    if (!path.isAbsolute()) {
+      currentFile = Path.of(getAppData(), path.toString());
+    }
     Set<OpenOption> openOptions = new HashSet<>();
     openOptions.add(StandardOpenOption.CREATE);
     openOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
@@ -152,22 +163,24 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       filePermissions.add(PosixFilePermission.OWNER_WRITE);
       FileAttribute<?> fileAttribute = PosixFilePermissions.asFileAttribute(filePermissions);
 
-      try (FileChannel channel = FileChannel.open(path, openOptions, fileAttribute)) {
+      try (FileChannel channel = FileChannel.open(currentFile, openOptions, fileAttribute)) {
         logger.info(FdoSys.FILEDESC + " file created.");
       } catch (IOException e) {
+        currentFile = null;
         throw new RuntimeException(e);
       }
 
     } else {
 
-      try (FileChannel channel = FileChannel.open(path, openOptions)) {
+      try (FileChannel channel = FileChannel.open(currentFile, openOptions)) {
         // opening the channel is enough to create the file
       } catch (IOException e) {
+        currentFile = null;
         throw new RuntimeException(e);
       }
     }
 
-    currentFile = path;
+
   }
 
 
@@ -196,8 +209,10 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
     try {
       ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.directory(new File(getAppData()));
       builder.redirectErrorStream(true);
       builder.redirectOutput(getExecOutputRedirect());
+
       Process process = builder.start();
       try {
         boolean processDone = process.waitFor(getExecTimeout().toMillis(), TimeUnit.MILLISECONDS);
@@ -248,6 +263,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
     try {
       ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.directory(new File(getAppData()));
       builder.redirectErrorStream(true);
       builder.redirectOutput(getExecOutputRedirect());
       execProcess = builder.start();
@@ -298,7 +314,14 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
   private void fetch(String fetchFileName, int mtu) throws IOException {
     EotResult result = new EotResult();
     result.setResult(0);
-    try (FileInputStream in = new FileInputStream(fetchFileName)) {
+
+    String fileName = fetchFileName;
+    if (!Path.of(fetchFileName).isAbsolute()) {
+      fileName = Path.of(getAppData(), fetchFileName).toString();
+    }
+
+
+    try (FileInputStream in = new FileInputStream(fileName)) {
 
       byte[] data = new byte[mtu - 100];
 

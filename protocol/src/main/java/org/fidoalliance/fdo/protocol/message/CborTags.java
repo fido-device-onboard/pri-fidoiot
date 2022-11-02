@@ -10,7 +10,7 @@ public enum CborTags {
   COSE_MAC_0(17),
   COSE_SIGN_1(18);
 
-  private int id;
+  private final int id;
 
   CborTags(int id) {
     this.id = id;

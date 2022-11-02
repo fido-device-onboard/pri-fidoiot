@@ -118,7 +118,7 @@ public class StreamMessage {
     if (initialBytes == null || initialBytes.length < (numBuff.length + 1)) {
       throw new IOException(
           new IllegalArgumentException(
-              "initial read bytes < " + Integer.toString(numBuff.length + 1)));
+              "initial read bytes < " + (numBuff.length + 1)));
     }
 
     for (int i = 0; i < numBuff.length; i++) {
