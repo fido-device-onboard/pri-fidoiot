@@ -19,7 +19,7 @@ import org.fidoalliance.fdo.protocol.serialization.SimpleStorageSerializer;
 @JsonDeserialize(using = SimpleStorageDeserializer.class)
 public class SimpleStorage {
 
-  private Map<String, Object> map;
+  private final Map<String, Object> map;
 
   /**
    * Default constructor.

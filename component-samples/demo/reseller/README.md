@@ -11,8 +11,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.X
-- Docker compose 1.21.2
+- Docker 20.10.10+ / Podman engine 3.4.2+ (For RHEL)
+- Docker compose 1.29.2 / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -50,6 +50,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 - `http-server:` - This section contains the *Tomcat server related properties including ports, schemes, keystore information and api authentication setup.
 
+- `secrets:` - This section contains path to the service credentials.
 
 - `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 
@@ -70,6 +71,8 @@ end of initialization of all services, you will see following statement on the c
 `[INFO] Started Reseller Service.`
 
 Follow the below steps to start FDO Reseller Service.
+
+***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/reseller/` and execute following command.
@@ -93,6 +96,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/reseller/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
 # FDO PRI Reseller REST APIs
+
+***NOTE***: Follow the steps to port DIGEST auth calls with mTLS enabled cURL requests. [READ MORE](../README.MD#executing-curl-request-with-mtls)
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
@@ -127,7 +132,7 @@ Alias values that can be used for GET /api/v1/certificate?alias={alias}
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring Reseller for HTTPS/TLS Communication
 
@@ -159,4 +164,6 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.db.StandardExtraInfoSupplier | Provides null as owner extra data in ownership voucher entries |
 | org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream | Provides Keystore loading from a database table |
 | org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream | Provides Keystore storage to a database table |
+| org.fidoalliance.fdo.FileKeyStoreInputStream | Loads PRI Service keys from disk |
+| org.fidoalliance.fdo.FileKeyStoreOutputStream | Save PRI Service keys to disk |
 | org.fidoalliance.fdo.protocol.db.StandardValidityDaysSupplier | Provides the validity days for certificate generation |

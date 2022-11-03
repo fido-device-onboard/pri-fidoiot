@@ -12,8 +12,8 @@ The following are the system requirements for the All-in-One demo.
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
-- Docker 20.10.X
-- Docker compose 1.21.2
+- Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
+- Docker compose 1.29.2 / Podman-compose 1.0.3(For RHEL)
 - Haveged
 
 # Configuring JAVA Execution Environment
@@ -57,6 +57,7 @@ All the runtime configurations for the services are specified in four files: `se
 
 - `owner:` - This section contains the configuration related to Owner keystore path, type and credentials.
 
+- `secrets:` - This section contains path to the service credentials.
 
 - `cwt:` - This section contains the configuration related to CBOR web token (cwt) keystore path, type and credentials.
 
@@ -69,7 +70,7 @@ All the runtime configurations for the services are specified in four files: `se
 # Running All-In-One Demo
 
 The All-In-One demo can be executed as a standalone service as well as a docker service. At the
-end of initialization of all services, you will see following statement on the console.
+end of initialization of all services, you will see following statement on the console. Generate the required credentials keypair and certificates using the 'keys_gen.sh' script present  in `<fdo-pri-src>/component-samples/demo/scripts/`
 
 `[INFO] Started All-in-one demo Service.`
 
@@ -96,11 +97,11 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 ***NOTE :*** To support OnDie ECDSA Device attestation, copy the required certificates and crls to `<fdo-pri-src>/component-samples/aio/ondiecache` folder.
 
-***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/aio/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
-
 # FDO PRI AIO REST APIs
 
 ***NOTE***: These REST APIs use Digest authentication. `api_user` and `api_password` properties specify the credentials to be used while making the REST calls. The value for `api_user` is present in `service.yml` file and value for `api_password` is present in `service.env` file.
+
+***NOTE***: Follow the steps to port DIGEST auth calls with mTLS enabled cURL requests. [READ MORE](../README.MD#executing-curl-request-with-mtls)
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
@@ -122,7 +123,7 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | |  | Keystore file in binary format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' |
 | POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
-| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"host.docker.internal"],[3,8040],[12,1],[2,"127.0.0.1"],[4,8041]]]' |
+| POST /api/v1/rvinfo/ | Updates RV Info in `RV_DATA` table | | text/plain | RV Info |   |  curl  -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/rvinfo' --header 'Content-Type: text/plain' --data-raw '[[[5,"host.docker.internal"],[3,8080],[12,1],[2,"127.0.0.1"],[4,8443]]]' |
 | GET /api/v1/deviceinfo/{seconds} | Serves the serial no. and GUID of the devices that completed DI in the last `n` seconds | Path - `n` seconds |  |  | JSON array of Serial No, GUID ,DI Timestamp and Attestion type. | curl -D - --digest -u apiUser:  --location --request GET 'http://host.docker.internal:8080/api/v1/deviceinfo/30' --header 'Content-Type: text/plain' | 
 | GET /api/v1/logs | Serves the log from the manufacturer service | | | | Manufacturer logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8080/api/v1/logs' --header 'Content-Type: text/plain'| 
 | DELETE /api/v1/logs | Deletes the log from the manufacturer service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8080/api/v1/logs' --header 'Content-Type: text/plain'|
@@ -134,8 +135,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 
 | Operation                      | Description                        | Path/Query Parameters    | Content Type   |Request Body  | Response Body | Sample cURL call |
 | ------------------------------:|:----------------------------------:|:------------------------:|:--------------:|-------------:|--------------:|-----------------:|
-| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' |
-| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8040/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
+| GET /api/v1/certificate?filename=fileName | Returns the certificate file based on filename | Query - filename | | | Certificate file in PKCS12 format | curl  -D - --digest -u ${api_user}: --location --request GET 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' |
+| POST /api/v1/certificate?filename=fileName | Adds the certificate file to DB based on filename | Query - filename | text/plain| PKCS12 Certificate file in Binary format |  | curl -D - --digest -u ${api_user}: --location --request POST 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --data-binary '@< path to ssl.p12 >' |
 | DELETE /api/v1/certificate?filename=fileName | Delete the certificate file to DB based on filename | Query - filename | | |  | curl  -D - --digest -u ${api_user}: --location --request DELETE 'http://host.docker.internal:8080/api/v1/certificate?filename=ssl.p12' --header 'Content-Type: text/plain' | 
 | GET /api/v1/logs | Serves the log from the RV service | | | | RV logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8080/api/v1/logs' | 
 | DELETE /api/v1/logs | Deletes the log from the RV service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8080/api/v1/logs' |
@@ -247,7 +248,7 @@ The following filter will only return service info instructions if the device in
 
 # Troubleshooting
 
-As the H2 DB grows, larger heap space will be required by the application to run the service. The default configured heap size is `256 MB`. Increase the heap size appropriately in `demo/owner/owner-entrypoint.sh` to avoid heap size issue
+Increase the heap size appropriately in case you encounter heap size issues.
 
 # Configuring AIO for HTTPS/TLS Communication
 
@@ -285,6 +286,8 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier | Tells the owner to use HTTPS for TO0 protocol |
 | org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier | Provides Owner2 keys for for credential replacement during TO2
 | org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction | Tells the RV server to allow TO0 with untrusted ownership keys
+| org.fidoalliance.fdo.FileKeyStoreInputStream | Loads PRI Service keys from disk |
+| org.fidoalliance.fdo.FileKeyStoreOutputStream | Save PRI Service keys to disk |
 | org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction | Automatically extends the voucher to the AIO owner and performs To0 protocol |
 | org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier| Uses BASIC auth with api_user api_password from service.env for serivceinfo urls (NOT Recommended) |
 

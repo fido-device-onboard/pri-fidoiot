@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * FDO Configuration Object.
  */
@@ -33,15 +37,17 @@ public class Config {
   private static final String ENV_PARAM_START = "$(";
   private static final String ENV_PARAM_END = ")";
   private static final String CONFIG_HOME = "fdo.config.home";
+  private static final String SECRETS_PATH = "secrets.path";
 
   private static Root ROOT;
   private static final Properties env = new Properties();
   private static List<Object> workers = new ArrayList<>();
   private static final List<Object> configs = new ArrayList<>();
 
-  private static String configPath;
+  private static final String configPath;
   private static final String CONFIG_FILE = "service.yml";
 
+  private static Logger logger;
 
   static {
 
@@ -60,15 +66,28 @@ public class Config {
 
     try {
       ROOT = Mapper.INSTANCE.readStringValue(file, Root.class);
+      loadEnvFiles();
       loadSystemProperties();
       loadWorkerItems();
-      loadEnvFiles();
+
+
+
     } catch (Throwable e) {
+      logger = LoggerFactory.getLogger(Config.class);
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
-        System.out.println(yamlException.getMessage());
+        logger.error(yamlException.getMessage());
+      } else  {
+        if (e.getCause() != null) {
+          logger.error(e.getCause().getClass().getName());
+          logger.error(e.getCause().getMessage());
+        } else {
+          logger.error(e.getClass().getName());
+          logger.error(e.getMessage());
+        }
       }
-      System.out.println("Invalid service.yml file. Restart service with correct yaml file.");
+
+      logger.error("Invalid service.yml file. Restart service with correct yaml file.");
       System.exit(-1);
     }
   }
@@ -111,10 +130,6 @@ public class Config {
     }
 
 
-    public void store(KeyStore keyStore) throws IOException {
-
-    }
-
   }
 
 
@@ -127,8 +142,10 @@ public class Config {
     private String[] workers = new String[0];
 
     @JsonProperty("system-properties")
-    private Map<String, String> systemProperties = new HashMap<>();
+    private final Map<String, String> systemProperties = new HashMap<>();
 
+    @JsonProperty("secrets")
+    private final String[] secrets = new String[0];
 
   }
 
@@ -143,13 +160,31 @@ public class Config {
         loadConfig(file);
       }
     }
+    try {
+      if (Path.of(SECRETS_PATH).toFile().exists()) {
+        env.put(SECRETS_PATH, Files.readString(Path.of(SECRETS_PATH)));
+      } else {
+        env.put(SECRETS_PATH, Files.readString(Path.of(Config.getPath(), SECRETS_PATH)));
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(SECRETS_PATH, e);
+    }
 
+  }
+
+  private static boolean isSecret(String secret) {
+    for (String s : ROOT.secrets) {
+      if (s.equals(secret)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void loadConfig(File file) {
     Properties props = new Properties();
 
-    try (FileInputStream fin = new FileInputStream(file);) {
+    try (FileInputStream fin = new FileInputStream(file)) {
       props.load(fin);
     } catch (FileNotFoundException e) {
       throw new RuntimeException(file.getName(), e);
@@ -249,7 +284,16 @@ public class Config {
               }
             }
           }
+          if (isSecret(envName)) {
+            try {
+              final String secretPath = Files.readString(Path.of(SECRETS_PATH));
+              envValue = Files.readString(Path.of(secretPath,envValue));
+            } catch (IOException e) {
+              throw  new RuntimeException(e);
+            }
+          }
           result = result.substring(0, start) + envValue + value.substring(end + 1);
+
         } else {
           break;
         }
@@ -257,6 +301,7 @@ public class Config {
         break;
       }
     }
+
     return result;
   }
 
@@ -295,7 +340,7 @@ public class Config {
         throw new RuntimeException(
             new InstantiationException("class requires constructor with no args."));
       }
-      return ctor.newInstance(new Object[]{});
+      return ctor.newInstance();
 
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -312,7 +357,7 @@ public class Config {
     Map<String, String> map = ROOT.systemProperties;
     for (Map.Entry<String, String> entry : map.entrySet()) {
       if (!System.getProperties().containsKey(entry.getKey())) {
-        System.setProperty(entry.getKey(), entry.getValue());
+        System.setProperty(entry.getKey(), resolve(entry.getValue()));
       }
     }
   }
@@ -369,7 +414,7 @@ public class Config {
       }
     }
     try {
-      T result = (T) Mapper.INSTANCE.readStringValue(new File(getFileName()), clazz);
+      T result = Mapper.INSTANCE.readStringValue(new File(getFileName()), clazz);
       configs.add(result);
       return result;
     } catch (IOException e) {
@@ -393,7 +438,7 @@ public class Config {
         while (currentClass != null) {
           Type[] interfaces = currentClass.getInterfaces();
           for (Type type : interfaces) {
-            if (type.equals((Type) clazz)) {
+            if (type.equals(clazz)) {
               return (T) item;
             }
           }

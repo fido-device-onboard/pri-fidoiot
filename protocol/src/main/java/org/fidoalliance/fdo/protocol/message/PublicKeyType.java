@@ -15,7 +15,7 @@ public enum PublicKeyType {
   SECP384R1(11);
 
 
-  private int id;
+  private final int id;
 
   PublicKeyType(int id) {
     this.id = id;

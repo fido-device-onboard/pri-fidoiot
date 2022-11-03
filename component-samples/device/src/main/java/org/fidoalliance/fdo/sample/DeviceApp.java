@@ -30,6 +30,7 @@ import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceKeySupplier;
+import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AppStart;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
@@ -78,7 +79,13 @@ public class DeviceApp extends HttpClient {
       DispatchMessage prevMessage = new DispatchMessage();
       prevMessage.setMsgType(MsgType.DI_APP_START);
       DispatchMessage.fromThrowable(throwable, prevMessage);
-      logger.error(throwable);
+
+      try {
+        Config.getWorker(ExceptionConsumer.class).accept(throwable);
+      } catch (IOException e) {
+        logger.error("failed log exception");
+        // already in exception handler
+      }
     }
   }
 
@@ -217,7 +224,7 @@ public class DeviceApp extends HttpClient {
 
       final String alias = KeyResolver.getAlias(keyType, keySize);
 
-      signingKey = (PrivateKey) keyResolver.getPrivateKey(alias);
+      signingKey = keyResolver.getPrivateKey(alias);
 
       final X509Certificate cert = (X509Certificate) keyResolver.getCertificateChain(alias)[0];
 

@@ -19,7 +19,7 @@ public enum ErrorCode {
   CRED_REUSE_ERROR(102),
   INTERNAL_SERVER_ERROR(500);
 
-  private int id;
+  private final int id;
 
   ErrorCode(int id) {
     this.id = id;

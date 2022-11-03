@@ -62,7 +62,5 @@ public class OwnerPublicKeyTest {
 
     OwnerPublicKey key4 = Mapper.INSTANCE.readValue(data,OwnerPublicKey.class);
 
-    str.toString();
-
   }
 }

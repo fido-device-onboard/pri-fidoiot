@@ -4,14 +4,11 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -19,7 +16,6 @@ import java.util.Date;
 import java.util.UUID;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.sec.ECPrivateKey;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
@@ -28,9 +24,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.fidoalliance.fdo.protocol.AlgorithmFinder;
-import org.fidoalliance.fdo.protocol.CloseableKey;
 import org.fidoalliance.fdo.protocol.Config;
-import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -40,7 +34,6 @@ import org.fidoalliance.fdo.protocol.dispatch.ExtraInfoSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.OwnerKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
-import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.CoseSign1;
 import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.HashType;
@@ -49,7 +42,6 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntries;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntryPayload;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
-import org.hibernate.criterion.Example.NotNullOrZeroPropertySelector;
 
 public class InteropVoucher extends RestApi {
 
@@ -220,7 +212,7 @@ public class InteropVoucher extends RestApi {
       pemWriter.writeObject(new PemObject(getKeyFormatString(pubKey), pvt.getEncoded()));
       pemWriter.flush();
       pemWriter.close();
-      return "\r\n" + writer.toString();
+      return "\r\n" + writer;
 
 
     } catch (Exception e) {

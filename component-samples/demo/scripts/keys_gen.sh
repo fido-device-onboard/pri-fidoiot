@@ -48,49 +48,37 @@ usage()
 gen_credentials() 
 {
 
-db_user=sa
-api_pass=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+api_user='C=US, ST=OR, L=Hillsboro, O=LF Edge, OU=FDO project, CN=apiUser'
+db_user=root
+api_pass=default
 db_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
 encrypt_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
-ssl_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+ssl_password=
 
-cd $CREDS_PATH
-mkdir -p $1 && cd $1
+
 
 rm -f service.env && touch service.env
 
 echo "## environment variables" >> service.env
 echo "db_user=$db_user" >> service.env
 echo "api_password=$api_pass" >> service.env
-echo "db_password=$db_password" >> service.env
+echo "db_password=db_password.txt" >> service.env
 echo "encrypt_password=$encrypt_password" >> service.env
 echo "ssl_password=$ssl_password" >> service.env
+echo "api_user=$api_user" >> service.env
+echo "useSSL=true" >> service.env
+echo "requireSSL=true" >> service.env
+echo -n `openssl rand --base64 12 | tr -dc 0-9A-Za-z` > db_password.txt
 
+mkdir -p secrets
+cp api-user.pem ./secrets/api-user.pem
+cp ca-cert.pem ./secrets/ca-cert.pem
+cp server-cert.pem ./secrets/server-cert.pem
+cp server-key.pem ./secrets/server-key.pem
+cp db_password.txt ./secrets/db_password.txt
 }
 
-# Environmental variables
-if [ $# -gt 1 ]; then
-  usage
-  exit
-fi
+gen_credentials
 
-COMP_PATH=`pwd`
-if [ $# -eq 1 ]; then
-  if [ $1 == "-h" ]; then
-    usage
-    exit
-  fi
-  COMP_PATH=$(realpath $1)
-fi
-CREDS_PATH=$COMP_PATH/creds
-
-mkdir -p $CREDS_PATH
-
-components=("manufacturer" "rv" "owner" "aio" "reseller")
-for i in ${components[@]}; do
-  if [[ "${components[@]}" =~ "$i" ]]; then
-    gen_credentials $i
-  fi
-done
 
 echo "Key generation completed."

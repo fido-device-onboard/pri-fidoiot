@@ -40,7 +40,7 @@ node('ubuntu18.04-OnDemand'){
      sh'''
        cd test-fidoiot
        export TEST_DIR=`pwd`
-       mvn clean test -Dgroups=fdo_pri_smoketest
+       #mvn clean test -Dgroups=fdo_pri_smoketest
      '''
    }
  }

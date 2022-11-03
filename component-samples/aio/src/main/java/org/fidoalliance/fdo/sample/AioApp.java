@@ -11,7 +11,7 @@ import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 
 public class AioApp {
 
-  private static LoggerService logger = new LoggerService(AioApp.class);
+  private static final LoggerService logger = new LoggerService(AioApp.class);
 
   /**
    * Main entry.

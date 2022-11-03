@@ -17,7 +17,7 @@ public enum HashType {
   HMAC_SHA384(6);
 
 
-  private int id;
+  private final int id;
 
   HashType(int id) {
     this.id = id;

@@ -20,9 +20,9 @@
 
 * Linux packages:
 
-  - Docker engine (minimum version 20.10.7, Supported till version 20.10.17) / Podman engine (For RHEL)
+  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+
 
-  - Docker-compose (minimum version 1.21.2) / Podman-compose (For RHEL)
+  - Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)
 
   - Haveged
 
@@ -162,6 +162,8 @@ http_proxy_port: 900
 non_proxy_host: myproxy.com | ip 
 ```
 
+***NOTE:*** For RHEL, proxy variables need to be configured in `/etc/environment`.
+
 If no proxy needs to be specified, do not add these properties to your _JAVA_OPTIONS.
 
 # Configuring OnDie (Optional)
@@ -205,7 +207,7 @@ grep -qxF 'export PODMAN_USERNS=keep-id' ~/.bashrc || echo $'\nexport PODMAN_USE
 source ~/.bashrc
 ```
 
-***NOTE***:  **Before starting the containers on RHEL, replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
+***NOTE***:  **Before starting the containers on RHEL, assign your machine IP to host.docker.internal in "/etc/hosts" and replace "host.docker.internal:host-gateway" with "host.docker.internal:your-machine-IP" from the extra_hosts field in the docker-compose.yml file for each component.**
 
 1. Start the FDO Manufacturer Sample as per the steps outlined in [Manufacturer README](manufacturer/README.md).
 
@@ -257,23 +259,74 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *exec-cb* - This command returns the status / progress of the process running.
 
+    *fetch* - This command returns the fetched file from client filesystem.
+
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
-     {"write": "sample.txt"},
      {"exec" :"cat sample.txt"}`
 
     or
   
      `{"filedesc" : "sample.txt","resource" : "database resource"},
-      {"write": "sample.txt"},
       {"exec" :"cat sample.txt"}`
 
 ***NOTE***: The comma-separated values must be ordered such that the 'filedesc' and 'write' objects are one after the other pair-wise, followed by the 'exec' commands.
 
+***NOTE***: You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
+
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
+
+# Executing cURL request with mTLS
+
+Generic sample Digest authentication call:
+
+  ```shell
+    curl -D - --digest -u ${apiUser}:${api_password} --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
+    --header 'Content-Type: text/plain' \
+    --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
+  ```
+
+Replace `-D - --digest -u ${apiUser}:${api_password}` with `--cacert path-to-CA --cert path-to-client-Certificate`
+
+Finally, the mTLS enabled cURL request will be:
+
+  ```shell
+    curl \
+    --cacert scripts/secrets/ca-cert.pem --cert scripts/secrets/api-user.pem \
+     --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
+    --header 'Content-Type: text/plain' \
+    --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
+  ```
+
+# Loading Keystores from FileSystem
+
+1. Copy the required Keystores into `demo/<fdo-component>/app-data` folder.
+
+2. Disable the following workers.
+
+```
+org.fidoalliance.fdo.protocol.db.StandardKeyStoreInputStream
+org.fidoalliance.fdo.protocol.db.StandardKeyStoreOutputStream
+```
+
+3. Enable the following workers.
+
+```
+org.fidoalliance.fdo.FileKeyStoreInputStream
+org.fidoalliance.fdo.FileKeyStoreOutputStream
+```
+
+4. Update `service.yml` with the new Keystore filename and credentials in `service.env`
+
+```
+   keystore:
+     path: new-keystore-filename
+     store-type: PKCS12
+     password: $(encrypt_password)
+```
 
 # Enabling ServiceInfo Transfer
 
@@ -292,6 +345,28 @@ This can be confirmed using the `docker stats` command that shows live resource 
 During SVI Transfer, observe the column `MEM USAGE / LIMIT` for respective container when SVI transmission is in progress.
 If the failure is observed when MEM USAGE reaches the LIMIT, it is due to the memory limit we have allocated for the container.
 To resolve this, edit fields `mem_limit` and `mem_reservation` in the respective docker-compose.yml according to the needs and restart the container.
+
+# Connecting to external resources during SVI
+
+When connecting to the external signed resource, the application should be using the default java ca-certs instead of the custom truststore. The following properties in `service.yml` need to be commented out to pick the default java ca-certs.
+
+  ```
+    #javax.net.ssl.keyStorePassword: default
+    #javax.net.ssl.trustStorePassword: default
+    #javax.net.ssl.keyStore: $(secrets.path)/api-user.pem
+    #javax.net.ssl.trustStore: $(secrets.path)/ca-cert.pem
+    #javax.net.ssl.keyStoreType: PEM
+    #javax.net.ssl.trustStoreType: PEM
+  ```
+
+To support external signed resources along with self-signed resource, add the self-signed certificate to the default java ca-certs. Add following lines to the `Dockerfile` of individual component.
+
+```
+COPY secrets/ca-cert.pem /home/fdo/ca-cert.pem
+
+RUN keytool -import -trustcacerts -noprompt -keystore "/usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts" -storepass changeit -alias tomcat -file /home/fdo/ca-cert.pem
+```
+
 
 # Customize for multi-machine setup
 
@@ -325,45 +400,39 @@ While customizing the system configuration for multi machine setup, ensure that 
       IP:<IP-address-of-host-machine>
     ```
 
+# Enable Embedded H2 Database Server
 
-# Enabling access to the Embedded database
+1. Activate `org.fidoalliance.fdo.protocol.EmbeddedDatabaseServer` worker in `service.yml` file.
 
-Remote access to H2 Storage DB has been disabled by default. Enabling the remote access creates a security hole in the system which makes it vulnerable to Remote Code Execution.
+2. Change hibernate properties in `service.yml` to connect with H2 database:
 
-To enable remote access to DB update the webAllowOthers properties in the `service.yml` :
+    ```
+    hibernate-properties:
+      connection.driver_class: org.h2.Driver
+      hibernate.connection.username: $(db_user)
+      hibernate.connection.password: $(db_password)
+      hibernate.connection.url: jdbc:h2:tcp://localhost:9092/./app-data/emdb
+      hibernate.dialect: org.hibernate.dialect.H2Dialect
+    ```
 
-```shell
-# sample H2 DB configurations
-h2-database:
-   tcp-server:
-     - "-ifNotExists"
-     - "-tcpPort"
-     - "9093"
-   web-server:
-     - "-webAllowOthers"
-     - "-webExternalNames"
-     - "-ifNotExists"
-     - "-webPort"
-     - "8083"
-```
+3. Append the following `h2-database` configuration to `service.yml` file.
 
-**NOTE:** Access of DB from local machine is enabled by default and can be accessed from browser using the address `http://host.docker.internal:<webport>`.
+    ```
+    h2-database:
+       tcp-server:
+         - "-ifNotExists"
+       web-server:
+         - "-webPort"
+         - "8082"
+    ```
 
-NOTE: Not recommended to enable this setting especially on production systems.
+4. In `hibernate.cfg.yml`, ensure that property `hibernate.connection.driver_class` is mapped to `org.h2.Driver`.
 
-# Disk Usage by the embedded database
-
-It is observed that with the increased number of transactions, the disk space utilized by the Database file expands rapidly.
-
-This is because of the H2 database's COMPACT & purge mechanism. When deleting data from the H2 database, the file is not reorganized in real time: this requires a database shutdown.
-While shutting down, H2 "compacts" the file in order to reduce the file size.
-
-If your FDO services has to handle a large number of sessions, it is recommended to use a different RDBMS system.
+***NOTE:*** It is recommended to configure H2 DB with the default settings for properties like webAllowOthers, either in a config file or as a parameter passed in, when the servlet is invoked
 
 # Certificate Validity checks
 
 For out of the box demo purposes, FDO services are configured to trust self-signed certificates.
-
 In production environments, the configurators should disable the trust for these self-signed certificates by updating the worker list in `service.yml` file of respective component.
 
 Sample `service.yml` file:
