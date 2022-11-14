@@ -13,6 +13,7 @@
 10. [Customize for multi machine setup](#customize-for-multi-machine-setup)
 11. [Enabling Access to the embedded database](#enabling-access-to-the-embedded-database)
 12. [Certificate Validity Checks](#certificate-validity-checks)
+13. [Support for multiple Databases](#support-for-multiple-databases)
 
 # System Requirements
 
@@ -455,4 +456,29 @@ The FDO spec states "When processing an Ownership Voucher with X5CHAIN encoding,
 
 This implementation will trust Ownership vouchers with X5Chain encoding without verifying the ownership chain. 
 
+# Support for multiple Database.
 
+FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of box, the following databases are supported by the FDO service:
+
+  + Derby
+  + H2 database
+  + mariaDB
+  + Microsoft SQL
+  + MySQL
+  + Postgres DB 
+
+Make sure that `hibernate.cfg.xml` and `hibernate-properties` in `service.yml` is configured specifically for the selected backend.
+
+Sample `hibernate-properties` for MySQL Database
+
+```yaml
+hibernate-properties:
+  hibernate.connection.username: fdo
+  hibernate.connection.password: sample_password
+  hibernate.connection.driver_class: com.mysql.cj.jdbc.Driver
+  hibernate.connection.url: jdbc:mysql://host.docker.internal:3306/fdo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+  hibernate.dialect: org.hibernate.dialect.MySQLDialect
+  hibernate.dialect.storage_engine: innodb
+```
+
+By default, FDO services is configured with MariaDB 3.0.5.
