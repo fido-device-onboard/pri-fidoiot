@@ -463,7 +463,6 @@ FDO services supports multiple database for the storage layer. Hibernate framewo
   + Derby
   + H2 database
   + mariaDB
-  + Microsoft SQL
   + MySQL
   + Postgres DB 
 
