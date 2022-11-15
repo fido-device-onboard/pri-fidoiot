@@ -46,7 +46,7 @@ node('ubuntu18.04-OnDemand'){
        chmod -R 777 secrets/
        cp -r service.env secrets/ ../aio/
        cp -r secrets/ ../db/
-       sed -i '/<security-constraint>/,/<\\security-constraint>/d' ../aio/WEB-INF/web.xml
+       sed -i '/<security-constraint>/,/<.security-constraint>/d' ../aio/WEB-INF/web.xml
        sed -i '/^innodb/d' ../db/custom/config-file.cnf  
     '''
 
