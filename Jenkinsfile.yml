@@ -47,7 +47,8 @@ node('ubuntu18.04-OnDemand'){
        cp -r service.env secrets/ ../aio/
        cp -r secrets/ ../db/
        sed -i '/<security-constraint>/,/<\\security-constraint>/d' ../aio/WEB-INF/web.xml
-     '''
+       sed -i '/^innodb/d' ../db/custom/config-file.cnf  
+    '''
 
      // Setting the TEST_DIR and executing smoke test
      sh'''
