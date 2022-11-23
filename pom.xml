@@ -42,7 +42,7 @@
     <log4j.version>2.17.2</log4j.version>
     <slf4j.version>1.7.36</slf4j.version>
     <hibernate.version>6.1.0.Final</hibernate.version>
-    <tomcat.version>10.1.0-M16</tomcat.version>
+    <tomcat.version>10.1.1</tomcat.version>
     <apache-httpcomponents.version>4.5.13</apache-httpcomponents.version>
     <snakeyaml.version>1.32</snakeyaml.version>
     <jackson-dataformat.version>2.13.3</jackson-dataformat.version>
