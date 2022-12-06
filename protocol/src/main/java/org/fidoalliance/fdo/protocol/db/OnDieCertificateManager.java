@@ -66,11 +66,12 @@ public class OnDieCertificateManager {
 
     // Read cert/crl from data store
     Session session = HibernateUtil.getSessionFactory().openSession();
+    Transaction trans = null;
     try {
-      Transaction trans = session.beginTransaction();
+      trans = session.beginTransaction();
       OnDieCertificateData certStore = session.get(OnDieCertificateData.class, fileName.toString());
       Blob blob = certStore.getData();
-      trans.commit();
+
       if (blob != null) {
         try {
           byte[] data = blob.getBytes(Long.valueOf(1),
@@ -83,6 +84,9 @@ public class OnDieCertificateManager {
     } catch (Exception ex) {
       throw new IOException(ex.getMessage());
     } finally {
+      if (trans != null) {
+        trans.commit();
+      }
       session.close();
     }
     return null;
