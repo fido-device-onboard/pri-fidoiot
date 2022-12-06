@@ -97,13 +97,16 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.EXEC_CB:
         if (state.isActive()) {
           String[] args = Mapper.INSTANCE.readValue(kvPair.getValue(), String[].class);
+          logger.info("Executing command CB :" + Arrays.asList(args));
           exec_cb(args);
         }
         break;
       case FdoSys.STATUS_CB:
         if (state.isActive()) {
           StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
+          logger.info("Status: " + status);
           statusTimeout = status.getTimeout();
+          logger.info("timeout: " + statusTimeout);
           if (status.isCompleted() && execProcess != null) {
             execProcess.destroyForcibly();
             execProcess = null;
@@ -271,6 +274,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       //set the first status check
       createStatus(false, 0, statusTimeout);
     } catch (IOException e) {
+      logger.error("IO Operation Failed");
       throw new RuntimeException(e);
     }
   }
@@ -282,6 +286,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       if (!execProcess.isAlive()) {
         createStatus(true, execProcess.exitValue(), statusTimeout);
         execProcess = null;
+        logger.info("Executing Process Finished ");
         return;
       }
     }

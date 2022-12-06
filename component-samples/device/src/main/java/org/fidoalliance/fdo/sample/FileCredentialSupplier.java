@@ -9,12 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.commons.lang3.function.Failable;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.DeviceCredentialSupplier;
 import org.fidoalliance.fdo.protocol.message.DeviceCredential;
 
 
 public class FileCredentialSupplier implements DeviceCredentialSupplier {
+
+  private static final LoggerService logger = new LoggerService(FileCredentialSupplier.class);
 
   @Override
   public DeviceCredential get() throws IOException {
@@ -28,8 +31,10 @@ public class FileCredentialSupplier implements DeviceCredentialSupplier {
       return null;
 
     } catch (FileNotFoundException e) {
+      logger.error("Credential file not found ");
       throw Failable.rethrow(e);
     } catch (IOException e) {
+      logger.error("Error in reading file ");
       throw Failable.rethrow(e);
     }
   }

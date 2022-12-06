@@ -104,6 +104,7 @@ public class DeviceApp extends HttpClient {
       final DeviceCredential devCredential = Config.getWorker(DeviceCredentialSupplier.class).get();
       if (devCredential == null) {
         generateDiHello();
+        logger.info("Generating Device Credential file ");
       } else {
         setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
 
@@ -145,6 +146,7 @@ public class DeviceApp extends HttpClient {
     logger.info("max message size is " + config.getMaxMessageSize());
 
     helloDevice.setGuid(cred.getGuid());
+    logger.info("GUID is " + cred.getGuid());
     Nonce nonceTO2ProveOv = Nonce.fromRandomUuid();
     helloDevice.setProveTo2Ov(nonceTO2ProveOv);
     helloDevice.setKexSuiteName(config.getKexSuite());
@@ -201,6 +203,7 @@ public class DeviceApp extends HttpClient {
     mfgInfo.setSerialNumber(serialNo);
     mfgInfo.setCertInfo(AnyType.fromObject(csr));
     mfgInfo.setDeviceInfo("DemoDevice");
+    logger.info("Device Info: " + mfgInfo.getDeviceInfo());
 
     AppStart appStart = new AppStart();
     appStart.setManufacturingInfo(Mapper.INSTANCE.writeValue(mfgInfo));
@@ -241,6 +244,7 @@ public class DeviceApp extends HttpClient {
       return pkcs10.getEncoded();
 
     } catch (OperatorCreationException | CertificateEncodingException e) {
+      logger.error("Operation Creation/Certificate Encoding Execution Failed : " + e.getMessage());
       throw new IOException(e);
     } finally {
       cs.destroyKey(signingKey);

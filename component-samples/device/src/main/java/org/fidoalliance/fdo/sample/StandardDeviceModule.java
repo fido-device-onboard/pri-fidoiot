@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
@@ -19,7 +20,7 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
 
 public class StandardDeviceModule implements ServiceInfoModule {
-
+  private static final LoggerService logger = new LoggerService(StandardDeviceModule.class);
   private final List<String> moduleNames = new ArrayList<>();
   private final List<String> unknownModules = new ArrayList<>();
   private final ServiceInfoQueue queue = new ServiceInfoQueue();
@@ -151,6 +152,7 @@ public class StandardDeviceModule implements ServiceInfoModule {
     }
 
     if (queue.size() == 0) {
+      logger.warn("Size of queue = 0 ");
       state.setDone(true);
     }
 
