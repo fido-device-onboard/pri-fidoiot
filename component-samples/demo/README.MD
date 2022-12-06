@@ -460,13 +460,14 @@ This implementation will trust Ownership vouchers with X5Chain encoding without 
 
 FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of box, the following databases are supported by the FDO service:
 
-  + Derby
   + H2 database
   + mariaDB
   + MySQL
   + Postgres DB 
 
 Make sure that `hibernate.cfg.xml` and `hibernate-properties` in `service.yml` is configured specifically for the selected backend.
+
+In `hibernate.cfg.xml` make sure that `connection.driver_class` is commented out.
 
 Sample `hibernate-properties` for MySQL Database
 
@@ -479,5 +480,20 @@ hibernate-properties:
   hibernate.dialect: org.hibernate.dialect.MySQLDialect
   hibernate.dialect.storage_engine: innodb
 ```
+
+Sample `hibernate-properties` for Postgres Database
+
+```yaml
+hibernate-properties:
+  hibernate.connection.username: fdo
+    hibernate.connection.password: sample_password
+  connection.driver_class: org.postgresql.Driver
+  hibernate.connection.autoReconnect: true
+  hibernate.connection.requireSSL: false
+  hibernate.connection.url: jdbc:postgresql://host.docker.internal:5432/fdo?createDatabaseIfNotExist=true&useSSL=false
+  hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+```
+
+For H2 Database refer to the [above section](#enable-embedded-h2-database-server).
 
 By default, FDO services is configured with MariaDB 3.0.5.
