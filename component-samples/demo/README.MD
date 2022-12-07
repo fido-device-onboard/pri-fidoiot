@@ -458,7 +458,7 @@ This implementation will trust Ownership vouchers with X5Chain encoding without 
 
 # Support for multiple Database.
 
-FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of the box, the following databases are supported by the FDO service:
+FDO services support multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of the box, the following databases are supported by the FDO service:
 
   + H2 Database
   + MariaDB
@@ -486,7 +486,7 @@ FDO services supports multiple database for the storage layer. Hibernate framewo
 
     c. Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
 
-    d. Command to start MySQL server
+    d. Use the below command to start MySQL server
 
       ```shell
       docker run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
@@ -519,7 +519,7 @@ FDO services supports multiple database for the storage layer. Hibernate framewo
 
     c. Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
 
-    d. Command to start PostgreSQL server
+    d. Use the below command to start PostgreSQL server
 
       ```shell
       docker run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
