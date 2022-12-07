@@ -458,72 +458,80 @@ This implementation will trust Ownership vouchers with X5Chain encoding without 
 
 # Support for multiple Database.
 
-FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of box, the following databases are supported by the FDO service:
+FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of the box, the following databases are supported by the FDO service:
 
   + H2 Database
   + MariaDB
   + MySQL
   + PostgreSQL
 
-Make sure that `hibernate.cfg.xml` and `hibernate-properties` in `service.yml` is configured specifically for the selected backend.
 
-In `hibernate.cfg.xml` make sure that `connection.driver_class` is commented out.
+1. Follow the below steps to configure FDO services with MySQL database: 
 
-Sample `hibernate-properties` for MySQL Database
+   a. Make sure that `connection.driver_class` is commented out in `hibernte.cfg.xml`.
 
-```yaml
-hibernate-properties:
-  hibernate.connection.username: fdo
-  hibernate.connection.password: sample_password
-  hibernate.connection.driver_class: com.mysql.cj.jdbc.Driver
-  hibernate.connection.url: jdbc:mysql://host.docker.internal:3306/fdo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-  hibernate.dialect: org.hibernate.dialect.MySQLDialect
-  hibernate.dialect.storage_engine: innodb
-  hibernate.connection.requireSSL: false
-  hibernate.connection.autoReconnect: true
-```
+   b. Update `hibernate-properties` in `service.yml`
 
-Sample `hibernate-properties` for Postgres Database
+      ```yaml
+      hibernate-properties:
+        hibernate.connection.username: fdo
+        hibernate.connection.password: sample_password
+        hibernate.connection.driver_class: com.mysql.cj.jdbc.Driver
+        hibernate.connection.url: jdbc:mysql://host.docker.internal:3306/fdo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+        hibernate.dialect: org.hibernate.dialect.MySQLDialect
+        hibernate.dialect.storage_engine: innodb
+        hibernate.connection.requireSSL: false
+        hibernate.connection.autoReconnect: true
+      ```
 
-```yaml
-hibernate-properties:
-  hibernate.connection.username: fdo
-  hibernate.connection.password: sample_password
-  connection.driver_class: org.postgresql.Driver
-  hibernate.connection.autoReconnect: true
-  hibernate.connection.requireSSL: false
-  hibernate.connection.url: jdbc:postgresql://host.docker.internal:5432/fdo?createDatabaseIfNotExist=true&useSSL=false
-  hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-```
+    c. Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
 
-For H2 Database refer to the [above section](#enable-embedded-h2-database-server).
+    d. Command to start MySQL server
 
-By default, FDO services is configured with MariaDB 3.0.5.
+      ```shell
+      docker run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
+      ```
 
-Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
+      For RHEL environment,
 
-Sample command to start MySQL server
+      ```shell
+      sudo podman run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
+      ```
 
-  ```shell
-  docker run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
-  ```
+
+2. Follow the below steps to configure FDO services with PostgreSQL database: 
+
+   a. Make sure that `connection.driver_class` is commented out in `hibernte.cfg.xml`.
+
+   b. Update `hibernate-properties` in `service.yml`
+
+      ```yaml
+      hibernate-properties:
+        hibernate.connection.username: fdo
+        hibernate.connection.password: sample_password
+        connection.driver_class: org.postgresql.Driver
+        hibernate.connection.autoReconnect: true
+        hibernate.connection.requireSSL: false
+        hibernate.connection.url: jdbc:postgresql://host.docker.internal:5432/fdo?createDatabaseIfNotExist=true&useSSL=false
+        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      ```
+
+
+    c. Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
+
+    d. Command to start PostgreSQL server
+
+      ```shell
+      docker run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
+      ```
+
+      For RHEL environment,
+
+      ```shell
+      sudo podman run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
+      ```
+
+3. Follow the [guide](./db/README.md) to configure FDO services with MariaDB. By default, FDO services are configured to support MariaDB.
+
+4. Follow the [Embedded DB guide](#enable-embedded-h2-database-server) to configure FDO services with H2 Database.
  
-  For RHEL environment,
-
-  ```shell
-  sudo podman run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
-  ```
-
-Sample command to start PostgreSQL server
-
-  ```shell
-  docker run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
-  ```
-
-  For RHEL environment,
-
-  ```shell
-  sudo podman run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
-  ```
-
-To start MariaDB follow the steps mentioned in [Database README](./db/README.md)
