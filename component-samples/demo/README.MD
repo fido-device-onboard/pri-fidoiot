@@ -460,10 +460,10 @@ This implementation will trust Ownership vouchers with X5Chain encoding without 
 
 FDO services supports multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of box, the following databases are supported by the FDO service:
 
-  + H2 database
-  + mariaDB
+  + H2 Database
+  + MariaDB
   + MySQL
-  + Postgres DB 
+  + PostgreSQL
 
 Make sure that `hibernate.cfg.xml` and `hibernate-properties` in `service.yml` is configured specifically for the selected backend.
 
@@ -479,6 +479,8 @@ hibernate-properties:
   hibernate.connection.url: jdbc:mysql://host.docker.internal:3306/fdo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
   hibernate.dialect: org.hibernate.dialect.MySQLDialect
   hibernate.dialect.storage_engine: innodb
+  hibernate.connection.requireSSL: false
+  hibernate.connection.autoReconnect: true
 ```
 
 Sample `hibernate-properties` for Postgres Database
@@ -486,7 +488,7 @@ Sample `hibernate-properties` for Postgres Database
 ```yaml
 hibernate-properties:
   hibernate.connection.username: fdo
-    hibernate.connection.password: sample_password
+  hibernate.connection.password: sample_password
   connection.driver_class: org.postgresql.Driver
   hibernate.connection.autoReconnect: true
   hibernate.connection.requireSSL: false
@@ -497,3 +499,31 @@ hibernate-properties:
 For H2 Database refer to the [above section](#enable-embedded-h2-database-server).
 
 By default, FDO services is configured with MariaDB 3.0.5.
+
+Make sure that `useSSL` and `requireSSL` is set to `false` in `service.env` file.
+
+Sample command to start MySQL server
+
+  ```shell
+  docker run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
+  ```
+ 
+  For RHEL environment,
+
+  ```shell
+  sudo podman run -d -p 3306:3306 --name mysql-docker-container -e MYSQL_ROOT_PASSWORD=root-password -e MYSQL_DATABASE=fdo -e MYSQL_USER=sample-user -e MYSQL_PASSWORD=sample-password mysql/mysql-server:8.0.31
+  ```
+
+Sample command to start PostgreSQL server
+
+  ```shell
+  docker run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
+  ```
+
+  For RHEL environment,
+
+  ```shell
+  sudo podman run -d --name postgres-db -e POSTGRES_ROOT_PASSWORD=root-password -e POSTGRES_DB=fdo -e POSTGRES_USER=sample-user -e POSTGRES_PASSWORD=sample-password -p 5432:5432 -d postgres
+  ```
+
+To start MariaDB follow the steps mentioned in [Database README](./db/README.md)
