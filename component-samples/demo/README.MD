@@ -456,9 +456,9 @@ The FDO spec states "When processing an Ownership Voucher with X5CHAIN encoding,
 
 This implementation will trust Ownership vouchers with X5Chain encoding without verifying the ownership chain. 
 
-# Support for multiple Database.
+# Support for multiple Databases.
 
-FDO services support multiple database for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of the box, the following databases are supported by the FDO service:
+FDO services support multiple databases for the storage layer. Hibernate framework is used to bridge the application layer with backend database storage layer. Out of the box, the following databases are supported by the FDO service:
 
   + H2 Database
   + MariaDB
