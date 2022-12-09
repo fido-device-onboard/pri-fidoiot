@@ -290,9 +290,7 @@ Workers are java classes the implement various behavioral aspects of an FDO serv
 | org.fidoalliance.fdo.FileKeyStoreOutputStream | Save PRI Service keys to disk |
 | org.fidoalliance.fdo.protocol.db.AutoInjectVoucherStorageFunction | Automatically extends the voucher to the AIO owner and performs To0 protocol |
 | org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier| Uses BASIC auth with api_user api_password from service.env for serivceinfo urls (NOT Recommended) |
-
-#- org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
-- org.fidoalliance.fdo.protocol.db.BasicServiceInfoClientSupplier
+| org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier | Uses standard auth for serviceinfo urls |
 | org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule | Provides the implementation of Fido Conformance Module for Interop|
 | org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule | Provides the implementation of the FdoSys Module |
 | org.fidoalliance.fdo.protocol.db.OnDieCertificateManager | Provides Root certificate chains for Intel OnDie hardware ECDSA keys|

@@ -14,7 +14,7 @@ deploying the example implementation for these components.
 * **Maven 3.6.3**.
 * **Java 11**.
 * **Haveged**.
-* **Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+**
+* **Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
 * **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
 +Supported list of Host operating systems.
