@@ -5,9 +5,11 @@ package org.fidoalliance.fdo.protocol.api;
 
 import java.security.cert.Certificate;
 import java.util.List;
+
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.KeyResolver;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
@@ -19,15 +21,18 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
  * Get API for Manufacturing voucher.
  */
 public class MfgVoucher extends RestApi {
+  protected static final LoggerService logger = new LoggerService(MfgVoucher.class);
 
 
   @Override
   public void doPost() throws Exception {
 
     String serialNo = getLastSegment();
+    logger.info("Manufacturing Voucher serialNo : " + serialNo);
 
     ManufacturedVoucher mfgVoucher = getSession().get(ManufacturedVoucher.class, serialNo);
     if (mfgVoucher == null) {
+      logger.warn("Manufacturing voucher is null");
       throw new NotFoundException(serialNo);
     }
     OwnershipVoucher voucher = Mapper.INSTANCE.readValue(mfgVoucher.getData(),
@@ -50,9 +55,11 @@ public class MfgVoucher extends RestApi {
   public void doGet() throws Exception {
 
     String path = getLastSegment();
+    logger.info("Manufacturing Voucher doGet Path : " + path);
 
     ManufacturedVoucher mfgVoucher = getSession().get(ManufacturedVoucher.class, path);
     if (mfgVoucher == null) {
+      logger.warn("Mfg voucher is null");
       throw new NotFoundException(path);
     }
     String text = VoucherUtils.toString(mfgVoucher.getData());
