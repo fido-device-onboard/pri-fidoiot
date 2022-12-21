@@ -3,9 +3,9 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import java.io.IOException;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
 
-import java.io.IOException;
 
 public class UnsupportedCredReuseFunction implements CredReuseFunction {
 
