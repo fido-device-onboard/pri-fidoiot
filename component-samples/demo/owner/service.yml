@@ -110,7 +110,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardOwnerKeySupplier
   - org.fidoalliance.fdo.protocol.StandardCwtKeySupplier
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
-  - org.fidoalliance.fdo.protocol.StandardCredReuseFunction
+  - org.fidoalliance.fdo.protocol.UnsupportedCredReuseFunction
   #- Use StandardHttpClientSupplier for secure Production configurations.
   - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 

@@ -127,7 +127,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
-  - org.fidoalliance.fdo.protocol.StandardCredReuseFunction
+  - org.fidoalliance.fdo.protocol.UnsupportedCredReuseFunction
   #- org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction
   - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
