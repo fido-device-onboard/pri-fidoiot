@@ -12,7 +12,7 @@ system-properties:
   application.version: 1.1.5-SNAPSHOT
   service.name: "Manufacturer"
   server.api.user: $(api_user)
-  server.api.password: "null"
+  server.api.password: $(api_password)
   javax.net.ssl.keyStorePassword: default
   javax.net.ssl.trustStorePassword: default
   javax.net.ssl.keyStore: $(secrets.path)/api-user.pem

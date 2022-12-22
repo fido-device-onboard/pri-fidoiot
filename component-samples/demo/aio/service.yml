@@ -11,7 +11,7 @@ system-properties:
   app-data.dir: ./app-data
   application.version: 1.1.5-SNAPSHOT
   server.api.user: $(api_user)
-  server.api.password: "null"
+  server.api.password: $(api_password)
   service.name: "All-in-one demo"
   javax.net.ssl.keyStorePassword: default
   javax.net.ssl.trustStorePassword: default
