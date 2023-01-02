@@ -5,9 +5,11 @@ package org.fidoalliance.fdo.protocol.api;
 
 import java.security.cert.Certificate;
 import java.util.List;
+
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.KeyResolver;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.PemLoader;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
@@ -20,6 +22,7 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
  * Performs resell operation.
  */
 public class ResellApi extends RestApi {
+  protected static final LoggerService logger = new LoggerService(ResellApi.class);
 
   @Override
   public void doPost() throws Exception {
@@ -43,6 +46,7 @@ public class ResellApi extends RestApi {
         }
 
       } else {
+        logger.warn("Not found exception for path " + path);
         throw new NotFoundException(path);
       }
     } else {

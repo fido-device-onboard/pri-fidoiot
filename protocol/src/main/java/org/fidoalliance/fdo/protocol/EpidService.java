@@ -75,7 +75,7 @@ public class EpidService {
     private Boolean testMode;
 
     protected String getPath() {
-      return Config.resolve(path);
+      return path;
     }
 
     protected Boolean getTestMode() {
