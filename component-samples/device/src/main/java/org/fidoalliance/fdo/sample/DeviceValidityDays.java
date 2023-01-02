@@ -15,7 +15,5 @@ public class DeviceValidityDays implements ValidityDaysSupplier {
   public Integer get() throws IOException {
     logger.debug("Validity days for device cert request is 365 * 10");
     return 360 * 10;//the validity days for the device cert request
-
-
   }
 }
