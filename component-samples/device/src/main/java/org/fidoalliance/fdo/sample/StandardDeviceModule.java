@@ -152,8 +152,7 @@ public class StandardDeviceModule implements ServiceInfoModule {
     }
 
     if (queue.size() == 0) {
-      logger.warn("Size of queue = 0 ");
-      logger.info("Completed DeviceServiceInfo messages")
+      logger.info("Completed DeviceServiceInfo messages");
       state.setDone(true);
     }
 
