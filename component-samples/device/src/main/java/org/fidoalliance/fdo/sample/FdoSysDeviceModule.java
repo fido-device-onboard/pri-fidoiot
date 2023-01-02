@@ -274,7 +274,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       //set the first status check
       createStatus(false, 0, statusTimeout);
     } catch (IOException e) {
-      logger.error("IO Operation Failed");
+      logger.error("IO Operation Failed" + e.getMessage());
       throw new RuntimeException(e);
     }
   }
