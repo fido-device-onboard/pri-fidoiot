@@ -13,7 +13,7 @@ public class DeviceValidityDays implements ValidityDaysSupplier {
 
   @Override
   public Integer get() throws IOException {
-    logger.info("Validity days for device cert request");
+    logger.debug("Validity days for device cert request is 365 * 10");
     return 360 * 10;//the validity days for the device cert request
 
 
