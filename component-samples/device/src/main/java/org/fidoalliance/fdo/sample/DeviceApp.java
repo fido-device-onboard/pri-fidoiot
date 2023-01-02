@@ -104,7 +104,7 @@ public class DeviceApp extends HttpClient {
       final DeviceCredential devCredential = Config.getWorker(DeviceCredentialSupplier.class).get();
       if (devCredential == null) {
         generateDiHello();
-        logger.info("Generating Device Credential file ");
+        logger.info("Generating Device Credential file");
       } else {
         setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
 
