@@ -244,7 +244,7 @@ public class DeviceApp extends HttpClient {
       return pkcs10.getEncoded();
 
     } catch (OperatorCreationException | CertificateEncodingException e) {
-      logger.error("Operation Creation/Certificate Encoding Execution Failed : " + e.getMessage());
+      logger.error("Operator Creation or Certificate Encoding Failed :" + e.getMessage());
       throw new IOException(e);
     } finally {
       cs.destroyKey(signingKey);
