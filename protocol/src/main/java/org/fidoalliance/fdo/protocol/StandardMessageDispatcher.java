@@ -509,20 +509,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("Voucher rejected due to untrusted key or guid");
     }
 
-    String guid = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
-            OwnershipVoucherHeader.class).getGuid().toString();
-
-    try {
-      To2RedirectEntry storedRedirectEntry = getWorker(RvBlobQueryFunction.class).apply(guid);
-      boolean verifiedRedirect = cs.verify(storedRedirectEntry.getTo1d(), ownerPublicKey);
-      if (!verifiedRedirect) {
-        logger.error("Invalid extension of OwnershipVoucher.");
-        throw new InvalidOwnerSignException();
-      }
-    } catch (ResourceNotFoundException e) {
-      // Redirect Blob is not stored for the guid
-    }
-
     VoucherUtils.verifyVoucher(to0d.getVoucher());
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();

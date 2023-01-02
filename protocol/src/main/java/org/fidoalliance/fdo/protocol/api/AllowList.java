@@ -49,6 +49,7 @@ public class AllowList extends RestApi {
       allowList.setAllowed(true);
       getSession().save(allowList);
     }
+    logger.debug("committing transaction");
     getTransaction().commit();
   }
 
@@ -69,6 +70,7 @@ public class AllowList extends RestApi {
 
     if (allowList != null) {
       // delete the row, if data exists.
+      logger.warn("Deleting transaction");
       getSession().delete(allowList);
     } else {
       logger.warn("Certificate not found.");

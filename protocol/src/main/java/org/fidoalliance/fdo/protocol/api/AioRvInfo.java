@@ -65,6 +65,7 @@ public class AioRvInfo extends RestApi {
 
       if (rviData == null) {
         // if data doesn't exist in DB, create new row and insert into RV_DATA table.
+        logger.info("Insert data into RV_DATA");
         rviData = new RvData();
         rviData.setData(getSession().getLobHelper().createClob(rvi));
         getSession().save(rviData);

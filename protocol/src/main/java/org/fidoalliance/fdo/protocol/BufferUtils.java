@@ -48,7 +48,7 @@ public class BufferUtils {
     } else { // the bigint must be padded to fill the field
       int pad = length - byteLen;
       Arrays.fill(dest, destPos, pad + destPos, (byte) 0);
-      System.arraycopy(intbuf, 0, dest, pad + destPos, byteLen);
+      System.arraycopy(intbuf, byteLen, dest, pad + destPos, byteLen);
     }
   }
 

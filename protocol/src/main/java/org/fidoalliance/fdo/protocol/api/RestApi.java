@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fidoalliance.fdo.protocol.BufferUtils;
 import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -23,6 +24,7 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
  * Base class for Rest Apis.
  */
 public class RestApi implements AutoCloseable {
+  protected static final LoggerService logger = new LoggerService(RestApi.class);
 
   private static final int READ_SIZE = 1024;
   private HttpServletRequest request;
@@ -99,6 +101,7 @@ public class RestApi implements AutoCloseable {
       reader.transferTo(stringWriter);
       return stringWriter.toString();
     } catch (IOException e) {
+      logger.error("Internal Server Error");
       throw new InternalServerErrorException(e);
     }
   }
@@ -111,10 +114,12 @@ public class RestApi implements AutoCloseable {
 
     if (request.getContentType() != null) {
       if (!request.getContentType().equals(getRequestContentType())) {
+        logger.error("Unsupported media type exception" + req.getContentType());
         throw new UnsupportedMediaTypeException(req.getContentType());
       }
     } else {
       if (request.getContentLength() > 0) {
+        logger.error("Unsupported media type exception - unspecified content type");
         throw new UnsupportedMediaTypeException("unspecified content type");
       }
     }
@@ -124,6 +129,7 @@ public class RestApi implements AutoCloseable {
     while (file != null) {
       String name = file.getName();
       if (name.equals(".") || name.equals("..")) {
+        logger.debug("Not found exception " + name);
         throw new NotFoundException(name);
       }
       uriSegments.add(name);
@@ -135,6 +141,8 @@ public class RestApi implements AutoCloseable {
     if (uriSegments.size() > 0) {
       return uriSegments.get(0);
     }
+    logger.debug("size of uri segments less than or equal to 0");
+    logger.debug("not found exception " + getRequest().getRequestURI());
     throw new NotFoundException(getRequest().getRequestURI());
   }
 
