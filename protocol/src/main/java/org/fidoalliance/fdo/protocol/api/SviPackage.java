@@ -28,7 +28,7 @@ public class SviPackage extends RestApi {
       String result = systemPackage.getData().getSubString(1,
           Long.valueOf(systemPackage.getData().length()).intValue());
       getResponse().getWriter().print(result);
-      logger.info("SVI package result : " + result);
+      logger.debug("SVI package result : " + result);
     }
   }
 
