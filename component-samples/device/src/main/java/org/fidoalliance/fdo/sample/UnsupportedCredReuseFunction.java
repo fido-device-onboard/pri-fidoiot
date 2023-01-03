@@ -14,7 +14,7 @@ public class UnsupportedCredReuseFunction implements CredReuseFunction {
   @Override
   public Boolean apply(Boolean reuseFlag) throws IOException {
     if (reuseFlag) {
-      logger.warn("Don't reuse credentials ");
+      logger.warn("Device doesn't support credential reuse");
       throw new CredentialReuseException();
     }
     return true;
