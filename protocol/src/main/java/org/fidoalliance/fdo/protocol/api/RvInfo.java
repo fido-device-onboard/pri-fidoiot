@@ -24,7 +24,7 @@ public class RvInfo extends RestApi {
 
     String body = rviData.getData().getSubString(1,
         Long.valueOf(rviData.getData().length()).intValue());
-    logger.info("Rv info doGet body : " + body);
+    logger.info("RVInfo doGet body : " + body);
 
     getResponse().getWriter().print(body);
   }
@@ -33,7 +33,7 @@ public class RvInfo extends RestApi {
   public void doPost() throws Exception {
 
     String body = getStringBody();
-    logger.info("Rv info doPost body : " + body);
+    logger.info("RVInfo doPost body : " + body);
     getTransaction();
 
     Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);
