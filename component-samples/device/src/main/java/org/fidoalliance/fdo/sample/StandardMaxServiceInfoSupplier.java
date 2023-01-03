@@ -13,7 +13,7 @@ public class StandardMaxServiceInfoSupplier implements MaxServiceInfoSupplier {
   @Override
   public Integer get() throws IOException {
     DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
-    logger.info("SviMtu " + config.getSviMtu());
+    logger.info("SVI MTU value: " + config.getSviMtu());
     return config.getSviMtu();
   }
 }
