@@ -112,7 +112,7 @@ public class OwnerVoucher extends RestApi {
       String text = VoucherUtils.toString(onboardingVoucher.getData());
       getResponse().getWriter().print(text);
     } else {
-      logger.error("Not Found Exception for path : " + path);
+      logger.error("Voucher not found for GUID: " + path);
       throw new NotFoundException(path);
     }
   }
