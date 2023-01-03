@@ -55,7 +55,7 @@ public class MfgVoucher extends RestApi {
   public void doGet() throws Exception {
 
     String path = getLastSegment();
-    logger.info("Manufacturing Voucher doGet Path : " + path);
+    logger.info("Manufacturing Voucher SerialNo: " + path);
 
     ManufacturedVoucher mfgVoucher = getSession().get(ManufacturedVoucher.class, path);
     if (mfgVoucher == null) {
