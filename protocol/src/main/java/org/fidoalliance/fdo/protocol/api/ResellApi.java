@@ -46,7 +46,7 @@ public class ResellApi extends RestApi {
         }
 
       } else {
-        logger.warn("Not found exception for path " + path);
+        logger.warn("Voucher not found for GUID: " + path);
         throw new NotFoundException(path);
       }
     } else {
