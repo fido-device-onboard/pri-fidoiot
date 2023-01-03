@@ -22,7 +22,7 @@ public class To2Blob extends RestApi {
 
       String body = onboardConfig.getRvBlob().getSubString(1,
           Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
-      logger.info("To2 doGet body : " + body);
+      logger.info("TO2 body: " + body);
 
       getResponse().getWriter().print(body);
     }
@@ -32,7 +32,7 @@ public class To2Blob extends RestApi {
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();
-    logger.info("To2 doPost body : " + body);
+    logger.info("TO2 body: " + body);
 
     getTransaction();
 
