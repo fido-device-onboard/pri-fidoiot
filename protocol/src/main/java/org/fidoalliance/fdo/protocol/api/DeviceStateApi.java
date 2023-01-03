@@ -8,7 +8,6 @@ import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
 
 public class DeviceStateApi extends RestApi {
 
-
   @Override
   protected void doGet() throws Exception {
     String path = getLastSegment();
