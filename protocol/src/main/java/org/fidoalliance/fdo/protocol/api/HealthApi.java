@@ -29,14 +29,14 @@ public class HealthApi extends RestApi {
 
       String systemTime = new Date().toString();
       logger.info("Health check invoked at " + systemTime);
-      String responseBody = "{\"version\" : \"%s\"}";
+      String responseBody = "{\"version\" : \"%s\", \"status\" : \"OK\"}";
 
       // Collects property from the service.yml file.
       String appVersion = System.getProperty("application.version");
 
       // Appends responseBody to the outputStream of HttpResponse Object.
       getResponse().getWriter().write(String.format(responseBody, appVersion));
-      getResponse().setContentType("plain/text");
+      getResponse().setContentType("application/json");
 
     } catch (Exception e) {
       logger.error("Unable to perform health check");
