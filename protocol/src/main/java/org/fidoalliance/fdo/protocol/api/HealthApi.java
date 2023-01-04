@@ -38,10 +38,12 @@ public class HealthApi extends RestApi {
       // Collects property from the service.yml file.
       String appVersion = System.getProperty("application.version");
 
-      String responseBody = "{\"version\" : \"%s\", \"databaseConnection\" : \"%s\", \"status\" : \"%s\"}";
+      String responseBody = "{\"version\" : \"%s\", \"databaseConnection\" : \"%s\","
+              + " \"status\" : \"%s\"}";
 
       // Appends responseBody to the outputStream of HttpResponse Object.
-      getResponse().getWriter().write(String.format(responseBody, appVersion, dbHealth, serviceStatus));
+      getResponse().getWriter().write(String.format(responseBody, appVersion,
+              dbHealth, serviceStatus));
       getResponse().setContentType("application/json");
 
     } catch (Exception e) {
