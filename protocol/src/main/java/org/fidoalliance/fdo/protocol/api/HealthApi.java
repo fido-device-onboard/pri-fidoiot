@@ -4,11 +4,8 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.net.URL;
 import java.util.Date;
 
-import org.fidoalliance.fdo.protocol.EpidService;
 import org.fidoalliance.fdo.protocol.LoggerService;
 
 
@@ -37,12 +34,11 @@ public class HealthApi extends RestApi {
       final String serviceStatus = "OK";
       String systemTime = new Date().toString();
       logger.info("Health check invoked at " + systemTime);
-
       final String dbHealth = databaseHealthStatus();
-      String responseBody = "{\"version\" : \"%s\", \"databaseConnection\" : \"%s\", \"status\" : \"%s\"}";
-
       // Collects property from the service.yml file.
       String appVersion = System.getProperty("application.version");
+
+      String responseBody = "{\"version\" : \"%s\", \"databaseConnection\" : \"%s\", \"status\" : \"%s\"}";
 
       // Appends responseBody to the outputStream of HttpResponse Object.
       getResponse().getWriter().write(String.format(responseBody, appVersion, dbHealth, serviceStatus));
