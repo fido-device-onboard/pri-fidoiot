@@ -522,7 +522,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     } catch (ResourceNotFoundException e) {
       // Redirect Blob is not stored for the guid
     }
-    
+
     VoucherUtils.verifyVoucher(to0d.getVoucher());
 
     To2RedirectEntry redirectEntry = new To2RedirectEntry();
