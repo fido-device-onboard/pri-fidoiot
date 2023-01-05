@@ -115,7 +115,7 @@ public class To0Scheduler implements Closeable {
       To2AddressEntries addressEntries = new To2BlobSupplier().get();
       OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
       for (OnboardingVoucher onboardingVoucher : list) {
-        if (onboardingVoucher.getTo0Expiry() == null
+        if ((onboardingVoucher.getTo0Expiry() == null
             || now.after(onboardingVoucher.getTo0Expiry())) {
                 && onboardingVoucher.getTo2CompletedOn() == null) {   
 
