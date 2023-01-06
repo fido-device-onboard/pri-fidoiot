@@ -1,7 +1,7 @@
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-version: "2.4"
+version: "3.3"
 
 services:
 
@@ -19,8 +19,4 @@ services:
       - ./app-data:/home/fdo/app-data 
     extra_hosts:
      - "host.docker.internal:host-gateway"
-    mem_limit: 500m
-    mem_reservation: 200m
-    cpu_shares: 1024
-    pids_limit: 500
 
