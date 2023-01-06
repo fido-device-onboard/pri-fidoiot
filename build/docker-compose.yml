@@ -1,7 +1,7 @@
 # Copyright 2021 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-version: "2.4"
+version: "3.3"
 
 services:
 
@@ -28,9 +28,5 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    mem_limit: 1500m
-    mem_reservation: 1000m
-    cpu_shares: 5
-    pids_limit: 100
 volumes:
   fdo-m2:
