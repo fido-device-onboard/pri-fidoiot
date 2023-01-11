@@ -3,12 +3,14 @@
 
 package org.fidoalliance.fdo.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -20,6 +22,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DispatchMessage;
+import org.fidoalliance.fdo.protocol.EnvironmentSanityPredicate;
 import org.fidoalliance.fdo.protocol.HttpClient;
 import org.fidoalliance.fdo.protocol.HttpInstruction;
 import org.fidoalliance.fdo.protocol.HttpUtils;
@@ -51,7 +54,7 @@ public class DeviceApp extends HttpClient {
 
   private static final LoggerService logger = new LoggerService(DeviceApp.class);
 
-  private final DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
+  private static final DeviceConfig config = Config.getConfig(RootConfig.class).getRoot();
 
 
   /**
@@ -61,8 +64,11 @@ public class DeviceApp extends HttpClient {
    */
   public static void main(String[] args) {
     try {
+      Config.getWorker(EnvironmentSanityPredicate.class)
+              .test(new ObjectMapper().convertValue(config, Map.class), "device");
       new DeviceApp().run();
     } catch (Throwable e) {
+      logger.error(e.getMessage());
       new RuntimeException(e);
     }
   }

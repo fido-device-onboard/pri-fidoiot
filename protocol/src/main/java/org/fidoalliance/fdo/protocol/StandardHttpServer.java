@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -200,6 +201,13 @@ public class StandardHttpServer implements HttpServer {
 
   @Override
   public void run() {
+
+    try {
+      Config.getWorker(EnvironmentSanityPredicate.class)
+              .test(new ObjectMapper().convertValue(config, Map.class), "http-server");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     Tomcat tomcat = new Tomcat();
 

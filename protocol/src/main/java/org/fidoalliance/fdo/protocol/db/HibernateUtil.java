@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +15,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DatabaseServer;
+import org.fidoalliance.fdo.protocol.EnvironmentSanityPredicate;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
-import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.exception.JDBCConnectionException;
+
 
 /**
  * Hibernate Utilities.
@@ -45,6 +49,8 @@ public class HibernateUtil {
       cfg.configure(file);
 
       final Map<String, String> map = Config.getConfig(RootConfig.class).hibernateProperties;
+      Config.getWorker(EnvironmentSanityPredicate.class)
+              .test(Config.resolve(map), "hibernate-properties");
       for (Map.Entry<String, String> entry : map.entrySet()) {
         cfg.setProperty(entry.getKey(), Config.resolve(entry.getValue()));
       }
@@ -56,6 +62,12 @@ public class HibernateUtil {
 
       return factory;
 
+    } catch (JDBCConnectionException  e) {
+      logger.error("Invalid Connection URL.Database session factory setup failed.");
+      return null;
+    } catch (HibernateException e) {
+      logger.error("Invalid Hibernate Property" + e.getMessage());
+      return null;
     } catch (Throwable e) {
       try {
         Config.getWorker(ExceptionConsumer.class).accept(e);

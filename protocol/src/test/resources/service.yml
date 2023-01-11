@@ -93,6 +93,7 @@ cwt:
 workers:
   - org.fidoalliance.fdo.protocol.StandardLogProvider
   #- org.fidoalliance.fdo.protocol.DebugExceptionConsumer
+  - org.fidoalliance.fdo.protocol.StandardEnvironmentSanityPredicate
   - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService

@@ -18,12 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -66,6 +68,12 @@ public class Config {
 
     try {
       ROOT = Mapper.INSTANCE.readStringValue(file, Root.class);
+      Optional<String> sanityWorker =
+              Arrays.stream(ROOT.workers)
+                      .filter(s -> s.toString().contains("SanityPredicate"))
+                      .findFirst();
+      workers.add(loadObject(sanityWorker.get()));
+
       loadEnvFiles();
       loadSystemProperties();
       loadWorkerItems();
@@ -73,6 +81,7 @@ public class Config {
 
 
     } catch (Throwable e) {
+
       logger = LoggerFactory.getLogger(Config.class);
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;
@@ -353,8 +362,9 @@ public class Config {
     }
   }
 
-  private static void loadSystemProperties() {
+  private static void loadSystemProperties() throws Exception {
     Map<String, String> map = ROOT.systemProperties;
+    Config.getWorker(EnvironmentSanityPredicate.class).test(map, "system-properties");
     for (Map.Entry<String, String> entry : map.entrySet()) {
       if (!System.getProperties().containsKey(entry.getKey())) {
         System.setProperty(entry.getKey(), resolve(entry.getValue()));
