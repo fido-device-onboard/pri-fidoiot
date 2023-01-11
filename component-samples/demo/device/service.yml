@@ -3,7 +3,7 @@
 
 device:
 
-  di-url: http://host.docker.internal:8080
+  di-url: http://localhost:8080
 
   credential-file: ./app-data/credentials.bin
  
@@ -89,6 +89,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardCryptoService
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
   - org.fidoalliance.fdo.sample.FileCredentialConsumer
+  - org.fidoalliance.fdo.sample.FileCredentialSupplier
   - org.fidoalliance.fdo.sample.DeviceEnvironmentSanityPredicate
   - org.fidoalliance.fdo.sample.FileKeyStoreInputStream
   - org.fidoalliance.fdo.sample.FileKeyStoreOutputStream 
