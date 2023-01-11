@@ -17,20 +17,7 @@ public class StandardEnvironmentSanityPredicate implements EnvironmentSanityPred
       } catch (NullPointerException e) {
         throw new NullPointerException("log4j.configurationFile property is null in service.yml");
       }
-
-      try {
-        Path path = Path.of((String) map.get("app-data.dir"));
-        if (!Files.exists(path)) {
-          throw new NullPointerException();
-        }
-      } catch (NullPointerException e) {
-        throw new NullPointerException(
-            "app-data.dir value points to non-existent directory in service.yml");
-      } catch (SecurityException e) {
-        throw new SecurityException(
-            "Application doesn't have enough permission to read" + " the app-data directory");
-      }
-
+      
       try {
         if (map.get("application.version") == null
             || map.get("application.version").toString().toLowerCase().equals("null")) {
