@@ -81,7 +81,6 @@ public class Config {
 
 
     } catch (Throwable e) {
-
       logger = LoggerFactory.getLogger(Config.class);
       if (e instanceof MarkedYAMLException) {
         MarkedYAMLException yamlException = (MarkedYAMLException)e;

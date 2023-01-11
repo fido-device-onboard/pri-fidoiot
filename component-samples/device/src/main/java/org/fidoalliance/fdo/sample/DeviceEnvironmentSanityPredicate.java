@@ -92,7 +92,7 @@ public class DeviceEnvironmentSanityPredicate implements EnvironmentSanityPredic
 
       try {
         if (map.get("key-enc") != null) {
-          List<Integer> supportedValues = Arrays.asList(5, 10, 11);
+          List<Integer> supportedValues = Arrays.asList(1, 2, 3);
           if (supportedValues.stream().filter(suite -> suite.equals(map.get("key-enc"))).count()
               != 1) {
             throw new IllegalArgumentException("Unsupported key-encoding in service.yml");
@@ -106,7 +106,7 @@ public class DeviceEnvironmentSanityPredicate implements EnvironmentSanityPredic
 
       try {
         if (map.get("key-type") != null) {
-          List<Integer> supportedValues = Arrays.asList(10, 11);
+          List<Integer> supportedValues = Arrays.asList(1, 5, 10, 11);
           if (supportedValues.stream().filter(suite -> suite.equals(map.get("key-type"))).count()
               != 1) {
             throw new IllegalArgumentException("Unsupported key-type in service.yml");
