@@ -3,7 +3,11 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
+import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
 /**
  * Maintains To2Blob for owners.
@@ -29,6 +33,14 @@ public class To2Blob extends RestApi {
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();
+
+    try {
+      final To2AddressEntries to2AddressEntries =
+            Mapper.INSTANCE.readJsonValue(body, To2AddressEntries.class);
+      HttpUtils.getInstructions(to2AddressEntries);
+    } catch (Exception e) {
+      getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
 
     getTransaction();
 
