@@ -40,6 +40,7 @@ public class To2Blob extends RestApi {
       HttpUtils.getInstructions(to2AddressEntries);
     } catch (Exception e) {
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
     }
 
     getTransaction();
