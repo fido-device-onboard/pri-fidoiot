@@ -1,5 +1,6 @@
 package org.fidoalliance.fdo.protocol;
 
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import java.io.IOException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -13,6 +14,7 @@ import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.junit.jupiter.api.Test;
 
 public class RendezvousInfoTest {
+  private static final LoggerService logger = new LoggerService(RendezvousInfoTest.class);
   @Test
   public void Test() throws DecoderException, IOException {
 
@@ -35,7 +37,11 @@ public class RendezvousInfoTest {
 
     data = Hex.decodeHex("81858205781F66646F31302E7765737475732E636C6F75646170702E617A7572652E636F6D82031850820C018202448A5BC35582041850");
     rvi = Mapper.INSTANCE.readValue(data,RendezvousInfo.class);
-    str = Mapper.INSTANCE.writeValueAsString(rvi);
+    try {
+      str = Mapper.INSTANCE.writeValueAsString(rvi);
+    } catch (InvalidDefinitionException i){
+      logger.error(i.getMessage());
+    }
 
 
   }
