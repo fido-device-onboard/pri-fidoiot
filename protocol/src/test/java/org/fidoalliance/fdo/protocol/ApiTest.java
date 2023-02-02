@@ -91,15 +91,19 @@ public class ApiTest {
   }
 
   public void doPostApi(String url, String body, int resp) throws IOException, InterruptedException {
-    HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.ofMinutes(1))
-            .header("Content-Type", "text/plain")
-            .POST(HttpRequest.BodyPublishers.ofString(body))
-            .build();
-    HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    assert (resp == response.statusCode());
+    try {
+      HttpClient client = HttpClient.newHttpClient();
+      HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .timeout(Duration.ofMinutes(1))
+              .header("Content-Type", "text/plain")
+              .POST(HttpRequest.BodyPublishers.ofString(body))
+              .build();
+      HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      assert (resp == response.statusCode());
+    } catch (OutOfMemoryError i){
+      assert (false);
+    }
   }
 
   public void doPostFileApi(String url, String filename, int resp) throws IOException, InterruptedException {

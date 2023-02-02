@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.apache.commons.codec.DecoderException;
 import org.fidoalliance.fdo.protocol.message.Guid;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.input.EOFException;
 
 public class GuidTest {
   @Test
@@ -17,11 +18,22 @@ public class GuidTest {
     String str = guid1.toString();
 
     byte[] data = guid1.toBytes();
-    Guid guid2 = Guid.fromBytes(data);
+    Guid guid2 = null;
+    try{
+      guid2 = Guid.fromBytes(data);
+    } catch (EOFException e){
+      assert(false);
+    }
 
     assertTrue(guid1.equals(guid2));
 
-    Guid guid3  = Guid.fromUuid(UUID.randomUUID());
+    Guid guid3 = null;
+    try{
+      guid3  = Guid.fromUuid(UUID.randomUUID());
+    } catch (IllegalArgumentException e){
+      assert(false);
+    }
+
     assertFalse(guid1.equals(guid3));
 
   }
