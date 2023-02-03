@@ -12,8 +12,6 @@ import org.fidoalliance.fdo.protocol.message.HashType;
 import org.junit.jupiter.api.Test;
 
 public class HashTest {
-  private static final LoggerService logger = new LoggerService(HashTest.class);
-
   @Test
   public void Test() throws DecoderException, IOException {
 
