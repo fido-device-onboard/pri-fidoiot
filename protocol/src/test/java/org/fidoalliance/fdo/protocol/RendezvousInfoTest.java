@@ -14,7 +14,6 @@ import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.junit.jupiter.api.Test;
 
 public class RendezvousInfoTest {
-  private static final LoggerService logger = new LoggerService(RendezvousInfoTest.class);
   @Test
   public void Test() throws DecoderException, IOException {
 
@@ -40,7 +39,6 @@ public class RendezvousInfoTest {
     try {
       str = Mapper.INSTANCE.writeValueAsString(rvi);
     } catch (InvalidDefinitionException i){
-      logger.error(i.getMessage());
     }
 
 
