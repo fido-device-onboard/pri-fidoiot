@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import java.io.IOException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.message.Hash;
 import org.fidoalliance.fdo.protocol.message.HashType;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ public class HashTest {
 
     Hash hash1 = new Hash();
     hash1.setHashType(HashType.SHA256);
-    hash1.setHashValue(new byte[]{1, 2, 3});
+    hash1.setHashValue(new byte[] {1, 2, 3});
 
 
     try {
