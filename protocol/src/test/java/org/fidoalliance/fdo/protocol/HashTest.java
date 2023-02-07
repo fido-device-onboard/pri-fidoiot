@@ -26,7 +26,6 @@ public class HashTest {
       byte[] data = Mapper.INSTANCE.writeValue(hash1);
       String str = Hex.encodeHexString(data);
     } catch (MismatchedInputException | InvalidDefinitionException e) {
-      logger.debug(e.getMessage());
     }
 
     try {
@@ -34,7 +33,6 @@ public class HashTest {
       Hash hash2 = Mapper.INSTANCE.readValue(data, Hash.class);
       assertTrue(hash1.equals(hash2));
     } catch (MismatchedInputException e) {
-      logger.debug(e.getMessage());
     }
 
   }
