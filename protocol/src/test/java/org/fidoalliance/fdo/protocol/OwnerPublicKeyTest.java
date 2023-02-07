@@ -14,8 +14,6 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.junit.jupiter.api.Test;
 
 public class OwnerPublicKeyTest {
-  private static final LoggerService logger = new LoggerService(OwnerPublicKeyTest.class);
-
   String certsPem = ""
       + "-----BEGIN CERTIFICATE-----\n"
       + "MIIBIjCByaADAgECAgkApNMDrpgPU/EwCgYIKoZIzj0EAwIwDTELMAkGA1UEAwwC\n"
@@ -39,7 +37,6 @@ public class OwnerPublicKeyTest {
       ownerKey.setEnc(PublicKeyEncoding.X509);
       ownerKey.setType(PublicKeyType.SECP256R1);
     } catch (IndexOutOfBoundsException | IllegalArgumentException e){
-      logger.error(e.getMessage());
     }
 
 
