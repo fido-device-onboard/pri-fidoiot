@@ -20,6 +20,10 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 
 public class HealthApi extends RestApi {
 
+  public String databaseHealthStatus() {
+    return getTransaction().getStatus().toString();
+  }
+
   @Override
   public void doGet() throws Exception {
 
@@ -27,16 +31,20 @@ public class HealthApi extends RestApi {
 
     try {
 
+      final String serviceStatus = "OK";
       String systemTime = new Date().toString();
       logger.info("Health check invoked at " + systemTime);
-      String responseBody = "{\"version\" : \"%s\"}";
-
+      final String dbHealth = databaseHealthStatus();
       // Collects property from the service.yml file.
       String appVersion = System.getProperty("application.version");
 
+      String responseBody = "{\"version\" : \"%s\", \"databaseConnection\" : \"%s\","
+              + " \"status\" : \"%s\"}";
+
       // Appends responseBody to the outputStream of HttpResponse Object.
-      getResponse().getWriter().write(String.format(responseBody, appVersion));
-      getResponse().setContentType("plain/text");
+      getResponse().getWriter().write(String.format(responseBody, appVersion,
+              dbHealth, serviceStatus));
+      getResponse().setContentType("application/json");
 
     } catch (Exception e) {
       logger.error("Unable to perform health check");
