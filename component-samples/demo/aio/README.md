@@ -230,7 +230,7 @@ The following filter will only return service info instructions if the device in
 The following filter will only return service info instructions if the device info reports the os is linux
 
 [
-{"filter": {"devmod-os" : "linux"}},
+{"filter": {"devmod:os" : "linux"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
 {"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
@@ -239,7 +239,7 @@ The following filter will only return service info instructions if the device in
 The following filter will only return service info instructions if the device info reports the os is linux and verion is 20.04
 
 [
-{"filter": {"devmod-os" : "linux", "devmod-version" : "Ubuntu 20.04 LTS"}},
+{"filter": {"devmod:os" : "linux", "devmod:version" : "Ubuntu 20.04 LTS"}},
 {"filedesc" : "setup.sh","resource" : "payload.bin"},
 {"exec" : ["bash","setup.sh"] },
 {"filter" : {}}
