@@ -134,6 +134,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
         logger.info("Voucher auto injected for guid:" + header.getGuid().toString());
 
       } finally {
+        logger.debug("Destroying private key");
         cs.destroyKey(privateKey);
       }
 
