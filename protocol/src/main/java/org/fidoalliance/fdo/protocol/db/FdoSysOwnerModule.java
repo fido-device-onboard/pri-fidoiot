@@ -300,7 +300,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             extra.getQueue().add(kv);
           }
         } catch (SQLException throwables) {
-          logger.info("");
+          logger.error("SQL Exception " + throwables.getMessage());
           throw new InternalServerErrorException(throwables);
         }
       } else {
