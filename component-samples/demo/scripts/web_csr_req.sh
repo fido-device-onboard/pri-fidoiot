@@ -22,3 +22,5 @@ openssl x509 -x509toreq -in webServer.pem -out server.req -signkey server-key.pe
 #comment out following line if signing with external CA
 openssl x509 -req -days 12775 -in server.req -CA ca-cert.pem -CAkey caKey.pem -CAcreateserial -out server-cert.pem -extfile ./web-server.conf -extensions v3_req  
 
+chmod 644 server-key.pem
+
