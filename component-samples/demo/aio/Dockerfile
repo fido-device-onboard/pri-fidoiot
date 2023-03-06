@@ -5,7 +5,7 @@ FROM ubuntu:20.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update 
-RUN apt install default-jre
+RUN apt-get install -y openjdk-11-jdk
 
 RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
