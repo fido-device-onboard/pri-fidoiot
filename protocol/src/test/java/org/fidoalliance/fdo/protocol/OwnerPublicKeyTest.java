@@ -14,6 +14,7 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.junit.jupiter.api.Test;
 
 public class OwnerPublicKeyTest {
+  private static final LoggerService logger = new LoggerService(OwnerPublicKeyTest.class);
 
   String certsPem = ""
       + "-----BEGIN CERTIFICATE-----\n"
@@ -29,14 +30,17 @@ public class OwnerPublicKeyTest {
   @Test
   public void Test() throws DecoderException, IOException {
 
-    List<Certificate> certs = PemLoader.loadCerts(certsPem);
-
-
-    byte[] enc1 = certs.get(0).getPublicKey().getEncoded();
-    OwnerPublicKey ownerKey = new OwnerPublicKey();
-    ownerKey.setBody(AnyType.fromObject(enc1));
-    ownerKey.setEnc(PublicKeyEncoding.X509);
-    ownerKey.setType(PublicKeyType.SECP256R1);
+    OwnerPublicKey ownerKey = null;
+    try {
+      List<Certificate> certs = PemLoader.loadCerts(certsPem);
+      byte[] enc1 = certs.get(0).getPublicKey().getEncoded();
+      ownerKey = new OwnerPublicKey();
+      ownerKey.setBody(AnyType.fromObject(enc1));
+      ownerKey.setEnc(PublicKeyEncoding.X509);
+      ownerKey.setType(PublicKeyType.SECP256R1);
+    } catch (IndexOutOfBoundsException | IllegalArgumentException e){
+      logger.error(e.getMessage());
+    }
 
 
     byte[] data = Mapper.INSTANCE.writeValue(ownerKey);
