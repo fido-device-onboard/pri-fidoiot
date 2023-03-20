@@ -233,6 +233,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       }
       trans.commit();
     } catch (SQLException e) {
+      logger.error("SQL Exception" + e.getMessage());
       throw new InternalServerErrorException(e);
     } finally {
       session.close();
@@ -299,9 +300,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             extra.getQueue().add(kv);
           }
         } catch (SQLException throwables) {
+          logger.error("SQL Exception " + throwables.getMessage());
           throw new InternalServerErrorException(throwables);
         }
       } else {
+        logger.error("SVI resource missing");
         throw new InternalServerErrorException("svi resource missing " + resource);
       }
       trans.commit();

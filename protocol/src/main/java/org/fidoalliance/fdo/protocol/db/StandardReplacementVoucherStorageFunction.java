@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
 import java.util.Date;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementVoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
@@ -15,6 +16,8 @@ import org.hibernate.Transaction;
 
 public class StandardReplacementVoucherStorageFunction implements
     ReplacementVoucherStorageFunction {
+  private static final LoggerService
+          logger = new LoggerService(StandardReplacementVoucherStorageFunction.class);
 
 
   @Override
@@ -48,6 +51,7 @@ public class StandardReplacementVoucherStorageFunction implements
 
 
     } finally {
+      logger.debug("Closing Replacement Voucher Storage Function's session");
       session.close();
     }
   }
