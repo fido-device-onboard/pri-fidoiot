@@ -59,6 +59,7 @@ public class SystemResourceApi extends RestApi {
     // Collect parameter 'filename' from HttpRequest parameter and
     // uploaded file content from InputStream of request.
     String fileName = getParamByValue("filename");
+    logger.info("Uploaded File: " + fileName + "to SystemResource Table");
     byte[] sviResourceFile = getRequest().getInputStream().readAllBytes();
 
     // Query database table SYSTEM_RESOURCE for filename Key
