@@ -69,32 +69,30 @@ public class InteropVoucher extends RestApi {
           if (obj == null) {
             break;
           }
-          if (obj instanceof PemObject) {
-            PemObject pemObj = (PemObject) obj;
-            if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
+          PemObject pemObj = (PemObject) obj;
+          if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
 
-              voucher = Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
-              OwnershipVoucherHeader header =
-                  Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
+            voucher = Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
+            OwnershipVoucherHeader header =
+                Mapper.INSTANCE.readValue(voucher.getHeader(), OwnershipVoucherHeader.class);
 
-              guid = header.getGuid().toUuid();
-              logger.info("voucher guid: " + guid.toString());
-            } else if (pemObj.getType().equals("EC PRIVATE KEY")) {
-              ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
-              //PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
-              // signKey = new JcaPEMKeyConverter().getPrivateKey(info);
-              ECPrivateKey ecpKey = ECPrivateKey.getInstance(seq);
-              AlgorithmIdentifier algId = new AlgorithmIdentifier(
-                  X9ObjectIdentifiers.id_ecPublicKey, ecpKey.getParameters());
-              byte[] serverPkcs8 = new PrivateKeyInfo(algId, ecpKey).getEncoded();
-              KeyFactory fact = KeyFactory.getInstance("EC", "BC");
-              signKey = fact.generatePrivate(new PKCS8EncodedKeySpec(serverPkcs8));
+            guid = header.getGuid().toUuid();
+            logger.info("voucher guid: " + guid.toString());
+          } else if (pemObj.getType().equals("EC PRIVATE KEY")) {
+            ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
+            //PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
+            // signKey = new JcaPEMKeyConverter().getPrivateKey(info);
+            ECPrivateKey ecpKey = ECPrivateKey.getInstance(seq);
+            AlgorithmIdentifier algId = new AlgorithmIdentifier(
+                X9ObjectIdentifiers.id_ecPublicKey, ecpKey.getParameters());
+            byte[] serverPkcs8 = new PrivateKeyInfo(algId, ecpKey).getEncoded();
+            KeyFactory fact = KeyFactory.getInstance("EC", "BC");
+            signKey = fact.generatePrivate(new PKCS8EncodedKeySpec(serverPkcs8));
 
-            } else if (pemObj.getType().equals("RSA PRIVATE KEY")) {
-              ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
-              PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
-              signKey = new JcaPEMKeyConverter().getPrivateKey(info);
-            }
+          } else if (pemObj.getType().equals("RSA PRIVATE KEY")) {
+            ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
+            PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
+            signKey = new JcaPEMKeyConverter().getPrivateKey(info);
           }
         }
       }

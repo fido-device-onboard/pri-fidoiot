@@ -19,7 +19,6 @@ public class HashTest {
 
 
     byte[] data = Mapper.INSTANCE.writeValue(hash1);
-    String str = Hex.encodeHexString(data);
 
     Hash hash2 = Mapper.INSTANCE.readValue(data,Hash.class);
     assertTrue(hash1.equals(hash2));

@@ -22,6 +22,7 @@ public class VoucherTest {
 
     byte[] data = Mapper.INSTANCE.writeValue(voucher);
     String str = Hex.encodeHexString(data);
+    System.out.println(str);
 
     //OwnershipVoucher voucher1 = Mapper.INSTANCE.readObject(data,OwnershipVoucher.class);
 

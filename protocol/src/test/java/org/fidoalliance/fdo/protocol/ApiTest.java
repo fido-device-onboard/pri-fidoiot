@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -141,7 +142,7 @@ public class ApiTest {
     httpCon.setRequestProperty("Content-Type", "text/plain" );
     httpCon.setRequestMethod("DELETE");
 
-    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
+    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream(), StandardCharsets.UTF_8);
     out.write(value);
     out.close();
 
