@@ -15,6 +15,9 @@ public class FdoSysInstruction {
   @JsonProperty("exec")
   private String[] execArgs;
 
+  @JsonProperty("owner_exec")
+  private String[] owner_execArgs;
+
   @JsonProperty("exec_cb")
   private String[] execCbArgs;
 
@@ -50,6 +53,11 @@ public class FdoSysInstruction {
   @JsonIgnore
   public String getResource() {
     return resource;
+  }
+
+  @JsonIgnore
+  public String[] getOwnerExec() {
+    return owner_execArgs;
   }
 
   public String getFetch() {

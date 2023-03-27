@@ -3,12 +3,20 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -41,6 +49,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
   private final LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+
+  private final ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
+  private final Duration execTimeout = Duration.ofHours(2);
+  private final Predicate<Integer> exitValueTest = val -> (0 == val);
 
   @Override
   public String getName() {
@@ -227,6 +239,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             getExecCb(state, extra, instruction);
           } else if (instruction.getFetch() != null) {
             getFetch(state, extra, instruction);
+          } else if (instruction.getOwnerExec() != null) {
+            getOwnerExec(state, extra, instruction);
           }
         }
 
@@ -247,6 +261,15 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     kv.setKeyName(FdoSys.EXEC);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
     extra.getQueue().add(kv);
+  }
+
+  protected void getOwnerExec(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction) throws IOException {
+
+
+    String[] args = instruction.getOwnerExec();
+    exec(args);
   }
 
   protected void getExecCb(ServiceInfoModuleState state,
@@ -313,6 +336,75 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       session.close();
     }
 
+  }
+
+  private String getAppData() throws IOException {
+    File file = new File(System.getProperty("app-data.dir"));
+    String canonicalPath = file.getCanonicalPath();
+    return canonicalPath;
+  }
+
+  private ProcessBuilder.Redirect getExecOutputRedirect() {
+    return execOutputRedirect;
+  }
+
+  private Duration getExecTimeout() {
+    return execTimeout;
+  }
+
+  private Predicate<Integer> getExitValueTest() {
+    return exitValueTest;
+  }
+
+  private String getCommand(List<String> args) {
+    StringBuilder builder = new StringBuilder();
+    for (String arg : args) {
+      if (builder.length() > 0) {
+        builder.append(" ");
+      }
+      builder.append(arg);
+    }
+    return builder.toString();
+  }
+
+  private void exec(String[] args) throws IOException {
+
+    List<String> argList = Arrays.asList(args);
+
+    try {
+      ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.directory(new File(getAppData()));
+      builder.redirectErrorStream(true);
+      builder.redirectOutput(getExecOutputRedirect());
+
+      Process process = builder.start();
+      try {
+        boolean processDone = process.waitFor(getExecTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        if (processDone) {
+          if (!getExitValueTest().test(process.exitValue())) {
+            throw new RuntimeException(
+                    "predicate failed: "
+                            + getCommand(argList)
+                            + " returned "
+                            + process.exitValue());
+          }
+        } else { // timeout
+          throw new TimeoutException(getCommand(argList));
+        }
+
+      } finally {
+
+        if (process.isAlive()) {
+          process.destroyForcibly();
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new InternalServerErrorException(e);
+    } catch (IOException e) {
+      throw new InternalServerErrorException(e);
+    } catch (TimeoutException e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   protected void getUrlFile(ServiceInfoModuleState state,
