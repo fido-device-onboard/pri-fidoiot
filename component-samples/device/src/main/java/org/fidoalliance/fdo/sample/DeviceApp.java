@@ -74,7 +74,6 @@ public class DeviceApp extends HttpClient {
     try {
       logger.info("Starting Fdo Device");
       super.run();
-      logger.info("Starting Fdo Completed");
     } catch (Throwable throwable) {
       DispatchMessage prevMessage = new DispatchMessage();
       prevMessage.setMsgType(MsgType.DI_APP_START);
