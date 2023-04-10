@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.RendezvousInfoSupplier;
 import org.fidoalliance.fdo.protocol.entity.RvData;
@@ -16,6 +17,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
+  private static final LoggerService
+          logger = new LoggerService(StandardRendezvousInfoSupplier.class);
 
   private static class RootConfig {
     @JsonProperty("manufacturer")
@@ -106,6 +109,7 @@ public class StandardRendezvousInfoSupplier implements RendezvousInfoSupplier {
       return Mapper.INSTANCE.readJsonValue(body, RendezvousInfo.class);
 
     } catch (SQLException throwables) {
+      logger.debug("SQL Exception " + throwables.getMessage());
       throw new InternalServerErrorException(throwables);
     } finally {
       session.close();

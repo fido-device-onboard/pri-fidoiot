@@ -16,11 +16,12 @@
 #
 
 
-openssl req -x509 -newkey rsa:2048 -keyout server-key.pem -out webServer.pem -sha256 -days 12775 -nodes -config ./web-server.conf
-openssl x509 -x509toreq -in webServer.pem -out server.req -signkey server-key.pem
+openssl req -x509 -newkey rsa:2048 -keyout server-key_temp.pem -out webServer.pem -sha256 -days 12775 -nodes -config ./web-server.conf
+openssl x509 -x509toreq -in webServer.pem -out server.req -signkey server-key_temp.pem
 
 #comment out following line if signing with external CA
-openssl x509 -req -days 12775 -in server.req -CA ca-cert.pem -CAkey caKey.pem -CAcreateserial -out server-cert.pem -extfile ./web-server.conf -extensions v3_req  
+openssl x509 -req -days 12775 -in server.req -CA ca-cert.pem -CAkey caKey.pem -CAcreateserial -out server-cert.pem -extfile ./web-server.conf -extensions v3_req
 
-chmod 644 server-key.pem
-
+#for read permission to server-key.pem
+cat server-key_temp.pem > server-key.pem
+rm server-key_temp.pem
