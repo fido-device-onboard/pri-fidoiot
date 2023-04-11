@@ -76,7 +76,7 @@ The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ### Credential storage
 
-Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.  
+Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
 
 aio/service.env
 manufacturer/service.env
@@ -100,8 +100,8 @@ The following passwords are defined in each service.env:
 | requireSSL           | Boolean value specifying SSL connection with Hibernate ORM |
 
 
-Keystores containing private keys can be stored in the database - `<fdo-pri-src>/component-sample/demo/{component}/app-data/emdb.mv.db` 
-as well as in the mounted file system. During runtime, the deployer can decide the mode of Keystore IO by activating the required worker class. 
+Keystores containing private keys can be stored in the database - `<fdo-pri-src>/component-sample/demo/{component}/app-data/emdb.mv.db`
+as well as in the mounted file system. During runtime, the deployer can decide the mode of Keystore IO by activating the required worker class.
 
 keys_gen.sh can be used to generate random passwords for each service.env.
 
@@ -113,7 +113,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 1. Generating demo certificate authority KeyPair and certificate
 
     ```shell
-      bash demo-ca.sh
+      bash demo_ca.sh
     ```
 
     **NOTE**: Configure the properties of `demo-CA` by updating `root-ca.conf`.
@@ -398,7 +398,7 @@ POST https://host.docker.internal:8038/api/v1/mfg/vouchers/43FF320A(or http://ho
 
 For authorization, users can use DIGEST AUTH with "apiUser" and api_password as defined in the manufacturer's service.env or can use CLIENT-CERT AUTH (mTLS).
 
-POST content-type `text\plain` 
+POST content-type `text\plain`
 
 In the request body add owner's certificate.
 
@@ -461,8 +461,8 @@ For authorization, users can use DIGEST AUTH with "apiUser" and api_password as 
 
 POST content
 ```
-[ 
-  {"filedesc" : "setup.sh", "resource" : "https://google.com"}, 
+[
+  {"filedesc" : "setup.sh", "resource" : "https://google.com"},
   {"exec" : ["sh","setup.sh"] }
 ]
 ```
