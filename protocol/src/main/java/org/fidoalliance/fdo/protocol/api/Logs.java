@@ -39,25 +39,6 @@ public class Logs extends RestApi {
   @Override
   public void doGet() throws Exception {
 
-    try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
-      //  HttpGet httpRequest = new HttpGet("https://host.docker.internal:8443/health");
-      HttpGet httpRequest = new HttpGet("https://host.docker.internal:8443/api/v1/rvinfo");
-
-      try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest)) {
-        HttpEntity entity = httpResponse.getEntity();
-        if (entity != null) {
-
-          String text = new String(entity.getContent().readAllBytes(), StandardCharsets.UTF_8);
-          text.toString();
-        }
-      }
-
-
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
-
-
     File file = getLogFile();
     try (BufferedReader br
         = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {

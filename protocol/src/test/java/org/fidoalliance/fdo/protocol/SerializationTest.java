@@ -16,9 +16,6 @@ public class SerializationTest {
   @Test
   public void Test() throws DecoderException, IOException {
 
-
-
-
     Hash hash = new Hash();
     hash.setHashType(HashType.SHA256);
     hash.setHashValue(new byte[] {1,2,3,4});

@@ -479,6 +479,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       cs.destroyKey(privateKey);
     }
 
+    byte[] byteArray = Mapper.INSTANCE.writeValue(ownerSign);
+    System.out.println(Arrays.toString(byteArray));
     response.setMessage(Mapper.INSTANCE.writeValue(ownerSign));
   }
 

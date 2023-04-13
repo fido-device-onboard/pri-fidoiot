@@ -127,9 +127,9 @@ public class ApiTest {
     httpCon.setRequestProperty("Content-Type", "text/plain" );
     httpCon.setRequestMethod("DELETE");
 
-    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
-    out.write(value);
-    out.close();
+    try (OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream())) {
+      out.write(value);
+    }
 
     httpCon.connect();
     return httpCon.getResponseCode();
