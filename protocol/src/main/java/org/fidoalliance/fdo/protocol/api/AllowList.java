@@ -50,6 +50,7 @@ public class AllowList extends RestApi {
       getSession().save(allowList);
     }
     getTransaction().commit();
+    logger.debug("Updated AllowList Table");
   }
 
   @Override
@@ -70,6 +71,7 @@ public class AllowList extends RestApi {
     if (allowList != null) {
       // delete the row, if data exists.
       getSession().delete(allowList);
+      logger.warn("Deleted from AllowList Table");
     } else {
       logger.warn("Certificate not found.");
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.OnDieCertificateData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -25,6 +26,7 @@ import org.hibernate.query.Query;
  * Ondie Certificate Manager.
  */
 public class OnDieCertificateManager {
+  private static final LoggerService logger = new LoggerService(OnDieCertificateManager.class);
 
   protected static List<String> rootCaList = new ArrayList<String>(Arrays.asList(
       "OnDie_CA_RootCA_Certificate.cer",
@@ -55,6 +57,7 @@ public class OnDieCertificateManager {
   public byte[] getCertificate(String name) throws IOException {
 
     URL url = new URL(name);
+    logger.info("OnDie Certificate URL: " + name);
     if (url == null) {
       throw new IllegalArgumentException("OnDieCache: illegal crl reference: " + name);
     }
@@ -82,11 +85,13 @@ public class OnDieCertificateManager {
         }
       }
     } catch (Exception ex) {
+      logger.error(ex.getMessage());
       throw new IOException(ex.getMessage());
     } finally {
       if (trans != null) {
         trans.commit();
       }
+      logger.debug("Closing the session");
       session.close();
     }
     return null;
@@ -146,6 +151,7 @@ public class OnDieCertificateManager {
       }
       trans.commit();
     } finally {
+      logger.debug("Closing zip file from session");
       session.close();
     }
   }
