@@ -63,7 +63,7 @@ public class DeviceApp extends HttpClient {
     try {
       new DeviceApp().run();
     } catch (Throwable e) {
-      new RuntimeException(e);
+      throw new RuntimeException(e);
     }
   }
 
