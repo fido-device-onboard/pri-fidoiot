@@ -169,6 +169,9 @@ public class InteropVoucher extends RestApi {
       } else {
         getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
       }
+    } catch (RuntimeException e) {
+      logger.warn("Failed due to Runtime Exception" + e.getMessage());
+      getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } catch (Exception exp) {
       logger.warn("Request failed because of internal server error.");
       getResponse().setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

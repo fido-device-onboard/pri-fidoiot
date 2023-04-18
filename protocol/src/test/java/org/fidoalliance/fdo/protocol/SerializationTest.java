@@ -49,6 +49,6 @@ public class SerializationTest {
     ownerKey2 = Mapper.INSTANCE.readObject(data, OwnerPublicKey.class);*/
 
 
-    System.out.println(data.toString());
+    System.out.println(data);
   }
 }

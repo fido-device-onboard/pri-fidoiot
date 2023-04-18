@@ -15,7 +15,7 @@ import org.hibernate.Transaction;
 public class StandardKeyStoreOutputStream implements KeyStoreOutputStreamFunction {
 
 
-  private class StoreOutputStream extends ByteArrayOutputStream {
+  private static class StoreOutputStream extends ByteArrayOutputStream {
 
     private final CertificateData certStore;
     private final Session session;

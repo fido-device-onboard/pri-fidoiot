@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -273,7 +274,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
           CoseSign1 coseSign = new CoseSign1();
           coseSign.setProtectedHeader(cphData);
-          coseSign.setPayload(diInfo.getSerialNumber().getBytes());
+          coseSign.setPayload(diInfo.getSerialNumber().getBytes(StandardCharsets.UTF_8));
           coseSign.setSignature(diInfo.getTestSignature());
           coseSign.setUnprotectedHeader(cuh);
 
@@ -546,7 +547,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
-    acceptOwner.getWaitSeconds();
+    if (acceptOwner.getWaitSeconds() < 0) {
+      throw new IOException("Invalid waitSeconds");
+    }
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {

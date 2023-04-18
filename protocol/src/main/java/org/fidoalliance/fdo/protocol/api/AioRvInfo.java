@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
@@ -59,6 +60,9 @@ public class AioRvInfo extends RestApi {
 
       // Creating RendezvousInfo object from yaml structure.
       RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi, RendezvousInfo.class);
+      if (rviObject.isEmpty()) {
+        throw new IOException();
+      }
 
       // Querying DB for RVINFO_BLOB with id=1
       RvData rviData = getSession().get(RvData.class, Long.valueOf(1));

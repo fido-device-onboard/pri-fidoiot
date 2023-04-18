@@ -70,10 +70,10 @@ public class HttpUtils {
     }
 
     segFile = segFile.getParentFile();
-    if (segFile != null || NumberUtils.isCreatable(segFile.getName())) {
-      message.setProtocolVersion(ProtocolVersion.fromString(segFile.getName()));
-    } else {
+    if (segFile == null || !NumberUtils.isCreatable(segFile.getName())) {
       throw new InvalidPathException(uri, "protocol version not a number");
+    } else {
+      message.setProtocolVersion(ProtocolVersion.fromString(segFile.getName()));
     }
 
     segFile = segFile.getParentFile();

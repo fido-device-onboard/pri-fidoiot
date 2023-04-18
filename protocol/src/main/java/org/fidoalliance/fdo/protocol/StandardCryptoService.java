@@ -586,9 +586,10 @@ public class StandardCryptoService implements CryptoService {
           throw new IllegalArgumentException();
         }
         byte[] value = new byte[len];
-        bis.read(value);
-
-        parts.add(value);
+        int read = bis.read(value);
+        if (read > 0) {
+          parts.add(value);
+        }
       }
       return parts;
 

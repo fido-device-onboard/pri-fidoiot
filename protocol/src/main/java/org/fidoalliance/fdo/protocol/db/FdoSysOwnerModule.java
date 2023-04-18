@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -136,7 +138,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     while (extra.getQueue().size() > 0) {
       boolean sent = sendFunction.apply(extra.getQueue().peek());
       if (sent) {
-        checkWaiting(extra, extra.getQueue().poll());
+        checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
       } else {
         break;
       }
@@ -354,6 +356,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           }
         }
       }
+    } catch (RuntimeException e) {
+      logger.error("Runtime Exception" +  e.getMessage());
+      throw new InternalServerErrorException(e);
     } catch (Exception e) {
       logger.error("failed to get http content" + e.getMessage());
       throw new InternalServerErrorException(e);
