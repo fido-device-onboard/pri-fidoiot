@@ -32,8 +32,10 @@ public class BasicServiceInfoClientSupplier implements ServiceInfoHttpClientSupp
       return new SSLConnectionSocketFactory(
           builder.build());
     } catch (NoSuchAlgorithmException e) {
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     } catch (KeyStoreException | KeyManagementException e) {
+      logger.error("Error in Key management or storage");
       throw new RuntimeException(e);
     }
 

@@ -76,6 +76,7 @@ public class DeviceInfo extends RestApi {
         obj.put("timestamp", createdOn.toString());
         obj.put("uuid", header.getGuid().toString());
         obj.put("alias", VoucherUtils.getPublicKeyAlias(ov));
+        logger.debug("Adding data (serial_no, timestamp, uuid, alias) to root JSON node");
         rootNode.add(obj);
       }
     }

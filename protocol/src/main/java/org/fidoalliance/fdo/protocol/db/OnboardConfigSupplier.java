@@ -8,6 +8,7 @@ import java.time.Duration;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
@@ -17,6 +18,7 @@ import org.hibernate.Transaction;
 
 public class OnboardConfigSupplier
     implements FailableSupplier<OnboardingConfig, IOException> {
+  private static final LoggerService logger = new LoggerService(OnboardConfigSupplier.class);
 
   @Override
   public OnboardingConfig get() throws IOException {
@@ -51,6 +53,7 @@ public class OnboardConfigSupplier
       return onboardConfig;
 
     } finally {
+      logger.debug("Closing the session");
       session.close();
     }
   }

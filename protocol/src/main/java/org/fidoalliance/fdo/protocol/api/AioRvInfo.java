@@ -57,6 +57,7 @@ public class AioRvInfo extends RestApi {
       }
 
       String rvi = String.format(defaultRvi, theDns, thePort, theProto, theIp, thePort);
+      logger.info("Rendezvous Info " + rvi);
 
       // Creating RendezvousInfo object from yaml structure.
       RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi, RendezvousInfo.class);
@@ -69,6 +70,7 @@ public class AioRvInfo extends RestApi {
 
       if (rviData == null) {
         // if data doesn't exist in DB, create new row and insert into RV_DATA table.
+        logger.info("Inserting data into RV_DATA");
         rviData = new RvData();
         rviData.setData(getSession().getLobHelper().createClob(rvi));
         getSession().save(rviData);

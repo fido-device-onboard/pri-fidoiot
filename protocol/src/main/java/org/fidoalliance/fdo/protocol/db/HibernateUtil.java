@@ -89,6 +89,7 @@ public class HibernateUtil {
       int length = Long.valueOf(blob.length()).intValue();
       return blob.getBytes(Long.valueOf(1), length);
     } catch (SQLException e) {
+      logger.error("SQL Exception: " + e.getMessage());
       throw new IOException(e);
     }
   }

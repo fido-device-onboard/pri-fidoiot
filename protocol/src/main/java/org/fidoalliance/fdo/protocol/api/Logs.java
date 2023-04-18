@@ -25,12 +25,14 @@ import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.DispatchMessage;
 import org.fidoalliance.fdo.protocol.HttpClientSupplier;
 import org.fidoalliance.fdo.protocol.HttpUtils;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.MessageBodyException;
 import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.fidoalliance.fdo.protocol.message.MsgType;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 
 public class Logs extends RestApi {
+  protected static final LoggerService logger = new LoggerService(Logs.class);
 
   private File getLogFile() {
     return new File("./app-data/service.log");

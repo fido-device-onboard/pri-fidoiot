@@ -70,6 +70,7 @@ public class OwnerVoucher extends RestApi {
         OwnershipVoucherHeader.class);
     byte[] data = Mapper.INSTANCE.writeValue(voucher);
     String guid = header.getGuid().toString();
+    logger.info("GUID is " + guid);
 
     OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class,
         header.getGuid().toString());
@@ -111,6 +112,7 @@ public class OwnerVoucher extends RestApi {
       String text = VoucherUtils.toString(onboardingVoucher.getData());
       getResponse().getWriter().print(text);
     } else {
+      logger.error("Voucher not found for GUID: " + path);
       throw new NotFoundException(path);
     }
   }

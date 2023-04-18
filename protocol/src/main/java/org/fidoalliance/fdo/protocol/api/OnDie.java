@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.protocol.api;
 import java.net.URL;
 import java.util.List;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.db.OnDieCertificateManager;
 
@@ -15,6 +16,7 @@ import org.fidoalliance.fdo.protocol.db.OnDieCertificateManager;
  * Maintains OnDie Certificates.
  */
 public class OnDie extends RestApi {
+  protected static final LoggerService logger = new LoggerService(OnDie.class);
 
   @Override
   public void doGet() throws Exception {
@@ -38,6 +40,7 @@ public class OnDie extends RestApi {
   public void doPost() throws Exception {
 
     String body = getStringBody();
+    logger.info("OnDie doPost body : " + body);
 
     String zipFilePathname = Mapper.INSTANCE.readValue(body, String.class);
 

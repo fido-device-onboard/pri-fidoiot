@@ -49,6 +49,6 @@ public class DenyList extends RestApi {
       getSession().save(allowList);
     }
     getTransaction().commit();
-
+    logger.debug("Updated AllowList Table");
   }
 }
