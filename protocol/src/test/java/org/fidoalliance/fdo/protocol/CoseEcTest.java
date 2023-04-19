@@ -64,8 +64,11 @@ public class CoseEcTest {
     OwnerPublicKey ownerKey = cs.encodeKey(PublicKeyType.SECP256R1, PublicKeyEncoding.X509,
         certs.toArray(Certificate[]::new));
 
-    CoseSign1 sign1 = cs.sign(payload, privateKey, ownerKey);
-    byte[] cbor = Mapper.INSTANCE.writeValue(sign1);
+    byte[] cbor = new byte[100];
+    if (privateKey != null) {
+      CoseSign1 sign1 = cs.sign(payload, privateKey, ownerKey);
+      cbor = Mapper.INSTANCE.writeValue(sign1);
+    }
     return Hex.encodeHexString(cbor);
 
   }

@@ -146,12 +146,10 @@ public class VoucherUtils {
         if (obj == null) {
           break;
         }
-        if (obj instanceof PemObject) {
-          PemObject pemObj = (PemObject) obj;
-          if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
-            return Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
+        PemObject pemObj = (PemObject) obj;
+        if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
+          return Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
 
-          }
         }
       }
     }

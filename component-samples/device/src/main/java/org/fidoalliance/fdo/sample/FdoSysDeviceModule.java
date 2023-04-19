@@ -162,7 +162,13 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     openOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
     openOptions.add(StandardOpenOption.WRITE);
 
-    if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+    boolean posixType = false;
+    try {
+      posixType = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+    } catch (Exception e) {
+      posixType = false;
+    }
+    if (posixType) {
 
       Set<PosixFilePermission> filePermissions = new HashSet<>();
       filePermissions.add(PosixFilePermission.OWNER_READ);

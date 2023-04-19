@@ -182,6 +182,9 @@ public abstract class HttpClient implements Runnable {
         }
         break; // success
 
+      } catch (RuntimeException e) {
+        logger.error("Runtime Exception:" + e.getMessage());
+        logger.info("instruction failed.");
       } catch (Exception e) {
 
         try {

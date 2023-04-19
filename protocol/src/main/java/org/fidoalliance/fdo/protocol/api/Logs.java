@@ -41,7 +41,6 @@ public class Logs extends RestApi {
   @Override
   public void doGet() throws Exception {
 
-
     File file = getLogFile();
     try (BufferedReader br
         = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {

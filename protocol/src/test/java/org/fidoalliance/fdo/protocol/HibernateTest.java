@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test;
 
 public class HibernateTest {
 
-  private final String dbName = "test"; //will be test.mv.db
-  private static final int DEFAULT_PORT = 9092;
-
   @Test
   public void Test() throws DecoderException, IOException {
     /*

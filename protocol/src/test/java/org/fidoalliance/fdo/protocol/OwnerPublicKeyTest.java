@@ -38,13 +38,6 @@ public class OwnerPublicKeyTest {
     ownerKey.setEnc(PublicKeyEncoding.X509);
     ownerKey.setType(PublicKeyType.SECP256R1);
 
-
-    byte[] data = Mapper.INSTANCE.writeValue(ownerKey);
-    String str = Hex.encodeHexString(data);
-
-    OwnerPublicKey key2 = Mapper.INSTANCE.readValue(data,OwnerPublicKey.class);
-    byte[] enc2 = key2.getBody().covertValue(byte[].class);
-
     //todo: handle other key types
     CoseKey key = new CoseKey();
     key.setCurve(CoseKeyCurveType.P256EC2);
@@ -55,12 +48,10 @@ public class OwnerPublicKeyTest {
     key3.setType(PublicKeyType.SECP256R1);
     key3.setEnc(PublicKeyEncoding.COSEKEY);
     key3.setBody(AnyType.fromObject(key));
-    data = Mapper.INSTANCE.writeValue(key3);
+    byte[] data = Mapper.INSTANCE.writeValue(key3);
 
-    str= Hex.encodeHexString(data);
-
-
-    OwnerPublicKey key4 = Mapper.INSTANCE.readValue(data,OwnerPublicKey.class);
+    String str= Hex.encodeHexString(data);
+    System.out.println(str);
 
   }
 }

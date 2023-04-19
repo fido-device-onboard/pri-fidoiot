@@ -48,7 +48,7 @@ public class SerializationTest {
     str = Hex.encodeHexString(data);
     ownerKey2 = Mapper.INSTANCE.readObject(data, OwnerPublicKey.class);*/
 
+    System.out.println(data);
 
-    System.out.println(data.toString());
   }
 }
