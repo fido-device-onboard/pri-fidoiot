@@ -39,7 +39,10 @@ public class OwnerPublicKeyTest {
     ownerKey.setType(PublicKeyType.SECP256R1);
     byte[] ec256Data = Mapper.INSTANCE.writeValue(ownerKey);
     String str = Hex.encodeHexString(ec256Data);
-    assert (str.startsWith("83"));
+    String expectedValue = "830a01585b3059301306072a8648ce3d020106082a8648ce3d030107034200042c02709032b3fc1696ab" +
+            "55b1ecf8e44795b92cb21b6a681265e54d525c8533fb74b0c0310166ef11b0f32aef76e135f86acdd65633267d" +
+            "e932b31df43e50c625";
+    assert (str.equals(expectedValue));
 
     //todo: handle other key types
     CoseKey key = new CoseKey();
@@ -54,7 +57,8 @@ public class OwnerPublicKeyTest {
     byte[] data = Mapper.INSTANCE.writeValue(key3);
 
     str= Hex.encodeHexString(data);
-    assert (str.equals("830a03a3200121430102032243030201"));
+    expectedValue = "830a03a3200121430102032243030201";
+    assert (str.equals(expectedValue));
 
   }
 }
