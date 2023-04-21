@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -163,8 +164,8 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     openOptions.add(StandardOpenOption.WRITE);
 
     boolean posixType = false;
-    try {
-      posixType = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+    try (FileSystem fs = FileSystems.getDefault()) {
+      posixType = fs.supportedFileAttributeViews().contains("posix");
     } catch (Exception e) {
       posixType = false;
     }

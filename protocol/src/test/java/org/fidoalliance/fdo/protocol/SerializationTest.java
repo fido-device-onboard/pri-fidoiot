@@ -1,6 +1,8 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.message.AnyType;
@@ -47,8 +49,7 @@ public class SerializationTest {
     data = Mapper.INSTANCE.toBytes(ownerKey);
     str = Hex.encodeHexString(data);
     ownerKey2 = Mapper.INSTANCE.readObject(data, OwnerPublicKey.class);*/
-
-    System.out.println(data);
-
+    byte[] expectedData = new byte[]{1,2,3};
+    assert (Arrays.equals(expectedData, data));
   }
 }
