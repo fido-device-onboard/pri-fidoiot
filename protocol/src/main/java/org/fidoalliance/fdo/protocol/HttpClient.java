@@ -271,6 +271,8 @@ public abstract class HttpClient implements Runnable {
         } catch (Throwable e) {
           logger.error("failed to send error");
         }
+      } else{
+        throw new RuntimeException();
       }
 
     }
