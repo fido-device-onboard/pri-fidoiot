@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import org.fidoalliance.fdo.protocol.serialization.NonceDeserializer;
 import org.fidoalliance.fdo.protocol.serialization.NonceSerializer;
 
@@ -51,7 +53,7 @@ public class Nonce {
       return ByteBuffer.wrap(this.nonce).compareTo(ByteBuffer.wrap(((Nonce) o).nonce)) == 0;
     }
     if (o instanceof byte[]) {
-      return ByteBuffer.wrap(this.nonce).compareTo(ByteBuffer.wrap((byte[]) o)) == 0;
+      return Arrays.equals(this.nonce, (byte[]) o);
     }
     return super.equals(o);
   }

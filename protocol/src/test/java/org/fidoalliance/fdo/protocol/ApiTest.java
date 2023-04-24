@@ -142,7 +142,7 @@ public class ApiTest {
     httpCon.setRequestProperty("Content-Type", "text/plain" );
     httpCon.setRequestMethod("DELETE");
 
-    try (OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream())) {
+    try (OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream(), StandardCharsets.UTF_8)) {
       out.write(value);
     }
 
