@@ -197,6 +197,10 @@ public abstract class HttpClient implements Runnable {
           index++;
           continue;
         }
+
+        logger.info("all instructions exhausted");
+        throw new IOException(e);
+
       } catch (Exception e) {
 
         try {
