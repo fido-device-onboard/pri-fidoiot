@@ -1,7 +1,7 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-version: "2.4"
+version: "3.3"
 
 services:
 
@@ -35,7 +35,6 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
-    pids_limit: 500
 
 secrets:
   ca-cert.pem:
