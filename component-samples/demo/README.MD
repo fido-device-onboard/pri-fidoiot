@@ -133,7 +133,7 @@ sudo podman system prune -a
 ```
 # Configuring Proxies
 
-Follow the steps in hyperlink for complete proxy setup. [REFER](https://secure-device-onboard.github.io/docs-fidoiot/latest/implementation-references/proxy-settings)
+Follow the steps in hyperlink for complete proxy setup. [REFER](https://fido-device-onboard.github.io/docs-fidoiot/latest/implementation-references/proxy-settings)
 
 For basic proxy setup, update the proxy information in `_JAVA_OPTIONS` as
 
