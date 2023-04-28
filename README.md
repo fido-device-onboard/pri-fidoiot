@@ -10,36 +10,29 @@ deploying the example implementation for these components.
 
 ## System Requirements:
 
-* **Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4**. +
-* **Maven 3.6.3**.
-* **Java 11**.
-* **Haveged**.
-* **Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
-* **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
+* **Supported Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4**.
 
-+Supported list of Host operating systems.
+* **Install required packages: Maven 3.6.3, Java 11, Haveged, Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+ , Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
-***NOTE***: FDO service require strong random number generation in order to perform the required cryptographic functions.  The FDO servers will hang on startup waiting for sufficient entropy unless the system continuously supplied random data.
-- `sudo apt-get install -y haveged` will ensure the system fdo services are running on have sufficient entropy.
+Run following command to install necessary packages:
+` sudo apt-get install -y maven docker docker-compose openjdk-11-jre-headless`
 
+***NOTE***: FDO service require strong random number generation in order to perform the required cryptographic functions.  The FDO servers will hang on startup waiting for sufficient entropy unless the system continuously supplied random data. Installing Haveged will ensure the system fdo services are running on have sufficient entropy. Ensure the proxy environment are set up accordingly to avoid issues during the build.
 
+## FDO Source Code Layout and Description
 
-## Source Layout
+For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'. FDO PRI source code is organized into the following sub-folders.
 
-For the instructions in this document, `<fdo-pri-src>` refers to the path of the FDO PRI folder 'pri-fidoiot'.
-
-FDO PRI source code is organized into the following sub-folders.
-
-- `component-samples`: It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile.
-
-- `protocol`: It contains implementations related to protocol message processing.
+| Source Code | Description |
+|-------------|-------------|
+| `component-samples` | It contains all the normative and non-normative server and client implementation with all specifications listed in the base profile |
+| `protocol` | It contains implementations related to protocol message processing |
+| `<fdo-pri-src>/component-samples/demo/` | Locations of an executable artifacts |
+| `<fdo-pri-src>/component-sample/demo/{component}/service.env` | Credentials storage for each service and will be made available as environment variables to each docker/podman container. |
+| `<fdo-pri-src>/component-samples/demo/device/service.yml` | Contains the configuration of the device. |
 
 
-## Building FDO PRI Source
-
-FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
-[Apache Maven* software](http://maven.apache.org).
-
+## List of ports used in the sample code
 The list of ports that are used for unit tests and sample code:
 
 | Port | Description    |
@@ -61,18 +54,25 @@ The list of ports that are used for unit tests and sample code:
 | 8073 | reseller H2 Console port |
 | 8443 | aio https port |
 
+## Getting Started Guide to Build FDO PRI Source
 
-Use the following commands to build FDO PRI source.
-```
-$ cd <fdo-pri-src>
-$ mvn clean install
-```
+The FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
+[Apache Maven* software](http://maven.apache.org).
 
-or FDO PRI source can be built using docker container. [REFER](./build/README.md)
+1. Download FDO source code using git.
 
-The build creates artifacts which will be used in the rest of this guide.
+    ```
+    $ git clone git@github.com:secure-device-onboard/pri-fidoiot.git 
+    ```
 
-The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
+2. Build FDO PRI source.
+
+    ```
+    $ cd <fdo-pri-src>
+    $ mvn clean install
+    ```
+
+***NOTE***: The FDO PRI source can be built using docker container. [REFER](./build/README.md). The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ### Credential storage
 
@@ -107,22 +107,20 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
 ***NOTE***: Changing the database password after the H2 database has been created requires the database file to be deleted and recreated.
 
+### Generate secure keys
 
-### Generating random passwords using keys_gen.sh
+3. Generate demo certificate authority KeyPair and certificate.
 
-1. Generating demo certificate authority KeyPair and certificate
-
-    ```shell
-      bash demo_ca.sh
+    ```
+    $ cd <fdo-pri-src>/component-sample/demo/scripts
+    $ ./demo_ca.sh
     ```
 
-    **NOTE**: Configure the properties of `demo-CA` by updating `root-ca.conf`.
+4. Generating Server and Client Keypair and certificates.
 
-2. Generating Server and Client Keypair and certificates.
-
-    ```shell
-    bash web_csr_req.sh
-    bash user_csr_req.sh
+    ```
+    $ ./web_csr_req.sh
+    $ ./user_csr_req.sh
     ```
 
     **NOTE**: Both Server and Client certificates are signed by the previously generated demo-CA. Moreover, we can configure the properties of Server and Client certificates by updating `web-server.conf` and `client.conf` respectively. [Learn how to configure Server and Client Certificates.](#specifying-subject-alternate-names-for-the-webhttps-self-signed-certificate)
@@ -130,28 +128,23 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 3. Running keys_gen.sh will generate random passwords for the all http servers and creates `secrets` folder containing all the required `.pem` files of Client, CA and Server component.
 
     ```
-    $ cd <fdo-pri-src>/component-samples/demo/scripts
     $ ./keys_gen.sh
+    $ chmod 777 -R secrets/ service.env
     ```
 
-    A message "Key generation completed." will be displayed on the console.
+    **NOTE**: A message "Key generation completed." will be displayed on the console. Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
 
-    Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
-
-4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components.
-
-    **NOTE:** Don't replace `service.env` present in the database component with generated `service.env` in `scripts` folder.
-
+4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components. Do not replace `service.env` present in the database component with generated `service.env` in `scripts` folder.
+    
     ```
-    $ cd <fdo-pri-src>/component-samples/demo/scripts
-    $ cp -r ./secrets/. ../<component>
-    $ cp service.env ../<component>
+    $ cp -r secrets/ ../<components>
+    $ cp -r secrets/ service.env ../<components>
     ```
-
     **NOTE**: Component refers to the individual FDO services like aio, manufacturer, rv , owner and reseller.
 
     **NOTE**: Docker secrets are only available to swarm services, not to standalone containers. To use this feature, consider adapting your container to run as a service. Stateful containers can typically run with a scale of 1 without changing the container code.
 
+##Removing this section to an additional configuration at below.
 ### Specifying Subject alternate names for the Web/HTTPS self-signed certificate.
 
 When the http server starts for the first time it will generate a self-signed certificate for https protocol.
@@ -179,127 +172,91 @@ Uncomment `subjectAltName` and allowed list of IP and DNS in `[alt_names]` secti
 
 ### Starting Standalone Database for PRI servers
 
-1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](#Generating-random-passwords-using-keys_gen.sh)
+**NOTE**: To generate `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](#Generating-random-passwords-using-keys_gen.sh)
 
-2. Start the Database service
-```shell
-cd <fdo-pri-src>/component-samples/demo/db
-docker-compose up --build -d/ podman-compose up --build -d
-```
+5. Start the Database service
+   
+   ```
+   $ cd <fdo-pri-src>/component-samples/demo/db
+   $ docker-compose up --build -d/ podman-compose up --build -d
+   ```
 
 **NOTE**: By default, Database uses mTLS connection for jdbc. MariaDB* is used as the default database. For non-mTLS jdbc connection, set `use_ssl` and `require_ssl` property to `false` in `service.yml` of individual services.
 
 **NOTE**: Follow the steps to [Enable embedded H2 database](./component-samples/demo/README.MD#enable-embedded-h2-database-server)
 
-### Starting FDO PRI HTTP Servers
+### Starting FDO PRI Services
 
 
-#### Starting the FDO PRI All-In-One (AIO) HTTP Server
+6. Start the FDO PRI All-In-One (AIO) HTTP Server container and the standalone java application.
 
-To start the server as a docker/podman container.
+   ```
+   $ cd <fdo-pri-src>/component-samples/demo/aio
+   $ docker-compose up --build  -d / podman-compose up --build -d
+   $ cd <fdo-pri-src>/component-samples/demo/aio
+   $ java -jar aio.jar
+   ```
 
-```
-$ cd <fdo-pri-src>/component-samples/demo/aio
-$ docker-compose up --build  -d / podman-compose up --build -d
-```
-
-To start the server as a standalone java application.
-
-  ```
-  $ cd <fdo-pri-src>/component-samples/demo/aio
-  $ java -jar aio.jar
-  ```
-
-  The server will listen for FDO PRI http & https messages on ports 8080 and 8443 respectively.
-
-  The all-in-one demo supports all FDO protocols in a single service by default.
+The server will listen for FDO PRI http & https messages on ports 8080 and 8443 respectively. The all-in-one demo supports all FDO protocols in a single service by default.
 
 
-#### Starting the FDO PRI Rendezvous (RV) HTTP Server
+7. Start the FDO PRI Rendezvous (RV) HTTP Server container and the standalone java application.
 
-To start the server as a docker/podman container.
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/rv
-$ docker-compose up --build -d/ podman-compose up --build -d
-```
-
-To start the server as a standalone java application.
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/rv
-$ java -jar aio.jar
-```
+   ```
+   $ cd <fdo-pri-src>/component-samples/demo/rv
+   $ docker-compose up --build -d/ podman-compose up --build -d
+   $ cd <fdo-pri-src>/component-samples/demo/rv
+   $ java -jar aio.jar
+   ```
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8040 and 8041 respectively.
 
-#### Starting the FDO PRI Owner HTTP Server
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/owner
-$ docker-compose up --build -d/ podman-compose up --build -d
-```
-
-To start the server as a standalone java application.
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/owner
-$ java -jar aio.jar
-```
+8. Start the FDO PRI Owner HTTP Server contaner and the standalone java application.
+    
+    ```
+    $ cd <fdo-pri-src>/component-samples/demo/owner
+    $ docker-compose up --build -d/ podman-compose up --build -d
+    $ cd <fdo-pri-src>/component-samples/demo/owner
+    $ java -jar aio.jar
+    ```
 
 The server will listen for FDO PRI HTTP & HTTPS messages on port 8042 and 8043 respectively.
 
-#### Starting the FDO PRI Manufacturer Server
+9. Starting the FDO PRI Manufacturer Server container and the standalone java application.
 
-```
-$ cd <fdo-pri-src>/component-samples/demo/manufacturer
-$ docker-compose up --build -d/ podman-compose up --build -d
-```
-
-To start the server as a standalone java application.
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/manufacturer
-$ java -jar aio.jar
-```
+    ```
+    $ cd <fdo-pri-src>/component-samples/demo/manufacturer
+    $ docker-compose up --build -d/ podman-compose up --build -d
+    $ cd <fdo-pri-src>/component-samples/demo/manufacturer
+    $ java -jar aio.jar
+    ```
 
 The server will listen for FDO PRI HTTP & HTTPS  messages on port 8039 and 8038 respectively.
 
 ### Running the FDO PRI HTTP Device
 
-#### Staring the FDO PRI HTTP Device
+10. Start the FDO PRI HTTP Device container and the standalone java application.
 
 ***NOTE***: By default the device is configured to run with the All-In-One (AIO) ports.  You must edit the service.yml in the demo device directory to run with the  manufacturer demo.
 
-```shell
-$ cd <fdo-pri-src>/component-samples/demo/device
-$ docker-compose up --build -d
-```
-
-To start the Client as a standalone java application.
-
-```
-$ cd <fdo-pri-src>/component-samples/demo/device
-$ java -jar device.jar
-```
+    ```
+    $ cd <fdo-pri-src>/component-samples/demo/device
+    $ docker-compose up --build -d
+    $ cd <fdo-pri-src>/component-samples/demo/device
+    $ java -jar device.jar
+    ```
+    
 Running the device for the first time will result in device keys being generated and the device keys are stored in the `app-data` directory.
 Once device keys are generated the device will run the DI protocol and store the DI credentials in a file called `credentials.bin`.
 
-Running device for a second time will result in the device performing TO1/TO2 protocols.
-
-Deleting the `credentials.bin` file will force the device to re-run DI protocol.
+**NOTE**: Running device for a second time will result in the device performing TO1/TO2 protocols. Deleting the `credentials.bin` file will force the device to re-run DI protocol.
 
 
 #### Configuring FDO PRI HTTP Device
 
-`<fdo-pri-src>/component-samples/demo/device/service.yml` contains the configuration of the device.
-
-
 #### Creating Ownership Vouchers using All-In-One (AIO) demo
 
-Before running the device for the first time start the demo aio server.
-
-Run the demo device
+Ensure the demo aio server has started. refer to this link <> and run the demo device.
 
 As auto injection of ownership voucher is enabled in AIO by default; the ownership voucher is extended and stored in `ONBOARDING_CONFIG` table and the device is ready for TO1/2.
 
@@ -473,5 +430,3 @@ Now run the device again to onboard the device
 $ cd <fdo-pri-src>/component-samples/demo/device
 $ java -jar device.jar
 ```
-
-
