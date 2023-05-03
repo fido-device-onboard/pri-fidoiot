@@ -39,7 +39,7 @@ public class EpidService {
   });
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
 
-  private static final String defaultEpidOnlineUrl = "http://verify.epid-sbx.trustedservices.intel.com/";
+  private static final String defaultEpidOnlineUrl = "http://verifier.fdorv.com/";
   private static URI epidOnlineUrl = null;
 
   private static final int EpidGroupLength = 4;
