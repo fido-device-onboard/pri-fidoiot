@@ -61,9 +61,9 @@ epid:
   # fail for non-signature issues (i.e. malformed requests)
   testMode: false
   # TBD: the url below is the used for production purposes
-  # url: http://verify.epid-sbx.trustedservices.intel.com
+  # url: http://verifier.fdorv.com
   # the url below is used for testing purposes only
-  url: http://verify.epid-sbx.trustedservices.intel.com
+  url: http://verifier.fdorv.com
 
 #cbor Web Token (cwt) used for to0 and to1 sessions
 cwt:

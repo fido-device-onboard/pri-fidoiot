@@ -13,7 +13,7 @@
 
   <artifactId>fdo</artifactId>
   <groupId>org.fidoalliance</groupId>
-  <version>1.1.5-SNAPSHOT</version>
+  <version>1.1.5</version>
   <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
@@ -24,7 +24,7 @@
   -->
   <properties>
     <!-- FDO Dependency Version -->
-    <fdo.version>1.1.5-SNAPSHOT</fdo.version>
+    <fdo.version>1.1.5</fdo.version>
 
 
     <!-- Dependency Version -->
@@ -52,8 +52,8 @@
     <!-- Database Client Version -->
     <h2db.version>2.1.214</h2db.version>
     <mariadb.version>3.0.5</mariadb.version>
-    <mysql.version>8.0.32</mysql.version>
-    <postgresql.version>42.5.0</postgresql.version>
+    <mysql.version>8.0.33</mysql.version>
+    <postgresql.version>42.5.2</postgresql.version>
 
     <!-- Maven Version -->
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
