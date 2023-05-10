@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
-import org.bouncycastle.util.encoders.Hex;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
@@ -26,7 +24,6 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntries;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntryPayload;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
-import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -53,7 +50,7 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
   }
 
   @Override
-  public Boolean apply(To0OwnerSign to0OwnerSign) throws IOException {
+  public Boolean apply(OwnershipVoucher voucher) throws IOException {
 
     boolean trusted = false;
     Session session = HibernateUtil.getSessionFactory().openSession();
@@ -67,9 +64,9 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
       TypedQuery<AllowDenyList> allQuery = session.createQuery(all);
 
       OwnershipVoucherHeader header = Mapper.INSTANCE.readValue(
-          to0OwnerSign.getTo0d().getVoucher().getHeader(), OwnershipVoucherHeader.class);
+          voucher.getHeader(), OwnershipVoucherHeader.class);
       String uuid = header.getGuid().toString();
-      List<String> hashes = getKeyHashes(to0OwnerSign.getTo0d().getVoucher());
+      List<String> hashes = getKeyHashes(voucher);
 
       //look for allowed
       for (AllowDenyList adList : allQuery.getResultList()) {
