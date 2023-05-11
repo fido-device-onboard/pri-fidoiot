@@ -276,7 +276,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 ***NOTE***: You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
 
-- `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
+- `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419/FIDO-Device-Onboard-PS-v1.1-20220419.html#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
@@ -452,7 +452,7 @@ and enable
 The Device certificate chain is checked during TO0 by the rendezvous server and by the owner during TO2.  This check includes verifying the certificate chain hash and if the leaf certificate has expired. 
 Owner certificates with X5Chain encoding are not analyzed by this implementation.
 
-The FDO spec states "When processing an Ownership Voucher with X5CHAIN encoding, the Rendezvous Server and Device SHOULD verify the certificate chain as much as possible, and MAY decide to accept or reject the Ownership Voucher based on a trust analysis of the X5CHAIN". [REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214/#:~:text=When%20processing%20an%20Ownership%20Voucher%20with%20X5CHAIN%20encoding%2C%20the%20Rendezvous%20Server%20and%20Device%20SHOULD%20verify%20the%20certificate%20chain%20as%20much%20as%20possible%2C%20and%20MAY%20decide%20to%20accept%20or%20reject%20the%20Ownership%20Voucher%20based%20on%20a%20trust%20analysis%20of%20the%20X5CHAIN)
+The FDO spec states "When processing an Ownership Voucher with X5CHAIN encoding, the Rendezvous Server and Device SHOULD verify the certificate chain as much as possible, and MAY decide to accept or reject the Ownership Voucher based on a trust analysis of the X5CHAIN". [REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419/FIDO-Device-Onboard-PS-v1.1-20220419.html#the-devmod-module:~:text=When%20processing%20an%20Ownership%20Voucher%20with%20X5CHAIN%20encoding%2C%20the%20Rendezvous%20Server%20and%20Device%20SHOULD%20verify%20the%20certificate%20chain%20as%20much%20as%20possible%2C%20and%20MAY%20decide%20to%20accept%20or%20reject%20the%20Ownership%20Voucher%20based%20on%20a%20trust%20analysis%20of%20the%20X5CHAIN.)
 
 This implementation will trust Ownership vouchers with X5Chain encoding without verifying the ownership chain. 
 
