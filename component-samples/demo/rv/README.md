@@ -71,7 +71,7 @@ end of initialization of all services, you will see following statement on the c
 
 Follow the below steps to start FDO Rendezvous demo.
 
-***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
+***NOTE***: Generate random credentails before starting the service [Refer](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.

@@ -69,7 +69,7 @@ end of initialization of all services, you will see following statement on the c
 
 Follow the below steps to start FDO Manufacturer demo.
 
-***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
+***NOTE***: Generate random credentails before starting the service [Refer](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/manufacturer/` and execute following command.
@@ -90,7 +90,7 @@ docker-compose up --build
 
 In case you need super user access, prefix 'sudo -E' to above command.
 
-***NOTE :*** To configure OnDie [REFER](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo#configuring-ondie-optional).
+***NOTE :*** To configure OnDie [REFER](https://github.com/fido-device-onboard/pri-fidoiot/tree/master/component-samples/demo#configuring-ondie-optional).
 
 ***NOTE***: The database file located at \<fdo-pri-src\>/component-samples/demo/manufacturer/app-data/emdb.mv.db is not deleted during 'mvn clean'. As a result, the database schema and tables are persisted across docker invocations. Please delete the file manually, if you encounter any error due to persisted stale data.
 
