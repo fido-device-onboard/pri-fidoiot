@@ -9,19 +9,18 @@ import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -45,10 +44,30 @@ public class CertChainBuilder {
   private X500Name subject;
   private int validityDays;
   private GeneralNames subjectAlternateNames;
+  private BasicConstraints caConstraint;
+
+
+  /**
+   * Sets the CA Constraint.
+   *
+   * @param value The CA constraint flag.
+   * @return The builder.
+   */
+  public CertChainBuilder setCA(boolean value) {
+    if (value) {
+      caConstraint = new BasicConstraints(true);
+
+    } else {
+      caConstraint = null;
+    }
+
+    return this;
+  }
 
 
   /**
    * Sets the Private Key.
+   *
    * @param privateKey A Private Key.
    * @return The builder.
    */
@@ -59,6 +78,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the issuer chain.
+   *
    * @param issuerChain The issuer chain.
    * @return The builder.
    */
@@ -69,6 +89,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the public key.
+   *
    * @param publicKeyInfo The subject public key info.
    * @return The builder.
    */
@@ -79,6 +100,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the public key.
+   *
    * @param publicKey A Java public key.
    * @return The builder.
    */
@@ -90,6 +112,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the signature algorithm.
+   *
    * @param signatureAlgorithm The algorithm as a string.
    * @return The builder.
    */
@@ -100,6 +123,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the signature algorithm.
+   *
    * @param algorithm The ANS1 signature algorithm.
    * @return The builder.
    */
@@ -110,6 +134,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the crypto provider.
+   *
    * @param provider A java cryto Provider.
    * @return The builder.
    */
@@ -120,6 +145,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the Subject Name.
+   *
    * @param subject The subject as a String.
    * @return The builder.
    */
@@ -130,6 +156,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the subject Name.
+   *
    * @param subject The X500Name subject.
    * @return The builder.
    */
@@ -140,6 +167,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the validity days.
+   *
    * @param days the validity days.
    * @return The builder.
    */
@@ -150,6 +178,7 @@ public class CertChainBuilder {
 
   /**
    * Sets the Subject Alternate Names.
+   *
    * @param names Subject Alternate Names.
    * @return The builder.
    */
@@ -160,6 +189,7 @@ public class CertChainBuilder {
 
   /**
    * Builds a certificate chain.
+   *
    * @return The built certificate chain.
    * @throws IOException An Error occurred.
    */
@@ -184,6 +214,10 @@ public class CertChainBuilder {
         Date.from(ZonedDateTime.now().plusDays(validityDays).toInstant()),
         subject,
         publicKeyInfo);
+
+    if (caConstraint != null) {
+      certBuilder.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, caConstraint);
+    }
 
     if (subjectAlternateNames != null) {
       certBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAlternateNames);

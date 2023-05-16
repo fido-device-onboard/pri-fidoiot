@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.fidoalliance.fdo.protocol.Config.KeyStoreConfig;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.KeyStoreInputStreamFunction;
@@ -77,12 +77,15 @@ public class KeyResolver {
       final String sigAlgorithm =
           new AlgorithmFinder().getSignatureAlgorithm(keyType, sizeType);
 
+      // Basic Constraints true for CA, false for EndEntity
+      BasicConstraints basicConstraints = new BasicConstraints(true);
+
       Certificate[] chain = new CertChainBuilder()
           .setPrivateKey(keyPair.getPrivate())
           .setPublicKey(keyPair.getPublic())
           .setProvider(cs.getProvider())
           .setSignatureAlgorithm(sigAlgorithm)
-          .setSubject("CN=FdoEntity")
+          .setSubject("CN=FdoEntity CA")
           .setValidityDays(Config.getWorker(ValidityDaysSupplier.class).get())
           .build();
 
@@ -100,6 +103,7 @@ public class KeyResolver {
 
   /**
    * Gets the underlying keystore.
+   *
    * @return The underlying keystore.
    */
   public KeyStore getKeyStore() {
@@ -122,12 +126,12 @@ public class KeyResolver {
         String pemString = Files.readString(Path.of(config.getPath()));
         List<Certificate> certs = PemLoader.loadCerts(pemString);
         final String keyPass = config.getPassword();
-        PrivateKey privateKey = PemLoader.loadPrivateKey(pemString,keyPass);
+        PrivateKey privateKey = PemLoader.loadPrivateKey(pemString, keyPass);
 
         this.keyStore = KeyStore.getInstance("JKS");
-        this.keyStore.load(null,getPasswordArray());
+        this.keyStore.load(null, getPasswordArray());
 
-        this.keyStore.setKeyEntry(config.getAlias(),privateKey,getPasswordArray(),
+        this.keyStore.setKeyEntry(config.getAlias(), privateKey, getPasswordArray(),
             certs.stream().toArray(Certificate[]::new));
 
 
