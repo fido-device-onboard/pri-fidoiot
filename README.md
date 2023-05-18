@@ -15,7 +15,7 @@ deploying the example implementation for these components.
 * **Install required packages: Maven 3.6.3, Java 11, Haveged, Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+ , Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
 Run following command to install necessary packages:
-` sudo apt-get install -y maven docker docker-compose openjdk-11-jre-headless`
+` sudo apt-get install -y maven docker docker-compose openjdk-11-jre-headless haveged`
 
 ***NOTE***: FDO service require strong random number generation in order to perform the required cryptographic functions.  The FDO servers will hang on startup waiting for sufficient entropy unless the system continuously supplied random data. Installing Haveged will ensure the system fdo services are running on have sufficient entropy. Ensure the proxy environment are set up accordingly to avoid issues during the build.
 
