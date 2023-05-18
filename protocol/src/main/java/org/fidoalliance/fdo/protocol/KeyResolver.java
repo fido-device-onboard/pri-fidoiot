@@ -77,9 +77,6 @@ public class KeyResolver {
       final String sigAlgorithm =
           new AlgorithmFinder().getSignatureAlgorithm(keyType, sizeType);
 
-      // Basic Constraints true for CA, false for EndEntity
-      BasicConstraints basicConstraints = new BasicConstraints(true);
-
       Certificate[] chain = new CertChainBuilder()
           .setPrivateKey(keyPair.getPrivate())
           .setPublicKey(keyPair.getPublic())
@@ -87,6 +84,7 @@ public class KeyResolver {
           .setSignatureAlgorithm(sigAlgorithm)
           .setSubject("CN=FdoEntity CA")
           .setValidityDays(Config.getWorker(ValidityDaysSupplier.class).get())
+          .setCA(true)
           .build();
 
       keyStore.setKeyEntry(KeyResolver.getAlias(keyType, sizeType),
