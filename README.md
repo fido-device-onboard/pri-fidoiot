@@ -2,7 +2,7 @@
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
 This is a reference implementation of the
-[FDO v1.1 Review Draft](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-RD-v1.1-20211214)
+[FDO v1.1 Review Draft](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419)
 published by the FIDO Alliance. It provides production-ready implementation for the protocol defined
 by the specification. It also provides example implementation for different components to
 demonstrate end-to-end execution of the protocol. Appropriate security measures should be taken while
@@ -179,7 +179,7 @@ Uncomment `subjectAltName` and allowed list of IP and DNS in `[alt_names]` secti
 
 ### Starting Standalone Database for PRI servers
 
-1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](#Generating-random-passwords-using-keys_gen.sh)
+1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 2. Start the Database service
 ```shell
@@ -380,7 +380,7 @@ For authorization, users can use DIGEST AUTH with "apiUser" and api_password as 
 
 Result body will be the owners certificate in PEM format
 
-[REFER](https://github.com/secure-device-onboard/pri-fidoiot/tree/master/component-samples/demo/aio#list-of-key-store-alias-values) for the other supported attestation type.
+[REFER](https://github.com/fido-device-onboard/pri-fidoiot/tree/master/component-samples/demo/aio#list-of-key-store-alias-values) for the other supported attestation type.
 
 Next, collect the serial number of the last manufactured voucher
 
