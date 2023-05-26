@@ -64,15 +64,14 @@ public class OwnerVoucher extends RestApi {
 
   private void listSerialNo() {
 
-    final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
 
-      CriteriaBuilder cb = session.getCriteriaBuilder();
+      CriteriaBuilder cb = getSession().getCriteriaBuilder();
       CriteriaQuery<VoucherAlias> cq = cb.createQuery(VoucherAlias.class);
       Root<VoucherAlias> rootEntry = cq.from(VoucherAlias.class);
       CriteriaQuery<VoucherAlias> all = cq.select(rootEntry);
 
-      TypedQuery<VoucherAlias> allQuery = session.createQuery(all);
+      TypedQuery<VoucherAlias> allQuery = getSession().createQuery(all);
       List<VoucherAlias> list = allQuery.getResultList();
       for (VoucherAlias voucherAlias : list) {
         getResponse().getWriter().println(voucherAlias.getAlias());
@@ -80,8 +79,6 @@ public class OwnerVoucher extends RestApi {
 
     } catch (IOException e) {
       logger.error("error retrieving vouchers " + e.getMessage());
-    } finally {
-      session.close();
     }
   }
 
