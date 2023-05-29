@@ -28,6 +28,7 @@ public class VoucherAlias {
   public String getAlias() {
     return alias;
   }
+
   public String getGuid() {
     return guid;
   }
@@ -36,6 +37,7 @@ public class VoucherAlias {
   public void setAlias(String alias) {
     this.alias = alias;
   }
+
   public void setGuid(String guid) {
     this.guid = guid;
   }
