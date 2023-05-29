@@ -149,7 +149,7 @@ public class OwnerVoucher extends RestApi {
 
     //if last segment is serialno vs guid
     if (!isGuid(path)) {
-      VoucherAlias voucherAlias  = getSession().get(VoucherAlias .class, path);
+      VoucherAlias voucherAlias  = getSession().get(VoucherAlias.class, path);
       if (voucherAlias != null) {
         path = voucherAlias.getGuid();
       }
@@ -176,7 +176,7 @@ public class OwnerVoucher extends RestApi {
     String path = getLastSegment();
 
     if (!isGuid(path)) {
-      VoucherAlias voucherAlias  = getSession().get(VoucherAlias .class, path);
+      VoucherAlias voucherAlias  = getSession().get(VoucherAlias.class, path);
       if (voucherAlias != null) {
         path = voucherAlias.getGuid();
         getSession().remove(voucherAlias);
