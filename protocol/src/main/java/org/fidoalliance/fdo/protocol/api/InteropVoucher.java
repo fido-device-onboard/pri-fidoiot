@@ -7,18 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.UUID;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.sec.ECPrivateKey;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -28,6 +23,7 @@ import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.KeyResolver;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
+import org.fidoalliance.fdo.protocol.PemFormatter;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.dispatch.ExtraInfoSupplier;
@@ -78,21 +74,17 @@ public class InteropVoucher extends RestApi {
 
             guid = header.getGuid().toUuid();
             logger.info("voucher guid: " + guid.toString());
-          } else if (pemObj.getType().equals("EC PRIVATE KEY")) {
-            ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
-            //PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
-            // signKey = new JcaPEMKeyConverter().getPrivateKey(info);
-            ECPrivateKey ecpKey = ECPrivateKey.getInstance(seq);
-            AlgorithmIdentifier algId = new AlgorithmIdentifier(
-                X9ObjectIdentifiers.id_ecPublicKey, ecpKey.getParameters());
-            byte[] serverPkcs8 = new PrivateKeyInfo(algId, ecpKey).getEncoded();
-            KeyFactory fact = KeyFactory.getInstance("EC", "BC");
-            signKey = fact.generatePrivate(new PKCS8EncodedKeySpec(serverPkcs8));
 
-          } else if (pemObj.getType().equals("RSA PRIVATE KEY")) {
+            String devicePem = PemFormatter.format(voucher.getCertChain().getChain());
+            logger.info(devicePem);
+
+          } else if (pemObj.getType().equals("EC PRIVATE KEY")
+              || pemObj.getType().equals("RSA PRIVATE KEY")) {
             ASN1Sequence seq = ASN1Sequence.getInstance(pemObj.getContent());
+
             PrivateKeyInfo info = PrivateKeyInfo.getInstance(seq);
             signKey = new JcaPEMKeyConverter().getPrivateKey(info);
+
           }
         }
       }
