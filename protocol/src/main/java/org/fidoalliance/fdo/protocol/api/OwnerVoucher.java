@@ -105,10 +105,16 @@ public class OwnerVoucher extends RestApi {
     String path = getLastSegment();
     if (!path.equals("vouchers")) {
 
-      VoucherAlias voucherAlias = new VoucherAlias();
-      voucherAlias.setAlias(path);
-      voucherAlias.setGuid(guid);
-      getSession().persist(voucherAlias);
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
+      if (voucherAlias == null) {
+        voucherAlias = new VoucherAlias();
+        voucherAlias.setAlias(path);
+        voucherAlias.setGuid(guid);
+        getSession().persist(voucherAlias);
+      } else {
+        voucherAlias.setGuid(guid);
+        getSession().merge(voucherAlias);
+      }
     }
 
     OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class,
@@ -146,10 +152,9 @@ public class OwnerVoucher extends RestApi {
       return;
     }
 
-
     //if last segment is serialno vs guid
     if (!isGuid(path)) {
-      VoucherAlias voucherAlias  = getSession().get(VoucherAlias.class, path);
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
       if (voucherAlias != null) {
         path = voucherAlias.getGuid();
       }
@@ -176,7 +181,7 @@ public class OwnerVoucher extends RestApi {
     String path = getLastSegment();
 
     if (!isGuid(path)) {
-      VoucherAlias voucherAlias  = getSession().get(VoucherAlias.class, path);
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
       if (voucherAlias != null) {
         path = voucherAlias.getGuid();
         getSession().remove(voucherAlias);
@@ -193,8 +198,6 @@ public class OwnerVoucher extends RestApi {
       logger.warn("GUID not found.");
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
-
-
 
   }
 }
