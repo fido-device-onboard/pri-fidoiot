@@ -61,7 +61,6 @@ public class DeviceApp extends HttpClient {
     try {
       new DeviceApp().run();
     } catch (Throwable e) {
-      logger.info("Exiting FDO device application");
       throw new RuntimeException(e);
     }
   }
@@ -78,6 +77,7 @@ public class DeviceApp extends HttpClient {
       DispatchMessage prevMessage = new DispatchMessage();
       prevMessage.setMsgType(MsgType.DI_APP_START);
       DispatchMessage.fromThrowable(throwable, prevMessage);
+      logger.info("Exiting FDO device application");
 
       try {
         Config.getWorker(ExceptionConsumer.class).accept(throwable);
