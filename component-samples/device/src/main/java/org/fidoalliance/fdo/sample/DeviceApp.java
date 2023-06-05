@@ -84,7 +84,7 @@ public class DeviceApp extends HttpClient {
       } catch (IOException e) {
         logger.error("failed log exception");
         // already in exception handler
-      } throw new RuntimeException();
+      }
     }
   }
 
