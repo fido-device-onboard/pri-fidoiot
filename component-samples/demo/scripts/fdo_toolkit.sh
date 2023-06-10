@@ -16,7 +16,7 @@
 #  chmod 777 fdo_toolkit.sh & source fdo_toolkit.sh
 #
 #
-#  sudo aio_e2e_setup
+#  aio_e2e_setup
 #
 #  
 #  Pending Features:
@@ -47,8 +47,12 @@ chk() {
     exit $exitCode
 }
 
+clean_build() {
+  sudo rm -rf  ~/pri_code_base/
+}
 
 download_and_unpack_binaries() {
+
 
     mkdir -p ~/pri_code_base
     cd ~/pri_code_base
@@ -65,6 +69,12 @@ docker_cleaner() {
     echo "Stopping all containers"  
     docker stop $(docker ps -a -q)
     echo "Stopped all containers"
+}
+
+fdo_docker_cleaner() {
+    echo "Stopping all FDO containers"
+    docker stop pri-fdo-aio pri-fdo-mfg pri-fdo-rv pri-fdo-owner db_fdo-db_1
+    echo "Stopped all FDO containers"
 }
 
 docker_system_pruner() {
@@ -102,7 +112,7 @@ else
 fi
 
 
-if ! command haveged --help >/dev/null 2>&1; then
+if ! dpkg-query -s haveged > /dev/null 2>&1; then
     echo "Haveged is required, installing it"
     sudo apt-get install -y haveged
     chk $? 'installing haveged'
@@ -122,7 +132,7 @@ fi
 
 # If docker-compose isn't installed, or isn't at least 1.21.0 (when docker-compose.yml version 2.4 was introduced), then install/upgrade it
 # For the dependency on 1.21.0 or greater, see: https://docs.docker.com/compose/release-notes/
-minVersion=1.29.0
+minVersion=1.29.2
 if ! isDockerComposeAtLeast $minVersion; then
     if [[ -f '/usr/bin/docker-compose' ]]; then
         echo "Error: Need at least docker-compose $minVersion. A down-level version is currently installed, preventing us from installing the latest version. Uninstall docker-compose and rerun this script."
@@ -155,7 +165,7 @@ echo "DNS.3 = host.docker.internal" >> web-server.conf
 echo "DNS.4 = host.docker.internal" >> web-server.conf
 echo "IP.1 = $ipaddress" >> web-server.conf
 echo "IP.2 = 127.0.0.1" >> web-server.conf
-echo "IP.3 = 192.0.0.1" >> web-server.conf
+echo "IP.3 = 172.17.0.1" >> web-server.conf
 
 }
 
