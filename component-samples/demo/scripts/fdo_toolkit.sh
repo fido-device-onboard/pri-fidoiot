@@ -36,7 +36,7 @@
 #################    Documentation   #############################
 
 
-FDO_RELEASE="1.1.4"
+FDO_RELEASE="1.1.5.1"
 
 
 chk() {
@@ -185,7 +185,8 @@ cp -r secrets ../db/
 
 start_db() {
 cd $1/db
-if [ ! "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then 
+if [ ! "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then
+  sed -i 's+innodb_change_buffer_max_size = 25+#innodb_change_buffer_max_size = 25+g' custom/config-file.cnf
   docker-compose up --build -d
 fi
 }
