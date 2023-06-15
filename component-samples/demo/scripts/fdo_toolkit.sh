@@ -57,7 +57,7 @@ download_and_unpack_binaries() {
     mkdir -p ~/pri_code_base
     cd ~/pri_code_base
     echo "Downloading Protocol Reference Implementation $FDO_RELEASE"
-    curl --progress-bar -LO https://github.com/secure-device-onboard/release-fidoiot/releases/download/v$FDO_RELEASE/pri-fidoiot-v$FDO_RELEASE.tar.gz
+    curl --progress-bar -LO https://github.com/fido-device-onboard/release-fidoiot/releases/download/v$FDO_RELEASE/pri-fidoiot-v$FDO_RELEASE.tar.gz
     chk $? 'downloading pri'
     echo "Unpacking Protocol Reference Implementation $FDO_RELEASE"
     tar -zxf pri-fidoiot-v$FDO_RELEASE.tar.gz
