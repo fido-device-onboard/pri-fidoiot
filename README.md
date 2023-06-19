@@ -138,6 +138,12 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
     Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
 
+   **NOTE:** Execute the following command to add hosted rendezvous certificates to the java client trust stores.
+
+    ```
+    $ echo | openssl s_client -proxy ${https_proxy_host}:${https_proxy_port} -showcerts -connect fdorv.com:443 2>/dev/null | sed -n '/-----BEGIN CERTIFICATE-----/, /-----END CERTIFICATE-----/p' >> ./secrets/ca-cert.pem
+    ```
+
 4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components.
 
     **NOTE:** Don't replace `service.env` present in the database component with generated `service.env` in `scripts` folder.

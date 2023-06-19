@@ -71,7 +71,7 @@ echo "requireSSL=true" >> service.env
 echo -n `openssl rand --base64 12 | tr -dc 0-9A-Za-z` > db_password.txt
 
 mkdir -p secrets
-cp api-user.pem ./secrets/api-user.pem
+touch ./secrets/api-user.pem
 cp ca-cert.pem ./secrets/ca-cert.pem
 cp server-cert.pem ./secrets/server-cert.pem
 cp server-key.pem ./secrets/server-key.pem
