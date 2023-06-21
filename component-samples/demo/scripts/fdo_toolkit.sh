@@ -175,7 +175,7 @@ bash demo_ca.sh
 bash web_csr_req.sh
 bash user_csr_req.sh
 bash keys_gen.sh
-chmod -R 777 secrets/ service.env
+chmod +r secrets/server-key.pem
 cp -r secrets service.env ../manufacturer/
 cp -r secrets service.env ../rv/
 cp -r secrets service.env ../owner/
