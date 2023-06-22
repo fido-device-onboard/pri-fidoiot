@@ -140,6 +140,11 @@ public class StandardDeviceModule implements ServiceInfoModule {
   }
 
   @Override
+  public void keepAlive() throws IOException {
+
+  }
+
+  @Override
   public void send(ServiceInfoModuleState state, ServiceInfoSendFunction sendFunction)
       throws IOException {
 

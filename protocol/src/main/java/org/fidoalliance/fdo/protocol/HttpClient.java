@@ -186,8 +186,8 @@ public abstract class HttpClient implements Runnable {
         if (getInstructions().size() > 0
             && index < getInstructions().size()
             && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
-                || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
-                || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
+            || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+            || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
 
           if (httpInstruction.isRendezvousBypass()) {
             clearByPass();
@@ -266,7 +266,8 @@ public abstract class HttpClient implements Runnable {
 
       }
     } catch (Throwable throwable) {
-      if (getResponse() != null && getResponse().getMsgType() != MsgType.ERROR) {
+      if (getResponse() != null
+          && getResponse().getMsgType() != MsgType.ERROR) {
         DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, getRequest());
         setRequest(errorMsg);
 

@@ -1,15 +1,12 @@
-// Copyright 2022 Intel Corporation
-// SPDX-License-Identifier: Apache 2.0
-
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Objects;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -20,33 +17,35 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
+import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
-import org.fidoalliance.fdo.protocol.message.EotResult;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
-import org.fidoalliance.fdo.protocol.message.StatusCb;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
-import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-/**
- * Implements FdoSysModule spec.
- */
-public class FdoSysOwnerModule implements ServiceInfoModule {
+public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
+
+  public static final String MODULE_NAME = "fdo.download";
+  public static final String ACTIVE = MODULE_NAME + ":active";
+  public static final String NAME = MODULE_NAME + ":name";
+  public static final String LENGTH = MODULE_NAME + ":length";
+  public static final String SHA_384 = MODULE_NAME + ":sha-384";
+  public static final String DATA = MODULE_NAME + ":data";
+  public static final String DONE = MODULE_NAME + ":done";
 
 
-  private final LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+  private final LoggerService logger = new LoggerService(FdoSimDownloadOwnerModule.class);
 
   @Override
   public String getName() {
-    return FdoSys.NAME;
+    return MODULE_NAME;
   }
-
 
   @Override
   public void prepare(ServiceInfoModuleState state) throws IOException {
@@ -62,11 +61,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         DevModList list =
             Mapper.INSTANCE.readValue(kvPair.getValue(), DevModList.class);
         for (String name : list.getModulesNames()) {
-          if (name.equals(FdoSys.NAME)) {
+          if (name.equals(MODULE_NAME)) {
             state.setActive(true);
             ServiceInfoQueue queue = extra.getQueue();
             ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-            activePair.setKeyName(FdoSys.ACTIVE);
+            activePair.setKeyName(ACTIVE);
             activePair.setValue(Mapper.INSTANCE.writeValue(true));
             queue.add(activePair);
 
@@ -81,40 +80,28 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         extra.getFilter().put(kvPair.getKey(),
             Mapper.INSTANCE.readValue(kvPair.getValue(), String.class));
         break;
-      case FdoSys.STATUS_CB:
-        if (state.isActive()) {
-          StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
 
-          //send notification of status
-          ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(FdoSys.STATUS_CB);
-          kv.setValue(Mapper.INSTANCE.writeValue(status));
-          extra.getQueue().add(kv);
-          onStatusCb(state, extra, status);
-          if (status.isCompleted()) {
-            // check for error
-            if (status.getRetCode() != 0) {
-              throw new InternalServerErrorException("Exec_cb status returned failure.");
-            }
-            extra.setWaiting(false);
-            extra.getQueue().addAll(extra.getWaitQueue());
-            extra.setWaitQueue(new ServiceInfoQueue());
-          }
-        }
-        break;
-      case FdoSys.DATA:
-        if (state.isActive()) {
-          byte[] data = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
-          onFetch(state, extra, data);
-        }
-        break;
-      case FdoSys.EOT:
+      case DONE:
         if (state.isActive()) {
           extra.setWaiting(false);
           extra.setQueue(extra.getWaitQueue());
           extra.setWaitQueue(new ServiceInfoQueue());
-          EotResult result = Mapper.INSTANCE.readValue(kvPair.getValue(), EotResult.class);
-          onEot(state, extra, result);
+          int result = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
+          if (result == -1) {
+            throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
+                + " " + getName() + " Hash did not match");
+          } else if (result >= 0) {
+            if (extra.getLength() != result) {
+              throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
+                  + " " + getName() + " all bytes not received");
+            }
+            logger.info(FdoSimDownloadOwnerModule.DONE
+                + " " + extra.getName() + " file received");
+          } else {
+            throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
+                + " " + getName() + " invalid value ");
+          }
+
         }
         break;
       default:
@@ -125,6 +112,27 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
   @Override
   public void keepAlive() throws IOException {
+
+  }
+
+  protected void getFile(ServiceInfoModuleState state,
+      FdoSysModuleExtra extra,
+      FdoSysInstruction instruction)
+      throws IOException {
+
+    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+    kv.setKeyName(NAME);
+    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
+    extra.getQueue().add(kv);
+    extra.setName(instruction.getFileDesc());
+
+    String resource = instruction.getResource();
+    if (resource.startsWith("https://") || resource.startsWith("http://")) {
+      getUrlFile(state, extra, instruction);
+    } else {
+      getDbFile(state, extra, instruction);
+    }
+
 
   }
 
@@ -142,7 +150,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     while (extra.getQueue().size() > 0) {
       boolean sent = sendFunction.apply(extra.getQueue().peek());
       if (sent) {
-        checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
+        checkWaiting(extra, extra.getQueue().poll());
       } else {
         break;
       }
@@ -156,24 +164,22 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     state.setExtra(AnyType.fromObject(extra));
   }
 
-  protected void checkWaiting(FdoSysModuleExtra extra, ServiceInfoKeyValuePair kv) {
+
+  protected void checkWaiting(FdoSysModuleExtra extra, ServiceInfoKeyValuePair kv)
+      throws IOException {
     switch (kv.getKey()) {
-      case FdoSys.EXEC_CB:
-      case FdoSys.FETCH:
-        extra.setWaiting(true);
-        extra.setWaitQueue(extra.getQueue());
-        extra.setQueue(new ServiceInfoQueue());
+      case LENGTH:
+        extra.setReceived(0);
+        break;
+      case DATA:
+        byte[] data = Mapper.INSTANCE.readValue(kv.getValue(), byte[].class);
+        if (data.length == 0) {
+          extra.setWaiting(true);
+        }
         break;
       default:
         break;
     }
-  }
-
-  protected boolean checkProvider(FdoSysInstruction instruction) {
-    if (instruction.getModule() != null) {
-      return instruction.getModule().equals(getName());
-    }
-    return true;
   }
 
   protected boolean infoReady(FdoSysModuleExtra extra) {
@@ -187,90 +193,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     return !devMap.entrySet().containsAll(filterMap.entrySet());
   }
 
-  protected void onStatusCb(ServiceInfoModuleState state, FdoSysModuleExtra extra,
-      StatusCb status) throws IOException {
-    logger.info("status_cb completed " + status.isCompleted() + " retcode "
-        + status.getRetCode() + " timeout " + status.getTimeout());
-  }
-
-  protected void onFetch(ServiceInfoModuleState state, FdoSysModuleExtra extra,
-      byte[] data) throws IOException {
-
-    logger.warn(new String(data, StandardCharsets.US_ASCII));
-  }
-
-  protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, EotResult result)
-      throws IOException {
-    logger.info("EOT:resultCode " + result.getResult());
-  }
-
-  protected void load(ServiceInfoModuleState state, FdoSysModuleExtra extra)
-      throws IOException {
-
-    if (!state.isActive()) {
-      return;
+  protected boolean checkProvider(FdoSysInstruction instruction) {
+    if (instruction.getModule() != null) {
+      return instruction.getModule().equals(getName());
     }
-
-    ServiceInfoDocument document = state.geDocument();
-    FdoSysInstruction[] instructions =
-        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
-
-    boolean skip = false;
-    for (int i = document.getIndex(); i < instructions.length; i++) {
-
-      if (!checkProvider(instructions[i])) {
-        break;
-      }
-
-      if (instructions[i].getFilter() != null) {
-        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
-      }
-      if (skip) {
-        document.setIndex(i);
-        continue;
-      }
-
-
-      document.setIndex(i);
-      if (instructions[i].getFileDesc() != null) {
-        getFile(state, extra, instructions[i]);
-      } else if (instructions[i].getExecArgs() != null) {
-        getExec(state, extra, instructions[i]);
-      } else if (instructions[i].getExecCbArgs() != null) {
-        getExecCb(state, extra, instructions[i]);
-      } else if (instructions[i].getFetch() != null) {
-        getFetch(state, extra, instructions[i]);
-      } else {
-        break;
-      }
-    }
-  }
-
-  protected void getExec(ServiceInfoModuleState state,
-      FdoSysModuleExtra extra,
-      FdoSysInstruction instruction) throws IOException {
-    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-    kv.setKeyName(FdoSys.EXEC);
-    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
-    extra.getQueue().add(kv);
-  }
-
-  protected void getExecCb(ServiceInfoModuleState state,
-      FdoSysModuleExtra extra,
-      FdoSysInstruction instruction) throws IOException {
-    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-    kv.setKeyName(FdoSys.EXEC_CB);
-    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecCbArgs()));
-    extra.getQueue().add(kv);
-  }
-
-  protected void getFetch(ServiceInfoModuleState state,
-      FdoSysModuleExtra extra,
-      FdoSysInstruction instruction) throws IOException {
-    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-    kv.setKeyName(FdoSys.FETCH);
-    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFetch()));
-    extra.getQueue().add(kv);
+    return true;
   }
 
   protected void getDbFile(ServiceInfoModuleState state,
@@ -279,15 +206,20 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     String resource = instruction.getResource();
     final Session session = HibernateUtil.getSessionFactory().openSession();
     try {
-      Transaction trans = session.beginTransaction();
+      final Transaction trans = session.beginTransaction();
       resource = resource.replace("$(guid)", state.getGuid().toString());
+      ServiceInfoKeyValuePair activeKeyPair = extra.getQueue().poll();
+      ServiceInfoKeyValuePair nameKeyPair = extra.getQueue().poll();
+      extra.getQueue().clear();
 
       // Query database table SYSTEM_RESOURCE for filename Key
-      SystemResource sviResource = session.get(SystemResource.class, resource);
+      final SystemResource sviResource = session.get(SystemResource.class, resource);
 
       if (sviResource != null) {
         Blob blobData = sviResource.getData();
         try (InputStream input = blobData.getBinaryStream()) {
+          MessageDigest msgDigest = MessageDigest.getInstance("SHA-384");
+          int fileLength = 0;
           for (; ; ) {
             byte[] data = new byte[state.getMtu() - 26];
             int br = input.read(data);
@@ -295,22 +227,48 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
               break;
             }
             ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-            kv.setKeyName(FdoSys.WRITE);
+            kv.setKeyName(DATA);
 
             if (br < data.length) {
               byte[] temp = data;
               data = new byte[br];
               System.arraycopy(temp, 0, data, 0, br);
             }
-            kv.setValue(Mapper.INSTANCE.writeValue(data));
-            extra.getQueue().add(kv);
+
+            if (data.length > 0) {
+              fileLength += data.length;
+              msgDigest.update(data);
+              kv.setValue(Mapper.INSTANCE.writeValue(data));
+              extra.getQueue().add(kv);
+            }
           }
-        } catch (SQLException throwables) {
-          logger.error("SQL Exception " + throwables.getMessage());
+
+          ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(DATA);
+          kv.setValue(Mapper.INSTANCE.writeValue(new byte[0])); //send empty
+          extra.getQueue().add(kv);
+
+
+
+          kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(SHA_384);
+          kv.setValue(Mapper.INSTANCE.writeValue(msgDigest.digest()));
+          extra.getQueue().addFirst(kv);
+
+          kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(LENGTH);
+          kv.setValue(Mapper.INSTANCE.writeValue(fileLength));
+          extra.getQueue().addFirst(kv);
+          extra.setLength(fileLength);
+
+          extra.getQueue().addFirst(nameKeyPair);
+          extra.getQueue().addFirst(activeKeyPair);
+
+
+        } catch (SQLException | NoSuchAlgorithmException throwables) {
           throw new InternalServerErrorException(throwables);
         }
       } else {
-        logger.error("SVI resource missing");
         throw new InternalServerErrorException("svi resource missing " + resource);
       }
       trans.commit();
@@ -350,7 +308,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
                 break;
               }
               ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-              kv.setKeyName(FdoSys.WRITE);
+              kv.setKeyName(DATA);
 
               if (br < data.length) {
                 byte[] temp = data;
@@ -363,9 +321,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           }
         }
       }
-    } catch (RuntimeException e) {
-      logger.error("Runtime Exception" + e.getMessage());
-      throw new InternalServerErrorException(e);
     } catch (Exception e) {
       logger.error("failed to get http content" + e.getMessage());
       throw new InternalServerErrorException(e);
@@ -374,21 +329,40 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
   }
 
-  protected void getFile(ServiceInfoModuleState state,
-      FdoSysModuleExtra extra,
-      FdoSysInstruction instruction)
+  protected void load(ServiceInfoModuleState state, FdoSysModuleExtra extra)
       throws IOException {
 
-    ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-    kv.setKeyName(FdoSys.FILEDESC);
-    kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
-    extra.getQueue().add(kv);
-
-    String resource = instruction.getResource();
-    if (resource.startsWith("https://") || resource.startsWith("http://")) {
-      getUrlFile(state, extra, instruction);
-    } else {
-      getDbFile(state, extra, instruction);
+    if (!state.isActive()) {
+      return;
     }
+
+    ServiceInfoDocument document = state.geDocument();
+    FdoSysInstruction[] instructions =
+        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
+
+    boolean skip = false;
+    for (int i = document.getIndex(); i < instructions.length; i++) {
+
+      if (!checkProvider(instructions[i])) {
+        break;
+      }
+
+      if (instructions[i].getFilter() != null) {
+        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+      }
+      if (skip) {
+        document.setIndex(i);
+        continue;
+      }
+
+
+      document.setIndex(i);
+      if (instructions[i].getFileDesc() != null) {
+        getFile(state, extra, instructions[i]);
+      } else {
+        break;
+      }
+    }
+
   }
 }

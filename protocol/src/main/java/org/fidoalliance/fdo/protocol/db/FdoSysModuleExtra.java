@@ -10,8 +10,10 @@ import java.util.Map;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
 public class FdoSysModuleExtra {
+
   @JsonProperty("filter")
-  private final Map<String,String> filter = new HashMap<>();
+  private final Map<String, String> filter = new HashMap<>();
+
 
   @JsonProperty("queue")
   private ServiceInfoQueue queue = new ServiceInfoQueue();
@@ -19,17 +21,34 @@ public class FdoSysModuleExtra {
   @JsonProperty("waitQueue")
   private ServiceInfoQueue waitQueue = new ServiceInfoQueue();
 
+
   @JsonProperty("loaded")
   private boolean loaded;
 
   @JsonProperty("waiting")
   private boolean waiting;
 
+  @JsonProperty("length")
+  private int length;
+
+  @JsonProperty("name")
+  private String name;
+
+  @JsonProperty("checksum")
+  private byte[] checksum;
+
+  @JsonProperty("data")
+  private byte[] data;
+
+  @JsonProperty("received")
+  private int received;
+
 
   @JsonIgnore
   public Map<String, String> getFilter() {
     return filter;
   }
+
 
   @JsonIgnore
   public ServiceInfoQueue getQueue() {
@@ -39,6 +58,31 @@ public class FdoSysModuleExtra {
   @JsonIgnore
   public ServiceInfoQueue getWaitQueue() {
     return waitQueue;
+  }
+
+  @JsonIgnore
+  public int getLength() {
+    return length;
+  }
+
+  @JsonIgnore
+  public String getName() {
+    return name;
+  }
+
+  @JsonIgnore
+  public byte[] getChecksum() {
+    return checksum;
+  }
+
+  @JsonIgnore
+  public byte[] getData() {
+    return data;
+  }
+
+  @JsonIgnore
+  public int getReceived() {
+    return received;
   }
 
   @JsonIgnore
@@ -69,5 +113,30 @@ public class FdoSysModuleExtra {
   @JsonIgnore
   public void setWaitQueue(ServiceInfoQueue waitQueue) {
     this.waitQueue = waitQueue;
+  }
+
+  @JsonIgnore
+  public void setLength(int length) {
+    this.length = length;
+  }
+
+  @JsonIgnore
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  @JsonIgnore
+  public void setChecksum(byte[] checksum) {
+    this.checksum = checksum;
+  }
+
+  @JsonIgnore
+  public void setData(byte[] data) {
+    this.data = data;
+  }
+
+  @JsonIgnore
+  public void setReceived(int received) {
+    this.received = received;
   }
 }

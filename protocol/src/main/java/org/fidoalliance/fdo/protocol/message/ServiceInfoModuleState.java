@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
 @JsonPropertyOrder({"name", "more", "done", "mtu", "guid", "extra"})
@@ -29,10 +28,13 @@ public class ServiceInfoModuleState {
   private int mtu;
 
   @JsonProperty("guid")
-  Guid guid;
+  private Guid guid;
 
   @JsonProperty("extra")
-  AnyType extra;
+  private AnyType extra;
+
+  @JsonIgnore
+  private ServiceInfoDocument document;
 
   @JsonIgnore
   public String getName() {
@@ -48,7 +50,6 @@ public class ServiceInfoModuleState {
   public boolean isDone() {
     return done;
   }
-
 
   @JsonIgnore
   public boolean isMore() {
@@ -69,6 +70,12 @@ public class ServiceInfoModuleState {
   public AnyType getExtra() {
     return extra;
   }
+
+  @JsonIgnore
+  public ServiceInfoDocument geDocument() {
+    return document;
+  }
+
 
   @JsonIgnore
   public void setName(String name) {
@@ -104,5 +111,11 @@ public class ServiceInfoModuleState {
   public void setExtra(AnyType extra) {
     this.extra = extra;
   }
+
+  @JsonIgnore
+  public void setDocument(ServiceInfoDocument document) {
+    this.document = document;
+  }
+
 
 }

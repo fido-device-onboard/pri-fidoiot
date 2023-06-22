@@ -38,6 +38,7 @@ import org.fidoalliance.fdo.protocol.dispatch.ReplacementKeySupplier;
 import org.fidoalliance.fdo.protocol.dispatch.ReplacementVoucherStorageFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobQueryFunction;
 import org.fidoalliance.fdo.protocol.dispatch.RvBlobStorageFunction;
+import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoDocumentSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.dispatch.SessionManager;
@@ -81,6 +82,7 @@ import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
@@ -1191,6 +1193,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
+    ServiceInfoDocument document = getWorker(ServiceInfoDocumentSupplier.class).get();
+    storage.put(ServiceInfoDocument.class,document);
+
+
     HelloDevice helloDevice = storage.get(HelloDevice.class);
     List<Object> workers = getWorkers();
     ServiceInfoModuleList moduleList = new ServiceInfoModuleList();
@@ -1204,11 +1210,14 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         state.setExtra(AnyType.fromObject(new NullValue()));
         state.setMtu(Math.min(devInfoReady.getMaxMessageSize(),
             ownerInfoReady.getMaxMessageSize()));
+        state.setDocument(document);
         module.prepare(state);
         moduleList.add(state);
       }
     }
     storage.put(ServiceInfoModuleList.class, moduleList);
+
+
 
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
@@ -1288,10 +1297,15 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceServiceInfo devInfo = Mapper.INSTANCE.readValue(cipherText,
         DeviceServiceInfo.class);
 
+    ServiceInfoDocument document = storage.get(ServiceInfoDocument.class);
     ServiceInfoModuleList moduleList = storage.get(ServiceInfoModuleList.class);
-
     for (ServiceInfoModuleState state : moduleList) {
+
+      state.setDocument(document);
       ServiceInfoModule module = getModule(state.getName());
+      if (devInfo.getServiceInfo().size() == 0) {
+        module.keepAlive();
+      }
       for (ServiceInfoKeyValuePair pair : devInfo.getServiceInfo()) {
         module.receive(state, pair);
       }
@@ -1345,6 +1359,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     for (ServiceInfoModuleState state : moduleList) {
       ServiceInfoModule module = getModule(state.getName());
+      if (ownerInfo.getServiceInfo().size() == 0) {
+        module.keepAlive();
+      }
       for (ServiceInfoKeyValuePair pair : ownerInfo.getServiceInfo()) {
         module.receive(state, pair);
       }

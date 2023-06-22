@@ -10,7 +10,7 @@ import java.util.Map;
 public class FdoSysInstruction {
 
   @JsonProperty("filter")
-  private Map<String,String> filter;
+  private Map<String, String> filter;
 
   @JsonProperty("exec")
   private String[] execArgs;
@@ -26,6 +26,28 @@ public class FdoSysInstruction {
 
   @JsonProperty("fetch")
   private String fetch;
+
+  @JsonProperty("wget")
+  private String webGet;
+
+  @JsonProperty("sha384")
+  private String sha384;
+
+  @JsonProperty("name")
+  private String name;
+
+  @JsonProperty("may_fail")
+  private String mayFail;
+
+  @JsonProperty("return_stdout")
+  private String returnStdOut;
+
+  @JsonProperty("return_stderr")
+  private String returnStdErr;
+
+  @JsonProperty("module")
+  private String module;
+
 
   @JsonIgnore
   public Map<String, String> getFilter() {
@@ -52,7 +74,43 @@ public class FdoSysInstruction {
     return resource;
   }
 
+  @JsonIgnore
   public String getFetch() {
     return fetch;
+  }
+
+  @JsonIgnore
+  public String getWebGet() {
+    return webGet;
+  }
+
+  @JsonIgnore
+  public String getSha384() {
+    return sha384;
+  }
+
+  @JsonIgnore
+  public String getName() {
+    return name;
+  }
+
+  @JsonIgnore
+  public String getMayFail() {
+    return mayFail;
+  }
+
+  @JsonIgnore
+  public String getReturnStdOut() {
+    return returnStdOut;
+  }
+
+  @JsonIgnore
+  public String getReturnStdErr() {
+    return returnStdErr;
+  }
+
+  @JsonIgnore
+  public String getModule() {
+    return module;
   }
 }

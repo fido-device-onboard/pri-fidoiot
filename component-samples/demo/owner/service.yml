@@ -136,6 +136,12 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
+  - org.fidoalliance.fdo.protocol.db.StandardServiceInfoDocumentSupplier
+  - org.fidoalliance.fdo.protocol.db.FdoSimDownloadOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimUploadOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimCommandOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimWebGetOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimCsrOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
 
 
