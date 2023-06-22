@@ -1,3 +1,6 @@
+// Copyright 2023 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;

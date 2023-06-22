@@ -1,3 +1,6 @@
+// Copyright 2023 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
 import java.io.File;
@@ -84,8 +87,8 @@ public class FdoSimWebGetDeviceModule implements ServiceInfoModule {
           sha384 = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
           try {
             digest = MessageDigest.getInstance("SHA-384");
-            logger.info("expected checksum " +
-                Hex.encodeHexString(sha384, false));
+            logger.info("expected checksum "
+                + Hex.encodeHexString(sha384, false));
           } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
           }
@@ -175,8 +178,7 @@ public class FdoSimWebGetDeviceModule implements ServiceInfoModule {
             kv.setValue(Mapper.INSTANCE.writeValue("SHA mismatch"));
             queue.add(kv);
 
-          }
-          else {
+          } else {
             kv.setKeyName(FdoSimWebGetOwnerModule.SHA_384);
             kv.setValue(Mapper.INSTANCE.writeValue(computed));
             queue.add(kv);
@@ -193,7 +195,7 @@ public class FdoSimWebGetDeviceModule implements ServiceInfoModule {
           System.arraycopy(buffer, 0, data, 0, br);
         }
         fileChannel.write(ByteBuffer.wrap(data));
-        if (digest !=  null) {
+        if (digest != null) {
           digest.update(data);
         }
       }

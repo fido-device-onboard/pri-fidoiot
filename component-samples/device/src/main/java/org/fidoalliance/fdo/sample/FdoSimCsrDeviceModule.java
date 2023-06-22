@@ -1,15 +1,11 @@
+// Copyright 2023 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
 package org.fidoalliance.fdo.sample;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
-import org.fidoalliance.fdo.protocol.db.FdoSimCommandOwnerModule;
 import org.fidoalliance.fdo.protocol.db.FdoSimCsrOwnerModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
@@ -48,7 +44,7 @@ public class FdoSimCsrDeviceModule implements ServiceInfoModule {
       case FdoSimCsrOwnerModule.CACERTS_RES:
         if (state.isActive()) {
           logger.info("CA response");
-         logger.info(Mapper.INSTANCE.readValue(kvPair.getValue(), String.class));
+          logger.info(Mapper.INSTANCE.readValue(kvPair.getValue(), String.class));
 
         }
         break;

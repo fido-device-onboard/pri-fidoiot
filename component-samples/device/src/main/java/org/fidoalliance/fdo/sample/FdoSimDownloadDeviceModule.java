@@ -1,5 +1,7 @@
-package org.fidoalliance.fdo.sample;
+// Copyright 2023 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
+package org.fidoalliance.fdo.sample;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,8 +90,8 @@ public class FdoSimDownloadDeviceModule implements ServiceInfoModule {
           expectedCheckSum = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
           try {
             digest = MessageDigest.getInstance("SHA-384");
-            logger.info("expected checksum " +
-                Hex.encodeHexString(expectedCheckSum, false));
+            logger.info("expected checksum "
+                + Hex.encodeHexString(expectedCheckSum, false));
           } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
           }
