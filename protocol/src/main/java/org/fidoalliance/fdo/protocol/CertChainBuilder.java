@@ -278,7 +278,7 @@ public class CertChainBuilder {
         PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult) validator.validate(path,
             params);
         X509Certificate trustedCert = result.getTrustAnchor().getTrustedCert();
-        if(trustedCert == null) {
+        if (trustedCert == null) {
           throw new CertificateException("certificate path failed: Trusted CA is NULL");
         }
       }
