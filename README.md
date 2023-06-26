@@ -158,6 +158,8 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
     **NOTE**: Docker secrets are only available to swarm services, not to standalone containers. To use this feature, consider adapting your container to run as a service. Stateful containers can typically run with a scale of 1 without changing the container code.
 
+    **NOTE**: Make sure to clean `api-user.pem` of the owner component, If connections to the external Rendezvous service are failing. With certificates present in `api-user.pem` the owner component tries to perform an mTLS connection with the external Rendezvous component.
+
 ### Specifying Subject alternate names for the Web/HTTPS self-signed certificate.
 
 When the http server starts for the first time it will generate a self-signed certificate for https protocol.
