@@ -266,7 +266,7 @@ public abstract class HttpClient implements Runnable {
 
       }
     } catch (IOException e) {
-        throw new RuntimeException("Unable to establish connection with FDO Server");
+      throw new RuntimeException("Unable to establish connection with FDO Server");
     } catch (Throwable throwable) {
       if (getResponse() != null && getResponse().getMsgType() != MsgType.ERROR) {
         DispatchMessage errorMsg = DispatchMessage.fromThrowable(throwable, getRequest());

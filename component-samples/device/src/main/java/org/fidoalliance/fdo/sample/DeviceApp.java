@@ -72,7 +72,7 @@ public class DeviceApp extends HttpClient {
     try {
       logger.info("Starting FDO Device");
       super.run();
-    } catch(RuntimeException e) {
+    } catch (RuntimeException e) {
       logger.error(e.getMessage());
       logger.info("Exiting FDO Device Application");
     } catch (Throwable throwable) {
