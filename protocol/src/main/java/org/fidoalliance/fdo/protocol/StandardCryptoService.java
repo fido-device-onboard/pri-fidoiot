@@ -678,8 +678,12 @@ public class StandardCryptoService implements CryptoService {
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
               BCPROV);
-          cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
-          b = cipher.doFinal(message);
+          if (decryptionKey != null) {
+            cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
+            b = cipher.doFinal(message);
+          } else {
+            throw new IllegalStateException("Decryption Key is empty");
+          }
         } catch (GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
