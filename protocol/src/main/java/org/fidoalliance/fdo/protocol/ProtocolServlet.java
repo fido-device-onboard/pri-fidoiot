@@ -52,7 +52,11 @@ public class ProtocolServlet extends HttpServlet {
 
       reqMsg.setMessage(req.getInputStream().readNBytes(req.getContentLength()));
 
-      logMessage(reqMsg);
+      if (reqMsg.getMessage() != null) {
+        logMessage(reqMsg);
+      } else {
+        throw new NullPointerException("Received empty request message");
+      }
 
       MessageDispatcher dispatcher = Config.getWorker(StandardMessageDispatcher.class);
       Optional<DispatchMessage> result = dispatcher.dispatch(reqMsg);
