@@ -138,7 +138,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     while (extra.getQueue().size() > 0) {
       boolean sent = sendFunction.apply(extra.getQueue().peek());
       if (sent) {
-        checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
+        if (extra.getQueue().size() > 0) {
+          checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
+        }
       } else {
         break;
       }

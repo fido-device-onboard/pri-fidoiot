@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
@@ -45,6 +46,9 @@ public class Hash {
 
   @Override
   public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
     if (obj instanceof Hash) {
       Hash hash = (Hash) obj;
       if (hash.hashType != hashType) {
@@ -53,5 +57,10 @@ public class Hash {
       return ByteBuffer.wrap(hash.hashValue).compareTo(ByteBuffer.wrap(hashValue)) == 0;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(hashType, hashValue);
   }
 }
