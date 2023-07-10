@@ -10,7 +10,7 @@ export https_proxy_host=$(echo $https_proxy | awk -F':' {'print $2'} | tr -d '/'
 export https_proxy_port=$(echo $https_proxy | awk -F':' {'print $3'} | tr -d '/')
 
 export _JAVA_OPTIONS="-Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port -Dhttps.proxyHost=$https_proxy_host -Dhttps.proxyPort=$https_proxy_port"
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 REMOTE_URL=https://github.com/fido-device-onboard/pri-fidoiot.git
 REMOTE_BRANCH=master

@@ -1,13 +1,13 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && apt-get -y update && apt-get -y upgrade
 
-RUN apt-get install -y openjdk-11-jdk maven git
+RUN apt-get install -y openjdk-17-jdk maven git
 
 # Create a user 'fdouser'. If the user name is updated, please update the same in docker-compose.yaml.
 RUN useradd -ms /bin/bash fdouser
