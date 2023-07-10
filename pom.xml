@@ -45,8 +45,8 @@
     <tomcat.version>10.1.10</tomcat.version>
     <apache-httpcomponents.version>4.5.13</apache-httpcomponents.version>
     <snakeyaml.version>2.0</snakeyaml.version>
-    <jackson-dataformat.version>2.15.0</jackson-dataformat.version>
-    <jackson-databind.version>2.15.0</jackson-databind.version>
+    <jackson-dataformat.version>2.15.2</jackson-dataformat.version>
+    <jackson-databind.version>2.15.2</jackson-databind.version>
     <cose-java.version>1.1.0</cose-java.version>
 
     <!-- Database Client Version -->
