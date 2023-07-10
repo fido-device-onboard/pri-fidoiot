@@ -1,11 +1,11 @@
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update 
-RUN apt-get install -y openjdk-11-jdk
+RUN apt-get install -y openjdk-17-jdk
 
 RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
@@ -27,4 +27,4 @@ RUN chown -R fdo:fdo /home/fdo
 USER fdo
 
 # Configure and start all-in-one
-CMD ["/usr/lib/jvm/java-11-openjdk-amd64/bin/java", "-jar", "aio.jar"]
+CMD ["/usr/lib/jvm/java-17-openjdk-amd64/bin/java", "-jar", "aio.jar"]
