@@ -29,6 +29,7 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.util.StandardSessionIdGenerator;
+import org.apache.coyote.http2.Http2Protocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate.Type;
@@ -259,6 +260,7 @@ public class StandardHttpServer implements HttpServer {
         httpsConnector.setEnableLookups(true);
 
         httpsConnector.setScheme(HttpUtils.HTTPS_SCHEME);
+        httpsConnector.addUpgradeProtocol(new Http2Protocol());
         SSLHostConfig sslHostConfig = null;
 
         try {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -38,7 +39,7 @@ public class EpidService {
   });
   private static final long httpRequestTimeout = Duration.ofSeconds(10).getSeconds();
 
-  private static final String defaultEpidOnlineUrl = "http://verify.epid-sbx.trustedservices.intel.com/";
+  private static final String defaultEpidOnlineUrl = "http://verifier.fdorv.com/";
   private static URI epidOnlineUrl = null;
 
   private static final int EpidGroupLength = 4;
@@ -239,31 +240,29 @@ public class EpidService {
       SigInfoType sgType) {
     try {
       String msg = createEpidSignatureBodyMessage(
-          signature,
-          maroePrefix,
-          nonce,
-          signedData,
-          groupId,
-          sgType);
+              signature,
+              maroePrefix,
+              nonce,
+              signedData,
+              groupId,
+              sgType);
 
       String url = null;
       String path;
 
       path = String.join(EpidService.URL_PATH_SEPARATOR,
-          Arrays.asList(EpidService.EPID_PROTOCOL_VERSION_V1,
-              EpidService.EPID_11, EpidService.EPID_PROOF_URI_PATH));
+              Arrays.asList(EpidService.EPID_PROTOCOL_VERSION_V1,
+                      EpidService.EPID_11, EpidService.EPID_PROOF_URI_PATH));
       url = new URL(
-          getEpidOnlineUrl().toString())
-          .toURI().resolve(EpidService.URL_PATH_SEPARATOR + path).toString();
+              getEpidOnlineUrl().toString())
+              .toURI().resolve(EpidService.URL_PATH_SEPARATOR + path).toString();
 
       int response = doPost(url, msg);
       if (response != HttpURLConnection.HTTP_OK) {
         if (config.getRoot().getTestMode() != null
-            && config.getRoot().getTestMode()) {
+                && config.getRoot().getTestMode()) {
           // in test mode return false only for non-signature issues
           switch (response) {
-            case HttpURLConnection.HTTP_OK:
-              // valid signature
             case HttpURLConnection.HTTP_FORBIDDEN:
               // invalid signature
             case HTTP_EXPECTATION_FAILED:
@@ -276,7 +275,15 @@ public class EpidService {
         }
         return false;
       }
-    } catch (Exception ex) {
+    } catch (MalformedURLException ex) {
+      return false;
+    } catch (IOException ex) {
+      return false;
+    } catch (URISyntaxException ex) {
+      return false;
+    } catch (RuntimeException ex) {
+      return false;
+    } catch (Exception e) {
       return false;
     }
     return true;

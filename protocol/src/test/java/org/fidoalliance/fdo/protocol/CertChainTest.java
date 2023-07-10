@@ -39,7 +39,6 @@ public class CertChainTest {
     CertChain chain = CertChain.fromList(list1);
 
     byte[] data = Mapper.INSTANCE.writeValue(chain);
-    String str = Hex.encodeHexString(data);
 
     CertChain chain2 = Mapper.INSTANCE.readValue(data,CertChain.class);
     List<Certificate> list2 = chain2.getChain();

@@ -182,6 +182,25 @@ public abstract class HttpClient implements Runnable {
         }
         break; // success
 
+      } catch (RuntimeException e) {
+        if (getInstructions().size() > 0
+            && index < getInstructions().size()
+            && (getRequest().getMsgType() == MsgType.TO1_HELLO_RV
+                || getRequest().getMsgType() == MsgType.TO2_HELLO_DEVICE
+                || getRequest().getMsgType() == MsgType.TO0_HELLO)) {
+
+          if (httpInstruction.isRendezvousBypass()) {
+            clearByPass();
+          }
+          logger.info("instruction failed.");
+          logger.info("moving to next instruction");
+          index++;
+          continue;
+        }
+
+        logger.info("all instructions exhausted");
+        throw new IOException(e);
+
       } catch (Exception e) {
 
         try {

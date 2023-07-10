@@ -586,9 +586,10 @@ public class StandardCryptoService implements CryptoService {
           throw new IllegalArgumentException();
         }
         byte[] value = new byte[len];
-        bis.read(value);
-
-        parts.add(value);
+        int read = bis.read(value);
+        if (read > 0) {
+          parts.add(value);
+        }
       }
       return parts;
 
@@ -677,8 +678,12 @@ public class StandardCryptoService implements CryptoService {
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
               BCPROV);
-          cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
-          b = cipher.doFinal(message);
+          if (decryptionKey != null) {
+            cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
+            b = cipher.doFinal(message);
+          } else {
+            throw new IllegalStateException("Decryption Key is empty");
+          }
         } catch (GeneralSecurityException e) {
           throw new RuntimeException(e);
         }

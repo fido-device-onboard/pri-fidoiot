@@ -13,16 +13,16 @@ import org.fidoalliance.fdo.protocol.serialization.GenericArraySerializer;
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
 @JsonPropertyOrder({"to0d", "to1d"})
 @JsonSerialize(using = GenericArraySerializer.class)
-public class To0OwnerSign {
+public class To0OwnerSign2 {
 
   @JsonProperty("to0d")
-  private byte[] to0d;
+  private To0d to0d;
 
   @JsonProperty("to1d")
   private CoseSign1 to1d;
 
   @JsonIgnore
-  public byte[] getTo0d() {
+  public To0d getTo0d() {
     return to0d;
   }
 
@@ -32,7 +32,7 @@ public class To0OwnerSign {
   }
 
   @JsonIgnore
-  public void setTo0d(byte[] to0d) {
+  public void setTo0d(To0d to0d) {
     this.to0d = to0d;
   }
 
@@ -41,3 +41,4 @@ public class To0OwnerSign {
     this.to1d = to1d;
   }
 }
+

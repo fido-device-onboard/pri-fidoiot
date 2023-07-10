@@ -11,12 +11,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.VoucherUtils;
 import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.fidoalliance.fdo.protocol.entity.OnboardingVoucher;
+import org.fidoalliance.fdo.protocol.entity.VoucherAlias;
+import org.fidoalliance.fdo.protocol.message.Guid;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.hibernate.Session;
@@ -57,8 +60,35 @@ public class OwnerVoucher extends RestApi {
     } finally {
       session.close();
     }
+  }
 
+  private void listSerialNo() {
 
+    try {
+
+      CriteriaBuilder cb = getSession().getCriteriaBuilder();
+      CriteriaQuery<VoucherAlias> cq = cb.createQuery(VoucherAlias.class);
+      Root<VoucherAlias> rootEntry = cq.from(VoucherAlias.class);
+      CriteriaQuery<VoucherAlias> all = cq.select(rootEntry);
+
+      TypedQuery<VoucherAlias> allQuery = getSession().createQuery(all);
+      List<VoucherAlias> list = allQuery.getResultList();
+      for (VoucherAlias voucherAlias : list) {
+        getResponse().getWriter().println(voucherAlias.getAlias());
+      }
+
+    } catch (IOException e) {
+      logger.error("error retrieving vouchers " + e.getMessage());
+    }
+  }
+
+  private boolean isGuid(String value) {
+    try {
+      UUID.fromString(value);
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -72,13 +102,28 @@ public class OwnerVoucher extends RestApi {
     String guid = header.getGuid().toString();
     logger.info("GUID is " + guid);
 
+    String path = getLastSegment();
+    if (!path.equals("vouchers")) {
+
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
+      if (voucherAlias == null) {
+        voucherAlias = new VoucherAlias();
+        voucherAlias.setAlias(path);
+        voucherAlias.setGuid(guid);
+        getSession().persist(voucherAlias);
+      } else {
+        voucherAlias.setGuid(guid);
+        getSession().merge(voucherAlias);
+      }
+    }
+
     OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class,
         header.getGuid().toString());
     if (onboardingVoucher != null) {
 
       onboardingVoucher.setGuid(guid);
       onboardingVoucher.setData(data);
-      getSession().update(onboardingVoucher);
+      getSession().merge(onboardingVoucher);
       getTransaction().commit();
     } else {
 
@@ -87,7 +132,7 @@ public class OwnerVoucher extends RestApi {
       onboardingVoucher.setData(data);
       onboardingVoucher.setTo0Expiry(new Date(System.currentTimeMillis()));
       onboardingVoucher.setCreatedOn(new Date(System.currentTimeMillis()));
-      getSession().save(onboardingVoucher);
+      getSession().persist(onboardingVoucher);
       getTransaction().commit();
     }
     getResponse().setContentType(HttpUtils.HTTP_PLAIN_TEXT);
@@ -103,7 +148,16 @@ public class OwnerVoucher extends RestApi {
 
     if (path.equals("vouchers")) {
       listVouchers();
+      listSerialNo();
       return;
+    }
+
+    //if last segment is serialno vs guid
+    if (!isGuid(path)) {
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
+      if (voucherAlias != null) {
+        path = voucherAlias.getGuid();
+      }
     }
 
     OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class, path);
@@ -124,14 +178,22 @@ public class OwnerVoucher extends RestApi {
     getTransaction();
 
     // Collect 'guid' from HttpRequest URL last segment
-    String guid = getLastSegment();
+    String path = getLastSegment();
+
+    if (!isGuid(path)) {
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
+      if (voucherAlias != null) {
+        path = voucherAlias.getGuid();
+        getSession().remove(voucherAlias);
+      }
+    }
 
     // Query database table ONBOARDING_VOUCHER for guid
-    OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class, guid);
+    OnboardingVoucher onboardingVoucher = getSession().get(OnboardingVoucher.class, path);
 
     if (onboardingVoucher != null) {
       // delete the row, if data exists.
-      getSession().delete(onboardingVoucher);
+      getSession().remove(onboardingVoucher);
     } else {
       logger.warn("GUID not found.");
       getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
