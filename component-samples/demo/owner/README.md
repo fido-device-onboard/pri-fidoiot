@@ -8,7 +8,7 @@ The FDO Owner Service is designed to onboard the client device to a management s
 
 The following are the system requirements for the FDO Owner Service.
 - Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
-- Java* Development Kit 11
+- Java* Development Kit 17
 - Apache Maven* 3.6.3 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
 - Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
