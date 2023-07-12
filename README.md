@@ -12,7 +12,7 @@ deploying the example implementation for these components.
 
 * **Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4**. +
 * **Maven 3.6.3**.
-* **Java 11**.
+* **Java 17**.
 * **Haveged**.
 * **Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
 * **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
@@ -37,7 +37,7 @@ FDO PRI source code is organized into the following sub-folders.
 
 ## Building FDO PRI Source
 
-FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
+FDO PRI source is written in [Java 17](https://openjdk.java.net/projects/jdk/17/) and uses the
 [Apache Maven* software](http://maven.apache.org).
 
 The list of ports that are used for unit tests and sample code:
