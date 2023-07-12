@@ -27,7 +27,7 @@
 
   - Haveged
 
-  - Java 11
+  - Java 17
 
   - Maven (minimum 3.6.3)
   
