@@ -434,6 +434,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     consumer.accept(credential);
     request.setExtra(new SimpleStorage());
     logger.info("DI complete, GUID is " + credential.getGuid());
+    logger.info("===== FDO DI SUCCESS =====");
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -1436,6 +1437,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
     logger.info("TO2 completed successfully.");
+    logger.info("===== FDO TO2 SUCCESS =====");
   }
 
   protected void doError(DispatchMessage request, DispatchMessage response) throws IOException {
