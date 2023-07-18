@@ -51,8 +51,8 @@ gen_credentials()
 api_user='C=US, ST=OR, L=Hillsboro, O=LF Edge, OU=FDO project, CN=apiUser'
 db_user=root
 api_pass=default
-db_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
-encrypt_password=`openssl rand --base64 12 | tr -dc 0-9A-Za-z`
+db_password=`openssl rand -base64 12 | tr -dc 0-9A-Za-z`
+encrypt_password=`openssl rand -base64 12 | tr -dc 0-9A-Za-z`
 ssl_password=
 
 
@@ -68,7 +68,7 @@ echo "ssl_password=$ssl_password" >> service.env
 echo "api_user=$api_user" >> service.env
 echo "useSSL=true" >> service.env
 echo "requireSSL=true" >> service.env
-echo -n `openssl rand --base64 12 | tr -dc 0-9A-Za-z` > db_password.txt
+echo -n `openssl rand -base64 12 | tr -dc 0-9A-Za-z` > db_password.txt
 
 mkdir -p secrets
 touch ./secrets/api-user.pem
