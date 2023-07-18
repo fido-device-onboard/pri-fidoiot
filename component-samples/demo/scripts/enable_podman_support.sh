@@ -4,6 +4,11 @@
 # This script is used to add the required changes to enable FDO support on RHEL. 
 # It will replace the dockerfile build to Podmanfile in docker-compose.yml
 
+#Podman Build
+if [ -f "../../../build/builder.sh" ]; then
+    sed -i '/export JAVA_HOME/d' ../../../build/build.sh
+fi
+
 #manufacturer
 sed -i 's/Dockerfile/Podmanfile/' manufacturer/docker-compose.yml
 grep -q '/fdo/app-data:Z' manufacturer/docker-compose.yml || sed -i 's/fdo\/app-data/fdo\/app-data:Z/' manufacturer/docker-compose.yml

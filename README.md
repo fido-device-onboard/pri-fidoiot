@@ -12,7 +12,7 @@ deploying the example implementation for these components.
 
 * **Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4**. +
 * **Maven 3.6.3**.
-* **Java 11**.
+* **Java 17**.
 * **Haveged**.
 * **Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
 * **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
@@ -37,7 +37,7 @@ FDO PRI source code is organized into the following sub-folders.
 
 ## Building FDO PRI Source
 
-FDO PRI source is written in [Java 11](https://openjdk.java.net/projects/jdk/11/) and uses the
+FDO PRI source is written in [Java 17](https://openjdk.java.net/projects/jdk/17/) and uses the
 [Apache Maven* software](http://maven.apache.org).
 
 The list of ports that are used for unit tests and sample code:
@@ -73,6 +73,8 @@ or FDO PRI source can be built using docker container. [REFER](./build/README.md
 The build creates artifacts which will be used in the rest of this guide.
 
 The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
+
+***NOTE***: Export the following variable `JDK_JAVA_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED"`, if you are facing ClassFormatError exception while building using maven.
 
 ### Credential storage
 
@@ -138,6 +140,12 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
     Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
 
+   **NOTE:** Execute the following command to add hosted rendezvous certificates to the java client trust stores.
+
+    ```
+    $ echo | openssl s_client -proxy ${https_proxy_host}:${https_proxy_port} -showcerts -connect fdorv.com:443 2>/dev/null | sed -n '/-----BEGIN CERTIFICATE-----/, /-----END CERTIFICATE-----/p' >> ./secrets/ca-cert.pem
+    ```
+
 4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components.
 
     **NOTE:** Don't replace `service.env` present in the database component with generated `service.env` in `scripts` folder.
@@ -151,6 +159,8 @@ keys_gen.sh can be used to generate random passwords for each service.env.
     **NOTE**: Component refers to the individual FDO services like aio, manufacturer, rv , owner and reseller.
 
     **NOTE**: Docker secrets are only available to swarm services, not to standalone containers. To use this feature, consider adapting your container to run as a service. Stateful containers can typically run with a scale of 1 without changing the container code.
+
+    **NOTE**: Make sure to clean `api-user.pem` of the owner component at `<fdo-pri-src>/component-samples/demo/owner/secrets/` and restart owner service, if connections to the external Rendezvous service are failing. With certificates present in `api-user.pem` the owner component tries to perform an mTLS connection with the external Rendezvous component.
 
 ### Specifying Subject alternate names for the Web/HTTPS self-signed certificate.
 
