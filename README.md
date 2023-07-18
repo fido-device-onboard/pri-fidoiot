@@ -74,6 +74,8 @@ The build creates artifacts which will be used in the rest of this guide.
 
 The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
+***NOTE***: Export the following variable `JDK_JAVA_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED"`, if you are facing ClassFormatError exception while building using maven.
+
 ### Credential storage
 
 Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
