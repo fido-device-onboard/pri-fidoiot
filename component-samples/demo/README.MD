@@ -296,7 +296,7 @@ Finally, the mTLS enabled cURL request will be:
 
   ```shell
     curl \
-    --cacert scripts/secrets/ca-cert.pem --cert scripts/secrets/api-user.pem \
+    --cacert scripts/secrets/ca-cert.pem --cert scripts/api-user.pem \
      --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
     --header 'Content-Type: text/plain' \
     --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
