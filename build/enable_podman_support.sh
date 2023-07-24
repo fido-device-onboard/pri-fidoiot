@@ -10,5 +10,5 @@ sed -i '/- fdo-m2:\/home\/fdouser\/.m2:rw/d' docker-compose.yml
 sed -i 's/:rw/:Z/' docker-compose.yml
 grep -q 'fdo-m2: {}' docker-compose.yml || sed -i 's/fdo-m2:/fdo-m2: {}/' docker-compose.yml
 sed -i 's/java-11-openjdk-amd64/java-11-openjdk/' build.sh
-
+sed -i '/export JAVA_HOME/d' build.sh
 
