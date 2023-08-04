@@ -1,0 +1,29 @@
+name: prifidoiot
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: scm checkout
+        uses: actions/checkout@v3
+      - name: setup-java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: local maven repository cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom/xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: build
+        run: |
+          mvn clean install
+          cd component-samples && tar -czvf demo.tar.gz demo && mv demo.tar.gz ..
+      - name: archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: demo.tar.gz
+          path: demo.tar.gz
