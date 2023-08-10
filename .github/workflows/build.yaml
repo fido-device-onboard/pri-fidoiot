@@ -1,5 +1,10 @@
 name: prifidoiot
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, '*rel']
+  pull_request:
+    branches: [master, '*rel']
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,19 +16,40 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: local maven repository cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom/xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
       - name: build
         run: |
           mvn clean install
           cd component-samples && tar -czvf demo.tar.gz demo && mv demo.tar.gz ..
+      - name: checkout test-fidoiot
+        uses: actions/checkout@v3
+        with:
+          repository: fido-device-onboard/test-fidoiot
+          ref: master
+          path: test-fidoiot
+      - name: Add host to /etc/hosts
+        run: |
+          sudo echo "127.0.0.1 host.docker.internal" | sudo tee -a /etc/hosts
+      - name: run smoke test
+        run: |
+          mkdir -p test-fidoiot/binaries/pri-fidoiot
+          cp -r component-samples/demo/* test-fidoiot/binaries/pri-fidoiot
+          cp -r test-fidoiot/binaries/pri-fidoiot/device/* test-fidoiot/
+          cd test-fidoiot/binaries/pri-fidoiot/scripts
+          bash demo_ca.sh
+          bash web_csr_req.sh
+          bash user_csr_req.sh
+          bash keys_gen.sh
+          chmod -R 777 secrets/
+          cp -r service.env secrets/ ../aio/
+          cp -r secrets/ ../db/
+          sed -i '/<security-constraint>/,/<.security-constraint>/d' ../aio/WEB-INF/web.xml
+          sed -i '/^innodb/d' ../db/custom/config-file.cnf
+          cd ${{ github.workspace }}/test-fidoiot
+          export TEST_DIR=$PWD
+          mvn clean test -Dgroups=fdo_pri_smoketest
       - name: archive artifacts
         uses: actions/upload-artifact@v3
         with:
           name: demo.tar.gz
           path: demo.tar.gz
+        if: github.event_name != 'pull_request'
