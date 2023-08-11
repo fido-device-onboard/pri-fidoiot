@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
+import org.fidoalliance.fdo.protocol.db.FdoSysModuleExtra;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
@@ -83,9 +85,11 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.message.SetCredentials;
 import org.fidoalliance.fdo.protocol.message.SetHmac;
 import org.fidoalliance.fdo.protocol.message.SigInfo;
@@ -456,8 +460,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0d to0d = storage.get(To0d.class);
     to0d.setNonce(helloAck.getNonce());
 
-
-
     CryptoService cs = Config.getWorker(CryptoService.class);
     byte[] to0dBytes = Mapper.INSTANCE.writeValue(to0d);
     HashType hashType = new AlgorithmFinder().getCompatibleHashType(
@@ -506,11 +508,11 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0d to0d;
     CoseSign1 sign1;
     try {
-      To0OwnerSign ownerSign  = request.getMessage(To0OwnerSign.class);
-      to0d = Mapper.INSTANCE.readValue(ownerSign.getTo0d(),To0d.class);
+      To0OwnerSign ownerSign = request.getMessage(To0OwnerSign.class);
+      to0d = Mapper.INSTANCE.readValue(ownerSign.getTo0d(), To0d.class);
       sign1 = ownerSign.getTo1d();
     } catch (MessageBodyException e) {
-      To0OwnerSign2 ownerSign2  = request.getMessage(To0OwnerSign2.class);
+      To0OwnerSign2 ownerSign2 = request.getMessage(To0OwnerSign2.class);
       to0d = ownerSign2.getTo0d();
       sign1 = ownerSign2.getTo1d();
       logger.info("non conformant OwnerSign message received");
@@ -535,7 +537,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     }
 
     String guid = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
-            OwnershipVoucherHeader.class).getGuid().toString();
+        OwnershipVoucherHeader.class).getGuid().toString();
 
     try {
       To2RedirectEntry storedRedirectEntry = getWorker(RvBlobQueryFunction.class).apply(guid);
@@ -1131,8 +1133,6 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
-
-
     if (credReuse) {
       newMac = null;
       getWorker(CredReuseFunction.class).apply(true);
@@ -1194,9 +1194,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     storage.put(To2OwnerInfoReady.class, ownerInfoReady);
 
     ServiceInfoDocument document = getWorker(ServiceInfoDocumentSupplier.class).get();
-    storage.put(ServiceInfoDocument.class,document);
+    storage.put(ServiceInfoDocument.class, document);
 
-
+    ServiceInfoGlobalState globalState = new ServiceInfoGlobalState();
     HelloDevice helloDevice = storage.get(HelloDevice.class);
     List<Object> workers = getWorkers();
     ServiceInfoModuleList moduleList = new ServiceInfoModuleList();
@@ -1211,13 +1211,13 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         state.setMtu(Math.min(devInfoReady.getMaxMessageSize(),
             ownerInfoReady.getMaxMessageSize()));
         state.setDocument(document);
+        state.setGlobalState(globalState);
         module.prepare(state);
         moduleList.add(state);
       }
     }
     storage.put(ServiceInfoModuleList.class, moduleList);
-
-
+    storage.put(ServiceInfoGlobalState.class, globalState);
 
     OwnerServiceInfo lastInfo = new OwnerServiceInfo();
     lastInfo.setServiceInfo(new ServiceInfo());
@@ -1256,6 +1256,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To2ProveHeaderPayload ownerPayload = storage.get(To2ProveHeaderPayload.class);
     OwnershipVoucherHeader header =
         Mapper.INSTANCE.readValue(ownerPayload.getHeader(), OwnershipVoucherHeader.class);
+
 
     List<Object> workers = getWorkers();
     ServiceInfoModuleList moduleList = new ServiceInfoModuleList();
@@ -1297,10 +1298,12 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     DeviceServiceInfo devInfo = Mapper.INSTANCE.readValue(cipherText,
         DeviceServiceInfo.class);
 
+    ServiceInfoGlobalState globalState = storage.get(ServiceInfoGlobalState.class);
     ServiceInfoDocument document = storage.get(ServiceInfoDocument.class);
     ServiceInfoModuleList moduleList = storage.get(ServiceInfoModuleList.class);
     for (ServiceInfoModuleState state : moduleList) {
 
+      state.setGlobalState(globalState);
       state.setDocument(document);
       ServiceInfoModule module = getModule(state.getName());
       if (devInfo.getServiceInfo().size() == 0) {

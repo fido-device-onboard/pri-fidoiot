@@ -20,6 +20,7 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
+import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 
 public class FdoSimUploadOwnerModule implements ServiceInfoModule {
@@ -56,11 +57,6 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
         for (String name : list.getModulesNames()) {
           if (name.equals(MODULE_NAME)) {
             state.setActive(true);
-            ServiceInfoQueue queue = extra.getQueue();
-            ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-            activePair.setKeyName(ACTIVE);
-            activePair.setValue(Mapper.INSTANCE.writeValue(true));
-            queue.add(activePair);
 
           }
         }
@@ -136,10 +132,10 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (extra.getQueue().size() > 0) {
-      boolean sent = sendFunction.apply(extra.getQueue().peek());
+    while (state.getGlobalState().getQueue().size() > 0) {
+      boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, extra.getQueue().poll());
+        checkWaiting(extra, state.getGlobalState().getQueue().poll());
       } else {
         break;
       }
@@ -147,7 +143,7 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (extra.getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
@@ -191,7 +187,7 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
       return;
     }
 
-    ServiceInfoDocument document = state.geDocument();
+    ServiceInfoDocument document = state.getDocument();
     FdoSysInstruction[] instructions =
         Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
@@ -218,13 +214,21 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
         ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
         kv.setKeyName(NEED_SHA);
         kv.setValue(Mapper.INSTANCE.writeValue(true));
-        extra.getQueue().add(kv);
+        state.getGlobalState().getQueue().add(kv);
 
         kv = new ServiceInfoKeyValuePair();
         kv.setKeyName(NAME);
         kv.setValue(Mapper.INSTANCE.writeValue(instructions[i].getFetch()));
-        extra.getQueue().add(kv);
+        state.getGlobalState().getQueue().add(kv);
         extra.setName(instructions[i].getFetch());
+
+        if (!state.getActiveSent()) {
+          ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+          activePair.setKeyName(ACTIVE);
+          activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+          state.setActiveSent(true);
+          state.getGlobalState().getQueue().addFirst(activePair);
+        }
       }
     }
 

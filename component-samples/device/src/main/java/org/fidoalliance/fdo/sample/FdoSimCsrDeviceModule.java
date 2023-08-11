@@ -12,7 +12,6 @@ import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
-import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 public class FdoSimCsrDeviceModule implements ServiceInfoModule {
 
@@ -37,7 +36,7 @@ public class FdoSimCsrDeviceModule implements ServiceInfoModule {
 
     switch (kvPair.getKey()) {
       case FdoSimCsrOwnerModule.ACTIVE:
-        logger.info(FdoSys.ACTIVE + " = "
+        logger.info(FdoSimCsrOwnerModule.ACTIVE + " = "
             + Mapper.INSTANCE.readValue(kvPair.getValue(), Boolean.class));
         state.setActive(Mapper.INSTANCE.readValue(kvPair.getValue(), Boolean.class));
         break;

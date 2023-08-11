@@ -14,10 +14,9 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
+import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 public class FdoSimCsrOwnerModule implements ServiceInfoModule {
-
-
 
 
   public static final String MODULE_NAME = "fdo.csr";
@@ -58,11 +57,7 @@ public class FdoSimCsrOwnerModule implements ServiceInfoModule {
         for (String name : list.getModulesNames()) {
           if (name.equals(MODULE_NAME)) {
             state.setActive(true);
-            ServiceInfoQueue queue = extra.getQueue();
-            ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-            activePair.setKeyName(ACTIVE);
-            activePair.setValue(Mapper.INSTANCE.writeValue(true));
-            queue.add(activePair);
+
             //extra.setWaiting(true);
 
           }
@@ -108,14 +103,22 @@ public class FdoSimCsrOwnerModule implements ServiceInfoModule {
 
     FdoSysModuleExtra extra = state.getExtra().covertValue(FdoSysModuleExtra.class);
 
+    if (!state.getActiveSent()) {
+      ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+      activePair.setKeyName(ACTIVE);
+      activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+      state.setActiveSent(true);
+      state.getGlobalState().getQueue().addFirst(activePair);
+    }
+
     if (infoReady(extra)) {
       extra.setLoaded(true);
     }
 
-    while (extra.getQueue().size() > 0) {
-      boolean sent = sendFunction.apply(extra.getQueue().peek());
+    while (state.getGlobalState().getQueue().size() > 0) {
+      boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, extra.getQueue().poll());
+        checkWaiting(extra, state.getGlobalState().getQueue().poll());
       } else {
         break;
       }
@@ -123,7 +126,7 @@ public class FdoSimCsrOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (extra.getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));

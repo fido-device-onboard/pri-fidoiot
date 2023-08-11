@@ -20,7 +20,6 @@ import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
-import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
@@ -29,6 +28,7 @@ import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
+import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -66,11 +66,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
         for (String name : list.getModulesNames()) {
           if (name.equals(MODULE_NAME)) {
             state.setActive(true);
-            ServiceInfoQueue queue = extra.getQueue();
-            ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-            activePair.setKeyName(ACTIVE);
-            activePair.setValue(Mapper.INSTANCE.writeValue(true));
-            queue.add(activePair);
+
 
           }
         }
@@ -87,8 +83,8 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DONE:
         if (state.isActive()) {
           extra.setWaiting(false);
-          extra.setQueue(extra.getWaitQueue());
-          extra.setWaitQueue(new ServiceInfoQueue());
+          state.getGlobalState().setQueue(state.getGlobalState().getWaitQueue());
+          state.getGlobalState().setWaitQueue(new ServiceInfoQueue());
           int result = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
           if (result == -1) {
             throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
@@ -126,7 +122,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(NAME);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
-    extra.getQueue().add(kv);
+    state.getGlobalState().getQueue().add(kv);
     extra.setName(instruction.getFileDesc());
 
     String resource = instruction.getResource();
@@ -150,10 +146,10 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (extra.getQueue().size() > 0) {
-      boolean sent = sendFunction.apply(extra.getQueue().peek());
+    while (state.getGlobalState().getQueue().size() > 0) {
+      boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, extra.getQueue().poll());
+        checkWaiting(extra, state.getGlobalState().getQueue().poll());
       } else {
         break;
       }
@@ -161,7 +157,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (extra.getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
@@ -170,6 +166,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
 
   protected void checkWaiting(FdoSysModuleExtra extra, ServiceInfoKeyValuePair kv)
       throws IOException {
+
     switch (kv.getKey()) {
       case LENGTH:
         extra.setReceived(0);
@@ -211,9 +208,6 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
     try {
       final Transaction trans = session.beginTransaction();
       resource = resource.replace("$(guid)", state.getGuid().toString());
-      ServiceInfoKeyValuePair activeKeyPair = extra.getQueue().poll();
-      ServiceInfoKeyValuePair nameKeyPair = extra.getQueue().poll();
-      extra.getQueue().clear();
 
       // Query database table SYSTEM_RESOURCE for filename Key
       final SystemResource sviResource = session.get(SystemResource.class, resource);
@@ -242,30 +236,31 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
               fileLength += data.length;
               msgDigest.update(data);
               kv.setValue(Mapper.INSTANCE.writeValue(data));
-              extra.getQueue().add(kv);
+              state.getGlobalState().getQueue().add(kv);
             }
           }
 
           ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(DATA);
           kv.setValue(Mapper.INSTANCE.writeValue(new byte[0])); //send empty
-          extra.getQueue().add(kv);
-
-
+          state.getGlobalState().getQueue().add(kv);
 
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(SHA_384);
           kv.setValue(Mapper.INSTANCE.writeValue(msgDigest.digest()));
-          extra.getQueue().addFirst(kv);
+          state.getGlobalState().getQueue().addFirst(kv);
 
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(LENGTH);
           kv.setValue(Mapper.INSTANCE.writeValue(fileLength));
-          extra.getQueue().addFirst(kv);
+          state.getGlobalState().getQueue().addFirst(kv);
           extra.setLength(fileLength);
 
-          extra.getQueue().addFirst(nameKeyPair);
-          extra.getQueue().addFirst(activeKeyPair);
+          kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(NAME);
+          kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
+          state.getGlobalState().getQueue().addFirst(kv);
+          extra.setName(instruction.getFileDesc());
 
 
         } catch (SQLException | NoSuchAlgorithmException throwables) {
@@ -319,7 +314,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
                 System.arraycopy(temp, 0, data, 0, br);
               }
               kv.setValue(Mapper.INSTANCE.writeValue(data));
-              extra.getQueue().add(kv);
+              state.getGlobalState().getQueue().add(kv);
             }
           }
         }
@@ -339,7 +334,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       return;
     }
 
-    ServiceInfoDocument document = state.geDocument();
+    ServiceInfoDocument document = state.getDocument();
     FdoSysInstruction[] instructions =
         Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
@@ -358,13 +353,20 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
         continue;
       }
 
-
       document.setIndex(i);
       if (instructions[i].getFileDesc() != null) {
         getFile(state, extra, instructions[i]);
       } else {
         break;
       }
+    }
+
+    if (!state.getActiveSent()) {
+      ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+      activePair.setKeyName(ACTIVE);
+      activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+      state.setActiveSent(true);
+      state.getGlobalState().getQueue().addFirst(activePair);
     }
 
   }

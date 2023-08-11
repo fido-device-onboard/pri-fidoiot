@@ -35,7 +35,6 @@ import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
-import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 public class FdoSimWebGetDeviceModule implements ServiceInfoModule {
 
@@ -78,7 +77,7 @@ public class FdoSimWebGetDeviceModule implements ServiceInfoModule {
 
     switch (kvPair.getKey()) {
       case FdoSimWebGetOwnerModule.ACTIVE:
-        logger.info(FdoSys.ACTIVE + " = "
+        logger.info(FdoSimWebGetOwnerModule.ACTIVE + " = "
             + Mapper.INSTANCE.readValue(kvPair.getValue(), Boolean.class));
         state.setActive(Mapper.INSTANCE.readValue(kvPair.getValue(), Boolean.class));
         break;

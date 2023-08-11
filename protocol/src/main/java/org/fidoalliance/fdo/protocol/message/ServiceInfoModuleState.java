@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"name", "more", "done", "mtu", "guid", "extra"})
+@JsonPropertyOrder({"name", "active", "active_sent", "more", "done", "mtu", "guid", "extra"})
 public class ServiceInfoModuleState {
 
   @JsonProperty("name")
@@ -17,6 +17,9 @@ public class ServiceInfoModuleState {
 
   @JsonProperty("active")
   private boolean active;
+
+  @JsonProperty("active_sent")
+  private boolean activeSent;
 
   @JsonProperty("more")
   private boolean more;
@@ -32,6 +35,10 @@ public class ServiceInfoModuleState {
 
   @JsonProperty("extra")
   private AnyType extra;
+
+  @JsonIgnore
+  private ServiceInfoGlobalState globalState;
+
 
   @JsonIgnore
   private ServiceInfoDocument document;
@@ -72,10 +79,19 @@ public class ServiceInfoModuleState {
   }
 
   @JsonIgnore
-  public ServiceInfoDocument geDocument() {
+  public ServiceInfoDocument getDocument() {
     return document;
   }
 
+  @JsonIgnore
+  public boolean getActiveSent() {
+    return activeSent;
+  }
+
+  @JsonIgnore
+  public ServiceInfoGlobalState getGlobalState() {
+    return this.globalState;
+  }
 
   @JsonIgnore
   public void setName(String name) {
@@ -117,5 +133,14 @@ public class ServiceInfoModuleState {
     this.document = document;
   }
 
+  @JsonIgnore
+  public void setGlobalState(ServiceInfoGlobalState state) {
+    this.globalState = state;
+  }
+
+  @JsonIgnore
+  public void setActiveSent(boolean sent) {
+    this.activeSent = sent;
+  }
 
 }

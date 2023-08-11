@@ -7,19 +7,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
 public class FdoSysModuleExtra {
 
   @JsonProperty("filter")
   private final Map<String, String> filter = new HashMap<>();
-
-
-  @JsonProperty("queue")
-  private ServiceInfoQueue queue = new ServiceInfoQueue();
-
-  @JsonProperty("waitQueue")
-  private ServiceInfoQueue waitQueue = new ServiceInfoQueue();
 
 
   @JsonProperty("loaded")
@@ -51,16 +45,6 @@ public class FdoSysModuleExtra {
 
 
   @JsonIgnore
-  public ServiceInfoQueue getQueue() {
-    return queue;
-  }
-
-  @JsonIgnore
-  public ServiceInfoQueue getWaitQueue() {
-    return waitQueue;
-  }
-
-  @JsonIgnore
   public int getLength() {
     return length;
   }
@@ -85,6 +69,7 @@ public class FdoSysModuleExtra {
     return received;
   }
 
+
   @JsonIgnore
   public boolean isLoaded() {
     return loaded;
@@ -105,15 +90,6 @@ public class FdoSysModuleExtra {
     this.waiting = waiting;
   }
 
-  @JsonIgnore
-  public void setQueue(ServiceInfoQueue queue) {
-    this.queue = queue;
-  }
-
-  @JsonIgnore
-  public void setWaitQueue(ServiceInfoQueue waitQueue) {
-    this.waitQueue = waitQueue;
-  }
 
   @JsonIgnore
   public void setLength(int length) {
@@ -139,4 +115,5 @@ public class FdoSysModuleExtra {
   public void setReceived(int received) {
     this.received = received;
   }
+
 }
