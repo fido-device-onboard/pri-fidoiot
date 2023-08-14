@@ -137,8 +137,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     while (state.getGlobalState().getQueue().size() > 0) {
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(state.getGlobalState(), extra,
-            Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
+        if (state.getGlobalState().getQueue().size() > 0) {
+          checkWaiting(state.getGlobalState(), extra,
+              Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
+        }
       } else {
         break;
       }
@@ -241,8 +243,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-
-
 
     if (!state.getActiveSent()) {
       ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
