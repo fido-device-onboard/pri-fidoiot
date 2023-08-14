@@ -3,7 +3,7 @@
 
 FROM registry.access.redhat.com/ubi8/ubi
 
-RUN yum install -y java-11-openjdk-devel git && yum clean all
+RUN yum install -y java-17-openjdk-devel git && yum clean all
 
 ENV MVN_VERSION=3.8.3 
 

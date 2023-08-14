@@ -171,6 +171,8 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     boolean posixType = false;
     try (FileSystem fs = FileSystems.getDefault()) {
       posixType = fs.supportedFileAttributeViews().contains("posix");
+    } catch (RuntimeException e) {
+      posixType = false;
     } catch (Exception e) {
       posixType = false;
     }

@@ -4,7 +4,7 @@
 FROM registry.access.redhat.com/ubi8/ubi
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN yum -y install java-11-openjdk-devel \
+RUN yum -y install java-17-openjdk-devel \
     && yum clean all
 
 RUN useradd -ms /bin/bash fdo
@@ -23,5 +23,5 @@ RUN chown -R fdo:fdo /home/fdo
 USER fdo
 
 # Configure and start all-in-one
-CMD ["/usr/lib/jvm/java-11-openjdk/bin/java", "-jar", "device.jar"]
+CMD ["/usr/lib/jvm/java-17-openjdk/bin/java", "-jar", "device.jar"]
 

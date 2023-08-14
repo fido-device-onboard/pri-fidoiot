@@ -138,8 +138,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
         if (state.getGlobalState().getQueue().size() > 0) {
-          checkWaiting(state.getGlobalState(), extra,
-              Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
+           checkWaiting(state.getGlobalState(), extra,
+               Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
         }
       } else {
         break;

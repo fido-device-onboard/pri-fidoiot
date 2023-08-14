@@ -27,7 +27,7 @@
 
   - Haveged
 
-  - Java 11
+  - Java 17
 
   - Maven (minimum 3.6.3)
   
@@ -296,7 +296,7 @@ Finally, the mTLS enabled cURL request will be:
 
   ```shell
     curl \
-    --cacert scripts/secrets/ca-cert.pem --cert scripts/secrets/api-user.pem \
+    --cacert scripts/secrets/ca-cert.pem --cert scripts/api-user.pem \
      --location --request POST 'http://host.docker.internal:8039/api/v1/rvinfo' \
     --header 'Content-Type: text/plain' \
     --data-raw '[[[5,"{rv-dns}"],[3,8040],[12,1],[2,"{rv-ip}"],[4,8040]]]'
@@ -365,7 +365,7 @@ To support external signed resources along with self-signed resource, add the se
 ```
 COPY secrets/ca-cert.pem /home/fdo/ca-cert.pem
 
-RUN keytool -import -trustcacerts -noprompt -keystore "/usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts" -storepass changeit -alias tomcat -file /home/fdo/ca-cert.pem
+RUN keytool -import -trustcacerts -noprompt -keystore "/usr/lib/jvm/java-17-openjdk-amd64/lib/security/cacerts" -storepass changeit -alias tomcat -file /home/fdo/ca-cert.pem
 ```
 
 

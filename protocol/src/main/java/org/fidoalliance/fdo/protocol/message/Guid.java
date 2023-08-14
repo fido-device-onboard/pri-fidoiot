@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.UUID;
 import org.fidoalliance.fdo.protocol.InvalidGuidException;
 import org.fidoalliance.fdo.protocol.serialization.GuidDeserializer;
@@ -73,13 +74,19 @@ public class Guid {
 
   @Override
   public boolean equals(Object o) {
-    if (o instanceof Guid) {
-      return this.uuid.equals(((Guid) o).uuid);
+
+    if (o == null) {
+      return false;
     }
-    if (o instanceof UUID) {
-      return this.uuid.equals(o);
+    Class theClass = o.getClass();
+    if (theClass.isAssignableFrom(Guid.class)) {
+      return this.uuid.equals(((Guid) o).uuid);
     }
     return super.equals(o);
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(uuid);
+  }
 }

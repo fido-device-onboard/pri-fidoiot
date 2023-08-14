@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
+import java.util.Objects;
 import org.fidoalliance.fdo.protocol.serialization.NonceDeserializer;
 import org.fidoalliance.fdo.protocol.serialization.NonceSerializer;
 
@@ -49,6 +49,9 @@ public class Nonce {
 
   @Override
   public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
     if (o instanceof Nonce) {
       return ByteBuffer.wrap(this.nonce).compareTo(ByteBuffer.wrap(((Nonce) o).nonce)) == 0;
     }
@@ -56,6 +59,11 @@ public class Nonce {
       return Arrays.equals(this.nonce, (byte[]) o);
     }
     return super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(nonce);
   }
 
   /**
