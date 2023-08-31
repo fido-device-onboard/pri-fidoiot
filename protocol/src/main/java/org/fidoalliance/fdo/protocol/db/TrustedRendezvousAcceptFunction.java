@@ -67,15 +67,13 @@ public class TrustedRendezvousAcceptFunction implements RendezvousAcceptFunction
           voucher.getHeader(), OwnershipVoucherHeader.class);
       String uuid = header.getGuid().toString();
       List<String> hashes = getKeyHashes(voucher);
+      String lastOwnerHash = hashes.get(hashes.size() - 1);
 
       //look for allowed
       for (AllowDenyList adList : allQuery.getResultList()) {
-
-        for (String hash : hashes) {
-          if (adList.getHash().equals(hash) && adList.isAllowed()) {
-            trusted = true;
-            break;
-          }
+        if (adList.getHash().equals(lastOwnerHash) && adList.isAllowed()) {
+          trusted = true;
+          break;
         }
       }
 
