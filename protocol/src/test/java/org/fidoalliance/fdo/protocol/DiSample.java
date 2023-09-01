@@ -94,8 +94,6 @@ class TestHmacFunction implements HmacFunction {
                     Mapper.INSTANCE.readValue(headerTag, OwnershipVoucherHeader.class);
         DiSample.setGuid(header.getGuid().toString());
         CryptoService cs = Config.getWorker(CryptoService.class);
-        PublicKey ownerKey = cs.decodeKey(header.getPublicKey());
-        KeySizeType ownerSize = new AlgorithmFinder().getKeySizeType(ownerKey);
         credential.setHmacSecret(cs.createHmacKey(hmacType));
         return cs.hash(hmacType, credential.getHmacSecret(), headerTag);
     }

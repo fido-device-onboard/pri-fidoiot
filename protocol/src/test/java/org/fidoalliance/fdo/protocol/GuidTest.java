@@ -14,7 +14,6 @@ public class GuidTest {
   public void Test() throws DecoderException, IOException {
 
     Guid guid1 = Guid.fromRandomUuid();
-    String str = guid1.toString();
 
     byte[] data = guid1.toBytes();
     Guid guid2 = Guid.fromBytes(data);

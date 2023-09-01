@@ -230,7 +230,7 @@ public class Config {
     for (Map.Entry<String, String> entry : map.entrySet()) {
       result.put(entry.getKey(), resolve(entry.getValue()));
     }
-    return map;
+    return result;
   }
 
 

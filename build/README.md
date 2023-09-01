@@ -13,7 +13,7 @@ Docker/Podman Script for building `pri-fidoiot` repository. Using this script yo
 
 ***NOTE***: Use the following commands to enable podman build support on RHEL.
 ```
-cd <fdo-pri-src>/component-samples/demo/scripts
+cd <fdo-pri-src>/build
 bash enable_podman_support.sh
 echo $'\nexport PODMAN_USERNS=keep-id' >> ~/.bashrc
 source ~/.bashrc

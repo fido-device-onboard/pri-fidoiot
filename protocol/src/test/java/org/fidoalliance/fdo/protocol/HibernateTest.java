@@ -10,32 +10,12 @@ import org.junit.jupiter.api.Test;
 
 public class HibernateTest {
 
-  private final String dbName = "test"; //will be test.mv.db
-  private static final int DEFAULT_PORT = 9092;
-
-  private void test(String className, Session session) {
-
-    Class stgClass = null;
-    try {
-      stgClass = Class.forName(className);
-      CriteriaBuilder cb = session.getCriteriaBuilder();
-      CriteriaQuery<?> cr = cb.createQuery(stgClass);
-      //session.createQuery(stgClass);
-    } catch (ClassNotFoundException e) {
-      System.out.println(e.getMessage());
-
-    }
-  }
-
-
-
   @Test
   public void Test() throws DecoderException, IOException {
     /*
     System.out.println(System.getProperty("user.dir"));
     List<String> tcpParams = new ArrayList<>();
     tcpParams.add("-ifNotExists");
-    //tcpParams.add("-baseDir");
 
 
 

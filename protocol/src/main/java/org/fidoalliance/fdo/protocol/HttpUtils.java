@@ -65,19 +65,20 @@ public class HttpUtils {
       throw new InvalidPathException(uri, "msgType not a number");
     }
     segFile = segFile.getParentFile();
-    if (!segFile.getName().equals(HttpUtils.MSG_COMPONENT)) {
+    if (segFile == null || !segFile.getName().equals(HttpUtils.MSG_COMPONENT)) {
       throw new InvalidPathException(uri, "msg expected");
     }
 
     segFile = segFile.getParentFile();
-    if (NumberUtils.isCreatable(segFile.getName())) {
-      message.setProtocolVersion(ProtocolVersion.fromString(segFile.getName()));
-    } else {
+
+    if (segFile == null || !NumberUtils.isCreatable(segFile.getName())) {
       throw new InvalidPathException(uri, "protocol version not a number");
+    } else {
+      message.setProtocolVersion(ProtocolVersion.fromString(segFile.getName()));
     }
 
     segFile = segFile.getParentFile();
-    if (!segFile.getName().equals(HttpUtils.FDO_COMPONENT)) {
+    if (segFile == null || !segFile.getName().equals(HttpUtils.FDO_COMPONENT)) {
       throw new InvalidPathException(uri, "fdo expected");
     }
 

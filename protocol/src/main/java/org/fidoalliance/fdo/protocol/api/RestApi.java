@@ -98,7 +98,10 @@ public class RestApi implements AutoCloseable {
           new InputStreamReader(getRequest().getInputStream(), StandardCharsets.UTF_8);
 
       StringWriter stringWriter = new StringWriter();
-      reader.transferTo(stringWriter);
+      int numChars = (int) reader.transferTo(stringWriter);
+      if (numChars == 0) {
+        return "";
+      }
       return stringWriter.toString();
     } catch (IOException e) {
       logger.error("Internal Server Error");
