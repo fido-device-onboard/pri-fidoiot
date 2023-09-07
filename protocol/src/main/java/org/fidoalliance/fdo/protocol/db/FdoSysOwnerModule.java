@@ -3,9 +3,14 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
@@ -43,6 +48,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
   private final LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+  private String fetchFileName;
 
   @Override
   public String getName() {
@@ -103,6 +109,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           }
         }
         break;
+      case FdoSys.FETCHFILE:
+        if (state.isActive()) {
+          fetchFileName = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+        }
       case FdoSys.DATA:
         if (state.isActive()) {
           byte[] data = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
@@ -174,6 +184,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         && extra.getFilter().containsKey(DevMod.KEY_ARCH);
   }
 
+  private String getAppData() throws IOException {
+    File file = new File(System.getProperty("app-data.dir"));
+    return file.getCanonicalPath();
+  }
+
   protected boolean checkFilter(Map<String, String> devMap, Map<String, String> filterMap) {
     return !devMap.entrySet().containsAll(filterMap.entrySet());
   }
@@ -187,7 +202,17 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
   protected void onFetch(ServiceInfoModuleState state, FdoSysModuleExtra extra,
       byte[] data) throws IOException {
 
-    logger.warn(new String(data, StandardCharsets.US_ASCII));
+    Path path = Paths.get(getAppData(), fetchFileName);
+    try {
+      if (Files.exists(path)) {
+        Files.write(path, data, StandardOpenOption.APPEND);
+      } else {
+        Files.write(path, data, StandardOpenOption.CREATE_NEW);
+      }
+    } catch (IOException e) {
+      logger.error("Error writing to file: " + e.getMessage());
+    }
+
   }
 
   protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, EotResult result)
