@@ -8,5 +8,5 @@
 # Builds device package
 
 echo -e "bulding device package"
-tar cvf device-package.tar.gz onboard-device.sh additonal-device-file.txt
+tar -czvf device-package.tar.gz onboard-device.sh additonal-device-file.txt
 echo -e "done building package"
