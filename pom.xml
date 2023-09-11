@@ -16,6 +16,10 @@
   <version>1.1.6</version>
   <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
+  
+  
+  
+  
 
   <!--
   to update all library and plugin versions to latest releases, use
