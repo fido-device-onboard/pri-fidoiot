@@ -32,6 +32,11 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
     super(t);
   }
 
+  /**
+   * Checks whether string contains only alphanumberic characters along with '_' and '-'.
+   * @param deviceString The string to be validated as a device string.
+   * @return True if the string is a valid device string, false otherwise.
+   */
   public boolean isValidString(String deviceString) {
     String[] invalidStrings = { "", "null", "none", "true", "false", "undefined", "undef",
         "NaN", "nil",
