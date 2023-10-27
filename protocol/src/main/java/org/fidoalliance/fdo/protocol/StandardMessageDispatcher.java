@@ -113,7 +113,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   private static final LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
 
   protected StandardCryptoService getCryptoService() {
-    return Config.getWorker(StandardCryptoService.class);  
+    return Config.getWorker(StandardCryptoService.class);
   }
 
   protected <T> T getWorker(Class<T> t) {
