@@ -113,7 +113,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   private static final LoggerService logger = new LoggerService(StandardMessageDispatcher.class);
 
   protected StandardCryptoService getCryptoService() {
-    return Config.getWorker(StandardCryptoService.class);
+    return Config.getWorker(StandardCryptoService.class);  
   }
 
   protected <T> T getWorker(Class<T> t) {
@@ -440,6 +440,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
     Nonce nonceTO0Sign = Nonce.fromRandomUuid();
     response.setAuthToken(createCwtSession(nonceTO0Sign));
+
+    if (request.getMessage().length != 1) {
+      throw new InvalidMessageException("Invalid message for the body");
+    }
 
     To0HelloAck helloAck = new To0HelloAck();
     helloAck.setNonce(nonceTO0Sign);
