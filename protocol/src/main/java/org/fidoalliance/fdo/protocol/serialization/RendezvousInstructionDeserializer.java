@@ -45,14 +45,17 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
         if (subNode.isNull()) {
           throw new InvalidMessageException("expecting rv owner port value");
         }
+        return Mapper.INSTANCE.writeValue(subNode.intValue());
       case DEV_PORT:
         if (subNode.isNull()) {
           throw new InvalidMessageException("expecting rv dev port value");
         }
+        return Mapper.INSTANCE.writeValue(subNode.intValue());
       case PROTOCOL:
         if (subNode.isNull() || subNode.intValue() < 1 || subNode.intValue() > 2) {
           throw new InvalidMessageException("expecting rv protocol value 1 or 2");
         }
+        return Mapper.INSTANCE.writeValue(subNode.intValue());
       case MEDIUM:
       case DELAYSEC:
         return Mapper.INSTANCE.writeValue(subNode.intValue());

@@ -509,59 +509,57 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0d to0d;
     CoseSign1 sign1;
     try {
-      To0OwnerSign ownerSign  = request.getMessage(To0OwnerSign.class);
-      to0d = Mapper.INSTANCE.readValue(ownerSign.getTo0d(),To0d.class);
+      To0OwnerSign ownerSign = request.getMessage(To0OwnerSign.class);
+      to0d = Mapper.INSTANCE.readValue(ownerSign.getTo0d(), To0d.class);
       sign1 = ownerSign.getTo1d();
     } catch (MessageBodyException e) {
-      To0OwnerSign2 ownerSign2  = request.getMessage(To0OwnerSign2.class);
+      To0OwnerSign2 ownerSign2 = request.getMessage(To0OwnerSign2.class);
       to0d = ownerSign2.getTo0d();
       sign1 = ownerSign2.getTo1d();
       logger.info("non conformant OwnerSign message received");
     }
-
-    OwnershipVoucher OV = to0d.getVoucher();
-    OwnershipVoucherHeader OVHeader = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
-        OwnershipVoucherHeader.class);
-
-    if (OVHeader.getGuid().toString().isEmpty()) {
-      throw new InvalidMessageException("GUID field in OV Header should not be empty");
-    }
-
-    if (OV.getVersion() != ProtocolVersion.V101) {
-      throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
-    }
-
-    
-    RendezvousInstruction RVInstruction_DNS = OVHeader.getRendezvousInfo().get(0).get(0);
-    if(ByteBuffer.wrap(RVInstruction_DNS.getValue()).getInt() != 5){
-      throw new InvalidMessageException("Invalid RVDNS value in OV Header");
-    }
-
-    RendezvousInstruction RVInstruction_DEV_PORT = OVHeader.getRendezvousInfo().get(0).get(1);
-    if(ByteBuffer.wrap(RVInstruction_DEV_PORT.getValue()).getInt() != 3){
-      throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
-    }
-    
-    RendezvousInstruction RVInstruction_PROTOCOL = OVHeader.getRendezvousInfo().get(0).get(2);
-    if(ByteBuffer.wrap(RVInstruction_PROTOCOL.getValue()).getInt() != 12){
-      throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
-    }
-
-    RendezvousInstruction RVInstruction_OWNER_PORT = OVHeader.getRendezvousInfo().get(0).get(4);
-    if(ByteBuffer.wrap(RVInstruction_OWNER_PORT.getValue()).getInt() != 4){
-      throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
-    }
-
-    PublicKeyEncoding MfgPubKeyEnc = OVHeader.getPublicKey().getEnc();
-    if(MfgPubKeyEnc.toInteger() < 0 || MfgPubKeyEnc.toInteger() > 3){
-      throw new InvalidMessageException("Invalid Encoding of Mfg Pubkey in OV Header");
-    }
-
     Nonce nonceTO0Sign = new Nonce();
     nonceTO0Sign.setNonce(cwtToken.getCwtId());
     if (!nonceTO0Sign.equals(to0d.getNonce())) {
       throw new InvalidMessageException("NonceTO0Sign does not match");
     }
+
+    OwnershipVoucherHeader ovHeader = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
+        OwnershipVoucherHeader.class);
+
+    if (ovHeader.getGuid().toString().isEmpty()) {
+      throw new InvalidMessageException("GUID field in OV Header should not be empty");
+    }
+
+    if (to0d.getVoucher().getVersion() != ProtocolVersion.V101) {
+      throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
+    }
+
+    RendezvousInstruction rvInstructionDns = ovHeader.getRendezvousInfo().get(0).get(0);
+    if (ByteBuffer.wrap(rvInstructionDns.getValue()).getInt() != 5) {
+      throw new InvalidMessageException("Invalid RVDNS value in OV Header");
+    }
+
+    RendezvousInstruction rvInstructionDevPort = ovHeader.getRendezvousInfo().get(0).get(1);
+    if (ByteBuffer.wrap(rvInstructionDevPort.getValue()).getInt() != 3) {
+      throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
+    }
+
+    RendezvousInstruction rvInstructionProtocol = ovHeader.getRendezvousInfo().get(0).get(2);
+    if (ByteBuffer.wrap(rvInstructionProtocol.getValue()).getInt() != 12) {
+      throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
+    }
+
+    RendezvousInstruction rvInstructionOwnerPort = ovHeader.getRendezvousInfo().get(0).get(4);
+    if (ByteBuffer.wrap(rvInstructionOwnerPort.getValue()).getInt() != 4) {
+      throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
+    }
+
+    PublicKeyEncoding mfgPubKeyEnc = ovHeader.getPublicKey().getEnc();
+    if (mfgPubKeyEnc.toInteger() < 0 || mfgPubKeyEnc.toInteger() > 3) {
+      throw new InvalidMessageException("Invalid Encoding of Mfg Pubkey in OV Header");
+    }
+    
     //verify to1d
     CryptoService cs = getCryptoService();
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(to0d.getVoucher());
