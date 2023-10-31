@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
@@ -535,24 +536,37 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
     }
 
-    RendezvousInstruction rvInstructionDns = ovHeader.getRendezvousInfo().get(0).get(0);
-    if (ByteBuffer.wrap(rvInstructionDns.getValue()).getInt() != 5) {
-      throw new InvalidMessageException("Invalid RVDNS value in OV Header");
-    }
+    RendezvousInfo rvInfo = ovHeader.getRendezvousInfo();
+    LinkedList<RendezvousDirective> directives = rvInfo;
 
-    RendezvousInstruction rvInstructionDevPort = ovHeader.getRendezvousInfo().get(0).get(1);
-    if (ByteBuffer.wrap(rvInstructionDevPort.getValue()).getInt() != 3) {
-      throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
-    }
+    for (RendezvousDirective directive : directives) {
+      LinkedList<RendezvousInstruction> instructions = directive;
+      for (RendezvousInstruction instruction : instructions) {
 
-    RendezvousInstruction rvInstructionProtocol = ovHeader.getRendezvousInfo().get(0).get(2);
-    if (ByteBuffer.wrap(rvInstructionProtocol.getValue()).getInt() != 12) {
-      throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
-    }
+        if (instruction.getVariable() == RendezvousVariable.DNS) {
+          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 5) {
+            throw new InvalidMessageException("Invalid RVDNS value in OV Header");
+          }
+        }
 
-    RendezvousInstruction rvInstructionOwnerPort = ovHeader.getRendezvousInfo().get(0).get(4);
-    if (ByteBuffer.wrap(rvInstructionOwnerPort.getValue()).getInt() != 4) {
-      throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
+        if (instruction.getVariable() == RendezvousVariable.DEV_PORT) {
+          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 3) {
+            throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
+          }
+        }
+
+        if (instruction.getVariable() == RendezvousVariable.PROTOCOL) {
+          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 12) {
+            throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
+          }
+        }
+
+        if (instruction.getVariable() == RendezvousVariable.OWNER_PORT) {
+          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 4) {
+            throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
+          }
+        }
+      }
     }
 
     PublicKeyEncoding mfgPubKeyEnc = ovHeader.getPublicKey().getEnc();
