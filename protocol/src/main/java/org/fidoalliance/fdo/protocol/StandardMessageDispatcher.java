@@ -80,6 +80,10 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
+import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
+import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
+import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
+import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleList;
@@ -513,6 +517,44 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       to0d = ownerSign2.getTo0d();
       sign1 = ownerSign2.getTo1d();
       logger.info("non conformant OwnerSign message received");
+    }
+
+    OwnershipVoucher OV = to0d.getVoucher();
+    OwnershipVoucherHeader OVHeader = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
+        OwnershipVoucherHeader.class);
+
+    if (OVHeader.getGuid().toString().isEmpty()) {
+      throw new InvalidMessageException("GUID field in OV Header should not be empty");
+    }
+
+    if (OV.getVersion() != ProtocolVersion.V101) {
+      throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
+    }
+
+    
+    RendezvousInstruction RVInstruction_DNS = OVHeader.getRendezvousInfo().get(0).get(0);
+    if(ByteBuffer.wrap(RVInstruction_DNS.getValue()).getInt() != 5){
+      throw new InvalidMessageException("Invalid RVDNS value in OV Header");
+    }
+
+    RendezvousInstruction RVInstruction_DEV_PORT = OVHeader.getRendezvousInfo().get(0).get(1);
+    if(ByteBuffer.wrap(RVInstruction_DEV_PORT.getValue()).getInt() != 3){
+      throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
+    }
+    
+    RendezvousInstruction RVInstruction_PROTOCOL = OVHeader.getRendezvousInfo().get(0).get(2);
+    if(ByteBuffer.wrap(RVInstruction_PROTOCOL.getValue()).getInt() != 12){
+      throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
+    }
+
+    RendezvousInstruction RVInstruction_OWNER_PORT = OVHeader.getRendezvousInfo().get(0).get(4);
+    if(ByteBuffer.wrap(RVInstruction_OWNER_PORT.getValue()).getInt() != 4){
+      throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
+    }
+
+    PublicKeyEncoding MfgPubKeyEnc = OVHeader.getPublicKey().getEnc();
+    if(MfgPubKeyEnc.toInteger() < 0 || MfgPubKeyEnc.toInteger() > 3){
+      throw new InvalidMessageException("Invalid Encoding of Mfg Pubkey in OV Header");
     }
 
     Nonce nonceTO0Sign = new Nonce();
