@@ -172,111 +172,114 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
     }
 
     ServiceInfoDocument document = state.getDocument();
-    FdoSysInstruction[] instructions =
-        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
+    if (!state.getActiveSent()) {
+      ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+      activePair.setKeyName(ACTIVE);
+      activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+      state.setActiveSent(true);
+      state.getGlobalState().getQueue().addFirst(activePair);
+    }
+    if (document.getInstructions() != null) {
+      FdoSysInstruction[] instructions =
+              Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
-    boolean skip = false;
-    for (int i = document.getIndex(); i < instructions.length; i++) {
+      boolean skip = false;
+      for (int i = document.getIndex(); i < instructions.length; i++) {
 
-      if (!checkProvider(instructions[i])) {
-        break;
-      }
+        if (!checkProvider(instructions[i])) {
+          break;
+        }
 
-      if (instructions[i].getFilter() != null) {
-        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
-      }
-      if (skip) {
+        if (instructions[i].getFilter() != null) {
+          skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+        }
+        if (skip) {
+          document.setIndex(i);
+          continue;
+        }
+
         document.setIndex(i);
-        continue;
-      }
 
-      document.setIndex(i);
+        if (instructions[i].getExecCbArgs() != null) {
+          extra.setName(instructions[i].getExecCbArgs()[0]);
 
-      if (instructions[i].getExecCbArgs() != null) {
-        extra.setName(instructions[i].getExecCbArgs()[0]);
+          ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(COMMAND);
+          kv.setValue(Mapper.INSTANCE.writeValue(instructions[i].getExecCbArgs()[0]));
+          state.getGlobalState().getQueue().add(kv);
 
-        ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-        kv.setKeyName(COMMAND);
-        kv.setValue(Mapper.INSTANCE.writeValue(instructions[i].getExecCbArgs()[0]));
-        state.getGlobalState().getQueue().add(kv);
-
-        //build remaining args
-        String[] commandArgs = new String[instructions[i].getExecCbArgs().length - 1];
-        int index = 0;
-        for (int j = 1; j < instructions[i].getExecCbArgs().length; j++) {
-          commandArgs[index++] = instructions[i].getExecCbArgs()[j];
-        }
-
-        kv = new ServiceInfoKeyValuePair();
-        kv.setKeyName(ARGS);
-        kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
-        state.getGlobalState().getQueue().add(kv);
-
-        if (instructions[i].getMayFail() != null) {
-          kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(MAY_FAIL);
-          if (instructions[i].getMayFail().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
-            kv.setValue(Mapper.INSTANCE.writeValue(true));
-          } else {
-            kv.setValue(Mapper.INSTANCE.writeValue(false));
+          //build remaining args
+          String[] commandArgs = new String[instructions[i].getExecCbArgs().length - 1];
+          int index = 0;
+          for (int j = 1; j < instructions[i].getExecCbArgs().length; j++) {
+            commandArgs[index++] = instructions[i].getExecCbArgs()[j];
           }
-          state.getGlobalState().getQueue().add(kv);
-        } else {
-          kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(MAY_FAIL);
-          kv.setValue(Mapper.INSTANCE.writeValue(false));
-          state.getGlobalState().getQueue().add(kv);
-        }
 
-        if (instructions[i].getReturnStdOut() != null) {
           kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(RETURN_STDOUT);
-          if (instructions[i].getReturnStdErr().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
-            kv.setValue(Mapper.INSTANCE.writeValue(true));
+          kv.setKeyName(ARGS);
+          kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
+          state.getGlobalState().getQueue().add(kv);
+
+          if (instructions[i].getMayFail() != null) {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(MAY_FAIL);
+            if (instructions[i].getMayFail().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
+              kv.setValue(Mapper.INSTANCE.writeValue(true));
+            } else {
+              kv.setValue(Mapper.INSTANCE.writeValue(false));
+            }
+            state.getGlobalState().getQueue().add(kv);
           } else {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(MAY_FAIL);
             kv.setValue(Mapper.INSTANCE.writeValue(false));
+            state.getGlobalState().getQueue().add(kv);
           }
-          state.getGlobalState().getQueue().add(kv);
-        } else {
-          kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(RETURN_STDOUT);
-          kv.setValue(Mapper.INSTANCE.writeValue(false));
-          state.getGlobalState().getQueue().add(kv);
-        }
 
-        if (instructions[i].getReturnStdErr() != null) {
-          kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(RETURN_STDERR);
-          if (instructions[i].getReturnStdErr().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
-            kv.setValue(Mapper.INSTANCE.writeValue(true));
+          if (instructions[i].getReturnStdOut() != null) {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(RETURN_STDOUT);
+            if (instructions[i].getReturnStdErr().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
+              kv.setValue(Mapper.INSTANCE.writeValue(true));
+            } else {
+              kv.setValue(Mapper.INSTANCE.writeValue(false));
+            }
+            state.getGlobalState().getQueue().add(kv);
           } else {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(RETURN_STDOUT);
             kv.setValue(Mapper.INSTANCE.writeValue(false));
+            state.getGlobalState().getQueue().add(kv);
           }
-          state.getGlobalState().getQueue().add(kv);
-        } else {
+
+          if (instructions[i].getReturnStdErr() != null) {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(RETURN_STDERR);
+            if (instructions[i].getReturnStdErr().compareToIgnoreCase(BOOLEAN_TRUE) == 0) {
+              kv.setValue(Mapper.INSTANCE.writeValue(true));
+            } else {
+              kv.setValue(Mapper.INSTANCE.writeValue(false));
+            }
+            state.getGlobalState().getQueue().add(kv);
+          } else {
+            kv = new ServiceInfoKeyValuePair();
+            kv.setKeyName(RETURN_STDERR);
+            kv.setValue(Mapper.INSTANCE.writeValue(false));
+            state.getGlobalState().getQueue().add(kv);
+          }
+
           kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(RETURN_STDERR);
-          kv.setValue(Mapper.INSTANCE.writeValue(false));
+          kv.setKeyName(EXECUTE);
+          kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
           state.getGlobalState().getQueue().add(kv);
-        }
 
-        kv = new ServiceInfoKeyValuePair();
-        kv.setKeyName(EXECUTE);
-        kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
-        state.getGlobalState().getQueue().add(kv);
 
-        if (!state.getActiveSent()) {
-          ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-          activePair.setKeyName(ACTIVE);
-          activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
-          state.setActiveSent(true);
-          state.getGlobalState().getQueue().addFirst(activePair);
+
         }
 
       }
 
     }
-
   }
 
 

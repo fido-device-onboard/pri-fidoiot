@@ -256,11 +256,11 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
           state.getGlobalState().getQueue().addFirst(kv);
           extra.setLength(fileLength);
 
-          kv = new ServiceInfoKeyValuePair();
-          kv.setKeyName(NAME);
-          kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
-          state.getGlobalState().getQueue().addFirst(kv);
-          extra.setName(instruction.getFileDesc());
+//          kv = new ServiceInfoKeyValuePair();
+//          kv.setKeyName(NAME);
+//          kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
+//          state.getGlobalState().getQueue().addFirst(kv);
+//          extra.setName(instruction.getFileDesc());
 
 
         } catch (SQLException | NoSuchAlgorithmException throwables) {
@@ -335,29 +335,31 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
     }
 
     ServiceInfoDocument document = state.getDocument();
-    FdoSysInstruction[] instructions =
-        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
+    if (document.getInstructions() != null) {
+      FdoSysInstruction[] instructions =
+              Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
-    boolean skip = false;
-    for (int i = document.getIndex(); i < instructions.length; i++) {
+      boolean skip = false;
+      for (int i = document.getIndex(); i < instructions.length; i++) {
 
-      if (!checkProvider(instructions[i])) {
-        break;
-      }
+        if (!checkProvider(instructions[i])) {
+          break;
+        }
 
-      if (instructions[i].getFilter() != null) {
-        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
-      }
-      if (skip) {
+        if (instructions[i].getFilter() != null) {
+          skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+        }
+        if (skip) {
+          document.setIndex(i);
+          continue;
+        }
+
         document.setIndex(i);
-        continue;
-      }
-
-      document.setIndex(i);
-      if (instructions[i].getFileDesc() != null) {
-        getFile(state, extra, instructions[i]);
-      } else {
-        break;
+        if (instructions[i].getFileDesc() != null) {
+          getFile(state, extra, instructions[i]);
+        } else {
+          break;
+        }
       }
     }
 

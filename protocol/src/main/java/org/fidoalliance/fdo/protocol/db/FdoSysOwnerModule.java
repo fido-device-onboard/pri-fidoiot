@@ -212,35 +212,37 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     }
 
     ServiceInfoDocument document = state.getDocument();
-    FdoSysInstruction[] instructions =
-        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
+    if (document.getInstructions()!= null) {
+      FdoSysInstruction[] instructions =
+              Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
-    boolean skip = false;
-    for (int i = document.getIndex(); i < instructions.length; i++) {
+      boolean skip = false;
+      for (int i = document.getIndex(); i < instructions.length; i++) {
 
-      if (!checkProvider(instructions[i])) {
-        break;
-      }
+        if (!checkProvider(instructions[i])) {
+          break;
+        }
 
-      if (instructions[i].getFilter() != null) {
-        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
-      }
-      if (skip) {
+        if (instructions[i].getFilter() != null) {
+          skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+        }
+        if (skip) {
+          document.setIndex(i);
+          continue;
+        }
+
         document.setIndex(i);
-        continue;
-      }
-
-      document.setIndex(i);
-      if (instructions[i].getFileDesc() != null) {
-        getFile(state, extra, instructions[i]);
-      } else if (instructions[i].getExecArgs() != null) {
-        getExec(state, extra, instructions[i]);
-      } else if (instructions[i].getExecCbArgs() != null) {
-        getExecCb(state, extra, instructions[i]);
-      } else if (instructions[i].getFetch() != null) {
-        getFetch(state, extra, instructions[i]);
-      } else {
-        break;
+        if (instructions[i].getFileDesc() != null) {
+          getFile(state, extra, instructions[i]);
+        } else if (instructions[i].getExecArgs() != null) {
+          getExec(state, extra, instructions[i]);
+        } else if (instructions[i].getExecCbArgs() != null) {
+          getExecCb(state, extra, instructions[i]);
+        } else if (instructions[i].getFetch() != null) {
+          getFetch(state, extra, instructions[i]);
+        } else {
+          break;
+        }
       }
     }
 
@@ -251,6 +253,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       state.setActiveSent(true);
       state.getGlobalState().getQueue().addFirst(activePair);
     }
+
   }
 
   protected void getExec(ServiceInfoModuleState state,

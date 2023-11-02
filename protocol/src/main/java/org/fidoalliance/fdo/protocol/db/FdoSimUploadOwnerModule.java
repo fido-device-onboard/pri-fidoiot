@@ -188,46 +188,48 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
     }
 
     ServiceInfoDocument document = state.getDocument();
-    FdoSysInstruction[] instructions =
-        Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
+    if (document.getInstructions() != null) {
+      FdoSysInstruction[] instructions =
+              Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
-    boolean skip = false;
-    for (int i = document.getIndex(); i < instructions.length; i++) {
+      boolean skip = false;
+      for (int i = document.getIndex(); i < instructions.length; i++) {
 
-      if (!checkProvider(instructions[i])) {
-        break;
-      }
+        if (!checkProvider(instructions[i])) {
+          break;
+        }
 
-      if (instructions[i].getFilter() != null) {
-        skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
-      }
-      if (skip) {
+        if (instructions[i].getFilter() != null) {
+          skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+        }
+        if (skip) {
+          document.setIndex(i);
+          continue;
+        }
+
         document.setIndex(i);
-        continue;
-      }
 
-      document.setIndex(i);
+        if (instructions[i].getFetch() != null) {
+          extra.setName(instructions[i].getFetch());
+          extra.setChecksum(new byte[0]);
+          ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(NEED_SHA);
+          kv.setValue(Mapper.INSTANCE.writeValue(true));
+          state.getGlobalState().getQueue().add(kv);
 
-      if (instructions[i].getFetch() != null) {
-        extra.setName(instructions[i].getFetch());
-        extra.setChecksum(new byte[0]);
-        ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-        kv.setKeyName(NEED_SHA);
-        kv.setValue(Mapper.INSTANCE.writeValue(true));
-        state.getGlobalState().getQueue().add(kv);
+          kv = new ServiceInfoKeyValuePair();
+          kv.setKeyName(NAME);
+          kv.setValue(Mapper.INSTANCE.writeValue(instructions[i].getFetch()));
+          state.getGlobalState().getQueue().add(kv);
+          extra.setName(instructions[i].getFetch());
 
-        kv = new ServiceInfoKeyValuePair();
-        kv.setKeyName(NAME);
-        kv.setValue(Mapper.INSTANCE.writeValue(instructions[i].getFetch()));
-        state.getGlobalState().getQueue().add(kv);
-        extra.setName(instructions[i].getFetch());
-
-        if (!state.getActiveSent()) {
-          ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-          activePair.setKeyName(ACTIVE);
-          activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
-          state.setActiveSent(true);
-          state.getGlobalState().getQueue().addFirst(activePair);
+          if (!state.getActiveSent()) {
+            ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+            activePair.setKeyName(ACTIVE);
+            activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+            state.setActiveSent(true);
+            state.getGlobalState().getQueue().addFirst(activePair);
+          }
         }
       }
     }
