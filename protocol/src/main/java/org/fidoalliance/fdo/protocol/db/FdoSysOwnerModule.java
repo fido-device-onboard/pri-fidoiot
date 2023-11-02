@@ -212,7 +212,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     }
 
     ServiceInfoDocument document = state.getDocument();
-    if (document.getInstructions()!= null) {
+    if (document.getInstructions() != null) {
       FdoSysInstruction[] instructions =
               Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 

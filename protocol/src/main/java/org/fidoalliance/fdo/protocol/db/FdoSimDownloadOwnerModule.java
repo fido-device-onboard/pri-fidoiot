@@ -256,11 +256,11 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
           state.getGlobalState().getQueue().addFirst(kv);
           extra.setLength(fileLength);
 
-//          kv = new ServiceInfoKeyValuePair();
-//          kv.setKeyName(NAME);
-//          kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
-//          state.getGlobalState().getQueue().addFirst(kv);
-//          extra.setName(instruction.getFileDesc());
+          //kv = new ServiceInfoKeyValuePair();
+          //kv.setKeyName(NAME);
+          //kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
+          //state.getGlobalState().getQueue().addFirst(kv);
+          //extra.setName(instruction.getFileDesc());
 
 
         } catch (SQLException | NoSuchAlgorithmException throwables) {
