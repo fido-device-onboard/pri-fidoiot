@@ -87,6 +87,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardExceptionConsumer
   - org.fidoalliance.fdo.protocol.StandardMessageDispatcher
   - org.fidoalliance.fdo.protocol.StandardCryptoService
+  # - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
   - org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier
   - org.fidoalliance.fdo.sample.FileCredentialConsumer
   - org.fidoalliance.fdo.sample.FileCredentialSupplier 
@@ -107,3 +108,9 @@ workers:
 system-properties:
   log4j.configurationFile: log4j2.xml
   app-data.dir: ./app-data
+  # javax.net.ssl.keyStorePassword: default
+  # javax.net.ssl.trustStorePassword: default
+  # javax.net.ssl.keyStore: ./app-data/api-user.pem
+  # javax.net.ssl.trustStore: ./app-data/ca-cert.pem
+  # javax.net.ssl.keyStoreType: PEM
+  # javax.net.ssl.trustStoreType: PEM
