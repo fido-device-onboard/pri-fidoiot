@@ -187,7 +187,7 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
       for (int i = document.getIndex(); i < instructions.length; i++) {
 
         if (!checkProvider(instructions[i])) {
-          break;
+          continue;
         }
 
         if (instructions[i].getFilter() != null) {
