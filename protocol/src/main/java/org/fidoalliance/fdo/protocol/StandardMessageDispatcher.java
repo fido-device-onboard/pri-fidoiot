@@ -584,7 +584,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       isValidRVinfo |= isValidDirective;
     }
 
-    if(!isValidRVinfo){
+    if (!isValidRVinfo) {
       throw new InvalidMessageException("Invalid RendezvousInfo in OV Header");
     }
 
