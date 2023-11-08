@@ -543,34 +543,49 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     RendezvousInfo rvInfo = ovHeader.getRendezvousInfo();
     LinkedList<RendezvousDirective> directives = rvInfo;
 
+    boolean isValidRVinfo = false;
     for (RendezvousDirective directive : directives) {
       LinkedList<RendezvousInstruction> instructions = directive;
+      boolean isValidDirective = true;
       for (RendezvousInstruction instruction : instructions) {
 
         if (instruction.getVariable() == RendezvousVariable.DNS) {
           if (ByteBuffer.wrap(instruction.getValue()).getInt() != 5) {
-            throw new InvalidMessageException("Invalid RVDNS value in OV Header");
+            logger.info("Invalid RVDNS value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
           }
         }
 
         if (instruction.getVariable() == RendezvousVariable.DEV_PORT) {
           if (ByteBuffer.wrap(instruction.getValue()).getInt() != 3) {
-            throw new InvalidMessageException("Invalid RVDevPort value in OV Header");
+            logger.info("Invalid RVDevPort value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
           }
         }
 
         if (instruction.getVariable() == RendezvousVariable.PROTOCOL) {
           if (ByteBuffer.wrap(instruction.getValue()).getInt() != 12) {
-            throw new InvalidMessageException("Invalid RVProtocol value in OV Header");
+            logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
           }
         }
 
         if (instruction.getVariable() == RendezvousVariable.OWNER_PORT) {
           if (ByteBuffer.wrap(instruction.getValue()).getInt() != 4) {
-            throw new InvalidMessageException("Invalid RVOwnerPort value in OV Header");
+            logger.info("Invalid RVOwnerPort value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
           }
         }
       }
+      isValidRVinfo |= isValidDirective;
+    }
+
+    if(!isValidRVinfo){
+      throw new InvalidMessageException("Invalid RendezvousInfo in OV Header");
     }
 
     PublicKeyEncoding mfgPubKeyEnc = ovHeader.getPublicKey().getEnc();
