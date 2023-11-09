@@ -262,6 +262,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *fetch* - This command returns the fetched file from client filesystem.
 
+    *owner_exec* - This command is a generic execution module that can perform various tasks, such as downloading files, running scripts, and executing commands
+
     Sample SVI instruction :
   
     `{"filedesc" : "sample.txt","resource" : "http/https url"},
@@ -272,17 +274,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
      `{"filedesc" : "sample.txt","resource" : "database resource"},
       {"exec" :"cat sample.txt"}`
 
-    *owner_exec* - This command is a generic execution module that can perform various tasks, such as downloading files, running scripts, and executing commands
-
     Sample SVI instruction (with owner_exec):
-
-    `{"owner_exec": ["curl", "https://example.com/file.zip", "--output", "file.zip"]}`
-
-    or
-
-    `{ "owner_exec" : ["cmd.exe", "/C", "start", "script.bat"] }`
-
-    or
 
     `{ "owner_exec" : ["curl", "—location —digest", "-U username: -P:xyz", "https://sample:9999/files"] }`
 
