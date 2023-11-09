@@ -28,8 +28,8 @@
 
 
     <!-- Dependency Version -->
-    <bcpkix.version>1.74</bcpkix.version>
-    <bcprov.version>1.74</bcprov.version>
+    <bcpkix.version>1.76</bcpkix.version>
+    <bcprov.version>1.76</bcprov.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-codec.version>1.15</commons-codec.version>
     <commons-text.version>1.10.0</commons-text.version>
@@ -42,7 +42,7 @@
     <log4j.version>2.17.2</log4j.version>
     <slf4j.version>1.7.36</slf4j.version>
     <hibernate.version>6.1.0.Final</hibernate.version>
-    <tomcat.version>10.1.10</tomcat.version>
+    <tomcat.version>10.1.15</tomcat.version>
     <apache-httpcomponents.version>4.5.13</apache-httpcomponents.version>
     <snakeyaml.version>2.0</snakeyaml.version>
     <jackson-dataformat.version>2.15.2</jackson-dataformat.version>
@@ -50,7 +50,7 @@
     <cose-java.version>1.1.0</cose-java.version>
 
     <!-- Database Client Version -->
-    <h2db.version>2.2.220</h2db.version>
+    <h2db.version>2.2.224</h2db.version>
     <mariadb.version>3.0.5</mariadb.version>
     <mysql.version>8.0.33</mysql.version>
     <postgresql.version>42.5.2</postgresql.version>
