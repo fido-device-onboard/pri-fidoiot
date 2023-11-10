@@ -17,7 +17,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.fidoalliance.fdo.protocol.dispatch.ExceptionConsumer;
 import org.fidoalliance.fdo.protocol.message.AnyType;
+import org.fidoalliance.fdo.protocol.message.DeviceCredential;
 import org.fidoalliance.fdo.protocol.message.MsgType;
+import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 
@@ -227,7 +229,9 @@ public abstract class HttpClient implements Runnable {
         logger.info("all instructions exhausted");
 
         if (getRequest().getMsgType() == MsgType.TO0_HELLO) {
-          logger.info("Failed TO0 with error: " + e.getMessage());
+          DeviceCredential deviceCredential = getRequest().getExtra().get(DeviceCredential.class);
+          String guid = deviceCredential.getGuid().toString();
+          logger.info("Failed TO0 of device with guid" + guid + " with error " + e.getMessage());
         }
         
         throw new IOException(e);
