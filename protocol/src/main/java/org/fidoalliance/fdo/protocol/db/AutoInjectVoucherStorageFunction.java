@@ -96,7 +96,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
 
       To0d to0d = new To0d();
       to0d.setVoucher(ownershipVoucher);
-      to0d.setWaitSeconds(Duration.ofDays(360 * 10).toSeconds());
+      to0d.setWaitSeconds(Duration.ofDays(360).toSeconds());
       to0d.setNonce(Nonce.fromRandomUuid());
 
       HashType hashType = new AlgorithmFinder().getCompatibleHashType(
