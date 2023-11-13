@@ -231,7 +231,7 @@ public abstract class HttpClient implements Runnable {
         if (getRequest().getMsgType() == MsgType.TO0_HELLO) {
           DeviceCredential deviceCredential = getRequest().getExtra().get(DeviceCredential.class);
           String guid = deviceCredential.getGuid().toString();
-          logger.info("Failed TO0 of device with guid" + guid + " with error " + e.getMessage());
+          logger.info("Failed TO0 of device with guid: " + guid + " with error " + e.getMessage());
         }
         
         throw new IOException(e);
