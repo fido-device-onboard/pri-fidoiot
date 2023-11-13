@@ -366,12 +366,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
   }
 
-  private String getAppData() throws IOException {
-    File file = new File(System.getProperty("app-data.dir"));
-    String canonicalPath = file.getCanonicalPath();
-    return canonicalPath;
-  }
-
   private ProcessBuilder.Redirect getExecOutputRedirect() {
     return execOutputRedirect;
   }
