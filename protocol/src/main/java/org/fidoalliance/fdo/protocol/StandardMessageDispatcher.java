@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
@@ -84,6 +85,7 @@ import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
+import org.fidoalliance.fdo.protocol.message.RendezvousProtocol;
 import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
@@ -540,41 +542,51 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
     }
 
-    RendezvousInfo rvInfo = ovHeader.getRendezvousInfo();
-    LinkedList<RendezvousDirective> directives = rvInfo;
+    RendezvousInfo info = ovHeader.getRendezvousInfo();
 
     boolean isValidRVinfo = false;
-    for (RendezvousDirective directive : directives) {
-      LinkedList<RendezvousInstruction> instructions = directive;
-      boolean isValidDirective = true;
-      for (RendezvousInstruction instruction : instructions) {
 
-        if (instruction.getVariable() == RendezvousVariable.DNS) {
-          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 5) {
+    for (RendezvousDirective directive : info) {
+      boolean isValidDirective = true;
+      String dns = null;
+      Integer devPort = Integer.valueOf(80);
+      Integer ownerPort = Integer.valueOf(443);
+
+      for (RendezvousInstruction instruction : directive) {
+
+        RendezvousVariable variable = instruction.getVariable();
+
+        if (variable == RendezvousVariable.DNS) {
+          dns = Mapper.INSTANCE.readValue(instruction.getValue(), String.class);
+          if (variable.toInteger() != 5 || dns.isEmpty() || dns == null) {
             logger.info("Invalid RVDNS value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
           }
         }
 
-        if (instruction.getVariable() == RendezvousVariable.DEV_PORT) {
-          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 3) {
+        if (variable == RendezvousVariable.DEV_PORT) {
+          devPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+          if (variable.toInteger() != 3 || devPort == null) {
             logger.info("Invalid RVDevPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
           }
         }
 
-        if (instruction.getVariable() == RendezvousVariable.PROTOCOL) {
-          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 12) {
+        if (variable == RendezvousVariable.PROTOCOL) {
+          RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
+                RendezvousProtocol.class);
+          if (variable.toInteger() != 12 || rvp.toString().isEmpty() || rvp == null) {
             logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
           }
         }
 
-        if (instruction.getVariable() == RendezvousVariable.OWNER_PORT) {
-          if (ByteBuffer.wrap(instruction.getValue()).getInt() != 4) {
+        if (variable == RendezvousVariable.OWNER_PORT) {
+          ownerPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+          if (variable.toInteger() != 4 || ownerPort == null) {
             logger.info("Invalid RVOwnerPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
