@@ -335,6 +335,12 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
 
     String fileName = fetchFileName;
     logger.info("Filename " + fileName);
+
+    ServiceInfoKeyValuePair kvPair = new ServiceInfoKeyValuePair();
+    kvPair.setKeyName(FdoSys.FETCHFILE);
+    kvPair.setValue(Mapper.INSTANCE.writeValue(fileName));
+    queue.add(kvPair);
+
     if (!Path.of(fetchFileName).isAbsolute()) {
       fileName = Path.of(getAppData(), fetchFileName).toString();
     }
