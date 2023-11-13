@@ -1,3 +1,4 @@
+
 # Getting the Executable
 
 Use the following commands to build FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) HTTP Device Component sample source.
@@ -22,6 +23,44 @@ All the runtime configurations for the device is specified in `service.yml` file
 
 
 - `workers:` The section contains the configuration to select desired functionality for the device. The deployer can pick and choose the functionality during runtime.
+
+###  DI with mTLS
+1. To execute DI with mTLS, first uncomment the following lines from `<fdo-pri-src>/component-samples/demo/aio/WEB-INF/Web.xml` or `<fdo-pri-src>/component-samples/demo/manufacturer/WEB-INF/Web.xml` and start the sevices.
+
+```
+  <security-constraint>
+    <web-resource-collection>
+        <web-resource-name>apis</web-resource-name>
+        <url-pattern>/api/v1/*</url-pattern>
+        <!-- <url-pattern>/fdo/101/msg/10</url-pattern>
+        <url-pattern>/fdo/101/msg/12</url-pattern> -->
+    </web-resource-collection>
+    <auth-constraint>
+        <role-name>api</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  ```
+
+2.  Copy `api-user.pem` and `ca-cert.pem` into `demo/device/app-data` folder.
+3. Disable the following workers.
+`- org.fidoalliance.fdo.protocol.SelfSignedHttpClientSupplier`
+4. Enable the following workers.
+`- org.fidoalliance.fdo.protocol.StandardHttpClientSupplier`
+5. Then uncomment the following lines from `<fdo-pri-src>/component-samples/demo/device/service.yml`
+
+```
+system-properties:
+  # javax.net.ssl.keyStorePassword: default
+  # javax.net.ssl.trustStorePassword: default
+  # javax.net.ssl.keyStore: ./app-data/api-user.pem
+  # javax.net.ssl.trustStore: ./app-data/ca-cert.pem
+  # javax.net.ssl.keyStoreType: PEM
+  # javax.net.ssl.trustStoreType: PEM
+```
+
 
 
 # Starting the Device Service
