@@ -225,6 +225,11 @@ public abstract class HttpClient implements Runnable {
         }
 
         logger.info("all instructions exhausted");
+
+        if (getRequest().getMsgType() == MsgType.TO0_HELLO) {
+          logger.info("Failed TO0 with error: " + e.getMessage());
+        }
+        
         throw new IOException(e);
       }
 

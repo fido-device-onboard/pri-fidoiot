@@ -9,6 +9,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.fidoalliance.fdo.protocol.InvalidMessageException;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.CertChain;
@@ -28,6 +32,25 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
     super(t);
   }
 
+  /**
+   * Checks whether string contains only alphanumberic characters along with '_' and '-'.
+   * @param deviceString The string to be validated as a device string.
+   * @return True if the string is a valid device string, false otherwise.
+   */
+  public boolean isValidString(String deviceString) {
+    String[] invalidStrings = { "", "null", "none", "true", "false", "undefined", "undef",
+        "NaN", "nil",
+        "_", "-", "--", "--version", "--help" };
+
+    Boolean invalidStringMatch = Arrays.stream(invalidStrings).anyMatch(
+        invalid -> invalid.equalsIgnoreCase(deviceString));
+
+    Boolean invalidCharMatch = deviceString.chars().anyMatch(
+        c -> !Character.isLetterOrDigit(c) && c != '_' && c != '-');
+
+    return !invalidStringMatch && !invalidCharMatch;
+  }
+
   @Override
   public ManufacturingInfo deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
@@ -38,8 +61,23 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
 
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
     info.setKeyEnc(PublicKeyEncoding.fromNumber(node.get(index++).intValue()));
-    info.setSerialNumber(node.get(index++).textValue());
-    info.setDeviceInfo(node.get(index++).textValue());
+
+    String serialNumber = node.get(index++).textValue();
+
+    if (isValidString(serialNumber)) {
+      info.setSerialNumber(serialNumber);
+    } else {
+      throw new InvalidMessageException("Invalid Serial Number");
+    }
+
+    String deviceInfo = node.get(index++).textValue();
+
+    if (isValidString(deviceInfo)) {
+      info.setDeviceInfo(deviceInfo);
+    } else {
+      throw new InvalidMessageException("Invalid Device Info");
+    }
+
     if (index < node.size()) {
       JsonNode subNode = node.get(index++);
       if (subNode.isBinary()) {
