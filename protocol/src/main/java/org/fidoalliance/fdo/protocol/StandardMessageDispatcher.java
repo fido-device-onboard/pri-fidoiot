@@ -447,6 +447,10 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     Nonce nonceTO0Sign = Nonce.fromRandomUuid();
     response.setAuthToken(createCwtSession(nonceTO0Sign));
 
+    if (request.getMessage().length != 1) {
+      throw new InvalidMessageException("Invalid message for the body");
+    }
+
     To0HelloAck helloAck = new To0HelloAck();
     helloAck.setNonce(nonceTO0Sign);
     response.setMessage(Mapper.INSTANCE.writeValue(helloAck));

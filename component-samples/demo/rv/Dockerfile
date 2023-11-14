@@ -4,8 +4,7 @@
 FROM ubuntu:22.04
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update 
-RUN apt-get install -y openjdk-17-jdk
+RUN apt-get update && apt-get install -y openjdk-17-jre wget --no-install-recommends
 
 RUN useradd -ms /bin/bash fdo
 WORKDIR /home/fdo/
@@ -28,3 +27,6 @@ USER fdo
 
 # Configure and start all-in-one
 CMD ["/usr/lib/jvm/java-17-openjdk-amd64/bin/java", "-jar", "aio.jar"]
+
+#Docker image healthcheck
+HEALTHCHECK --interval=30s --timeout=30s CMD wget --spider -Y off http://localhost:8040/health || exit 1
