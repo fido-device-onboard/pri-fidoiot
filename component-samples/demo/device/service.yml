@@ -100,12 +100,12 @@ workers:
   - org.fidoalliance.fdo.sample.StandardCredReuseFunction
   #- org.fidoalliance.fdo.sample.UnsupportedCredReuseFunction
   - org.fidoalliance.fdo.sample.StandardDeviceModule
-  - org.fidoalliance.fdo.sample.ConformanceDeviceModule
+  #- org.fidoalliance.fdo.sample.ConformanceDeviceModule
   - org.fidoalliance.fdo.sample.FdoSimDownloadDeviceModule
-  - org.fidoalliance.fdo.sample.FdoSimUploadDeviceModule
+  #- org.fidoalliance.fdo.sample.FdoSimUploadDeviceModule
   - org.fidoalliance.fdo.sample.FdoSimCommandDeviceModule
-  - org.fidoalliance.fdo.sample.FdoSimWebGetDeviceModule
-  - org.fidoalliance.fdo.sample.FdoSimCsrDeviceModule
+  #- org.fidoalliance.fdo.sample.FdoSimWebGetDeviceModule
+  #- org.fidoalliance.fdo.sample.FdoSimCsrDeviceModule
   - org.fidoalliance.fdo.sample.FdoSysDeviceModule
 
 

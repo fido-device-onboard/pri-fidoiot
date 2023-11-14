@@ -276,8 +276,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           getExecCb(state, extra, instructions[i]);
         } else if (instructions[i].getFetch() != null) {
           getFetch(state, extra, instructions[i]);
-        } else if (instruction.getOwnerExec() != null) {
-            getOwnerExec(state, extra, instruction);
+        } else if (instructions[i].getOwnerExec() != null) {
+          getOwnerExec(state, extra, instructions[i]);
         } else {
           break;
         }
