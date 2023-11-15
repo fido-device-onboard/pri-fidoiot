@@ -53,7 +53,7 @@ http-server:
 
 owner:
    keystore: 
-     path: owner.p12
+     path: reseller.p12
      store-type: PKCS12
      password: $(encrypt_password)
 
