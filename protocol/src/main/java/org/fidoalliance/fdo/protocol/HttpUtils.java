@@ -174,6 +174,9 @@ public class HttpUtils {
         }
       }
 
+      if (devSchemes.isEmpty()) {
+        devSchemes.add(HTTPS_SCHEME);
+      }
       //done getting both
       if (!isDevice && devOnly) {
         continue;
@@ -182,9 +185,6 @@ public class HttpUtils {
         continue;
       }
 
-      if (dns == null && ipAddress == null) {
-        continue;
-      }
       if (dns == null && ipAddress == null) {
         continue;
       }
