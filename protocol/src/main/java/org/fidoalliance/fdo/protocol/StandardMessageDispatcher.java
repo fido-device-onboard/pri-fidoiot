@@ -709,6 +709,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     OnboardingConfig onboardConfig = new OnboardConfigSupplier().get();
     if (onboardConfig.getMaxMessageSize() != null) {
       int maxMessageSize = onboardConfig.getMaxMessageSize();
+      if (maxMessageSize != 0) {
+        throw new InvalidMessageException("Invalid maxMessageSize value should only accept 0");
+      }
       hdrPayload.setMaxMessageSize(maxMessageSize);
     } else {
       hdrPayload.setMaxMessageSize(0);
