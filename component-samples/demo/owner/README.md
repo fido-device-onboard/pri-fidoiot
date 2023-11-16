@@ -8,7 +8,7 @@ The FDO Owner Service is designed to onboard the client device to a management s
 
 The following are the system requirements for the FDO Owner Service.
 - Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
-- Java* Development Kit 11
+- Java* Development Kit 17
 - Apache Maven* 3.6.3 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
 - Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
@@ -136,6 +136,8 @@ In case you need super user access, prefix 'sudo -E' to above command.
 | GET /api/v1/owner/vouchers | Returns a list of all Ownership Voucher GUIDs. | | | | line separated list of GUIDs | curl  -D - --digest -u ${api_user}: --location --request GET "http://host.docker.internal:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' |
 | GET /api/v1/owner/vouchers/<device_guid> | Returns the Ownership Voucher for the specified GUID. | Path - id: Device GUID | | | Ownership Voucher | `curl  -D - --digest -u ${api_user}: --location --request GET "http://host.docker.internal:8042/api/v1/owner/vouchers/${device_guid}" --header 'Content-Type: text/plain'` |
 | POST /api/v1/owner/vouchers/ | Insert Ownership Voucher against the specified GUID in `ONBOARDING_VOUCHER` table. | | text/plain | Content of Ownership Voucher in PEM Format | Guid of the device | ` curl  -D - --digest -u ${api_user}: --location --request POST "http://host.docker.internal:8042/api/v1/owner/vouchers" --header 'Content-Type: text/plain' --data-raw '${voucher}' `|
+| GET /api/v1/owner/vouchers/<serialNo> | Returns the Ownership Voucher for the specified serial number. | Path - id: Device SerialNo | | | Ownership Voucher | curl  -D - --digest -u ${api_user}: --location --request GET "http://host.docker.internal:8080/api/v1/owner/vouchers/${device_serialno}" --header 'Content-Type: text/plain' |
+| POST /api/v1/owner/vouchers/<serialNo> | Insert Ownership Voucher against the specified serialnumber in `ONBOARDING_VOUCHER` table.  The serialno to guid mapping will be preserved in 'VOUCHER_ALIAS' table | | text/plain | Content of Ownership Voucher in PEM Format | Guid of the device |  curl  -D - --digest -u ${api_user}: --location --request POST "http://host.docker.internal:8080/api/v1/owner/vouchers/${device_serialno}" --header 'Content-Type: text/plain' --data-raw '${voucher}' |
 | GET /api/v1/logs | Serves the log from the owner service | | | | owner logs| curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8042/api/v1/logs' | 
 | DELETE /api/v1/logs | Deletes the log from the owner service | | |  | | curl  -D - --digest -u ${api_user}:  --location --request DELETE 'http://host.docker.internal:8042/api/v1/logs' |
 | GET /health | Returns the health status |  |  | | Current version |  curl  -D - --digest -u ${api_user}:  --location --request GET 'http://host.docker.internal:8042/health'|

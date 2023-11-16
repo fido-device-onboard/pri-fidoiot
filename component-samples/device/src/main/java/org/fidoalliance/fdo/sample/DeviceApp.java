@@ -5,13 +5,11 @@ package org.fidoalliance.fdo.sample;
 
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -63,7 +61,7 @@ public class DeviceApp extends HttpClient {
     try {
       new DeviceApp().run();
     } catch (Throwable e) {
-      new RuntimeException(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -72,9 +70,11 @@ public class DeviceApp extends HttpClient {
   public void run() {
 
     try {
-      logger.info("Starting Fdo Device");
+      logger.info("Starting FDO Device");
       super.run();
-      logger.info("Starting Fdo Completed");
+    } catch (RuntimeException e) {
+      logger.error(e.getMessage());
+      logger.info("Exiting FDO Device Application");
     } catch (Throwable throwable) {
       DispatchMessage prevMessage = new DispatchMessage();
       prevMessage.setMsgType(MsgType.DI_APP_START);
@@ -86,6 +86,7 @@ public class DeviceApp extends HttpClient {
         logger.error("failed log exception");
         // already in exception handler
       }
+      logger.info("Exiting FDO Device Application");
     }
   }
 
@@ -104,6 +105,7 @@ public class DeviceApp extends HttpClient {
       final DeviceCredential devCredential = Config.getWorker(DeviceCredentialSupplier.class).get();
       if (devCredential == null) {
         generateDiHello();
+        logger.info("Generating Device Credential file");
       } else {
         setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
 
@@ -145,6 +147,7 @@ public class DeviceApp extends HttpClient {
     logger.info("max message size is " + config.getMaxMessageSize());
 
     helloDevice.setGuid(cred.getGuid());
+    logger.info("GUID is " + cred.getGuid());
     Nonce nonceTO2ProveOv = Nonce.fromRandomUuid();
     helloDevice.setProveTo2Ov(nonceTO2ProveOv);
     helloDevice.setKexSuiteName(config.getKexSuite());
@@ -201,7 +204,7 @@ public class DeviceApp extends HttpClient {
     mfgInfo.setSerialNumber(serialNo);
     mfgInfo.setCertInfo(AnyType.fromObject(csr));
     mfgInfo.setDeviceInfo("DemoDevice");
-
+    logger.info("Device Info: " + mfgInfo.getDeviceInfo());
     AppStart appStart = new AppStart();
     appStart.setManufacturingInfo(Mapper.INSTANCE.writeValue(mfgInfo));
 
@@ -231,7 +234,7 @@ public class DeviceApp extends HttpClient {
       final ContentSigner signer =
           new JcaContentSignerBuilder(cert.getSigAlgName()).build(signingKey);
 
-      final X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+      final X500Name x500name = new X500Name("CN=Fdo Device");
 
       final PKCS10CertificationRequestBuilder csrBuilder =
           new JcaPKCS10CertificationRequestBuilder(x500name,
@@ -240,7 +243,8 @@ public class DeviceApp extends HttpClient {
       final PKCS10CertificationRequest pkcs10 = csrBuilder.build(signer);
       return pkcs10.getEncoded();
 
-    } catch (OperatorCreationException | CertificateEncodingException e) {
+    } catch (OperatorCreationException e) {
+      logger.error("Operator Creation or Certificate Encoding Failed :" + e.getMessage());
       throw new IOException(e);
     } finally {
       cs.destroyKey(signingKey);

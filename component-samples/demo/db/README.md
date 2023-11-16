@@ -15,8 +15,11 @@ The following are the system requirements for FDO DB.
 
 The FDO DB can be executed as a docker service only. 
 
+
+***NOTE***: If MariaDB's `latest` or `lts` tag is pulling 11.* version. Make sure to remove the deprecated configuration variables in `custom/config-file.cnf` [Check for deprecated variables](https://mariadb.com/kb/en/server-system-variables/#list-of-server-system-variables).
+
 Generate the required credentials keypair and certificates using the 'keys_gen.sh' script present  in `<fdo-pri-src>/component-samples/demo/scripts/`.
-[Learn more about key generation](../../../README.md#generating-random-passwords-using-keysgensh)
+[Learn more about key generation](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 At the end of initialization of DB service, you will see following statement on the console. 
 

@@ -23,7 +23,7 @@ import java.util.Scanner;
 
 public class PemKeyStoreImpl extends KeyStoreSpi {
 
-  private final class PemEntry {
+  private static final class PemEntry {
 
     public PrivateKey key;
     public Certificate cert;

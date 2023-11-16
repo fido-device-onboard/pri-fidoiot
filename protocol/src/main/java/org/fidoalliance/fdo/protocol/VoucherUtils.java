@@ -19,6 +19,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntries;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherEntryPayload;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
+import org.fidoalliance.fdo.protocol.message.PublicKeyType;
 import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
@@ -112,9 +114,10 @@ public class VoucherUtils {
     entryPayload.setHeaderHash(hdrHash);
     entryPayload.setExtra(Config.getWorker(ExtraInfoSupplier.class).get());
 
-    OwnerPublicKey nextOwnerKey = cs.encodeKey(prevOwnerPubKey.getType(),
-        prevOwnerPubKey.getEnc(),
-        nextChain);
+    OwnerPublicKey nextOwnerKey = cs.encodeKey(getCertificateKeyType(
+            nextChain[nextChain.length - 1]),
+            prevOwnerPubKey.getEnc(),
+            nextChain);
 
     //assume owner is encoded same a
     entryPayload.setOwnerPublicKey(nextOwnerKey);
@@ -146,12 +149,10 @@ public class VoucherUtils {
         if (obj == null) {
           break;
         }
-        if (obj instanceof PemObject) {
-          PemObject pemObj = (PemObject) obj;
-          if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
-            return Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
+        PemObject pemObj = (PemObject) obj;
+        if (pemObj.getType().equals("OWNERSHIP VOUCHER")) {
+          return Mapper.INSTANCE.readValue(pemObj.getContent(), OwnershipVoucher.class);
 
-          }
         }
       }
     }
@@ -341,6 +342,37 @@ public class VoucherUtils {
     PublicKey publicKey = cs.decodeKey(ownerKey);
     return KeyResolver.getAlias(ownerKey.getType(),
         new AlgorithmFinder().getKeySizeType(publicKey));
+  }
+
+  private static PublicKeyType getCertificateKeyType(Certificate certificate) throws IOException {
+    PublicKey publicKey = certificate.getPublicKey();
+
+    if (publicKey instanceof RSAPublicKey) {
+      RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+      int keySize = rsaPublicKey.getModulus().bitLength();
+
+      if (keySize == 2048) {
+        return PublicKeyType.RSA2048RESTR;
+      } else {
+        String algorithm = rsaPublicKey.getAlgorithm();
+        if ("RSA".equalsIgnoreCase(algorithm)) {
+          return PublicKeyType.RSAPKCS;
+        }
+      }
+    } else if (publicKey instanceof ECPublicKey) {
+      ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+      ECParameterSpec params = ecPublicKey.getParams();
+
+      if (params != null) {
+        int keySize = params.getOrder().bitLength();
+        if (keySize == 256) {
+          return PublicKeyType.SECP256R1;
+        } else if (keySize == 384) {
+          return PublicKeyType.SECP384R1;
+        }
+      }
+    }
+    throw new IOException("Invalid Certificate type");
   }
 
   private static CertPath getCertPath(List<Certificate> chain) throws IOException {

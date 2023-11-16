@@ -14,7 +14,7 @@
   <parent>
     <artifactId>fdo</artifactId>
     <groupId>org.fidoalliance</groupId>
-    <version>1.1.5-SNAPSHOT</version>
+    <version>1.1.6</version>
   </parent>
 
   <name>Protocol Core</name>
@@ -154,13 +154,13 @@
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcprov-jdk18on</artifactId>
       <version>${bcprov.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
+      <artifactId>bcpkix-jdk18on</artifactId>
       <version>${bcpkix.version}</version>
     </dependency>
 

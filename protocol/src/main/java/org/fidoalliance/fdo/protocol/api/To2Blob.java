@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.protocol.api;
 import jakarta.servlet.http.HttpServletResponse;
 import org.fidoalliance.fdo.protocol.HttpUtils;
 import org.fidoalliance.fdo.protocol.Mapper;
+import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
 
@@ -13,6 +14,7 @@ import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
  * Maintains To2Blob for owners.
  */
 public class To2Blob extends RestApi {
+  LoggerService logger = new LoggerService(To2Blob.class);
 
   @Override
   protected void doGet() throws Exception {
@@ -24,6 +26,7 @@ public class To2Blob extends RestApi {
 
       String body = onboardConfig.getRvBlob().getSubString(1,
           Long.valueOf(onboardConfig.getRvBlob().length()).intValue());
+      logger.info("TO2 body: " + body);
 
       getResponse().getWriter().print(body);
     }
@@ -33,6 +36,7 @@ public class To2Blob extends RestApi {
   @Override
   public void doPost() throws Exception {
     String body = getStringBody();
+    logger.info("TO2 body: " + body);
 
     try {
       final To2AddressEntries to2AddressEntries =

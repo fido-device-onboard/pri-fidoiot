@@ -49,9 +49,17 @@ public class PemLoader {
     StringReader reader = new StringReader(pemString);
     PemReader pemReader = new PemReader(reader);
     try {
-      PemObject o = pemReader.readPemObject();
-      o.toString();
-    } catch (IOException e) {
+      while (true) {
+        PemObject o = pemReader.readPemObject();
+        if (o == null) {
+          break;
+        }
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        ByteArrayInputStream bis = new ByteArrayInputStream(o.getContent());
+        Certificate cert = cf.generateCertificate(bis);
+        certs.add(cert);
+      }
+    } catch (IOException | CertificateException e) {
       throw new IOException(e);
     }
     return certs;

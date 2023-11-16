@@ -8,7 +8,7 @@ The FDO Rendezvous Service is designed to acts as a rendezvous point between a n
 
 The following are the system requirements for the All-in-One demo.
 - Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
-- Java* Development Kit 11
+- Java* Development Kit 17
 - Apache Maven* 3.5.4 (Optional) software for building the demo from source
 - Java IDE (Optional) for convenience in modifying the source code
 - Docker 20.10.10+ / Podman engine 3.4.2+(For RHEL)
@@ -71,7 +71,7 @@ end of initialization of all services, you will see following statement on the c
 
 Follow the below steps to start FDO Rendezvous demo.
 
-***NOTE***: Generate random credentails before starting the service [Refer](../../../README.md#generating-random-passwords-using-keysgensh)
+***NOTE***: Generate random credentails before starting the service [Refer](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 ##  Run as Standalone service.
 Open a terminal, change directory to `<fdo-pri-src>/component-samples/demo/rv/` and execute following command.

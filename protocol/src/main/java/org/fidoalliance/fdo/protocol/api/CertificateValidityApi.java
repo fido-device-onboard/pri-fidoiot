@@ -58,12 +58,13 @@ public class CertificateValidityApi extends RestApi {
         getSession().get(CertificateValidity.class, Long.valueOf(1));
     try {
       int parsedDays = Integer.parseInt(days);
-      certificateValidity.setDays(parsedDays);
       if (certificateValidity == null) {
         certificateValidity = new CertificateValidity();
+        certificateValidity.setDays(parsedDays);
         getSession().save(certificateValidity);
         logger.info("Certificate Validity value updated to " + parsedDays);
       } else {
+        certificateValidity.setDays(parsedDays);
         getSession().update(certificateValidity);
       }
     } catch (NumberFormatException e) {

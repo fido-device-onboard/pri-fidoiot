@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.protocol;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -90,6 +91,7 @@ import org.fidoalliance.fdo.protocol.message.SimpleStorage;
 import org.fidoalliance.fdo.protocol.message.To0AcceptOwner;
 import org.fidoalliance.fdo.protocol.message.To0HelloAck;
 import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
+import org.fidoalliance.fdo.protocol.message.To0OwnerSign2;
 import org.fidoalliance.fdo.protocol.message.To0d;
 import org.fidoalliance.fdo.protocol.message.To1dPayload;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
@@ -273,7 +275,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
           CoseSign1 coseSign = new CoseSign1();
           coseSign.setProtectedHeader(cphData);
-          coseSign.setPayload(diInfo.getSerialNumber().getBytes());
+          coseSign.setPayload(diInfo.getSerialNumber().getBytes(StandardCharsets.UTF_8));
           coseSign.setSignature(diInfo.getTestSignature());
           coseSign.setUnprotectedHeader(cuh);
 
@@ -432,11 +434,16 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     consumer.accept(credential);
     request.setExtra(new SimpleStorage());
     logger.info("DI complete, GUID is " + credential.getGuid());
+    logger.info("===== FDO DI SUCCESS =====");
   }
 
   protected void doTo0Hello(DispatchMessage request, DispatchMessage response) throws IOException {
     Nonce nonceTO0Sign = Nonce.fromRandomUuid();
     response.setAuthToken(createCwtSession(nonceTO0Sign));
+
+    if (request.getMessage().length != 1) {
+      throw new InvalidMessageException("Invalid message for the body");
+    }
 
     To0HelloAck helloAck = new To0HelloAck();
     helloAck.setNonce(nonceTO0Sign);
@@ -452,8 +459,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     To0d to0d = storage.get(To0d.class);
     to0d.setNonce(helloAck.getNonce());
 
-    To0OwnerSign ownerSign = new To0OwnerSign();
-    ownerSign.setTo0d(to0d);
+
 
     CryptoService cs = Config.getWorker(CryptoService.class);
     byte[] to0dBytes = Mapper.INSTANCE.writeValue(to0d);
@@ -474,12 +480,25 @@ public class StandardMessageDispatcher implements MessageDispatcher {
           privateKey,
           lastOwner
       );
+
+      To0OwnerSign ownerSign = new To0OwnerSign();
+      ownerSign.setTo0d(to0dBytes);
       ownerSign.setTo1d(sign1);
+
+      //uncomment below to send non conformant message
+      //To0OwnerSign2 ownerSign = new To0OwnerSign2();
+      //ownerSign.setTo0d(to0d);
+      //ownerSign.setTo1d(sign1);
+
+      byte[] byteArray = Mapper.INSTANCE.writeValue(ownerSign);
+      System.out.println(Arrays.toString(byteArray));
+      response.setMessage(byteArray);
+
     } finally {
       cs.destroyKey(privateKey);
     }
 
-    response.setMessage(Mapper.INSTANCE.writeValue(ownerSign));
+
   }
 
   protected void doTo0OwnerSign(DispatchMessage request, DispatchMessage response)
@@ -487,17 +506,26 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     CwtToken cwtToken = getCwtSession(request.getAuthToken().get());
 
-    To0OwnerSign ownerSign = request.getMessage(To0OwnerSign.class);
+    To0d to0d;
+    CoseSign1 sign1;
+    try {
+      To0OwnerSign ownerSign  = request.getMessage(To0OwnerSign.class);
+      to0d = Mapper.INSTANCE.readValue(ownerSign.getTo0d(),To0d.class);
+      sign1 = ownerSign.getTo1d();
+    } catch (MessageBodyException e) {
+      To0OwnerSign2 ownerSign2  = request.getMessage(To0OwnerSign2.class);
+      to0d = ownerSign2.getTo0d();
+      sign1 = ownerSign2.getTo1d();
+      logger.info("non conformant OwnerSign message received");
+    }
 
     Nonce nonceTO0Sign = new Nonce();
     nonceTO0Sign.setNonce(cwtToken.getCwtId());
-    To0d to0d = ownerSign.getTo0d();
     if (!nonceTO0Sign.equals(to0d.getNonce())) {
       throw new InvalidMessageException("NonceTO0Sign does not match");
     }
     //verify to1d
     CryptoService cs = getCryptoService();
-    CoseSign1 sign1 = ownerSign.getTo1d();
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(to0d.getVoucher());
     boolean verified = cs.verify(sign1, ownerPublicKey);
     if (!verified) {
@@ -505,7 +533,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidOwnerSignException();
     }
 
-    if (!getWorker(RendezvousAcceptFunction.class).apply(ownerSign)) {
+    if (!getWorker(RendezvousAcceptFunction.class).apply(to0d.getVoucher())) {
       throw new InvalidMessageException("Voucher rejected due to untrusted key or guid");
     }
 
@@ -544,7 +572,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     To0AcceptOwner acceptOwner = request.getMessage(To0AcceptOwner.class);
     request.getExtra().put(To0AcceptOwner.class, acceptOwner);
-    acceptOwner.getWaitSeconds();
+    if (acceptOwner.getWaitSeconds() < 0) {
+      throw new IOException("Invalid waitSeconds");
+    }
   }
 
   protected void doTo1Hello(DispatchMessage request, DispatchMessage response) throws IOException {
@@ -1411,6 +1441,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       throw new InvalidMessageException("NonceTO2SetupDv noes not match");
     }
     logger.info("TO2 completed successfully.");
+    logger.info("===== FDO TO2 SUCCESS =====");
   }
 
   protected void doError(DispatchMessage request, DispatchMessage response) throws IOException {

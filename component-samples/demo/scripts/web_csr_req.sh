@@ -20,5 +20,7 @@ openssl req -x509 -newkey rsa:2048 -keyout server-key.pem -out webServer.pem -sh
 openssl x509 -x509toreq -in webServer.pem -out server.req -signkey server-key.pem
 
 #comment out following line if signing with external CA
-openssl x509 -req -days 12775 -in server.req -CA ca-cert.pem -CAkey caKey.pem -CAcreateserial -out server-cert.pem -extfile ./web-server.conf -extensions v3_req  
+openssl x509 -req -days 12775 -in server.req -CA ca-cert.pem -CAkey caKey.pem -CAcreateserial -out server-cert.pem -extfile ./web-server.conf -extensions v3_req
 
+#Add read permission to server-key.pem
+chmod 644 server-key.pem

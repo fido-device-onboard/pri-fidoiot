@@ -36,6 +36,7 @@ public class RendezvousInfoTest {
     data = Hex.decodeHex("81858205781F66646F31302E7765737475732E636C6F75646170702E617A7572652E636F6D82031850820C018202448A5BC35582041850");
     rvi = Mapper.INSTANCE.readValue(data,RendezvousInfo.class);
     str = Mapper.INSTANCE.writeValueAsString(rvi);
+    System.out.println(str);
 
 
   }

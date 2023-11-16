@@ -3,12 +3,25 @@
 
 package org.fidoalliance.fdo.protocol.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -41,6 +54,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
 
 
   private final LoggerService logger = new LoggerService(FdoSysOwnerModule.class);
+  private String fetchFileName;
+
+  private final ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
+  private final Duration execTimeout = Duration.ofHours(2);
+  private final Predicate<Integer> exitValueTest = val -> (0 == val);
 
   @Override
   public String getName() {
@@ -101,6 +119,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           }
         }
         break;
+      case FdoSys.FETCHFILE:
+        if (state.isActive()) {
+          fetchFileName = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+        }
+        break;
       case FdoSys.DATA:
         if (state.isActive()) {
           byte[] data = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
@@ -136,7 +159,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     while (extra.getQueue().size() > 0) {
       boolean sent = sendFunction.apply(extra.getQueue().peek());
       if (sent) {
-        checkWaiting(extra, extra.getQueue().poll());
+        if (extra.getQueue().size() > 0) {
+          checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
+        }
       } else {
         break;
       }
@@ -170,6 +195,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         && extra.getFilter().containsKey(DevMod.KEY_ARCH);
   }
 
+  private String getAppData() throws IOException {
+    File file = new File(System.getProperty("app-data.dir"));
+    return file.getCanonicalPath();
+  }
+
   protected boolean checkFilter(Map<String, String> devMap, Map<String, String> filterMap) {
     return !devMap.entrySet().containsAll(filterMap.entrySet());
   }
@@ -183,7 +213,17 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
   protected void onFetch(ServiceInfoModuleState state, FdoSysModuleExtra extra,
       byte[] data) throws IOException {
 
-    logger.warn(new String(data, StandardCharsets.US_ASCII));
+    Path path = Paths.get(getAppData(), fetchFileName);
+    try {
+      if (Files.exists(path)) {
+        Files.write(path, data, StandardOpenOption.APPEND);
+      } else {
+        Files.write(path, data, StandardOpenOption.CREATE_NEW);
+      }
+    } catch (IOException e) {
+      logger.error("Error writing to file: " + e.getMessage());
+    }
+
   }
 
   protected void onEot(ServiceInfoModuleState state, FdoSysModuleExtra extra, EotResult result)
@@ -227,12 +267,15 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             getExecCb(state, extra, instruction);
           } else if (instruction.getFetch() != null) {
             getFetch(state, extra, instruction);
+          } else if (instruction.getOwnerExec() != null) {
+            getOwnerExec(state, extra, instruction);
           }
         }
 
       }
       trans.commit();
     } catch (SQLException e) {
+      logger.error("SQL Exception" + e.getMessage());
       throw new InternalServerErrorException(e);
     } finally {
       session.close();
@@ -246,6 +289,15 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     kv.setKeyName(FdoSys.EXEC);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
     extra.getQueue().add(kv);
+  }
+
+  protected void getOwnerExec(ServiceInfoModuleState state,
+                         FdoSysModuleExtra extra,
+                         FdoSysInstruction instruction) throws IOException {
+
+
+    String[] args = instruction.getOwnerExec();
+    exec(args);
   }
 
   protected void getExecCb(ServiceInfoModuleState state,
@@ -299,9 +351,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
             extra.getQueue().add(kv);
           }
         } catch (SQLException throwables) {
+          logger.error("SQL Exception " + throwables.getMessage());
           throw new InternalServerErrorException(throwables);
         }
       } else {
+        logger.error("SVI resource missing");
         throw new InternalServerErrorException("svi resource missing " + resource);
       }
       trans.commit();
@@ -310,6 +364,69 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       session.close();
     }
 
+  }
+
+  private ProcessBuilder.Redirect getExecOutputRedirect() {
+    return execOutputRedirect;
+  }
+
+  private Duration getExecTimeout() {
+    return execTimeout;
+  }
+
+  private Predicate<Integer> getExitValueTest() {
+    return exitValueTest;
+  }
+
+  private String getCommand(List<String> args) {
+    StringBuilder builder = new StringBuilder();
+    for (String arg : args) {
+      if (builder.length() > 0) {
+        builder.append(" ");
+      }
+      builder.append(arg);
+    }
+    return builder.toString();
+  }
+
+  private void exec(String[] args) throws IOException {
+
+    List<String> argList = Arrays.asList(args);
+
+    try {
+      ProcessBuilder builder = new ProcessBuilder(argList);
+      builder.directory(new File(getAppData()));
+      builder.redirectErrorStream(true);
+      builder.redirectOutput(getExecOutputRedirect());
+
+      Process process = builder.start();
+      try {
+        boolean processDone = process.waitFor(getExecTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        if (processDone) {
+          if (!getExitValueTest().test(process.exitValue())) {
+            throw new RuntimeException(
+                    "predicate failed: "
+                            + getCommand(argList)
+                            + " returned "
+                            + process.exitValue());
+          }
+        } else { // timeout
+          throw new TimeoutException(getCommand(argList));
+        }
+
+      } finally {
+
+        if (process.isAlive()) {
+          process.destroyForcibly();
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new InternalServerErrorException(e);
+    } catch (IOException e) {
+      throw new InternalServerErrorException(e);
+    } catch (TimeoutException e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   protected void getUrlFile(ServiceInfoModuleState state,
@@ -354,6 +471,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           }
         }
       }
+    } catch (RuntimeException e) {
+      logger.error("Runtime Exception" +  e.getMessage());
+      throw new InternalServerErrorException(e);
     } catch (Exception e) {
       logger.error("failed to get http content" + e.getMessage());
       throw new InternalServerErrorException(e);

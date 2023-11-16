@@ -37,7 +37,6 @@ public class To0Starter extends RestApi {
           OwnershipVoucher voucher = Config.getWorker(VoucherQueryFunction.class).apply(
               guid);
           StandardTo0Client to0Client = new StandardTo0Client();
-          To0OwnerSign ownerSign = new To0OwnerSign();
           To0d to0d = new To0d();
           to0d.setVoucher(voucher);
           to0d.setWaitSeconds(Duration.ofDays(1).toSeconds());

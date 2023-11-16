@@ -4,6 +4,7 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.HttpServer;
 import org.fidoalliance.fdo.protocol.LoggerService;
@@ -56,15 +57,20 @@ public class AioRvInfo extends RestApi {
       }
 
       String rvi = String.format(defaultRvi, theDns, thePort, theProto, theIp, thePort);
+      logger.info("Rendezvous Info " + rvi);
 
       // Creating RendezvousInfo object from yaml structure.
       RendezvousInfo rviObject = Mapper.INSTANCE.readValue(rvi, RendezvousInfo.class);
+      if (rviObject.isEmpty()) {
+        throw new IOException();
+      }
 
       // Querying DB for RVINFO_BLOB with id=1
       RvData rviData = getSession().get(RvData.class, Long.valueOf(1));
 
       if (rviData == null) {
         // if data doesn't exist in DB, create new row and insert into RV_DATA table.
+        logger.info("Inserting data into RV_DATA");
         rviData = new RvData();
         rviData.setData(getSession().getLobHelper().createClob(rvi));
         getSession().save(rviData);

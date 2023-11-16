@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +86,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.WRITE:
         if (state.isActive()) {
           byte[] data = Mapper.INSTANCE.readValue(kvPair.getValue(), byte[].class);
+          logger.info("File written with data" + Collections.singletonList(data));
           writeFile(data);
         }
         break;
@@ -97,15 +100,19 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       case FdoSys.EXEC_CB:
         if (state.isActive()) {
           String[] args = Mapper.INSTANCE.readValue(kvPair.getValue(), String[].class);
+          logger.info("Executing command CB :" + Arrays.asList(args));
           exec_cb(args);
         }
         break;
       case FdoSys.STATUS_CB:
         if (state.isActive()) {
           StatusCb status = Mapper.INSTANCE.readValue(kvPair.getValue(), StatusCb.class);
+          logger.info("Status: " + status);
           statusTimeout = status.getTimeout();
+          logger.info("timeout: " + statusTimeout);
           if (status.isCompleted() && execProcess != null) {
             execProcess.destroyForcibly();
+            logger.debug("Destroying Process");
             execProcess = null;
           } else {
             checkStatus();
@@ -156,7 +163,15 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     openOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
     openOptions.add(StandardOpenOption.WRITE);
 
-    if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+    boolean posixType = false;
+    try (FileSystem fs = FileSystems.getDefault()) {
+      posixType = fs.supportedFileAttributeViews().contains("posix");
+    } catch (RuntimeException e) {
+      posixType = false;
+    } catch (Exception e) {
+      posixType = false;
+    }
+    if (posixType) {
 
       Set<PosixFilePermission> filePermissions = new HashSet<>();
       filePermissions.add(PosixFilePermission.OWNER_READ);
@@ -166,6 +181,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       try (FileChannel channel = FileChannel.open(currentFile, openOptions, fileAttribute)) {
         logger.info(FdoSys.FILEDESC + " file created.");
       } catch (IOException e) {
+        logger.error("I/O failed in current file, setting it to null");
         currentFile = null;
         throw new RuntimeException(e);
       }
@@ -271,6 +287,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       //set the first status check
       createStatus(false, 0, statusTimeout);
     } catch (IOException e) {
+      logger.error("IO Operation Failed" + e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -282,6 +299,7 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
       if (!execProcess.isAlive()) {
         createStatus(true, execProcess.exitValue(), statusTimeout);
         execProcess = null;
+        logger.info("Executing Process Finished ");
         return;
       }
     }
@@ -316,6 +334,13 @@ public class FdoSysDeviceModule implements ServiceInfoModule {
     result.setResult(0);
 
     String fileName = fetchFileName;
+    logger.info("Filename " + fileName);
+
+    ServiceInfoKeyValuePair kvPair = new ServiceInfoKeyValuePair();
+    kvPair.setKeyName(FdoSys.FETCHFILE);
+    kvPair.setValue(Mapper.INSTANCE.writeValue(fileName));
+    queue.add(kvPair);
+
     if (!Path.of(fetchFileName).isAbsolute()) {
       fileName = Path.of(getAppData(), fetchFileName).toString();
     }
