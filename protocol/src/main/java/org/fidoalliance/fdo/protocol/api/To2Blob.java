@@ -4,11 +4,14 @@
 package org.fidoalliance.fdo.protocol.api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.sql.Clob;
 import org.fidoalliance.fdo.protocol.HttpUtils;
-import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.LoggerService;
+import org.fidoalliance.fdo.protocol.Mapper;
+import org.fidoalliance.fdo.protocol.db.HibernateUtil;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
 import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
+import org.hibernate.Session;
 
 /**
  * Maintains To2Blob for owners.
@@ -35,8 +38,22 @@ public class To2Blob extends RestApi {
 
   @Override
   public void doPost() throws Exception {
+
+    final Session session = HibernateUtil.getSessionFactory().openSession();
     String body = getStringBody();
     logger.info("TO2 body: " + body);
+
+    try {
+      Clob rvBlob = session.getLobHelper().createClob(body);
+      String parsedBody = rvBlob.getSubString(1,
+              Long.valueOf(rvBlob.length()).intValue());
+      final To2AddressEntries to2AddressEntries =
+              Mapper.INSTANCE.readJsonValue(parsedBody, To2AddressEntries.class);
+      HttpUtils.getInstructions(to2AddressEntries);
+    } catch (Exception e) {
+      getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return;
+    }
 
     try {
       final To2AddressEntries to2AddressEntries =
