@@ -5,9 +5,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get clean && apt-get -y update && apt-get -y upgrade
-
-RUN apt-get install -y openjdk-17-jdk maven git
+RUN apt-get clean && apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends openjdk-17-jdk maven git
 
 # Create a user 'fdouser'. If the user name is updated, please update the same in docker-compose.yaml.
 RUN useradd -ms /bin/bash fdouser
