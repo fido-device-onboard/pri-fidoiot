@@ -265,10 +265,10 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
               Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
       boolean skip = false;
-      for (int i = document.getIndex(); i < instructions.length; i++) {
+      for (int i = 0; i < instructions.length; i++) {
 
         if (!checkProvider(instructions[i])) {
-          break;
+          continue;
         }
 
         if (instructions[i].getFilter() != null) {

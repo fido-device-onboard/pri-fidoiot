@@ -157,10 +157,10 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
   }
 
   protected boolean checkProvider(FdoSysInstruction instruction) {
-    if (instruction.getModule() != null) {
-      return instruction.getModule().equals(getName());
+    if (instruction.getModule() == null) {
+      return false;
     }
-    return true;
+    return instruction.getModule().equals(getName());
   }
 
 
@@ -184,7 +184,7 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
               Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
       boolean skip = false;
-      for (int i = document.getIndex(); i < instructions.length; i++) {
+      for (int i = 0; i < instructions.length; i++) {
 
         if (!checkProvider(instructions[i])) {
           continue;
