@@ -15,7 +15,6 @@ public class FdoSysModuleExtra {
   @JsonProperty("filter")
   private final Map<String, String> filter = new HashMap<>();
 
-
   @JsonProperty("loaded")
   private boolean loaded;
 
@@ -36,7 +35,6 @@ public class FdoSysModuleExtra {
 
   @JsonProperty("received")
   private int received;
-
 
   @JsonIgnore
   public Map<String, String> getFilter() {

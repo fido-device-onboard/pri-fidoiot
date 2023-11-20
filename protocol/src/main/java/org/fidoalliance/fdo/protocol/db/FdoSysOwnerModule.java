@@ -4,8 +4,10 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -174,10 +176,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     }
     state.setExtra(AnyType.fromObject(extra));
   }
-
+  
   protected void checkWaiting(ServiceInfoGlobalState globalState, FdoSysModuleExtra extra,
       ServiceInfoKeyValuePair kv) {
-
     switch (kv.getKey()) {
       case FdoSys.EXEC_CB:
       case FdoSys.FETCH:
@@ -187,6 +188,9 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
       default:
         break;
+    }
+    if (kv.getKey().equals(FdoSys.FETCH)) {
+      extra.setName(Mapper.INSTANCE.readValue(kv.getValue(), String.class));
     }
   }
 
@@ -222,15 +226,23 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
   protected void onFetch(ServiceInfoModuleState state, FdoSysModuleExtra extra,
       byte[] data) throws IOException {
 
-    Path path = Paths.get(getAppData(), fetchFileName);
-    try {
-      if (Files.exists(path)) {
-        Files.write(path, data, StandardOpenOption.APPEND);
-      } else {
-        Files.write(path, data, StandardOpenOption.CREATE_NEW);
+    File remoteFile = new File(extra.getName());
+    Path path = Path.of(System.getProperty("app-data.dir"), state.getGuid().toString());
+    File guidPath = path.toFile();
+    if (!guidPath.exists()) {
+      guidPath.mkdir();
+    }
+    path = Path.of(path.toString(), remoteFile.toString());
+    File localFile = path.toFile();
+    if (!localFile.exists()) {
+      logger.info("created file: " + localFile.toString());
+      try (OutputStream of = new FileOutputStream(localFile, false)) {
+        of.write(data, 0, 0);
       }
-    } catch (IOException e) {
-      logger.error("Error writing to file: " + e.getMessage());
+    }
+
+    try (OutputStream of = new FileOutputStream(localFile, true)) {
+      of.write(data, 0, data.length);
     }
 
   }
