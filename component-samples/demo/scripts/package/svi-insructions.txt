@@ -1,0 +1,4 @@
+[ {"filedesc": "device-package.tar.gz", "resource": "device-package.tar.gz"},
+  {"exec": ["tar","-xf","device-package.tar.gz"] },
+  {"exec_cb": ["bash","onboard-device.sh"] },
+  {"fetch": "owner-package.tar.gz"}]
