@@ -189,22 +189,6 @@ public class FdoSimDownloadDeviceModule implements ServiceInfoModule {
     if (digest != null) {
       digest.update(data);
     }
-
-    if (data.length == 0) {
-      ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
-      kv.setKeyName(FdoSimDownloadOwnerModule.DONE);
-      //compute hash
-      if (digest != null && expectedCheckSum != null) {
-        byte[] computed = digest.digest();
-        if (!java.util.Arrays.equals(computed, expectedCheckSum)) {
-          kv.setValue(Mapper.INSTANCE.writeValue(-1));
-          queue.add(kv);
-          return;
-        }
-      }
-      //send done
-      kv.setValue(Mapper.INSTANCE.writeValue(bytesReceived));
-      queue.add(kv);
-    }
+    
   }
 }

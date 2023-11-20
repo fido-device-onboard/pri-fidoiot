@@ -174,7 +174,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DATA:
         byte[] data = Mapper.INSTANCE.readValue(kv.getValue(), byte[].class);
         if (data.length == 0) {
-          extra.setWaiting(true);
+          //extra.setWaiting(true);
         }
         break;
       default:
@@ -214,6 +214,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
 
       if (sviResource != null) {
         Blob blobData = sviResource.getData();
+        int bufferCount = 1;
         try (InputStream input = blobData.getBinaryStream()) {
           MessageDigest msgDigest = MessageDigest.getInstance("SHA-384");
           int fileLength = 0;
@@ -237,6 +238,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
               msgDigest.update(data);
               kv.setValue(Mapper.INSTANCE.writeValue(data));
               state.getGlobalState().getQueue().add(kv);
+              bufferCount = bufferCount + 1;
             }
           }
 
@@ -248,12 +250,16 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(SHA_384);
           kv.setValue(Mapper.INSTANCE.writeValue(msgDigest.digest()));
-          state.getGlobalState().getQueue().addFirst(kv);
+          //state.getGlobalState().getQueue().add(kv);
+          ServiceInfoQueue queue = state.getGlobalState().getQueue();
+          queue.add(queue.size() - bufferCount - 1, kv);
 
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(LENGTH);
           kv.setValue(Mapper.INSTANCE.writeValue(fileLength));
-          state.getGlobalState().getQueue().addFirst(kv);
+          //state.getGlobalState().getQueue().add(kv);
+          queue = state.getGlobalState().getQueue();
+          queue.add(queue.size() - bufferCount - 1, kv);
           extra.setLength(fileLength);
 
           //kv = new ServiceInfoKeyValuePair();
