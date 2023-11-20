@@ -263,10 +263,10 @@ public class ApiTest {
   @Test
   public void redirectEntryTest() throws IOException, InterruptedException {
     doPostApi("http://localhost:8080/api/v1/owner/redirect",
-            "[[\"localhost\",\"127.0.0.1\",8042,3]]",
+            "[[\"127.0.0.1\",\"127.0.0.1\",8042,3]]",
             HttpServletResponse.SC_OK);
     doGetApi("http://localhost:8080/api/v1/owner/redirect",
-            "[[\"localhost\",\"127.0.0.1\",8042,3]]",
+            "[[\"127.0.0.1\",\"127.0.0.1\",8042,3]]",
             HttpServletResponse.SC_OK);
     doPostApi("http://localhost:8080/api/v1/owner/redirect",
             "[[\"localhost\",\"127.0.0.1\",8080,3]]",

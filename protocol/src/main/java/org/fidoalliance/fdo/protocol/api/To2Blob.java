@@ -55,15 +55,6 @@ public class To2Blob extends RestApi {
       return;
     }
 
-    try {
-      final To2AddressEntries to2AddressEntries =
-            Mapper.INSTANCE.readJsonValue(body, To2AddressEntries.class);
-      HttpUtils.getInstructions(to2AddressEntries);
-    } catch (Exception e) {
-      getResponse().setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
     getTransaction();
 
     OnboardingConfig onboardingConfig =
