@@ -178,7 +178,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
   }
   
   protected void checkWaiting(ServiceInfoGlobalState globalState, FdoSysModuleExtra extra,
-      ServiceInfoKeyValuePair kv) {
+      ServiceInfoKeyValuePair kv) throws IOException {
     switch (kv.getKey()) {
       case FdoSys.EXEC_CB:
       case FdoSys.FETCH:
