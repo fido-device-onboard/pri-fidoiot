@@ -578,7 +578,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         if (variable == RendezvousVariable.PROTOCOL) {
           RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
                 RendezvousProtocol.class);
-          if (variable.toInteger() != RendezvousConstant.PROTOCOL || rvp.toString().isEmpty() || rvp == null) {
+          if (variable.toInteger() != RendezvousConstant.PROTOCOL || rvp.toString().isEmpty()
+                  || rvp == null) {
             logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
