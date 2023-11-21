@@ -82,6 +82,7 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
+import org.fidoalliance.fdo.protocol.message.RendezvousConstant;
 import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
 import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
 import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
@@ -558,7 +559,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.DNS) {
           dns = Mapper.INSTANCE.readValue(instruction.getValue(), String.class);
-          if (variable.toInteger() != 5 || dns.isEmpty() || dns == null) {
+          if (variable.toInteger() != RendezvousConstant.DNS || dns.isEmpty() || dns == null) {
             logger.info("Invalid RVDNS value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -567,7 +568,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.DEV_PORT) {
           devPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
-          if (variable.toInteger() != 3 || devPort == null) {
+          if (variable.toInteger() != RendezvousConstant.DEV_PORT || devPort == null) {
             logger.info("Invalid RVDevPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -577,7 +578,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         if (variable == RendezvousVariable.PROTOCOL) {
           RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
                 RendezvousProtocol.class);
-          if (variable.toInteger() != 12 || rvp.toString().isEmpty() || rvp == null) {
+          if (variable.toInteger() != RendezvousConstant.PROTOCOL || rvp.toString().isEmpty() || rvp == null) {
             logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -586,7 +587,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.OWNER_PORT) {
           ownerPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
-          if (variable.toInteger() != 4 || ownerPort == null) {
+          if (variable.toInteger() != RendezvousConstant.OWNER_PORT || ownerPort == null) {
             logger.info("Invalid RVOwnerPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
