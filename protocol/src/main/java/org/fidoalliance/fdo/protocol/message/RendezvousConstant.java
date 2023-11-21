@@ -1,6 +1,7 @@
 package org.fidoalliance.fdo.protocol.message;
 
 public class RendezvousConstant {
+
     public static final int DEV_ONLY = 0;
     public static final int OWNER_ONLY = 1;
     public static final int IP_ADDRESS = 2;
