@@ -316,7 +316,7 @@ and Activate the following workers in Owner's `service.yml`
 
   `[{"filedesc" : "script.bat","resource" : "script.bat", "module":"fdo.download"}, {"exec_cb" : ["cmd", "/c", "script.bat"], "module":"fdo.command"}]`
 
-***NOTE***: You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
+***NOTE***: Currently, FDO_SYS and FSIM modules cannot be used simultaneously. Disable FSIM modules if you are using FDO_SYS. You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
 
 # Executing cURL request with mTLS
 
