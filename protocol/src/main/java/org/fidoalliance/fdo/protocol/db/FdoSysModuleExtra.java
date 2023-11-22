@@ -10,8 +10,9 @@ import java.util.Map;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
 public class FdoSysModuleExtra {
+
   @JsonProperty("filter")
-  private final Map<String,String> filter = new HashMap<>();
+  private final Map<String, String> filter = new HashMap<>();
 
   @JsonProperty("queue")
   private ServiceInfoQueue queue = new ServiceInfoQueue();
@@ -24,6 +25,9 @@ public class FdoSysModuleExtra {
 
   @JsonProperty("waiting")
   private boolean waiting;
+
+  @JsonProperty("name")
+  private String name;
 
 
   @JsonIgnore
@@ -70,4 +74,15 @@ public class FdoSysModuleExtra {
   public void setWaitQueue(ServiceInfoQueue waitQueue) {
     this.waitQueue = waitQueue;
   }
+
+  @JsonIgnore
+  public String getName() {
+    return name;
+  }
+
+  @JsonIgnore
+  public void setName(String name) {
+    this.name = name;
+  }
+
 }
