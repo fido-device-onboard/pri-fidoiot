@@ -5,6 +5,7 @@ package org.fidoalliance.fdo.protocol;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
@@ -83,6 +85,12 @@ import org.fidoalliance.fdo.protocol.message.OwnershipVoucherHeader;
 import org.fidoalliance.fdo.protocol.message.ProtocolVersion;
 import org.fidoalliance.fdo.protocol.message.PublicKeyEncoding;
 import org.fidoalliance.fdo.protocol.message.PublicKeyType;
+import org.fidoalliance.fdo.protocol.message.RendezvousConstant;
+import org.fidoalliance.fdo.protocol.message.RendezvousDirective;
+import org.fidoalliance.fdo.protocol.message.RendezvousInfo;
+import org.fidoalliance.fdo.protocol.message.RendezvousInstruction;
+import org.fidoalliance.fdo.protocol.message.RendezvousProtocol;
+import org.fidoalliance.fdo.protocol.message.RendezvousVariable;
 import org.fidoalliance.fdo.protocol.message.ServiceInfo;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
@@ -522,12 +530,87 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       sign1 = ownerSign2.getTo1d();
       logger.info("non conformant OwnerSign message received");
     }
-
     Nonce nonceTO0Sign = new Nonce();
     nonceTO0Sign.setNonce(cwtToken.getCwtId());
     if (!nonceTO0Sign.equals(to0d.getNonce())) {
       throw new InvalidMessageException("NonceTO0Sign does not match");
     }
+
+    OwnershipVoucherHeader ovHeader = Mapper.INSTANCE.readValue(to0d.getVoucher().getHeader(),
+        OwnershipVoucherHeader.class);
+
+    if (ovHeader.getGuid().toString().isEmpty()) {
+      throw new InvalidMessageException("GUID field in OV Header should not be empty");
+    }
+
+    if (to0d.getVoucher().getVersion() != ProtocolVersion.V101) {
+      throw new InvalidMessageException("Invalid Protocol Version should only accept 101");
+    }
+
+    RendezvousInfo info = ovHeader.getRendezvousInfo();
+
+    boolean isValidRVinfo = false;
+
+    for (RendezvousDirective directive : info) {
+      boolean isValidDirective = true;
+      String dns = null;
+      Integer devPort = Integer.valueOf(80);
+      Integer ownerPort = Integer.valueOf(443);
+
+      for (RendezvousInstruction instruction : directive) {
+
+        RendezvousVariable variable = instruction.getVariable();
+
+        if (variable == RendezvousVariable.DNS) {
+          dns = Mapper.INSTANCE.readValue(instruction.getValue(), String.class);
+          if (variable.toInteger() != RendezvousConstant.DNS || dns.isEmpty() || dns == null) {
+            logger.info("Invalid RVDNS value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
+          }
+        }
+
+        if (variable == RendezvousVariable.DEV_PORT) {
+          devPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+          if (variable.toInteger() != RendezvousConstant.DEV_PORT || devPort == null) {
+            logger.info("Invalid RVDevPort value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
+          }
+        }
+
+        if (variable == RendezvousVariable.PROTOCOL) {
+          RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
+                RendezvousProtocol.class);
+          if (variable.toInteger() != RendezvousConstant.PROTOCOL || rvp.toString().isEmpty()
+                  || rvp == null) {
+            logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
+          }
+        }
+
+        if (variable == RendezvousVariable.OWNER_PORT) {
+          ownerPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
+          if (variable.toInteger() != RendezvousConstant.OWNER_PORT || ownerPort == null) {
+            logger.info("Invalid RVOwnerPort value in OV Header, moving to next instruction");
+            isValidDirective = false;
+            break;
+          }
+        }
+      }
+      isValidRVinfo |= isValidDirective;
+    }
+
+    if (!isValidRVinfo) {
+      throw new InvalidMessageException("Invalid RendezvousInfo in OV Header");
+    }
+
+    PublicKeyEncoding mfgPubKeyEnc = ovHeader.getPublicKey().getEnc();
+    if (mfgPubKeyEnc.toInteger() < 0 || mfgPubKeyEnc.toInteger() > 3) {
+      throw new InvalidMessageException("Invalid Encoding of Mfg Pubkey in OV Header");
+    }
+    
     //verify to1d
     CryptoService cs = getCryptoService();
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(to0d.getVoucher());
