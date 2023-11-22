@@ -10,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -146,10 +148,10 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (state.getGlobalState().getQueue().size() > 0) {
+    while (!state.getGlobalState().getQueue().isEmpty()) {
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, state.getGlobalState().getQueue().poll());
+        checkWaiting(extra, Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
       } else {
         break;
       }
@@ -157,7 +159,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().isEmpty() && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
@@ -325,6 +327,9 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
           }
         }
       }
+    } catch (RuntimeException e) {
+      logger.error("Runtime Exception:" + e.getMessage());
+      throw new InternalServerErrorException(e);
     } catch (Exception e) {
       logger.error("failed to get http content" + e.getMessage());
       throw new InternalServerErrorException(e);

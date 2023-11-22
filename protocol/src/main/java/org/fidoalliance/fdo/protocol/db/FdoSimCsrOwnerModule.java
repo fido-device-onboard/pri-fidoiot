@@ -4,6 +4,8 @@
 package org.fidoalliance.fdo.protocol.db;
 
 import java.io.IOException;
+import java.util.Objects;
+
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
@@ -115,10 +117,10 @@ public class FdoSimCsrOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (state.getGlobalState().getQueue().size() > 0) {
+    while (!state.getGlobalState().getQueue().isEmpty()) {
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, state.getGlobalState().getQueue().poll());
+        checkWaiting(extra, Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
       } else {
         break;
       }
@@ -126,7 +128,7 @@ public class FdoSimCsrOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().isEmpty() && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));

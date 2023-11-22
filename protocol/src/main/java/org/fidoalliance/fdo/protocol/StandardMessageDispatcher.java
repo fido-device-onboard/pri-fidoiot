@@ -563,7 +563,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.DNS) {
           dns = Mapper.INSTANCE.readValue(instruction.getValue(), String.class);
-          if (variable.toInteger() != RendezvousConstant.DNS || dns.isEmpty() || dns == null) {
+          if (dns == null || variable.toInteger() != RendezvousConstant.DNS
+                  || dns.isEmpty()) {
             logger.info("Invalid RVDNS value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -572,7 +573,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.DEV_PORT) {
           devPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
-          if (variable.toInteger() != RendezvousConstant.DEV_PORT || devPort == null) {
+          if (devPort == null || variable.toInteger() != RendezvousConstant.DEV_PORT) {
             logger.info("Invalid RVDevPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -582,8 +583,8 @@ public class StandardMessageDispatcher implements MessageDispatcher {
         if (variable == RendezvousVariable.PROTOCOL) {
           RendezvousProtocol rvp = Mapper.INSTANCE.readValue(instruction.getValue(),
                 RendezvousProtocol.class);
-          if (variable.toInteger() != RendezvousConstant.PROTOCOL || rvp.toString().isEmpty()
-                  || rvp == null) {
+          if (rvp == null || variable.toInteger() != RendezvousConstant.PROTOCOL
+                  || rvp.toString().isEmpty()) {
             logger.info("Invalid RVProtocol value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
@@ -592,7 +593,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
         if (variable == RendezvousVariable.OWNER_PORT) {
           ownerPort = Mapper.INSTANCE.readValue(instruction.getValue(), Integer.class);
-          if (variable.toInteger() != RendezvousConstant.OWNER_PORT || ownerPort == null) {
+          if (ownerPort == null || variable.toInteger() != RendezvousConstant.OWNER_PORT) {
             logger.info("Invalid RVOwnerPort value in OV Header, moving to next instruction");
             isValidDirective = false;
             break;
