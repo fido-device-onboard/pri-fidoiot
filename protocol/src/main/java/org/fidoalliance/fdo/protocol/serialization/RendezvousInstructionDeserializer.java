@@ -36,7 +36,6 @@ public class RendezvousInstructionDeserializer extends StdDeserializer<Rendezvou
       case DNS:
         return Mapper.INSTANCE.writeValue(subNode.textValue());
       case IP_ADDRESS:
-
         return Mapper.INSTANCE.writeValue(
             InetAddress.getByName(subNode.textValue()).getAddress());
       case OWNER_PORT:
