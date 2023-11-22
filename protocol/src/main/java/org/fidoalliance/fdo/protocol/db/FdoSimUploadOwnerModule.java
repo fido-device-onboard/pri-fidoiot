@@ -8,6 +8,8 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Objects;
+
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -132,10 +134,10 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (state.getGlobalState().getQueue().size() > 0) {
+    while (!state.getGlobalState().getQueue().isEmpty()) {
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        checkWaiting(extra, state.getGlobalState().getQueue().poll());
+        checkWaiting(extra, Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
       } else {
         break;
       }
@@ -143,7 +145,7 @@ public class FdoSimUploadOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().isEmpty() && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));

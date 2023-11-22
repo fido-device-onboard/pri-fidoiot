@@ -39,12 +39,13 @@ public class To2Blob extends RestApi {
   @Override
   public void doPost() throws Exception {
 
-    final Session session = HibernateUtil.getSessionFactory().openSession();
+    getTransaction();
+
     String body = getStringBody();
     logger.info("TO2 body: " + body);
 
     try {
-      Clob rvBlob = session.getLobHelper().createClob(body);
+      Clob rvBlob = getSession().getLobHelper().createClob(body);
       String parsedBody = rvBlob.getSubString(1,
               Long.valueOf(rvBlob.length()).intValue());
       final To2AddressEntries to2AddressEntries =
@@ -55,7 +56,7 @@ public class To2Blob extends RestApi {
       return;
     }
 
-    getTransaction();
+
 
     OnboardingConfig onboardingConfig =
         getSession().get(OnboardingConfig.class, Long.valueOf(1));

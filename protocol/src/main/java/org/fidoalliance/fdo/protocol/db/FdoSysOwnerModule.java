@@ -230,8 +230,12 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     Path path = Path.of(System.getProperty("app-data.dir"), state.getGuid().toString());
     File guidPath = path.toFile();
     if (!guidPath.exists()) {
-      guidPath.mkdir();
+      boolean mkdir = guidPath.mkdir();
+      if (!mkdir) {
+        logger.error("Unable to create the folder.");
+      }
     }
+    System.out.println(path.toAbsolutePath());
     path = Path.of(path.toString(), remoteFile.toString());
     File localFile = path.toFile();
     if (!localFile.exists()) {
