@@ -262,7 +262,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
     *fetch* - This command returns the fetched file from client filesystem.
 
-    *owner_exec* - This command is a generic execution module that can perform various tasks, such as downloading files, running scripts, and executing commands
+    *owner_exec* - This command is a generic execution module that can perform various tasks, such as downloading files, running scripts, and executing commands. For executing specific package add the package in the respective Dockers.
+
 
     Sample SVI instruction :
   
