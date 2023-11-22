@@ -23,23 +23,22 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.fidoalliance.fdo.protocol.Config;
-import org.fidoalliance.fdo.protocol.HttpClientSupplier;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoModule;
 import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
-import org.fidoalliance.fdo.protocol.entity.SystemPackage;
 import org.fidoalliance.fdo.protocol.entity.SystemResource;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.DevModList;
 import org.fidoalliance.fdo.protocol.message.EotResult;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
@@ -67,6 +66,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     return FdoSys.NAME;
   }
 
+
   @Override
   public void prepare(ServiceInfoModuleState state) throws IOException {
     state.setExtra(AnyType.fromObject(new FdoSysModuleExtra()));
@@ -83,12 +83,6 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         for (String name : list.getModulesNames()) {
           if (name.equals(FdoSys.NAME)) {
             state.setActive(true);
-            ServiceInfoQueue queue = extra.getQueue();
-            ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
-            activePair.setKeyName(FdoSys.ACTIVE);
-            activePair.setValue(Mapper.INSTANCE.writeValue(true));
-            queue.add(activePair);
-
           }
         }
       }
@@ -108,7 +102,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
           ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(FdoSys.STATUS_CB);
           kv.setValue(Mapper.INSTANCE.writeValue(status));
-          extra.getQueue().add(kv);
+          state.getGlobalState().getQueue().add(kv);
           onStatusCb(state, extra, status);
           if (status.isCompleted()) {
             // check for error
@@ -116,8 +110,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
               throw new InternalServerErrorException("Exec_cb status returned failure.");
             }
             extra.setWaiting(false);
-            extra.getQueue().addAll(extra.getWaitQueue());
-            extra.setWaitQueue(new ServiceInfoQueue());
+            state.getGlobalState().getQueue().addAll(state.getGlobalState().getWaitQueue());
+            state.getGlobalState().setWaitQueue(new ServiceInfoQueue());
           }
         }
         break;
@@ -135,8 +129,8 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       case FdoSys.EOT:
         if (state.isActive()) {
           extra.setWaiting(false);
-          extra.setQueue(extra.getWaitQueue());
-          extra.setWaitQueue(new ServiceInfoQueue());
+          state.getGlobalState().setQueue(state.getGlobalState().getWaitQueue());
+          state.getGlobalState().setWaitQueue(new ServiceInfoQueue());
           EotResult result = Mapper.INSTANCE.readValue(kvPair.getValue(), EotResult.class);
           onEot(state, extra, result);
         }
@@ -145,6 +139,11 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
     }
     state.setExtra(AnyType.fromObject(extra));
+  }
+
+  @Override
+  public void keepAlive() throws IOException {
+
   }
 
   @Override
@@ -158,11 +157,12 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       extra.setLoaded(true);
     }
 
-    while (extra.getQueue().size() > 0) {
-      boolean sent = sendFunction.apply(extra.getQueue().peek());
+    while (state.getGlobalState().getQueue().size() > 0) {
+      boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
-        if (extra.getQueue().size() > 0) {
-          checkWaiting(extra, Objects.requireNonNull(extra.getQueue().poll()));
+        if (state.getGlobalState().getQueue().size() > 0) {
+          checkWaiting(state.getGlobalState(), extra,
+              Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
         }
       } else {
         break;
@@ -171,20 +171,20 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (extra.getQueue().size() == 0 && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
   }
-
-  protected void checkWaiting(FdoSysModuleExtra extra, ServiceInfoKeyValuePair kv)
-      throws IOException {
+  
+  protected void checkWaiting(ServiceInfoGlobalState globalState, FdoSysModuleExtra extra,
+      ServiceInfoKeyValuePair kv) throws IOException {
     switch (kv.getKey()) {
       case FdoSys.EXEC_CB:
       case FdoSys.FETCH:
         extra.setWaiting(true);
-        extra.setWaitQueue(extra.getQueue());
-        extra.setQueue(new ServiceInfoQueue());
+        globalState.setWaitQueue(globalState.getQueue());
+        globalState.setQueue(new ServiceInfoQueue());
         break;
       default:
         break;
@@ -192,6 +192,13 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     if (kv.getKey().equals(FdoSys.FETCH)) {
       extra.setName(Mapper.INSTANCE.readValue(kv.getValue(), String.class));
     }
+  }
+
+  protected boolean checkProvider(FdoSysInstruction instruction) {
+    if (instruction.getModule() != null) {
+      return instruction.getModule().equals(getName());
+    }
+    return true;
   }
 
   protected boolean infoReady(FdoSysModuleExtra extra) {
@@ -252,48 +259,51 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       return;
     }
 
-    final Session session = HibernateUtil.getSessionFactory().openSession();
-    try {
-      Transaction trans = session.beginTransaction();
-      SystemPackage systemPackage =
-          session.find(SystemPackage.class, Long.valueOf(1));
+    ServiceInfoDocument document = state.getDocument();
+    if (document.getInstructions() != null) {
+      FdoSysInstruction[] instructions =
+              Mapper.INSTANCE.readJsonValue(document.getInstructions(), FdoSysInstruction[].class);
 
-      if (systemPackage != null) {
-        String body = systemPackage.getData().getSubString(1,
-            Long.valueOf(systemPackage.getData().length()).intValue());
-        FdoSysInstruction[] instructions =
-            Mapper.INSTANCE.readJsonValue(body, FdoSysInstruction[].class);
+      boolean skip = false;
+      for (int i = 0; i < instructions.length; i++) {
 
-        boolean skip = false;
-        for (FdoSysInstruction instruction : instructions) {
-          if (instruction.getFilter() != null) {
-            skip = checkFilter(extra.getFilter(), instruction.getFilter());
-          }
-          if (skip) {
-            continue;
-          }
-
-          if (instruction.getFileDesc() != null) {
-            getFile(state, extra, instruction);
-          } else if (instruction.getExecArgs() != null) {
-            getExec(state, extra, instruction);
-          } else if (instruction.getExecCbArgs() != null) {
-            getExecCb(state, extra, instruction);
-          } else if (instruction.getFetch() != null) {
-            getFetch(state, extra, instruction);
-          } else if (instruction.getOwnerExec() != null) {
-            getOwnerExec(state, extra, instruction);
-          }
+        if (!checkProvider(instructions[i])) {
+          continue;
         }
 
+        if (instructions[i].getFilter() != null) {
+          skip = checkFilter(extra.getFilter(), instructions[i].getFilter());
+        }
+        if (skip) {
+          document.setIndex(i);
+          continue;
+        }
+
+        document.setIndex(i);
+        if (instructions[i].getFileDesc() != null) {
+          getFile(state, extra, instructions[i]);
+        } else if (instructions[i].getExecArgs() != null) {
+          getExec(state, extra, instructions[i]);
+        } else if (instructions[i].getExecCbArgs() != null) {
+          getExecCb(state, extra, instructions[i]);
+        } else if (instructions[i].getFetch() != null) {
+          getFetch(state, extra, instructions[i]);
+        } else if (instructions[i].getOwnerExec() != null) {
+          getOwnerExec(state, extra, instructions[i]);
+        } else {
+          break;
+        }
       }
-      trans.commit();
-    } catch (SQLException e) {
-      logger.error("SQL Exception" + e.getMessage());
-      throw new InternalServerErrorException(e);
-    } finally {
-      session.close();
     }
+
+    if (!state.getActiveSent()) {
+      ServiceInfoKeyValuePair activePair = new ServiceInfoKeyValuePair();
+      activePair.setKeyName(FdoSys.ACTIVE);
+      activePair.setValue(Mapper.INSTANCE.writeValue(state.isActive()));
+      state.setActiveSent(true);
+      state.getGlobalState().getQueue().addFirst(activePair);
+    }
+
   }
 
   protected void getExec(ServiceInfoModuleState state,
@@ -302,7 +312,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(FdoSys.EXEC);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecArgs()));
-    extra.getQueue().add(kv);
+    state.getGlobalState().getQueue().add(kv);
   }
 
   protected void getOwnerExec(ServiceInfoModuleState state,
@@ -320,7 +330,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(FdoSys.EXEC_CB);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getExecCbArgs()));
-    extra.getQueue().add(kv);
+    state.getGlobalState().getQueue().add(kv);
   }
 
   protected void getFetch(ServiceInfoModuleState state,
@@ -329,7 +339,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(FdoSys.FETCH);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFetch()));
-    extra.getQueue().add(kv);
+    state.getGlobalState().getQueue().add(kv);
   }
 
   protected void getDbFile(ServiceInfoModuleState state,
@@ -362,7 +372,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
               System.arraycopy(temp, 0, data, 0, br);
             }
             kv.setValue(Mapper.INSTANCE.writeValue(data));
-            extra.getQueue().add(kv);
+            state.getGlobalState().getQueue().add(kv);
           }
         } catch (SQLException throwables) {
           logger.error("SQL Exception " + throwables.getMessage());
@@ -480,7 +490,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
                 System.arraycopy(temp, 0, data, 0, br);
               }
               kv.setValue(Mapper.INSTANCE.writeValue(data));
-              extra.getQueue().add(kv);
+              state.getGlobalState().getQueue().add(kv);
             }
           }
         }
@@ -504,7 +514,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
     ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
     kv.setKeyName(FdoSys.FILEDESC);
     kv.setValue(Mapper.INSTANCE.writeValue(instruction.getFileDesc()));
-    extra.getQueue().add(kv);
+    state.getGlobalState().getQueue().add(kv);
 
     String resource = instruction.getResource();
     if (resource.startsWith("https://") || resource.startsWith("http://")) {

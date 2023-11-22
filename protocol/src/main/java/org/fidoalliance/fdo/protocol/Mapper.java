@@ -205,6 +205,17 @@ public enum Mapper {
     return reader.readValue(json, t);
   }
 
+  /**
+   * Writes an Object as a json encoded string.
+   *
+   * @param value The object to encode.
+   * @return The object representation in json.
+   * @throws IOException An error occurred when writing the content.
+   */
+  public String writeJsonValue(Object value) throws IOException {
+    return jsonMapper.writeValueAsString(value);
+  }
+
 
   /**
    * Threads the cbor content to a JsonNode.

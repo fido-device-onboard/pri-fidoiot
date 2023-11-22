@@ -36,6 +36,13 @@ public interface ServiceInfoModule {
    */
   void receive(ServiceInfoModuleState state, ServiceInfoKeyValuePair kvPair) throws IOException;
 
+  /**
+   * Called when empty service info message received.
+   *
+   * @throws IOException An error occurred.
+   */
+  void keepAlive() throws IOException;
+
 
   /**
    * Sends service info values.
