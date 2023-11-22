@@ -287,6 +287,38 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
+# Preview implementation of FSIM ServiceInfo modules
+
+The FDO PRI Owner and PRI Java Device  currently supports FSIM modules: `fdo.download`, `fdo.command`.
+
+  *fdo.download* - sends payload/content (script, binaries, and others) from Owner to the device. Upon receiving this, device writes the content into the open stream as given by the preceding 'filedesc' message.
+
+  *fdo.command* - The command that will be executed at the device. Device executes the command as received.
+
+  ### Configuring FSIM ServiceInfo modules
+
+Activate the following workers in Device's `service.yml`:
+```yaml
+- org.fidoalliance.fdo.sample.FdoSimDownloadDeviceModule
+- org.fidoalliance.fdo.sample.FdoSimCommandDeviceModule
+```
+and Activate the following workers in Owner's `service.yml`
+
+```yaml
+- org.fidoalliance.fdo.sample.FdoSimDownloadOwnerModule
+- org.fidoalliance.fdo.sample.FdoSimCommandOwnerModule
+```
+
+ ### Sample SVI instruction :
+
+  `[{"filedesc" : "script.bat","resource" : "script.bat", "module":"fdo.download"}]`
+
+  or
+
+  `[{"filedesc" : "script.bat","resource" : "script.bat", "module":"fdo.download"}, {"exec_cb" : ["cmd", "/c", "script.bat"], "module":"fdo.command"}]`
+
+***NOTE***: Currently, FDO_SYS and FSIM modules cannot be used simultaneously. Disable FSIM modules if you are using FDO_SYS. You can filter SVI transfer based on Device parameters. [Learn more](aio/README.md#service-info-filters)
+
 # Executing cURL request with mTLS
 
 Generic sample Digest authentication call:

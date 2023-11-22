@@ -7,10 +7,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.fidoalliance.fdo.protocol.dispatch.ServiceInfoSendFunction;
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@JsonPropertyOrder({"name", "more", "done", "mtu", "guid", "extra"})
+@JsonPropertyOrder({"name", "active", "active_sent", "more", "done", "mtu", "guid", "extra"})
 public class ServiceInfoModuleState {
 
   @JsonProperty("name")
@@ -18,6 +17,9 @@ public class ServiceInfoModuleState {
 
   @JsonProperty("active")
   private boolean active;
+
+  @JsonProperty("active_sent")
+  private boolean activeSent;
 
   @JsonProperty("more")
   private boolean more;
@@ -29,10 +31,17 @@ public class ServiceInfoModuleState {
   private int mtu;
 
   @JsonProperty("guid")
-  Guid guid;
+  private Guid guid;
 
   @JsonProperty("extra")
-  AnyType extra;
+  private AnyType extra;
+
+  @JsonIgnore
+  private ServiceInfoGlobalState globalState;
+
+
+  @JsonIgnore
+  private ServiceInfoDocument document;
 
   @JsonIgnore
   public String getName() {
@@ -48,7 +57,6 @@ public class ServiceInfoModuleState {
   public boolean isDone() {
     return done;
   }
-
 
   @JsonIgnore
   public boolean isMore() {
@@ -68,6 +76,21 @@ public class ServiceInfoModuleState {
   @JsonIgnore
   public AnyType getExtra() {
     return extra;
+  }
+
+  @JsonIgnore
+  public ServiceInfoDocument getDocument() {
+    return document;
+  }
+
+  @JsonIgnore
+  public boolean getActiveSent() {
+    return activeSent;
+  }
+
+  @JsonIgnore
+  public ServiceInfoGlobalState getGlobalState() {
+    return this.globalState;
   }
 
   @JsonIgnore
@@ -103,6 +126,21 @@ public class ServiceInfoModuleState {
   @JsonIgnore
   public void setExtra(AnyType extra) {
     this.extra = extra;
+  }
+
+  @JsonIgnore
+  public void setDocument(ServiceInfoDocument document) {
+    this.document = document;
+  }
+
+  @JsonIgnore
+  public void setGlobalState(ServiceInfoGlobalState state) {
+    this.globalState = state;
+  }
+
+  @JsonIgnore
+  public void setActiveSent(boolean sent) {
+    this.activeSent = sent;
   }
 
 }

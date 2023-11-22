@@ -6,6 +6,7 @@ package org.fidoalliance.fdo.protocol.api;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.UUID;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
@@ -14,6 +15,7 @@ import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.db.To2BlobSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.VoucherQueryFunction;
 import org.fidoalliance.fdo.protocol.entity.OnboardingConfig;
+import org.fidoalliance.fdo.protocol.entity.VoucherAlias;
 import org.fidoalliance.fdo.protocol.message.OwnershipVoucher;
 import org.fidoalliance.fdo.protocol.message.To0OwnerSign;
 import org.fidoalliance.fdo.protocol.message.To0d;
@@ -24,11 +26,30 @@ import org.fidoalliance.fdo.protocol.message.To2AddressEntries;
  */
 public class To0Starter extends RestApi {
 
+  private boolean isGuid(String value) {
+    try {
+      UUID.fromString(value);
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+    return true;
+  }
+
   @Override
   public void doGet() throws Exception {
 
     LoggerService logger = new LoggerService(To0Starter.class);
-    String guid = getLastSegment();
+    String path = getLastSegment();
+
+    //if last segment is serialno vs guid
+    if (!isGuid(path)) {
+      VoucherAlias voucherAlias = getSession().get(VoucherAlias.class, path);
+      if (voucherAlias != null) {
+        path = voucherAlias.getGuid();
+      }
+    }
+
+    final String guid = path;
 
     Thread thread = new Thread() {
       public void run() {

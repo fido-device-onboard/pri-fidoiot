@@ -7,17 +7,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
+import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
 public class FdoSysModuleExtra {
+
   @JsonProperty("filter")
-  private final Map<String,String> filter = new HashMap<>();
-
-  @JsonProperty("queue")
-  private ServiceInfoQueue queue = new ServiceInfoQueue();
-
-  @JsonProperty("waitQueue")
-  private ServiceInfoQueue waitQueue = new ServiceInfoQueue();
+  private final Map<String, String> filter = new HashMap<>();
 
   @JsonProperty("loaded")
   private boolean loaded;
@@ -25,21 +21,52 @@ public class FdoSysModuleExtra {
   @JsonProperty("waiting")
   private boolean waiting;
 
+  @JsonProperty("length")
+  private int length;
+
+  @JsonProperty("name")
+  private String name;
+
+  @JsonProperty("checksum")
+  private byte[] checksum;
+
+  @JsonProperty("data")
+  private byte[] data;
+
+  @JsonProperty("received")
+  private int received;
 
   @JsonIgnore
   public Map<String, String> getFilter() {
     return filter;
   }
 
+
   @JsonIgnore
-  public ServiceInfoQueue getQueue() {
-    return queue;
+  public int getLength() {
+    return length;
   }
 
   @JsonIgnore
-  public ServiceInfoQueue getWaitQueue() {
-    return waitQueue;
+  public String getName() {
+    return name;
   }
+
+  @JsonIgnore
+  public byte[] getChecksum() {
+    return checksum;
+  }
+
+  @JsonIgnore
+  public byte[] getData() {
+    return data;
+  }
+
+  @JsonIgnore
+  public int getReceived() {
+    return received;
+  }
+
 
   @JsonIgnore
   public boolean isLoaded() {
@@ -61,13 +88,30 @@ public class FdoSysModuleExtra {
     this.waiting = waiting;
   }
 
+
   @JsonIgnore
-  public void setQueue(ServiceInfoQueue queue) {
-    this.queue = queue;
+  public void setLength(int length) {
+    this.length = length;
   }
 
   @JsonIgnore
-  public void setWaitQueue(ServiceInfoQueue waitQueue) {
-    this.waitQueue = waitQueue;
+  public void setName(String name) {
+    this.name = name;
   }
+
+  @JsonIgnore
+  public void setChecksum(byte[] checksum) {
+    this.checksum = checksum;
+  }
+
+  @JsonIgnore
+  public void setData(byte[] data) {
+    this.data = data;
+  }
+
+  @JsonIgnore
+  public void setReceived(int received) {
+    this.received = received;
+  }
+
 }
