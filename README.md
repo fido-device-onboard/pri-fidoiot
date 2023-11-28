@@ -76,6 +76,8 @@ The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ***NOTE***: Export the following variable `JDK_JAVA_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED"`, if you are facing ClassFormatError exception while building using maven.
 
+***NOTE***: If build is taking a lot of time in RHEL*, check the entropy of machine using `cat /proc/sys/kernel/random/entropy_avail` and make sure it's a multiple of 1000. If it's not a multiple of 1000, then run the following commands: `sudo yum install rng-tools -y` and `sudo service rngd start`.
+
 ### Credential storage
 
 Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
