@@ -10,7 +10,7 @@ deploying the example implementation for these components.
 
 ## System Requirements:
 
-* **Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4**. +
+* **Ubuntu (20.04, 22.04) / RHEL (8.6, 8.8) / Debian 11.4**. +
 * **Maven 3.6.3**.
 * **Java 17**.
 * **Haveged**.
@@ -76,6 +76,8 @@ The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ***NOTE***: Export the following variable `JDK_JAVA_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED"`, if you are facing ClassFormatError exception while building using maven.
 
+***NOTE***: If build is taking a lot of time in RHEL*, check the entropy of machine using `cat /proc/sys/kernel/random/entropy_avail` and make sure it's a multiple of 1000. If it's not a multiple of 1000, then run the following commands: `sudo yum install rng-tools -y` and `sudo service rngd start`.
+
 ### Credential storage
 
 Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
@@ -110,7 +112,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 ***NOTE***: Changing the database password after the H2 database has been created requires the database file to be deleted and recreated.
 
 
-### Generating random passwords using keys_gen.sh
+### Generating sample certificates and random passwords
 
 1. Generating demo certificate authority KeyPair and certificate
 
@@ -362,7 +364,7 @@ $ cd <fdo-pri-src>/component-samples/demo/device
 $ java -jar device.jar
 ...
 13:50:21.846 [INFO ] Type 13 []
-13:50:21.850 [INFO ] Starting Fdo Completed
+13:50:21.850 [INFO ] FDO DI SUCCESS
 ```
 
 
@@ -402,6 +404,9 @@ Result will contain the device info
 ```
 [{"serial_no":"43FF320A","timestamp":"2022-02-18 21:50:21.838","uuid":"24275cd7-f9f5-4d34-a2a5-e233ac38db6c"}]
 ```
+Following steps can be followed or extend and upload ownership voucher using `extend_upload.sh` script present in `<fdo-pri-src>/component-samples/demo/scripts`
+
+Ex: bash extend_upload.sh -m ${mfg_ip} -o ${owner_ip} -s abcdef
 
 Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
 POST https://host.docker.internal:8038/api/v1/mfg/vouchers/43FF320A(or http://host.docker.internal:8039api/v1/mfg/vouchers/43FF320A)
@@ -460,6 +465,9 @@ For authorization, users can use DIGEST AUTH with "apiUser" and api_password as 
 
 Response `200 OK`
 
+Check for TO0 completion in owner logs.
+
+***NOTE***: By default, TrustedRendezvousAcceptFunction worker is enabled. So we need to add the Owner's certificate to RV via api/v1/rv/allow endpoint to accept TO0 requests from Owner.
 
 
 #### Configure the owner service info package

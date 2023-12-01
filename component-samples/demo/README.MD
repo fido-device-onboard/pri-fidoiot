@@ -17,13 +17,13 @@
 
 # System Requirements
 
-* Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.4, 8.6) / Debian 11.4
+* Host Operating System: Ubuntu (20.04, 22.04) / RHEL (8.6, 8.8) / Debian 11.4
 
 * Linux packages:
 
-  - Docker engine (minimum version 20.10.10, Supported till version 20.10.17) / Podman engine (For RHEL) 3.4.2+
+  - Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
 
-  - Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)
+  - Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
   - Haveged
 
@@ -174,7 +174,7 @@ In Ubuntu/RHEL, copy the csme.zip/csme-debug.zip file present in `<fdo-pri-src>/
 ```
 cp <fdo-pri-src>/component-samples/demo/aio/csme.zip   <fdo-pri-src>/component-samples/demo/manufacturer
 cp <fdo-pri-src>/component-samples/demo/aio/csme.zip   <fdo-pri-src>/component-samples/demo/owner
-COPY ./csme.zip ./csme.zip`/
+COPY ./csme.zip ./csme.zip/
 ```
 
 Restart Docker/Podman containers and execute the below CURL command to upload Ondie artifacts to DB.
@@ -195,7 +195,7 @@ are printed in the log file.
 
 Use following command to extract the log file from a running container.
 ```
-docker container cp <container-id>:/home/fdo/log-filename .
+docker container cp <container-id>:/home/fdo/app-data/service.log .
 ```
 
 # Running Demo
@@ -248,7 +248,7 @@ source ~/.bashrc
 
 # ServiceInfo setup between FDO PRI HTTP Java Device Sample and FDO PRI Owner Sample
 
-The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
+The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` and `FSIM` module for interpreting received owner ServiceInfo and `devmod` module to share device ServiceInfo with Owner.
 
 - `fdo_sys` Owner ServiceInfo module: This module supports the following 4 message names as listed below to interpret the ServiceInfo as received from the Owner. The basic functionality of this module is to support payload/script transfers and basic command execution.  A sample format looks like 'fdo_sys:filedesc=filename, fdo_sys:write=filecontent,fdo_sys:exec=command-to-execute,fdo_sys:exec_cb=command-to-execute'.
 
@@ -261,6 +261,8 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
     *exec-cb* - This command returns the status / progress of the process running.
 
     *fetch* - This command returns the fetched file from client filesystem.
+
+    - The fetched file is stored in `owner/app-data/<device_guid>`
 
     *owner_exec* - This command is a generic execution module that can perform various tasks, such as downloading files, running scripts, and executing commands. For executing specific package add the package in the respective Dockers.
 
@@ -285,7 +287,7 @@ The FDO PRI HTTP Java Device Sample currently supports `fdo_sys` module for inte
 
 - `devmod` Device ServiceInfo module: This module supports multiple messages as listed down in the protocol specification[REFER](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419/FIDO-Device-Onboard-PS-v1.1-20220419.html#the-devmod-module), that is sent to the Owner as Device ServiceInfo. A sample format looks like 'devmod:active=1'.
 
-The FDO PRI Owner Sample currently supports `fdo_sys` module for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
+The FDO PRI Owner Sample currently supports `fdo_sys` and `FSIM` modules for sending serviceInfo to the PRI Device and `devmod` module to store the received Device ServiceInfo. When device information is inserted into the database table 'ONBOARDING_CONFIG', it'll not have any association with the ServiceInfo values, and so by default, no ServiceInfo is transferred to the Device.
 
 # Preview implementation of FSIM ServiceInfo modules
 
@@ -429,16 +431,6 @@ While customizing the system configuration for multi machine setup, ensure that 
       --header 'Content-Type: text/plain' \
       --data-raw '[["{owner-ip}","{owner-dns}",8042,3]]'
       ```
-
-- Updating subject_name in SSL certificate via `service.yml`
-
-  - 
-    ``` 
-    //Updates subject alternative information in the certificate.
-    subject_name:
-      DNS:<DNS-of-host-machine>
-      IP:<IP-address-of-host-machine>
-    ```
 
 # Enable Embedded H2 Database Server
 

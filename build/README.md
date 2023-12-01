@@ -5,11 +5,11 @@ Docker/Podman Script for building `pri-fidoiot` repository. Using this script yo
 
 ## Prerequisites
 
-- Operating system: **Ubuntu (20.04, 22.04) / RHEL 8.4.**
+- Operating system: **Ubuntu (20.04, 22.04) / RHEL (8.6, 8.8)**
 
-- Docker engine : **18.09** (Supported till version 20.10.7) / Podman engine (For RHEL).
+- Docker engine : (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
 
-- Docker-compose : **1.23.2** / Podman-compose: **0.1.5** (For RHEL).
+- Docker-compose : (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
 
 ***NOTE***: Use the following commands to enable podman build support on RHEL.
 ```

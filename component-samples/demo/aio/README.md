@@ -223,28 +223,22 @@ Every service info following a filter will only be returned if the filter matche
 The following filter will only return service info instructions if the device info reports the device is a "FDO-Pri-Device"
 
 [
-{"filter": {"device" : "FDO-Pri-Device"}},
-{"filedesc" : "setup.sh","resource" : "payload.bin"},
-{"exec" : ["bash","setup.sh"] },
-{"filter" : {}}
+{"filedesc" : "setup.sh","resource" : "payload.bin", "filter": {"device" : "FDO-Pri-Device"}},
+{"exec" : ["bash","setup.sh"] }
 ]
 
 The following filter will only return service info instructions if the device info reports the os is linux
 
 [
-{"filter": {"devmod:os" : "linux"}},
-{"filedesc" : "setup.sh","resource" : "payload.bin"},
-{"exec" : ["bash","setup.sh"] },
-{"filter" : {}}
+{"filedesc" : "setup.sh","resource" : "payload.bin", "filter": {"devmod:os" : "linux"}},
+{"exec" : ["bash","setup.sh"], "filter": {"devmod:os" : "linux"}}
 ]
 
 The following filter will only return service info instructions if the device info reports the os is linux and verion is 20.04
 
 [
-{"filter": {"devmod:os" : "linux", "devmod:version" : "Ubuntu 20.04 LTS"}},
-{"filedesc" : "setup.sh","resource" : "payload.bin"},
-{"exec" : ["bash","setup.sh"] },
-{"filter" : {}}
+{"filedesc" : "setup.sh","resource" : "payload.bin", "filter": {"devmod:os" : "linux", "devmod:version" : "Ubuntu 20.04 LTS"}},
+{"exec" : ["bash","setup.sh"] }
 ]
 
 
