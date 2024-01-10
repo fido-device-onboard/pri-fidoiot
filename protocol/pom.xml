@@ -67,13 +67,13 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bc-fips</artifactId>
-      <version>1.0.2.4</version>
+      <version>${bcfips.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-fips</artifactId>
-      <version>1.0.7</version>
+      <version>${bcpkix-fips.version}</version>
     </dependency>
 
 
@@ -164,19 +164,6 @@
       <artifactId>httpclient</artifactId>
       <version>${apache-httpcomponents.version}</version>
     </dependency>
-
-
-<!--    <dependency>-->
-<!--      <groupId>org.bouncycastle</groupId>-->
-<!--      <artifactId>bcprov-jdk15on</artifactId>-->
-<!--      <version>${bcprov.version}</version>-->
-<!--    </dependency>-->
-
-<!--    <dependency>-->
-<!--      <groupId>org.bouncycastle</groupId>-->
-<!--      <artifactId>bcpkix-jdk15on</artifactId>-->
-<!--      <version>${bcpkix.version}</version>-->
-<!--    </dependency>-->
 
     <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
     <dependency>
