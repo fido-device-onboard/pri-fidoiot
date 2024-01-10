@@ -46,19 +46,19 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk18on</artifactId>
-      <version>${bcpkix.version}</version>
-      <scope>compile</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.bouncycastle</groupId>-->
+<!--      <artifactId>bcpkix-jdk15on</artifactId>-->
+<!--      <version>${bcpkix.version}</version>-->
+<!--      <scope>compile</scope>-->
+<!--    </dependency>-->
 
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk18on</artifactId>
-      <version>${bcprov.version}</version>
-      <scope>compile</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.bouncycastle</groupId>-->
+<!--      <artifactId>bcprov-jdk15on</artifactId>-->
+<!--      <version>${bcprov.version}</version>-->
+<!--      <scope>compile</scope>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
