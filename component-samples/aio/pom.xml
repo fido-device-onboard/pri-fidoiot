@@ -54,19 +54,6 @@
       <scope>test</scope>
     </dependency>
 
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk18on</artifactId>
-      <version>${bcpkix.version}</version>
-
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk18on</artifactId>
-      <version>${bcprov.version}</version></dependency>
-
     <dependency>
       <groupId>org.fidoalliance.fdo</groupId>
       <artifactId>protocol</artifactId>

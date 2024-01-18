@@ -33,7 +33,7 @@ import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.db.OnDieCertificateManager;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
@@ -50,7 +50,7 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
     try {
       certFactory = CertificateFactory.getInstance(
           "X.509", // TODO Const.X509_ALG_NAME,
-          new BouncyCastleProvider());
+          new BouncyCastleFipsProvider());
     } catch (CertificateException e) {
       throw new IOException(e);
     }
@@ -278,7 +278,7 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
       for (Certificate cert : certificateList) {
         X509Certificate x509cert = (X509Certificate) cert;
         X509CertificateHolder certHolder = new X509CertificateHolder(x509cert.getEncoded());
-        CRLDistPoint cdp = CRLDistPoint.fromExtensions(certHolder.getExtensions());
+        CRLDistPoint cdp = CRLDistPoint.getInstance(certHolder);
         if (cdp != null) {
           DistributionPoint[] distPoints = cdp.getDistributionPoints();
           for (DistributionPoint dp : distPoints) {
