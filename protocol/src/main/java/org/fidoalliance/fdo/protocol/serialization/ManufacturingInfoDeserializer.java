@@ -55,13 +55,13 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
   public ManufacturingInfo deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
-
-    int index = 0;
-    ManufacturingInfo info = new ManufacturingInfo();
     
     if (node.size() < 5) {
       throw new InvalidMessageException("Invalid Message, All required fields are not present!");
     }
+    
+    int index = 0;
+    ManufacturingInfo info = new ManufacturingInfo();
     
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
     info.setKeyEnc(PublicKeyEncoding.fromNumber(node.get(index++).intValue()));
