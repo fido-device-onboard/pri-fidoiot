@@ -56,12 +56,6 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
       throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
     
-    int validMessageSize = 5;
-
-    if (node.size() < validMessageSize) {
-      throw new InvalidMessageException("Invalid Message. All required fields are not present!");
-    }
-    
     int index = 0;
     ManufacturingInfo info = new ManufacturingInfo();
     
@@ -78,7 +72,7 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
 
     String deviceInfo = node.get(index++).textValue();
 
-    if (isValidString(deviceInfo)) {
+    if (isValidString(deviceInfo) || deviceInfo.isEmpty()) {
       info.setDeviceInfo(deviceInfo);
     } else {
       throw new InvalidMessageException("Invalid Device Info");
