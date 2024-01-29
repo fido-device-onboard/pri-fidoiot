@@ -58,7 +58,6 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
     
     int index = 0;
     ManufacturingInfo info = new ManufacturingInfo();
-    
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
     info.setKeyEnc(PublicKeyEncoding.fromNumber(node.get(index++).intValue()));
 
