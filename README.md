@@ -117,7 +117,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 1. Generating demo certificate authority KeyPair and certificate
 
     ```
-    $ cd <fdo-pri-src>/component-samples/demo/scripts
+    cd <fdo-pri-src>/component-samples/demo/scripts
     bash demo_ca.sh
     ```
 
@@ -126,7 +126,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 2. Generating Server and Client Keypair and certificates.
 
     ```
-    $ cd <fdo-pri-src>/component-samples/demo/scripts
+    cd <fdo-pri-src>/component-samples/demo/scripts
     bash web_csr_req.sh
     bash user_csr_req.sh
     ```
