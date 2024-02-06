@@ -286,34 +286,36 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
         byte[] crlDistributionPointDerEncodedArray = certificate.getExtensionValue(
                 Extension.cRLDistributionPoints.getId());
 
-        ASN1InputStream oasnInstream = new ASN1InputStream(
-                new ByteArrayInputStream(crlDistributionPointDerEncodedArray));
-        ASN1Primitive derObjCrlDP = oasnInstream.readObject();
-        DEROctetString dosCrlDP = (DEROctetString) derObjCrlDP;
+        if (crlDistributionPointDerEncodedArray != null) {
+          ASN1InputStream oasnInstream = new ASN1InputStream(
+                  new ByteArrayInputStream(crlDistributionPointDerEncodedArray));
+          ASN1Primitive derObjCrlDP = oasnInstream.readObject();
+          DEROctetString dosCrlDP = (DEROctetString) derObjCrlDP;
 
 
-        byte[] crldpExtOctets = dosCrlDP.getOctets();
-        ASN1InputStream mainStream = new ASN1InputStream(
-                new ByteArrayInputStream(crldpExtOctets));
-        ASN1Primitive derObj2 = mainStream.readObject();
-        CRLDistPoint distPoints = CRLDistPoint.getInstance(derObj2);
+          byte[] crldpExtOctets = dosCrlDP.getOctets();
+          ASN1InputStream mainStream = new ASN1InputStream(
+                  new ByteArrayInputStream(crldpExtOctets));
+          ASN1Primitive derObj2 = mainStream.readObject();
+          CRLDistPoint distPoints = CRLDistPoint.getInstance(derObj2);
 
-        if (distPoints != null) {
-          for (DistributionPoint dp : distPoints.getDistributionPoints()) {
-            GeneralName[] generalNames =
-                GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
-            for (GeneralName generalName : generalNames) {
-              String name = generalName.toString();
-              byte[] crlBytes = certManager.getCertificate(name.substring(name.indexOf("http")));
-              if (crlBytes == null) {
-                // TODO logger.info("CRL: " + generalName.getName().toString()
-                //        + " not found in cache for cert: "
-                //        + x509cert.getIssuerX500Principal().getName());
-                return false;
-              } else {
-                CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));
-                if (crl.isRevoked(cert)) {
+          if (distPoints != null) {
+            for (DistributionPoint dp : distPoints.getDistributionPoints()) {
+              GeneralName[] generalNames =
+                      GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
+              for (GeneralName generalName : generalNames) {
+                String name = generalName.toString();
+                byte[] crlBytes = certManager.getCertificate(name.substring(name.indexOf("http")));
+                if (crlBytes == null) {
+                  // TODO logger.info("CRL: " + generalName.getName().toString()
+                  //        + " not found in cache for cert: "
+                  //        + x509cert.getIssuerX500Principal().getName());
                   return false;
+                } else {
+                  CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));
+                  if (crl.isRevoked(cert)) {
+                    return false;
+                  }
                 }
               }
             }
