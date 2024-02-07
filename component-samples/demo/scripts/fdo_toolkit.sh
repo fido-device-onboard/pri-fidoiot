@@ -189,6 +189,10 @@ cd $1/db
 if [ ! "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then
   sed -i 's+innodb_change_buffer_max_size = 25+#innodb_change_buffer_max_size = 25+g' custom/config-file.cnf
   docker-compose up --build -d
+  if [ ! "$( docker container inspect -f '{{.State.Status}}' db_fdo-db_1 )" == "running" ]; then
+     echo "Failed to start DB container" >&2
+     exit 1
+  fi
 fi
 }
 
