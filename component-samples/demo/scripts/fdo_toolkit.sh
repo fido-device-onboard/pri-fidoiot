@@ -162,7 +162,8 @@ echo "[ alt_names ]">> web-server.conf
 echo "DNS.1 = $ipaddress" >> web-server.conf
 echo "DNS.2 = localhost" >> web-server.conf
 echo "DNS.3 = host.docker.internal" >> web-server.conf
-echo "DNS.4 = host.docker.internal" >> web-server.conf
+machine_dns=`cat /etc/hostname`
+echo "DNS.4 = ${machine_dns}" >> web-server.conf
 echo "IP.1 = $ipaddress" >> web-server.conf
 echo "IP.2 = 127.0.0.1" >> web-server.conf
 echo "IP.3 = 172.17.0.1" >> web-server.conf
