@@ -265,7 +265,7 @@ cd $1/owner
 docker-compose up --build -d
 if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-owner )" == "running" ]; then
        echo "Failed to start owner container" >&2
-       return 1
+       exit 1
     fi
 }
 
