@@ -11,7 +11,7 @@
 #
 #  Usage:
 #
-#  wget script_url.sh
+#  fdo_toolkit.sh
 #  export ipaddress=<ip-address-of-machine>
 #  chmod 777 fdo_toolkit.sh & source fdo_toolkit.sh
 #
@@ -36,7 +36,7 @@
 #################    Documentation   #############################
 
 
-FDO_RELEASE="1.1.5.1"
+FDO_RELEASE="1.1.7"
 
 
 chk() {
@@ -139,7 +139,7 @@ if ! isDockerComposeAtLeast $minVersion; then
     fi
 #    echo "docker-compose is not installed or not at least version $minVersion, installing/upgrading it..."
 #    # Install docker-compose from its github repo, because that is the only way to get a recent enough version
-#    curl --progress-bar -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose ## TODO link not working
+#    curl --progress-bar -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose ## TODO link not working, See with Davis if we should keep this commented
 #    chk $? 'downloading docker-compose'
 #    chmod +x /usr/local/bin/docker-compose
 #    chk $? 'making docker-compose executable'
@@ -153,6 +153,10 @@ echo "Upgraded and Installed all FDO dependencies"
 
 
 update_scripts() {
+if [ ! -e "$1" ]; then
+  echo "Error: $1 does not exist" >&2
+  exit 1
+fi
 cd $1
 sed -i 's/#subjectAltName = @alt_names/subjectAltName = @alt_names/g' web-server.conf
 sed -i 's/#subjectAltName/subjectAltName/g' web-server.conf
@@ -162,7 +166,8 @@ echo "[ alt_names ]">> web-server.conf
 echo "DNS.1 = $ipaddress" >> web-server.conf
 echo "DNS.2 = localhost" >> web-server.conf
 echo "DNS.3 = host.docker.internal" >> web-server.conf
-echo "DNS.4 = host.docker.internal" >> web-server.conf
+machine_dns=`cat /etc/hostname`
+echo "DNS.4 = ${machine_dns}" >> web-server.conf
 echo "IP.1 = $ipaddress" >> web-server.conf
 echo "IP.2 = 127.0.0.1" >> web-server.conf
 echo "IP.3 = 172.17.0.1" >> web-server.conf
@@ -170,6 +175,10 @@ echo "IP.3 = 172.17.0.1" >> web-server.conf
 }
 
 generate_keys() {
+if [ ! -e "$1" ]; then
+  echo "Error: $1 does not exist" >&2
+  exit 1
+fi
 cd $1
 bash demo_ca.sh
 bash web_csr_req.sh
@@ -184,36 +193,80 @@ cp -r secrets ../db/
 }
 
 start_db() {
+if [ ! -e "$1" ]; then
+  echo "Error: $1 does not exist" >&2
+  exit 1
+fi
 cd $1/db
-if [ ! "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then
+if [ ! "$( docker container inspect -f '{{.State.Status}}' db_fdo-db_1 )" == "running" ]; then
   sed -i 's+innodb_change_buffer_max_size = 25+#innodb_change_buffer_max_size = 25+g' custom/config-file.cnf
   docker-compose up --build -d
+    if [ ! "$( docker container inspect -f '{{.State.Status}}' db_fdo-db_1 )" == "running" ]; then
+       echo "Failed to start DB container" >&2
+       exit 1
+    fi
 fi
 }
 
 start_aio() {
+if [ ! -e "$1" ]; then
+  echo "Error: $1 does not exist" >&2
+  exit 1
+fi
 cd $1/aio
 sed -i 's/  #- org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/  - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/g' service.yml
 sed -i 's/  - org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/  #- org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/g' service.yml
-docker-compose up --build -d
-docker logs -f pri-fdo-aio
+if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-aio )" == "running" ]; then
+  sed -i 's+innodb_change_buffer_max_size = 25+#innodb_change_buffer_max_size = 25+g' custom/config-file.cnf
+  docker-compose up --build -d
+    if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-aio )" == "running" ]; then
+       echo "Failed to start aio container" >&2
+       exit 1
+    fi
+fi
 }
 
+
 start_mfg() {
+ if [ ! -e "$1" ]; then
+   echo "Error: $1 does not exist" >&2
+   exit 1
+ fi
 cd $1/manufacturer
 docker-compose up --build -d
+if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-mfg )" == "running" ]; then
+       echo "Failed to start aio container" >&2
+       exit 1
+    fi
+
 }
 
 start_rv() {
+ if [ ! -e "$1" ]; then
+   echo "Error: $1 does not exist" >&2
+   exit 1
+ fi
 cd $1/rv
 sed -i 's/  #- org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/  - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/g' service.yml
 sed -i 's/  - org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/  #- org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/g' service.yml
 docker-compose up --build -d
+if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-rv )" == "running" ]; then
+       echo "Failed to start aio container" >&2
+       exit 1
+    fi
 }
 
 start_owner() {
+if [ ! -e "$1" ]; then
+  echo "Error: $1 does not exist" >&2
+  exit 1
+fi
 cd $1/owner
 docker-compose up --build -d
+if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-owner )" == "running" ]; then
+       echo "Failed to start owner container" >&2
+       return 1
+    fi
 }
 
 add_docker_internal_mappings() {
@@ -228,7 +281,7 @@ add_docker_internal_mappings() {
 aio_e2e_setup() {
   add_docker_internal_mappings
   install_dependencies
-  docker_cleaner
+  fdo_docker_cleaner
   download_and_unpack_binaries
   update_scripts ~/pri_code_base/pri-fidoiot-v$FDO_RELEASE/scripts
   generate_keys ~/pri_code_base/pri-fidoiot-v$FDO_RELEASE/scripts
@@ -254,7 +307,7 @@ aio_e2e_setup() {
 # Main Execution script starts from here
 
 if [[ -z "${ipaddress}" ]]; then
-  ipaddress=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+  ipaddress=`ip route get 8.8.8.8 | grep -oP 'src \K[^ ]+'`
 fi
 
 while getopts ":b:c:d:i:z" opt; do
