@@ -29,7 +29,7 @@
 #  5. Add your ideas here
 #
 #
-#
+# The script will only work for Ubuntu-22/Ubuntu-20/Debian.
 #
 #
 #
@@ -137,14 +137,6 @@ if ! isDockerComposeAtLeast $minVersion; then
         echo "Error: Need at least docker-compose $minVersion. A down-level version is currently installed, preventing us from installing the latest version. Uninstall docker-compose and rerun this script."
         exit 2
     fi
-#    echo "docker-compose is not installed or not at least version $minVersion, installing/upgrading it..."
-#    # Install docker-compose from its github repo, because that is the only way to get a recent enough version
-#    curl --progress-bar -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose ## TODO link not working, See with Davis if we should keep this commented
-#    chk $? 'downloading docker-compose'
-#    chmod +x /usr/local/bin/docker-compose
-#    chk $? 'making docker-compose executable'
-#    ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-#    chk $? 'linking docker-compose to /usr/bin'
 fi
 
 
@@ -217,7 +209,6 @@ cd $1/aio
 sed -i 's/  #- org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/  - org.fidoalliance.fdo.protocol.UntrustedRendezvousAcceptFunction/g' service.yml
 sed -i 's/  - org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/  #- org.fidoalliance.fdo.protocol.db.TrustedRendezvousAcceptFunction/g' service.yml
 if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-aio )" == "running" ]; then
-  sed -i 's+innodb_change_buffer_max_size = 25+#innodb_change_buffer_max_size = 25+g' custom/config-file.cnf
   docker-compose up --build -d
     if [ ! "$( docker container inspect -f '{{.State.Status}}' pri-fdo-aio )" == "running" ]; then
        echo "Failed to start aio container" >&2
@@ -289,20 +280,6 @@ aio_e2e_setup() {
   sleep 10
   start_aio ~/pri_code_base/pri-fidoiot-v$FDO_RELEASE
 }
-
-#update_rvinfo_aio() {
-  #ipaddress=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
-  #cert_path="~/pri_code_base/pri-fidoiot-v$FDO_RELEASE/aio"
-  #auth_arg="--cacert ${cert_path}/ca-cert.pem --cert ${cert_path}/api-user.pem"
-  #ip={$1:-${ipaddress}}
-  #get_cert=$(curl ${auth_arg} --silent -w "%{http_code}\n" --location --request POST "https://${ip}:8080/api/v1/rvinfo?ip=$ip&rvprot=http -H 'Content-Type: text/plain')
-  #get_cert_code=$(tail -n1 <<< "$get_cert")
-  #if [ "$get_cert_code" = "200" ]; then
-  #  echo "Successfully updated rvinfo"
-  #fi
-#}
-
-
 
 # Main Execution script starts from here
 
