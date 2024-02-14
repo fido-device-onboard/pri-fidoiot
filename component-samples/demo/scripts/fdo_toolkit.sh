@@ -287,7 +287,7 @@ if [[ -z "${ipaddress}" ]]; then
   ipaddress=`ip route get 8.8.8.8 | grep -oP 'src \K[^ ]+'`
 fi
 
-while getopts ":b:c:d:i:z" opt; do
+while getopts ":bcdiz" opt; do
   case $opt in
     b)
       echo "-binary parameter was passed"
