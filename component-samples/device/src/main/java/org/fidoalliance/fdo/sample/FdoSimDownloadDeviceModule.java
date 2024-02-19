@@ -224,9 +224,5 @@ public class FdoSimDownloadDeviceModule implements ServiceInfoModule {
       throw new InternalServerErrorException(e);
     }
 
-    if (digest != null) {
-      digest.update(data);
-    }
-
   }
 }
