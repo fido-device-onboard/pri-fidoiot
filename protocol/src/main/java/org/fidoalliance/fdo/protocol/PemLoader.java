@@ -19,8 +19,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -119,7 +118,8 @@ public class PemLoader {
           PKCS8EncryptedPrivateKeyInfo epki = (PKCS8EncryptedPrivateKeyInfo) obj;
 
           JcePKCSPBEInputDecryptorProviderBuilder builder =
-              new JcePKCSPBEInputDecryptorProviderBuilder().setProvider(new BouncyCastleProvider());
+              new JcePKCSPBEInputDecryptorProviderBuilder()
+                      .setProvider(new BouncyCastleFipsProvider());
 
           InputDecryptorProvider idp = null;
           if (password != null) {
