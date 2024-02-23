@@ -159,7 +159,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
         break;
       }
     }
-    if (state.getGlobalState().getQueue().isEmpty() && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
@@ -176,7 +176,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DATA:
         byte[] data = Mapper.INSTANCE.readValue(kv.getValue(), byte[].class);
         if (data.length == 0) {
-          //extra.setWaiting(true);
+          extra.setWaiting(true);
         }
         break;
       default:
