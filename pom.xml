@@ -28,8 +28,8 @@
 
 
     <!-- Dependency Version -->
-    <bcpkix.version>1.76</bcpkix.version>
-    <bcprov.version>1.76</bcprov.version>
+    <bcfips.version>1.0.2.4</bcfips.version>
+    <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-codec.version>1.15</commons-codec.version>
     <commons-text.version>1.10.0</commons-text.version>
