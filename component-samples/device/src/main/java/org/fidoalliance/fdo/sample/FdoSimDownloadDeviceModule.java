@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.Config;
 import org.fidoalliance.fdo.protocol.InternalServerErrorException;
@@ -83,6 +84,7 @@ public class FdoSimDownloadDeviceModule implements ServiceInfoModule {
       case FdoSimDownloadOwnerModule.LENGTH:
         if (state.isActive()) {
           expectedLength = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
+          bytesReceived = 0;
           logger.info("expected file length " + expectedLength);
         }
         break;
@@ -188,17 +190,39 @@ public class FdoSimDownloadDeviceModule implements ServiceInfoModule {
       throw new InternalServerErrorException(FdoSimDownloadOwnerModule.LENGTH + " not provided");
     }
 
+    if (bytesReceived == expectedLength) {
+      return;
+    }
+
     try (FileChannel channel = FileChannel.open(currentFile, StandardOpenOption.APPEND)) {
 
       bytesReceived += channel.write(ByteBuffer.wrap(data));
+
+      if (digest != null) {
+        digest.update(data);
+      }
+
+      int returnCode = -1;
+      if (bytesReceived == expectedLength) {
+
+        if (digest != null) {
+          byte[] checkSum = digest.digest();
+          if (ByteBuffer.wrap(checkSum).compareTo(ByteBuffer.wrap(expectedCheckSum)) == 0) {
+            returnCode = bytesReceived;
+          }
+        } else {
+          returnCode = bytesReceived;
+        }
+
+        ServiceInfoKeyValuePair kv = new ServiceInfoKeyValuePair();
+        kv.setKeyName(FdoSimDownloadOwnerModule.DONE);
+        kv.setValue(Mapper.INSTANCE.writeValue(returnCode));
+        queue.add(kv);
+      }
 
     } catch (IOException e) {
       throw new InternalServerErrorException(e);
     }
 
-    if (digest != null) {
-      digest.update(data);
-    }
-    
   }
 }

@@ -50,25 +50,25 @@ http-server:
   certificate_verification: want
   protocols: TLSv1.3
   certificate_verification_depth: 2
-  
+
 to0-scheduler:
     thread-count: 5
     interval: 120
 
 owner:
-   keystore: 
+   keystore:
      path: owner.p12
      store-type: PKCS12
      password: $(encrypt_password)
    replacement:
-     keystore: 
+     keystore:
        path: replacement.p12
        store-type: PKCS12
        password: $(encrypt_password)
    to0-scheduler:
     thread-count: 5
     interval: 120
-   
+
 
 epid:
   # WARNING: do not set testmode to true in production environments
@@ -112,7 +112,7 @@ workers:
   - org.fidoalliance.fdo.protocol.StandardReplacementKeySupplier
   #- Use StandardHttpClientSupplier for secure Production configurations.
   - org.fidoalliance.fdo.protocol.StandardHttpClientSupplier
-  #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier 
+  #- org.fidoalliance.fdo.protocol.HttpOwnerSchemeSupplier
   - org.fidoalliance.fdo.protocol.StandardOwnerSchemeSupplier
   - org.fidoalliance.fdo.protocol.db.StandardServiceInfoClientSupplier
   # Disable BasicServiceInfoClientSupplier in Production Environment to perform SSL certificate verification.
@@ -132,17 +132,17 @@ workers:
   - org.fidoalliance.fdo.protocol.db.StandardVoucherQueryFunction
   - org.fidoalliance.fdo.protocol.db.StandardVoucherReplacementFunction
   #- org.fidoalliance.fdo.protocol.db.ReuseVoucherReplacementFunction
-  - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction 
+  - org.fidoalliance.fdo.protocol.db.StandardReplacementVoucherStorageFunction
   - org.fidoalliance.fdo.protocol.db.StandardRendezvousWaitSecondsSupplier
   - org.fidoalliance.fdo.protocol.db.StandardOwnerInfoSizeSupplier
   - org.fidoalliance.fdo.protocol.db.ConformanceOwnerModule
   - org.fidoalliance.fdo.protocol.db.StandardServiceInfoDocumentSupplier
-  - org.fidoalliance.fdo.protocol.db.FdoSimDownloadOwnerModule
-  - org.fidoalliance.fdo.protocol.db.FdoSimUploadOwnerModule
-  - org.fidoalliance.fdo.protocol.db.FdoSimCommandOwnerModule
-  - org.fidoalliance.fdo.protocol.db.FdoSimWebGetOwnerModule
-  - org.fidoalliance.fdo.protocol.db.FdoSimCsrOwnerModule
   - org.fidoalliance.fdo.protocol.db.FdoSysOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimDownloadOwnerModule
+  #- org.fidoalliance.fdo.protocol.db.FdoSimUploadOwnerModule
+  - org.fidoalliance.fdo.protocol.db.FdoSimCommandOwnerModule
+  #- org.fidoalliance.fdo.protocol.db.FdoSimWebGetOwnerModule
+  #- org.fidoalliance.fdo.protocol.db.FdoSimCsrOwnerModule
 
 
 
