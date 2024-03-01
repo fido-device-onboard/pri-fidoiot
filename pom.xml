@@ -28,25 +28,25 @@
 
 
     <!-- Dependency Version -->
-    <bcpkix.version>1.76</bcpkix.version>
-    <bcprov.version>1.76</bcprov.version>
+    <bcfips.version>1.0.2.4</bcfips.version>
+    <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
-    <commons-codec.version>1.15</commons-codec.version>
-    <commons-text.version>1.10.0</commons-text.version>
-    <commons-lang3.version>3.12.0</commons-lang3.version>
-    <commons-configuration2.version>2.7</commons-configuration2.version>
-    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <commons-codec.version>1.16.1</commons-codec.version>
+    <commons-text.version>1.11.0</commons-text.version>
+    <commons-lang3.version>3.14.0</commons-lang3.version>
+    <commons-configuration2.version>2.9.0</commons-configuration2.version>
+    <exec-maven-plugin.version>3.2.0</exec-maven-plugin.version>
     <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
     <jackson.version>2.15.0</jackson.version>
-    <junit-jupiter.version>5.8.2</junit-jupiter.version>
-    <log4j.version>2.17.2</log4j.version>
+    <junit-jupiter.version>5.10.2</junit-jupiter.version>
+    <log4j.version>2.23.0</log4j.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <hibernate.version>6.1.0.Final</hibernate.version>
-    <tomcat.version>10.1.15</tomcat.version>
-    <apache-httpcomponents.version>4.5.13</apache-httpcomponents.version>
-    <snakeyaml.version>2.0</snakeyaml.version>
-    <jackson-dataformat.version>2.15.2</jackson-dataformat.version>
-    <jackson-databind.version>2.15.2</jackson-databind.version>
+    <hibernate.version>6.4.4.Final</hibernate.version>
+    <tomcat.version>10.1.19</tomcat.version>
+    <apache-httpcomponents.version>4.5.14</apache-httpcomponents.version>
+    <snakeyaml.version>2.2</snakeyaml.version>
+    <jackson-dataformat.version>2.16.1</jackson-dataformat.version>
+    <jackson-databind.version>2.16.1</jackson-databind.version>
     <cose-java.version>1.1.0</cose-java.version>
 
     <!-- Database Client Version -->
@@ -57,17 +57,17 @@
 
     <!-- Maven Version -->
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
-    <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
-    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
-    <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-    <maven-surefire-report-plugin.version>3.0.0</maven-surefire-report-plugin.version>
-    <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
+    <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+    <maven-project-info-reports-plugin.version>3.5.0</maven-project-info-reports-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-site-plugin.version>4.0.0.M13</maven-site-plugin.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <maven-surefire-report-plugin.version>3.2.5</maven-surefire-report-plugin.version>
+    <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
     <pgpverify-plugin.version>1.14.0</pgpverify-plugin.version>
 
     <!-- Project Configurations -->

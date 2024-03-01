@@ -51,6 +51,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyAgreement;
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -63,15 +64,10 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.modes.CCMBlockCipher;
-import org.bouncycastle.crypto.params.AEADParameters;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.crypto.EntropySourceProvider;
+import org.bouncycastle.crypto.fips.FipsDRBG;
+import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.dispatch.CryptoService;
 import org.fidoalliance.fdo.protocol.message.AnyType;
 import org.fidoalliance.fdo.protocol.message.AsymKex;
@@ -106,23 +102,24 @@ public class StandardCryptoService implements CryptoService {
   public static final String X509_ALG_NAME = "X.509";
   public static final String VALIDATOR_ALG_NAME = "PKIX";
 
-
+  private static final Provider BCFIPS = getInitializedProvider();
   protected static final SecureRandom random = getInitializedRandom();
-  private static final Provider BCPROV = getInitializedProvider();
 
 
   private static SecureRandom getInitializedRandom() {
 
-    try {
-      return SecureRandom.getInstanceStrong();
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Strong secure random required", e);
-    }
+    // DRBG -- Discrete Random Bit Generator.
+    EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+    FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
+            .setSecurityStrength(256)
+            .setEntropyBitsRequired(256);
+    return drgbBldr.build("nonce".getBytes(StandardCharsets.UTF_8), false);
+
   }
 
   private static Provider getInitializedProvider() {
     Security.addProvider(new PemProvider());
-    Provider result = new BouncyCastleProvider();
+    Provider result = new BouncyCastleFipsProvider();
     Security.addProvider(result);
     return result;
   }
@@ -153,18 +150,26 @@ public class StandardCryptoService implements CryptoService {
 
   @Override
   public Provider getProvider() {
-    return BCPROV;
+    return BCFIPS;
   }
 
   @Override
   public byte[] createHmacKey(HashType hashType) throws IOException {
-    switch (hashType) {
-      case HMAC_SHA256:
-        return getRandomBytes(new SHA256Digest().getDigestSize());
-      case HMAC_SHA384:
-        return getRandomBytes(new SHA384Digest().getDigestSize());
-      default:
-        throw new IOException(new IllegalArgumentException("not a hmac type"));
+    try {
+      KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA512", getProvider());
+      switch (hashType) {
+        case HMAC_SHA256:
+          keyGenerator.init(256);
+          break;
+        case HMAC_SHA384:
+          keyGenerator.init(384);
+          break;
+        default:
+          throw new IOException(new IllegalArgumentException("not a hmac type"));
+      }
+      return keyGenerator.generateKey().toString().getBytes(StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new IOException(new IllegalArgumentException("not a hmac type"));
     }
   }
 
@@ -178,7 +183,7 @@ public class StandardCryptoService implements CryptoService {
 
         try {
           KeyPairGenerator kg = KeyPairGenerator.getInstance(
-              new AlgorithmFinder().getAlgorithm(keyType));
+              new AlgorithmFinder().getAlgorithm(keyType), getProvider());
 
           RSAKeyGenParameterSpec rsaSpec =
               new RSAKeyGenParameterSpec(keySize.toInteger(), RSAKeyGenParameterSpec.F4);
@@ -199,7 +204,7 @@ public class StandardCryptoService implements CryptoService {
           final CoseKeyCurveType coseKeyCurveType = algorithmFinder.getCoseKeyCurve(keyType);
           final String curveName = algorithmFinder.getAlgorithm(coseKeyCurveType);
           final KeyPairGenerator kg = KeyPairGenerator.getInstance(
-              algorithmFinder.getAlgorithm(keyType));
+              algorithmFinder.getAlgorithm(keyType), getProvider());
           ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
           kg.initialize(ecSpec, getSecureRandom());
           return kg.generateKeyPair();
@@ -326,14 +331,14 @@ public class StandardCryptoService implements CryptoService {
 
           final RSAPublicKeySpec rsaPkSpec = new RSAPublicKeySpec(mod, exp);
           final KeyFactory factory = KeyFactory.getInstance(
-              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()));
+              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), getProvider());
           return factory.generatePublic(rsaPkSpec);
         }
         case X509: {
           final byte[] x509body = ownerPublicKey.getBody().covertValue(byte[].class);
           final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(x509body);
           final KeyFactory factory = KeyFactory.getInstance(
-              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()));
+              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), getProvider());
 
           return factory.generatePublic(keySpec);
         }
@@ -345,7 +350,7 @@ public class StandardCryptoService implements CryptoService {
 
           AlgorithmFinder algFinder = new AlgorithmFinder();
           AlgorithmParameters params = AlgorithmParameters.getInstance(
-              algFinder.getAlgorithm(ownerPublicKey.getType()));
+              algFinder.getAlgorithm(ownerPublicKey.getType()), getProvider());
 
           CoseKey coseKey = ownerPublicKey.getBody().covertValue(CoseKey.class);
 
@@ -357,7 +362,7 @@ public class StandardCryptoService implements CryptoService {
               new BigInteger(1, coseKey.getY()));
 
           final KeyFactory factory = KeyFactory.getInstance(
-              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()));
+              new AlgorithmFinder().getAlgorithm(ownerPublicKey.getType()), getProvider());
 
           return factory.generatePublic(
               new ECPublicKeySpec(ecPoint, ecParameterSpec));
@@ -474,7 +479,7 @@ public class StandardCryptoService implements CryptoService {
         byte[] xb;
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
-              BCPROV);
+              getProvider());
           cipher.init(Cipher.ENCRYPT_MODE, decodeKey(ownerKey), getSecureRandom());
           xb = cipher.doFinal(b);
         } catch (GeneralSecurityException e) {
@@ -611,8 +616,8 @@ public class StandardCryptoService implements CryptoService {
 
       final PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(encoded);
       final String algName = new AlgorithmFinder().getAlgorithm(ecdhState.getKeyType());
-      final KeyFactory factory = KeyFactory.getInstance(algName);
-      final KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+      final KeyFactory factory = KeyFactory.getInstance(algName, getProvider());
+      final KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH", getProvider());
       final ECPrivateKey ownKey = (ECPrivateKey) factory.generatePrivate(privateSpec);
       final byte[] sharedSecret;
       try {
@@ -677,7 +682,7 @@ public class StandardCryptoService implements CryptoService {
         byte[] b;
         try {
           Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
-              BCPROV);
+                  getProvider());
           if (decryptionKey != null) {
             cipher.init(Cipher.DECRYPT_MODE, decryptionKey, getSecureRandom());
             b = cipher.doFinal(message);
@@ -853,7 +858,7 @@ public class StandardCryptoService implements CryptoService {
       IOException,
       NoSuchAlgorithmException {
 
-    Mac prf = Mac.getInstance(prfId);
+    Mac prf = Mac.getInstance(prfId, getProvider());
     prf.init(new SecretKeySpec(kxResult.shSe, prfId));
 
     final int h = prf.getMacLength() * Byte.SIZE; // (h) the length (in bits) of the PRF output
@@ -923,10 +928,14 @@ public class StandardCryptoService implements CryptoService {
         aad = new byte[0];
       }
 
-      final byte[] ciphered;
+      byte[] ciphered = null;
       if (isCcmCipher(cipherType)) {
 
-        ciphered = ccmEncrypt(true, payload, sek, iv, aad);
+        try {
+          ciphered = ccmEncrypt(Cipher.ENCRYPT_MODE, payload, keySpec, iv, aad);
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
 
       } else {
 
@@ -1026,8 +1035,12 @@ public class StandardCryptoService implements CryptoService {
 
       if (isCcmCipher(cipherType)) {
 
-        final byte[] ciphered = encrypt0.getCipherText();
-        return ccmEncrypt(false, ciphered, sek, iv, aad);
+        try {
+          final byte[] ciphered = encrypt0.getCipherText();
+          return ccmEncrypt(Cipher.DECRYPT_MODE, ciphered, keySpec, iv, aad);
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
 
       } else {
 
@@ -1090,24 +1103,16 @@ public class StandardCryptoService implements CryptoService {
     }
   }
 
-  protected byte[] ccmEncrypt(boolean forEncryption, byte[] plainText, byte[] sek, byte[] iv,
-      byte[] aad) throws IOException {
-
-    final int macSize = 128; // All CCM cipher modes use this size
-
-    BlockCipher engine = new AESEngine();
-    AEADParameters params = new AEADParameters(new KeyParameter(sek), macSize, iv, aad);
-    CCMBlockCipher cipher = new CCMBlockCipher(engine);
-    cipher.init(forEncryption, params);
-    byte[] outputText = new byte[cipher.getOutputSize(plainText.length)];
-    int outputLen = cipher.processBytes(plainText, 0, plainText.length, outputText, 0);
-    try {
-      cipher.doFinal(outputText, outputLen);
-    } catch (InvalidCipherTextException e) {
-      throw new IOException(e);
-    }
-
-    return outputText;
+  protected byte[] ccmEncrypt(int encryptMode, byte[] payload, Key keySpec, byte[] iv,
+                              byte[] aad) throws InvalidAlgorithmParameterException,
+          InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException,
+          IllegalBlockSizeException, BadPaddingException {
+    AlgorithmParameterSpec cipherParams;
+    cipherParams = new GCMParameterSpec(128, iv);
+    final Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding", getProvider());
+    cipher.init(encryptMode, keySpec, cipherParams);
+    cipher.updateAAD(aad, 0, aad.length);
+    return cipher.doFinal(payload);
   }
 
   protected byte[] encryptThenMac(byte[] secret, byte[] ciphered, byte[] iv,
@@ -1134,7 +1139,7 @@ public class StandardCryptoService implements CryptoService {
         || cipherType.equals(CipherSuiteType.COSE_AES128_CBC)) {
       hmacType = HashType.HMAC_SHA256;
     } else if (cipherType.equals(CipherSuiteType.COSE_AES256_CBC)
-        || cipherType.equals(CipherSuiteType.COSE_AES256_CTR)) {
+            || cipherType.equals(CipherSuiteType.COSE_AES256_CTR)) {
       hmacType = HashType.SHA384;
     } else {
       throw new IOException(new NoSuchAlgorithmException());
@@ -1162,15 +1167,15 @@ public class StandardCryptoService implements CryptoService {
       switch (cipherType) {
         case COSE_AES128_CTR:
         case COSE_AES256_CTR:
-          return Cipher.getInstance("AES/CTR/NoPadding");
+          return Cipher.getInstance("AES/CTR/NoPadding", getProvider());
 
         case COSE_AES128_CBC:
         case COSE_AES256_CBC:
-          return Cipher.getInstance("AES/CBC/PKCS7Padding", BCPROV);
+          return Cipher.getInstance("AES/CBC/PKCS7Padding", getProvider());
 
         case A128GCM:
         case A256GCM:
-          return Cipher.getInstance("AES/GCM/NoPadding");
+          return Cipher.getInstance("AES/GCM/NoPadding", getProvider());
 
         default:
           throw new UnsupportedOperationException("AESType: " + cipherType);
@@ -1238,7 +1243,7 @@ public class StandardCryptoService implements CryptoService {
           new ASN1Integer(new BigInteger(1, message.getSignature(), size, size));
       DLSequence sequence = new DLSequence(new ASN1Encodable[]{r, s});
       ByteArrayOutputStream sigBytes = new ByteArrayOutputStream();
-      ASN1OutputStream asn1out = ASN1OutputStream.create(sigBytes);
+      ASN1OutputStream asn1out = new ASN1OutputStream(sigBytes);
       asn1out.writeObject(sequence);
       byte[] b = sigBytes.toByteArray();
       derSig = Arrays.copyOf(b, b.length);

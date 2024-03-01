@@ -26,14 +26,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.fidoalliance.fdo.protocol.db.OnDieCertificateManager;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
@@ -50,7 +55,7 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
     try {
       certFactory = CertificateFactory.getInstance(
           "X.509", // TODO Const.X509_ALG_NAME,
-          new BouncyCastleProvider());
+          new BouncyCastleFipsProvider());
     } catch (CertificateException e) {
       throw new IOException(e);
     }
@@ -276,26 +281,41 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
       CertificateFactory certificateFactory =
           CertificateFactory.getInstance(StandardCryptoService.X509_ALG_NAME);
       for (Certificate cert : certificateList) {
-        X509Certificate x509cert = (X509Certificate) cert;
-        X509CertificateHolder certHolder = new X509CertificateHolder(x509cert.getEncoded());
-        CRLDistPoint cdp = CRLDistPoint.fromExtensions(certHolder.getExtensions());
-        if (cdp != null) {
-          DistributionPoint[] distPoints = cdp.getDistributionPoints();
-          for (DistributionPoint dp : distPoints) {
-            GeneralName[] generalNames =
-                GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
-            for (GeneralName generalName : generalNames) {
-              String name = generalName.toString();
-              byte[] crlBytes = certManager.getCertificate(name.substring(name.indexOf("http")));
-              if (crlBytes == null) {
-                // TODO logger.info("CRL: " + generalName.getName().toString()
-                //        + " not found in cache for cert: "
-                //        + x509cert.getIssuerX500Principal().getName());
-                return false;
-              } else {
-                CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));
-                if (crl.isRevoked(cert)) {
+        X509Certificate certificate = (X509Certificate) cert;
+        X509CertificateHolder certHolder = new X509CertificateHolder(certificate.getEncoded());
+        byte[] crlDistributionPointDerEncodedArray = certificate.getExtensionValue(
+                Extension.cRLDistributionPoints.getId());
+
+        if (crlDistributionPointDerEncodedArray != null) {
+          ASN1InputStream oasnInstream = new ASN1InputStream(
+                  new ByteArrayInputStream(crlDistributionPointDerEncodedArray));
+          ASN1Primitive derObjCrlDP = oasnInstream.readObject();
+          DEROctetString dosCrlDP = (DEROctetString) derObjCrlDP;
+
+
+          byte[] crldpExtOctets = dosCrlDP.getOctets();
+          ASN1InputStream mainStream = new ASN1InputStream(
+                  new ByteArrayInputStream(crldpExtOctets));
+          ASN1Primitive derObj2 = mainStream.readObject();
+          CRLDistPoint distPoints = CRLDistPoint.getInstance(derObj2);
+
+          if (distPoints != null) {
+            for (DistributionPoint dp : distPoints.getDistributionPoints()) {
+              GeneralName[] generalNames =
+                      GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
+              for (GeneralName generalName : generalNames) {
+                String name = generalName.toString();
+                byte[] crlBytes = certManager.getCertificate(name.substring(name.indexOf("http")));
+                if (crlBytes == null) {
+                  // TODO logger.info("CRL: " + generalName.getName().toString()
+                  //        + " not found in cache for cert: "
+                  //        + x509cert.getIssuerX500Principal().getName());
                   return false;
+                } else {
+                  CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));
+                  if (crl.isRevoked(cert)) {
+                    return false;
+                  }
                 }
               }
             }
