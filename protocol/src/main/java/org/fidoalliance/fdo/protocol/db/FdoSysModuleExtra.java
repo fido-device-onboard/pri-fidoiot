@@ -6,7 +6,10 @@ package org.fidoalliance.fdo.protocol.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+
 import org.fidoalliance.fdo.protocol.message.ServiceInfoGlobalState;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 
@@ -23,6 +26,9 @@ public class FdoSysModuleExtra {
 
   @JsonProperty("length")
   private int length;
+
+  @JsonProperty("fileLength")
+  private Queue<Integer> fileLength = new LinkedList<>();
 
   @JsonProperty("name")
   private String name;
@@ -41,6 +47,10 @@ public class FdoSysModuleExtra {
     return filter;
   }
 
+  @JsonIgnore
+  public Queue<Integer> getFileLength() {
+    return fileLength;
+  }
 
   @JsonIgnore
   public int getLength() {
@@ -88,6 +98,10 @@ public class FdoSysModuleExtra {
     this.waiting = waiting;
   }
 
+  @JsonIgnore
+  public void setFileLength(Queue<Integer> fileLength) {
+    this.fileLength = fileLength;
+  }
 
   @JsonIgnore
   public void setLength(int length) {
