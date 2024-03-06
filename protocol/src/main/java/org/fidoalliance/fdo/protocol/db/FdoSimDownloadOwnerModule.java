@@ -85,8 +85,6 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DONE:
         if (state.isActive()) {
           extra.setWaiting(false);
-          state.getGlobalState().setQueue(state.getGlobalState().getWaitQueue());
-          state.getGlobalState().setWaitQueue(new ServiceInfoQueue());
           int result = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
           if (result == -1) {
             throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
