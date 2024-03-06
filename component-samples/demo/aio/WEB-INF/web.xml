@@ -56,6 +56,19 @@
       <url-pattern>/api/v1/owner/redirect</url-pattern>
    </servlet-mapping>
 
+    <servlet>
+        <servlet-name>Replacement</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.RvReplacementApi</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Replacement</servlet-name>
+        <url-pattern>/api/v1/owner/rvreplacement</url-pattern>
+    </servlet-mapping>
+
    <servlet>
       <servlet-name>To0Starter</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
