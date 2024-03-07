@@ -282,7 +282,6 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
           CertificateFactory.getInstance(StandardCryptoService.X509_ALG_NAME);
       for (Certificate cert : certificateList) {
         X509Certificate certificate = (X509Certificate) cert;
-        X509CertificateHolder certHolder = new X509CertificateHolder(certificate.getEncoded());
         byte[] crlDistributionPointDerEncodedArray = certificate.getExtensionValue(
                 Extension.cRLDistributionPoints.getId());
 
