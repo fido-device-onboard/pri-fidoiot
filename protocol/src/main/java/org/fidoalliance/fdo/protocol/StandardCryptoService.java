@@ -168,6 +168,8 @@ public class StandardCryptoService implements CryptoService {
           throw new IOException(new IllegalArgumentException("not a hmac type"));
       }
       return keyGenerator.generateKey().toString().getBytes(StandardCharsets.UTF_8);
+    } catch (RuntimeException e) {
+      throw new RuntimeException(new IllegalArgumentException("not a hmac type"));
     } catch (Exception e) {
       throw new IOException(new IllegalArgumentException("not a hmac type"));
     }
