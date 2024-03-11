@@ -1480,7 +1480,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
       }
     }
 
-    if (ownerInfo.isDone()) {
+    if (ownerInfo.isDone() && devInfo.getServiceInfo().isEmpty()) {
       To2Done done = storage.get(To2Done.class);
       response.setMsgType(MsgType.TO2_DONE);
       cipherText = Mapper.INSTANCE.writeValue(done);

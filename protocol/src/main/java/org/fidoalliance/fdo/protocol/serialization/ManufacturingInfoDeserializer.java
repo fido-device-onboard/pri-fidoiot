@@ -55,10 +55,9 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
   public ManufacturingInfo deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
-
+    
     int index = 0;
     ManufacturingInfo info = new ManufacturingInfo();
-
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
     info.setKeyEnc(PublicKeyEncoding.fromNumber(node.get(index++).intValue()));
 
@@ -72,7 +71,7 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
 
     String deviceInfo = node.get(index++).textValue();
 
-    if (isValidString(deviceInfo)) {
+    if (isValidString(deviceInfo) || deviceInfo.isEmpty()) {
       info.setDeviceInfo(deviceInfo);
     } else {
       throw new InvalidMessageException("Invalid Device Info");

@@ -15,11 +15,7 @@ import java.security.cert.Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
-import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
-import org.bouncycastle.asn1.x9.X962Parameters;
-import org.bouncycastle.crypto.prng.EntropySource;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMEncryptor;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
@@ -105,9 +101,9 @@ public class PemFormatter {
 
       JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
           PKCS8Generator.AES_256_CBC);
-      encryptorBuilder.setProvider(new BouncyCastleProvider());
+      encryptorBuilder.setProvider(new BouncyCastleFipsProvider());
       encryptorBuilder.setRandom(random);
-      encryptorBuilder.setPassword(password.toCharArray());
+      encryptorBuilder.setPasssword(password.toCharArray());
 
       OutputEncryptor oe = null;
       try {

@@ -292,7 +292,7 @@ public class Config {
               throw  new RuntimeException(e);
             }
           }
-          result = result.substring(0, start) + envValue + value.substring(end + 1);
+          result = result.substring(0, start) + envValue + result.substring(end + 1);
 
         } else {
           break;
