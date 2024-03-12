@@ -100,6 +100,7 @@ public abstract class HttpClient implements Runnable {
       index = 0;
     }
     HttpInstruction httpInstruction = null;
+    long delay = 0L;
     while (index <= getInstructions().size()) {
 
       try (CloseableHttpClient httpClient = Config.getWorker(HttpClientSupplier.class).get()) {
@@ -108,7 +109,7 @@ public abstract class HttpClient implements Runnable {
         httpInstruction = getInstructions().get(index);
         URIBuilder uriBuilder = new URIBuilder(
             httpInstruction.getAddress());
-
+        delay = getInstructions().get(index).getDelay();
         if (msgId == MsgType.TO1_HELLO_RV) {
           if (httpInstruction.isRendezvousBypass()) {
             generateBypass();
@@ -195,6 +196,15 @@ public abstract class HttpClient implements Runnable {
           logger.info("instruction failed.");
           logger.info("moving to next instruction");
           index++;
+          logger.info("Delaying connection for next " + delay + " seconds");
+          if (delay > 0) {
+            try {
+              Thread.sleep(1000 * delay);
+            } catch (InterruptedException ex) {
+              Thread.currentThread().interrupt();
+              throw new RuntimeException(ex);
+            }
+          }
           continue;
         }
 
