@@ -196,8 +196,8 @@ public abstract class HttpClient implements Runnable {
           logger.info("instruction failed.");
           logger.info("moving to next instruction");
           index++;
-          logger.info("Delaying connection for next " + delay + " seconds");
           if (delay > 0) {
+            logger.info("Delaying connection for next " + delay + " seconds");
             try {
               Thread.sleep(1000 * delay);
             } catch (InterruptedException ex) {
