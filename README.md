@@ -494,8 +494,6 @@ $ java -jar device.jar
 
 ## Notice: Use of Bouncy Castle FIPS as Security Provider in FDO Project
 
-FDO project utilizes Bouncy Castle FIPS as its primary security provider. This includes all cryptographic operations within the project.
+The PRI FIDO IOT component uses Bouncy Castle FIPS as the primary security provider for all cryptographic operations within the project with the exception of the KDF.
 
-However, it's important to note that there is one exception to this: the Key Derivation Function (KDF) implementation. For this specific operation, we use an unapproved implementation which follows FDO Spec.
-
-Aside from the KDF, all other cryptographic operations strictly adhere to the Bouncy Castle APIs.
+The KDF implementation is compliant with the FIDO specification and is not based on the Bouncy Castle FIPS.
