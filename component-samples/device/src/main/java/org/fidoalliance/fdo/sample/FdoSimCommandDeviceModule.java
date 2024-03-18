@@ -3,10 +3,13 @@ package org.fidoalliance.fdo.sample;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.fidoalliance.fdo.protocol.Config;
+import org.fidoalliance.fdo.protocol.InternalServerErrorException;
 import org.fidoalliance.fdo.protocol.LoggerService;
 import org.fidoalliance.fdo.protocol.Mapper;
 import org.fidoalliance.fdo.protocol.db.FdoSimCommandOwnerModule;
@@ -22,6 +25,7 @@ public class FdoSimCommandDeviceModule implements ServiceInfoModule {
 
   private final ProcessBuilder.Redirect execOutputRedirect = ProcessBuilder.Redirect.PIPE;
   private final ProcessBuilder.Redirect execNoOutput = Redirect.DISCARD;
+  private final Duration execTimeout = Duration.ofHours(2);
 
   private final ServiceInfoQueue queue = new ServiceInfoQueue();
 
@@ -163,6 +167,28 @@ public class FdoSimCommandDeviceModule implements ServiceInfoModule {
 
       builder.redirectOutput(getExecOutputRedirect());
       execProcess = builder.start();
+      try {
+        boolean processDone = execProcess.waitFor(
+            getExecTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        if (processDone) {
+          if (execProcess.exitValue() != 0) {
+            throw new RuntimeException(
+                "predicate failed: "
+                    + getCommand(argList)
+                    + " returned "
+                    + execProcess.exitValue());
+          }
+        } else { // timeout
+          logger.error("Process Timeout.");
+        }
+
+      } catch (InterruptedException e) {
+        throw new InternalServerErrorException(e);
+      } finally {
+        if (execProcess.isAlive()) {
+          execProcess.destroyForcibly();
+        }
+      }
     } catch (IOException e) {
       logger.error("IO Operation Failed" + e.getMessage());
       throw new RuntimeException(e);
@@ -180,5 +206,21 @@ public class FdoSimCommandDeviceModule implements ServiceInfoModule {
       return execOutputRedirect;
     }
     return execNoOutput;
+  }
+
+  private Duration getExecTimeout() {
+    return execTimeout;
+  }
+
+
+  private String getCommand(List<String> args) {
+    StringBuilder builder = new StringBuilder();
+    for (String arg : args) {
+      if (builder.length() > 0) {
+        builder.append(" ");
+      }
+      builder.append(arg);
+    }
+    return builder.toString();
   }
 }

@@ -85,14 +85,12 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DONE:
         if (state.isActive()) {
           extra.setWaiting(false);
-          state.getGlobalState().setQueue(state.getGlobalState().getWaitQueue());
-          state.getGlobalState().setWaitQueue(new ServiceInfoQueue());
           int result = Mapper.INSTANCE.readValue(kvPair.getValue(), Integer.class);
           if (result == -1) {
             throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
                 + " " + getName() + " Hash did not match");
           } else if (result >= 0) {
-            if (extra.getLength() != result) {
+            if (extra.getFileLength().isEmpty() || extra.getFileLength().poll() != result) {
               throw new InternalServerErrorException(FdoSimDownloadOwnerModule.DONE
                   + " " + getName() + " all bytes not received");
             }
@@ -149,17 +147,17 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
     }
 
     while (!state.getGlobalState().getQueue().isEmpty()) {
+      if (extra.isWaiting()) {
+        break;
+      }
       boolean sent = sendFunction.apply(state.getGlobalState().getQueue().peek());
       if (sent) {
         checkWaiting(extra, Objects.requireNonNull(state.getGlobalState().getQueue().poll()));
       } else {
         break;
       }
-      if (extra.isWaiting()) {
-        break;
-      }
     }
-    if (state.getGlobalState().getQueue().isEmpty() && !extra.isWaiting()) {
+    if (state.getGlobalState().getQueue().size() == 0 && !extra.isWaiting()) {
       state.setDone(true);
     }
     state.setExtra(AnyType.fromObject(extra));
@@ -176,7 +174,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
       case DATA:
         byte[] data = Mapper.INSTANCE.readValue(kv.getValue(), byte[].class);
         if (data.length == 0) {
-          //extra.setWaiting(true);
+          extra.setWaiting(true);
         }
         break;
       default:
@@ -263,6 +261,8 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
           queue = state.getGlobalState().getQueue();
           queue.add(queue.size() - bufferCount - 1, kv);
           extra.setLength(fileLength);
+          extra.getFileLength().add(fileLength);
+
 
           //kv = new ServiceInfoKeyValuePair();
           //kv.setKeyName(NAME);
@@ -296,6 +296,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
 
       logger.info("HTTP(S) GET: " + resource);
       HttpGet httpRequest = new HttpGet(resource);
+      int fileLength = 0;
       try (CloseableHttpResponse httpResponse = httpClient.execute(httpRequest)) {
         logger.info(httpResponse.getStatusLine().toString());
         if (httpResponse.getStatusLine().getStatusCode() != 200) {
@@ -317,6 +318,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
               kv.setKeyName(DATA);
 
               if (br < data.length) {
+                fileLength = fileLength + br;
                 byte[] temp = data;
                 data = new byte[br];
                 System.arraycopy(temp, 0, data, 0, br);
@@ -324,6 +326,7 @@ public class FdoSimDownloadOwnerModule implements ServiceInfoModule {
               kv.setValue(Mapper.INSTANCE.writeValue(data));
               state.getGlobalState().getQueue().add(kv);
             }
+            extra.getFileLength().add(fileLength);
           }
         }
       }

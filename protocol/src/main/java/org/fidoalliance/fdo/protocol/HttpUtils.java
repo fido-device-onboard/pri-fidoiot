@@ -85,6 +85,16 @@ public class HttpUtils {
     return message;
   }
 
+  private static boolean containsRvVariable(RendezvousDirective directive, RendezvousVariable val) {
+
+    for (RendezvousInstruction instruction : directive) {
+      RendezvousVariable variable = instruction.getVariable();
+      if (variable == val) {
+        return true;
+      }
+    }
+    return  false;
+  }
 
   /**
    * Gets a list of URL Strings.
@@ -220,7 +230,11 @@ public class HttpUtils {
 
         if (dns != null) {
           HttpInstruction httpInst = new HttpInstruction();
-          httpInst.setDelay(delaySec);
+          if (!containsRvVariable(directive, RendezvousVariable.IP_ADDRESS)) {
+            httpInst.setDelay(delaySec);
+          } else {
+            httpInst.setDelay(0);
+          }
           httpInst.setAddress(scheme + "://" + dns + ":" + assignedPort);
           httpInst.setRendezvousBypass(bypass);
           list.add(httpInst);

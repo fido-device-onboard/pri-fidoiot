@@ -118,6 +118,7 @@ public class FdoSysOwnerModule implements ServiceInfoModule {
       case FdoSys.FETCHFILE:
         if (state.isActive()) {
           fetchFileName = Mapper.INSTANCE.readValue(kvPair.getValue(), String.class);
+          extra.setName(fetchFileName);
         }
         break;
       case FdoSys.DATA:
