@@ -120,15 +120,17 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
 1. Generating demo certificate authority KeyPair and certificate
 
-    ```shell
-      bash demo_ca.sh
+    ```
+    cd <fdo-pri-src>/component-samples/demo/scripts
+    bash demo_ca.sh
     ```
 
     **NOTE**: Configure the properties of `demo-CA` by updating `root-ca.conf`.
 
 2. Generating Server and Client Keypair and certificates.
 
-    ```shell
+    ```
+    cd <fdo-pri-src>/component-samples/demo/scripts
     bash web_csr_req.sh
     bash user_csr_req.sh
     ```
@@ -425,7 +427,7 @@ Following steps can be followed or extend and upload ownership voucher using `ex
 Ex: bash extend_upload.sh -m ${mfg_ip} -o ${owner_ip} -s abcdef -c ${certpath}
 
 Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
-POST https://host.docker.internal:8038/api/v1/mfg/vouchers/43FF320A(or http://host.docker.internal:8039api/v1/mfg/vouchers/43FF320A)
+POST https://host.docker.internal:8038/api/v1/mfg/vouchers/{DeviceSerialNo}  (or http://host.docker.internal:8039api/v1/mfg/vouchers/{DeviceSerialNo})
 
 For authorization, users can use DIGEST AUTH with "apiUser" and api_password as defined in the manufacturer's service.env or can use CLIENT-CERT AUTH (mTLS).
 
@@ -475,7 +477,7 @@ Response `200 OK`
 
 Trigger owner to perform To0 with the voucher and post the extended ownership found obtained from the manufacturer to the owner
 
-GET https://host.docker.internal:8043/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c (or http://host.docker.internal:8042/api/v1/to0/24275cd7-f9f5-4d34-a2a5-e233ac38db6c)
+GET https://host.docker.internal:8043/api/v1/to0/{GUID} (or http://host.docker.internal:8042/api/v1/to0/{GUID})
 
 For authorization, users can use DIGEST AUTH with "apiUser" and api_password as defined in the owner's service.env or can use CLIENT-CERT AUTH (mTLS).
 
