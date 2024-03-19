@@ -46,6 +46,10 @@ import org.fidoalliance.fdo.protocol.message.ManufacturingInfo;
 public class OnDieCertSignatureFunction implements CertSignatureFunction {
 
   private final CertificateFactory certFactory;
+
+  private static  final String certType = "X.509";
+
+  private static final String connectionScheme = "http";
   private static final LoggerService logger = new LoggerService(OnDieCertSignatureFunction.class);
 
   /**
@@ -54,7 +58,7 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
   public OnDieCertSignatureFunction() throws IOException {
     try {
       certFactory = CertificateFactory.getInstance(
-          "X.509", // TODO Const.X509_ALG_NAME,
+          certType, // TODO Const.X509_ALG_NAME,
           new BouncyCastleFipsProvider());
     } catch (CertificateException e) {
       throw new IOException(e);
@@ -304,11 +308,11 @@ public class OnDieCertSignatureFunction implements CertSignatureFunction {
                       GeneralNames.getInstance(dp.getDistributionPoint().getName()).getNames();
               for (GeneralName generalName : generalNames) {
                 String name = generalName.toString();
-                byte[] crlBytes = certManager.getCertificate(name.substring(name.indexOf("http")));
+                byte[] crlBytes = certManager.getCertificate(
+                        name.substring(name.indexOf(connectionScheme)));
                 if (crlBytes == null) {
-                  // TODO logger.info("CRL: " + generalName.getName().toString()
-                  //        + " not found in cache for cert: "
-                  //        + x509cert.getIssuerX500Principal().getName());
+                  logger.info("CRL: " + generalName.getName().toString()
+                          + " not found in cache for cert:");
                   return false;
                 } else {
                   CRL crl = certificateFactory.generateCRL(new ByteArrayInputStream(crlBytes));

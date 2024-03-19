@@ -101,6 +101,7 @@ public class StandardCryptoService implements CryptoService {
 
   public static final String X509_ALG_NAME = "X.509";
   public static final String VALIDATOR_ALG_NAME = "PKIX";
+  public static final String RSA_CIPHER_SUITE = "RSA/NONE/OAEPWithSHA256AndMGF1Padding";
 
   private static final Provider BCFIPS = getInitializedProvider();
   protected static final SecureRandom random = getInitializedRandom();
@@ -108,12 +109,24 @@ public class StandardCryptoService implements CryptoService {
 
   private static SecureRandom getInitializedRandom() {
 
+    SecureRandom entropySource = new SecureRandom();
+    // Create a unique nonce with the current time and a random value
+    long timestamp = System.currentTimeMillis();
+    byte[] randomBytes = new byte[16];
+    entropySource.nextBytes(randomBytes);
+
+    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES + randomBytes.length);
+    buffer.putLong(timestamp);
+    buffer.put(randomBytes);
+    byte[] nonce = buffer.array();
+
     // DRBG -- Discrete Random Bit Generator.
     EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
     FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
             .setSecurityStrength(256)
             .setEntropyBitsRequired(256);
-    return drgbBldr.build("nonce".getBytes(StandardCharsets.UTF_8), false);
+    
+    return drgbBldr.build(nonce, false);
 
   }
 
@@ -480,7 +493,7 @@ public class StandardCryptoService implements CryptoService {
 
         byte[] xb;
         try {
-          Cipher cipher = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding",
+          Cipher cipher = Cipher.getInstance(RSA_CIPHER_SUITE,
               getProvider());
           cipher.init(Cipher.ENCRYPT_MODE, decodeKey(ownerKey), getSecureRandom());
           xb = cipher.doFinal(b);
