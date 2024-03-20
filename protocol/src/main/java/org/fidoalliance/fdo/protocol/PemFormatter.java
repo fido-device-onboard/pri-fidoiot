@@ -14,6 +14,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.Arrays;
 import java.util.List;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.openssl.PKCS8Generator;
@@ -96,6 +97,9 @@ public class PemFormatter {
   public static String formatKey(PrivateKey key, SecureRandom random, String password)
       throws IOException {
 
+    char[] passwordChars = password.toCharArray();
+    password = null;
+
     try (StringWriter writer = new StringWriter();
         PemWriter pemWriter = new PemWriter(writer)) {
 
@@ -103,7 +107,8 @@ public class PemFormatter {
           PKCS8Generator.AES_256_CBC);
       encryptorBuilder.setProvider(new BouncyCastleFipsProvider());
       encryptorBuilder.setRandom(random);
-      encryptorBuilder.setPasssword(password.toCharArray());
+      encryptorBuilder.setPasssword(passwordChars);
+      Arrays.fill(passwordChars, '\0');
 
       OutputEncryptor oe = null;
       try {
