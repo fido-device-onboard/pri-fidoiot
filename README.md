@@ -14,8 +14,10 @@ deploying the example implementation for these components.
 * **Maven 3.6.3**.
 * **Java 17**.
 * **Haveged**.
-* **Docker engine (minimum 20.10.10, Supported till version 20.10.21) / Podman engine (For RHEL) 3.4.2+**
-* **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.3(For RHEL)**
+* **OpenSSL 3.0.13**.
+* **Curl 8.6.0**.
+* **Docker engine (minimum 20.10.10, Supported till version 25.0.3) / Podman engine (For RHEL) 3.4.2+**
+* **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.6(For RHEL)**
 
 +Supported list of Host operating systems.
 
@@ -78,9 +80,11 @@ The runnable artifacts can be found in `<fdo-pri-src>/component-samples/demo/`.
 
 ***NOTE***: If build is taking a lot of time in RHEL*, check the entropy of machine using `cat /proc/sys/kernel/random/entropy_avail` and make sure it's a multiple of 1000. If it's not a multiple of 1000, then run the following commands: `sudo yum install rng-tools -y` and `sudo service rngd start`.
 
+***NOTE***: Before starting the container on an open network, ensure that all the proxy settings are disabled, if any, and then proceed with starting the container. 
+
 ### Credential storage
 
-Credentials are defined in the `<fdo-pri-src>/component-sample/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
+Credentials are defined in the `<fdo-pri-src>/component-samples/demo/{component}/service.env` for each service and will be made available as environment variables to each docker/podman container.
 
 aio/service.env
 manufacturer/service.env
@@ -104,7 +108,7 @@ The following passwords are defined in each service.env:
 | requireSSL           | Boolean value specifying SSL connection with Hibernate ORM |
 
 
-Keystores containing private keys can be stored in the database - `<fdo-pri-src>/component-sample/demo/{component}/app-data/emdb.mv.db`
+Keystores containing private keys can be stored in the database - `<fdo-pri-src>/component-samples/demo/{component}/app-data/emdb.mv.db`
 as well as in the mounted file system. During runtime, the deployer can decide the mode of Keystore IO by activating the required worker class.
 
 keys_gen.sh can be used to generate random passwords for each service.env.
@@ -142,7 +146,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
 
     A message "Key generation completed." will be displayed on the console.
 
-    Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-sample/demo/scripts`.
+    Credentials will be stored in the `secrets` directory within `<fdo-pri-src>/component-samples/demo/scripts`.
 
    **NOTE:** Execute the following command to add hosted rendezvous certificates to the java client trust stores.
 
@@ -150,7 +154,7 @@ keys_gen.sh can be used to generate random passwords for each service.env.
     $ echo | openssl s_client -proxy ${https_proxy_host}:${https_proxy_port} -showcerts -connect fdorv.com:443 2>/dev/null | sed -n '/-----BEGIN CERTIFICATE-----/, /-----END CERTIFICATE-----/p' >> ./secrets/ca-cert.pem
     ```
 
-4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-sample/demo/scripts`  folder to the individual components.
+4. Copy both `secrets/` and `service.env` file from  `<fdo-pri-src>/component-samples/demo/scripts`  folder to the individual components.
 
     **NOTE:** Don't replace `service.env` present in the database component with generated `service.env` in `scripts` folder.
 
@@ -193,7 +197,7 @@ Uncomment `subjectAltName` and allowed list of IP and DNS in `[alt_names]` secti
 
 ### Starting Standalone Database for PRI servers
 
-1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-sample/demo/db` folder. [Generate secrets](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
+1. Copy generated `secrets/` folder to `<fdo-pri-src>/component-samples/demo/db` folder. [Generate secrets](https://github.com/fido-device-onboard/pri-fidoiot#generating-random-passwords-using-keys_gensh)
 
 2. Start the Database service
 ```shell
@@ -341,6 +345,18 @@ As auto injection of ownership voucher is enabled in AIO by default; the ownersh
 
 2. Update `{server.api.user}` and `{server.api.password}` in `demo/<component>/tomcat-users.xml` file.
 
+#### Switching between mTLS and Basic Authentication for REST endpoints
+
+1. Update `WEB-INF/web.xml` to support Basic authentication
+    ```
+    <transport-guarantee>NONE<transport-guarante>
+    <auth-method>BASIC</auth-method>
+    ```
+
+2. Update `{server.api.user}` and `{server.api.password}` in `demo/<component>/tomcat-users.xml` file.
+
+***DISCLAIMER***: This authentication mechanism poses significant security risks,as credentials are transmitted in plaintext. Its usage is strongly discouraged, and any usage is undertaken at your own risk.
+
 #### Creating Ownership Vouchers using Individual Component Demos
 
 Before running the device for the first time start the demo manufacturer.
@@ -408,7 +424,7 @@ Result will contain the device info
 ```
 Following steps can be followed or extend and upload ownership voucher using `extend_upload.sh` script present in `<fdo-pri-src>/component-samples/demo/scripts`
 
-Ex: bash extend_upload.sh -m ${mfg_ip} -o ${owner_ip} -s abcdef
+Ex: bash extend_upload.sh -m ${mfg_ip} -o ${owner_ip} -s abcdef -c ${certpath}
 
 Post the PEM Certificate obtained form the owner to the manufacturer to get the ownership voucher transferred to the owner.
 POST https://host.docker.internal:8038/api/v1/mfg/vouchers/{DeviceSerialNo}  (or http://host.docker.internal:8039api/v1/mfg/vouchers/{DeviceSerialNo})
@@ -471,6 +487,19 @@ Check for TO0 completion in owner logs.
 
 ***NOTE***: By default, TrustedRendezvousAcceptFunction worker is enabled. So we need to add the Owner's certificate to RV via api/v1/rv/allow endpoint to accept TO0 requests from Owner.
 
+#### To replace the RV info
+
+Use the following REST api to replace the RV info.
+
+POST https://host.docker.internal:8043/api/v1/owner/rvreplacement (or http://host.docker.internal:8042/api/v1/owner/rvreplacement)
+The post body content-type header `text/plain`
+
+For authorization, users can use DIGEST AUTH with "apiUser" and api_password as defined in the manufacturer's service.env or can use CLIENT-CERT AUTH (mTLS).
+
+POST content
+```
+[[[5,"host.docker.internal"],[3,8041],[12,2],[2,"127.0.0.1"],[4,8041]]]
+```
 
 #### Configure the owner service info package
 
