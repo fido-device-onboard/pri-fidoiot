@@ -15,7 +15,7 @@ deploying the example implementation for these components.
 * **Java 17**.
 * **Haveged**.
 * **OpenSSL 3.0.13**.
-* **Curl 8.0.6**.
+* **Curl 8.6.0**.
 * **Docker engine (minimum 20.10.10, Supported till version 25.0.3) / Podman engine (For RHEL) 3.4.2+**
 * **Docker-compose (minimum version 1.29.2) / Podman-compose 1.0.6(For RHEL)**
 
