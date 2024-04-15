@@ -104,8 +104,8 @@ public class HttpUtils {
    * @return A List or URL strings.
    * @throws IOException An error occurred.
    */
-  public static List<HttpInstruction> getInstructions(RendezvousInfo info, boolean isDevice)
-      throws IOException {
+  public static List<HttpInstruction> getInstructions(RendezvousInfo info, boolean isDevice,
+                                                      boolean isOwner) throws IOException {
 
     List<HttpInstruction> list = new ArrayList<>();
     for (RendezvousDirective directive : info) {
@@ -206,8 +206,8 @@ public class HttpUtils {
         port = devPort;
       } else {
         if (ownerPort.equals((devPort)) && devSchemes.contains(HTTP_SCHEME)
-            && devSchemes.size() == 1
-            && !ownerOnly) {
+              && devSchemes.size() == 1
+            && !ownerOnly && !isOwner) {
           schemes = new ArrayList<>();
           schemes.add(HTTP_SCHEME);
         } else {

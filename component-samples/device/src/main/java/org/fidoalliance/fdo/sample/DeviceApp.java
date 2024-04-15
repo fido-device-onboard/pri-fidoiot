@@ -107,7 +107,7 @@ public class DeviceApp extends HttpClient {
         generateDiHello();
         logger.info("Generating Device Credential file");
       } else {
-        setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true));
+        setInstructions(HttpUtils.getInstructions(devCredential.getRvInfo(), true, false));
 
         storage.put(DeviceCredential.class, devCredential);
         logger.info("credentials loaded, GUID is " + devCredential.getGuid());

@@ -85,7 +85,7 @@ public class AutoInjectVoucherStorageFunction extends StandardVoucherStorageFunc
 
       OwnershipVoucherHeader header = VoucherUtils.getHeader(ownershipVoucher);
       List<HttpInstruction> h1 = HttpUtils.getInstructions(header.getRendezvousInfo(),
-          false);
+          false, false);
 
       List<HttpInstruction> h2 = HttpUtils.getInstructions(to2Entries);
 
