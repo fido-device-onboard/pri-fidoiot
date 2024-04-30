@@ -29,6 +29,11 @@ public class ManufacturedVoucher {
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdOn;
 
+  @Lob
+  @Column(name = "ekData", length = 65535, nullable = false)
+  private byte[] ekData;
+
+
   public String getSerialNo() {
     return serialNo;
   }
@@ -40,6 +45,15 @@ public class ManufacturedVoucher {
   public Date getCreatedOn() {
     return createdOn;
   }
+
+  public byte[] getEkData() {
+    return ekData;
+  }
+
+  public void setEkData(byte[] ekData) {
+    this.ekData = ekData;
+  }
+
 
   public void setSerialNo(String id) {
     this.serialNo = id;
