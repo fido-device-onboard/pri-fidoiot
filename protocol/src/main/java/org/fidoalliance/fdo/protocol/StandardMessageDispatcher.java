@@ -1527,6 +1527,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     manager.expireSession(request.getAuthToken().get());
 
 
+    getWorker(OnboardingManagerConnection.class).connect(serialNumber, true);
+
+
   }
 
   protected void doTo2Done2(DispatchMessage request, DispatchMessage response)
