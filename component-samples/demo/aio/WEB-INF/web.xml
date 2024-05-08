@@ -217,6 +217,19 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>EkVoucher</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.EkVoucher</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EkVoucher</servlet-name>
+        <url-pattern>/api/v1/mfg/ekcert/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>CertificateApi</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
         <init-param>
