@@ -55,7 +55,7 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
   public ManufacturingInfo deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
-    
+
     int index = 0;
     ManufacturingInfo info = new ManufacturingInfo();
     info.setKeyType(PublicKeyType.fromNumber(node.get(index++).intValue()));
@@ -84,6 +84,9 @@ public class ManufacturingInfoDeserializer extends StdDeserializer<Manufacturing
       } else if (subNode.isObject()) {
         info.setCertInfo(AnyType.fromObject(subNode));
       }
+    }
+    if (index < node.size()) {
+      info.setMacAddresses(node.get(index++).binaryValue());
     }
     if (index < node.size()) {
       info.setOnDieDeviceCertChain(node.get(index++).binaryValue());
