@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.api;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.List;
@@ -30,5 +31,23 @@ public class MacAddress extends RestApi {
       throw new NotFoundException(path);
     }
     getResponse().getOutputStream().write(mfgVoucher.getMacAddresses());
+  }
+
+  @Override
+  public void doPost() throws Exception {
+    String errorMessage = "Invalid Request Method.";
+    getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+  }
+
+  @Override
+  public void doPut() throws Exception {
+    String errorMessage = "Invalid Request Method.";
+    getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+  }
+
+  @Override
+  public void doDelete() throws Exception {
+    String errorMessage = "Invalid Request Method.";
+    getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
   }
 }
