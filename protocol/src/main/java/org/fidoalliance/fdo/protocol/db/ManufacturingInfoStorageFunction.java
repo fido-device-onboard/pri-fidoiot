@@ -23,7 +23,7 @@ public class ManufacturingInfoStorageFunction {
 
   /**
    * Stores TPM EK Certificate into database.
-   * @param serialNo Device serial number that is used to retrieve TPM EK Data.
+   * @param serialNo Device serial number that is used to retrieve MAC Addresses.
    * @param macAddresses MAC addresses received from the client.
    * @throws IOException Throws exception if required mfgVoucher is null.
    */
