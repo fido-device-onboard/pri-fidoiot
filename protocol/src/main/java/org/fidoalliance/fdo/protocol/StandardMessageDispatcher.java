@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.codec.binary.Hex;
 import org.fidoalliance.fdo.protocol.db.FdoSysModuleExtra;
+import org.fidoalliance.fdo.protocol.db.ManufacturingInfoStorageFunction;
 import org.fidoalliance.fdo.protocol.db.OnboardConfigSupplier;
 import org.fidoalliance.fdo.protocol.dispatch.CertSignatureFunction;
 import org.fidoalliance.fdo.protocol.dispatch.CredReuseFunction;
@@ -373,6 +374,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     ManufacturingInfo mfgInfo = Mapper.INSTANCE.readValue(appStart.getManufacturingInfo(),
         ManufacturingInfo.class);
+
     SimpleStorage storage = createVoucher(mfgInfo, request.getProtocolVersion());
 
     SessionManager manager = getWorker(SessionManager.class);
@@ -434,6 +436,9 @@ public class StandardMessageDispatcher implements MessageDispatcher {
 
     VoucherStorageFunction storageFunction = getWorker(VoucherStorageFunction.class);
     storageFunction.apply(info.getSerialNumber(), voucher);
+
+    ManufacturingInfoStorageFunction infoStore = new ManufacturingInfoStorageFunction();
+    infoStore.store(info.getSerialNumber(), info.getMacAddresses());
 
     //save the voucher
     response.setMessage(Mapper.INSTANCE.writeValue(new DiDone()));
@@ -611,7 +616,7 @@ public class StandardMessageDispatcher implements MessageDispatcher {
     if (mfgPubKeyEnc.toInteger() < 0 || mfgPubKeyEnc.toInteger() > 3) {
       throw new InvalidMessageException("Invalid Encoding of Mfg Pubkey in OV Header");
     }
-    
+
     //verify to1d
     CryptoService cs = getCryptoService();
     OwnerPublicKey ownerPublicKey = VoucherUtils.getLastOwner(to0d.getVoucher());

@@ -3,7 +3,7 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
      version="2.5">
- 
+
 
    <servlet>
       <servlet-name>FdoProtocol</servlet-name>
@@ -12,7 +12,7 @@
 
 
 
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>FdoProtocol</servlet-name>
       <url-pattern>/fdo/101/msg/10</url-pattern>
       <url-pattern>/fdo/101/msg/12</url-pattern>
@@ -29,7 +29,7 @@
       <url-pattern>/fdo/101/msg/255</url-pattern>
    </servlet-mapping>
 
-   
+
    <servlet>
       <servlet-name>RvInfo</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
@@ -38,7 +38,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.RvInfo</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>RvInfo</servlet-name>
       <url-pattern>/api/v1/rvinfo</url-pattern>
    </servlet-mapping>
@@ -51,7 +51,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.To2Blob</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>Redirect</servlet-name>
       <url-pattern>/api/v1/owner/redirect</url-pattern>
    </servlet-mapping>
@@ -77,7 +77,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.To0Starter</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>To0Starter</servlet-name>
       <url-pattern>/api/v1/to0/*</url-pattern>
    </servlet-mapping>
@@ -91,7 +91,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.SviPackage</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>SviPackage</servlet-name>
       <url-pattern>/api/v1/owner/svi</url-pattern>
    </servlet-mapping>
@@ -105,7 +105,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.OwnerVoucher</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>OwnerVoucher</servlet-name>
       <url-pattern>/api/v1/owner/vouchers/*</url-pattern>
    </servlet-mapping>
@@ -118,11 +118,11 @@
         <param-value>org.fidoalliance.fdo.protocol.api.Logs</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>Logs</servlet-name>
       <url-pattern>/api/v1/logs</url-pattern>
    </servlet-mapping>
-   
+
 
   <servlet>
       <servlet-name>Interop</servlet-name>
@@ -132,11 +132,11 @@
         <param-value>org.fidoalliance.fdo.protocol.api.InteropVoucher</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>Interop</servlet-name>
       <url-pattern>/api/v1/interop/vouchers/*</url-pattern>
    </servlet-mapping>
-   
+
    <servlet>
       <servlet-name>OnDie</servlet-name>
       <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
@@ -217,6 +217,19 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>MacAddress</servlet-name>
+        <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
+        <init-param>
+            <param-name>Api-Class</param-name>
+            <param-value>org.fidoalliance.fdo.protocol.api.MacAddress</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MacAddress</servlet-name>
+        <url-pattern>/api/v1/mfg/macaddress/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>CertificateApi</servlet-name>
         <servlet-class>org.fidoalliance.fdo.protocol.api.RestApiServlet</servlet-class>
         <init-param>
@@ -289,7 +302,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.AllowList</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>AllowList</servlet-name>
       <url-pattern>/api/v1/rv/allow</url-pattern>
    </servlet-mapping>
@@ -302,7 +315,7 @@
         <param-value>org.fidoalliance.fdo.protocol.api.DenyList</param-value>
       </init-param>
    </servlet>
-   <servlet-mapping> 
+   <servlet-mapping>
       <servlet-name>DenyList</servlet-name>
       <url-pattern>/api/v1/rv/deny</url-pattern>
    </servlet-mapping>

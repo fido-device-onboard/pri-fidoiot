@@ -13,7 +13,7 @@ import org.fidoalliance.fdo.protocol.serialization.ManufacturingInfoSerializer;
 
 @JsonPropertyOrder(
     {"keyType", "keyEnc", "serialNumber", "deviceInfo", "certInfo",
-        "onDieDeviceCertChain", "testSignature", "testSigMaroePrefix"}
+            "macAddresses", "onDieDeviceCertChain", "testSignature", "testSigMaroePrefix"}
 )
 @JsonSerialize(using = ManufacturingInfoSerializer.class)
 @JsonDeserialize(using = ManufacturingInfoDeserializer.class)
@@ -37,6 +37,9 @@ public class ManufacturingInfo {
   @JsonProperty("certInfo")
   private AnyType certInfo;
 
+  @JsonProperty("macAddresses")
+  private byte[] macAddresses;
+
   @JsonProperty("onDieDeviceCertChain")
   private byte[] onDieDeviceCertChain;
 
@@ -45,6 +48,7 @@ public class ManufacturingInfo {
 
   @JsonProperty("testSigMaroePrefix")
   private byte[] testSigMaroePrefix;
+
 
   @JsonIgnore
   public PublicKeyType getKeyType() {
@@ -87,6 +91,11 @@ public class ManufacturingInfo {
   }
 
   @JsonIgnore
+  public byte[] getMacAddresses() {
+    return macAddresses;
+  }
+
+  @JsonIgnore
   public void setKeyType(PublicKeyType keyType) {
     this.keyType = keyType;
   }
@@ -124,5 +133,10 @@ public class ManufacturingInfo {
   @JsonIgnore
   public void setTestSigMaroePrefix(byte[] maroePrefix) {
     this.testSigMaroePrefix = maroePrefix;
+  }
+
+  @JsonIgnore
+  public void setMacAddresses(byte[] macAddresses) {
+    this.macAddresses = macAddresses;
   }
 }
