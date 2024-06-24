@@ -7,7 +7,7 @@ version: "3.3"
 services:
 
   fdo-db:
-    image: mariadb:lts
+    image: mariadb:11.4.2
     restart: always
     ports:
       - 3306:3306   
