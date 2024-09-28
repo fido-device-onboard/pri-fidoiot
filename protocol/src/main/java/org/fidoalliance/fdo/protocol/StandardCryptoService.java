@@ -726,8 +726,13 @@ public class StandardCryptoService implements CryptoService {
             ownState.getState().covertValue(DiffieHellman.KeyExchange.class);
 
         try {
-          return new KeyExchangeResult(
-              ke.computeSharedSecret(new BigInteger(1, message)).toByteArray(), new byte[0]);
+          byte[] shSe = ke.computeSharedSecret(new BigInteger(1, message)).toByteArray();
+          if (shSe[0] == 0x00) {
+            byte[] tmp = new byte[shSe.length - 1];
+            System.arraycopy(shSe, 1, tmp, 0, tmp.length);
+            shSe = tmp;
+          }
+          return new KeyExchangeResult(shSe, new byte[0]);
         } finally {
           try {
             ke.destroy();
