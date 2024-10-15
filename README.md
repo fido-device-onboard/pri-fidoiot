@@ -2,7 +2,7 @@
 # FIDO Device Onboard (FDO) Protocol Reference Implementation (PRI) Quick Start
 
 This is a reference implementation of the
-[FDO v1.1 Proposed Standard](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419)
+[FDO v1.1 Standard](https://fidoalliance.org/specs/FDO/FIDO-Device-Onboard-PS-v1.1-20220419)
 published by the FIDO Alliance. It provides production-ready implementation for the protocol defined
 by the specification. It also provides example implementation for different components to
 demonstrate end-to-end execution of the protocol. Appropriate security measures should be taken while
