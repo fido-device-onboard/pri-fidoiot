@@ -2,9 +2,9 @@ name: prifidoiot
 on:
   workflow_dispatch:
   push:
-    branches: [master, '*rel']
+    branches: [master, "*rel"]
   pull_request:
-    branches: [master, '*rel']
+    branches: [master, "*rel"]
 permissions:
   contents: read
 
@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: scm checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: setup-java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
       - name: build
         run: |
           mvn clean install
           cd component-samples && tar -czvf demo.tar.gz demo && mv demo.tar.gz ..
       - name: checkout test-fidoiot
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fido-device-onboard/test-fidoiot
           ref: master
@@ -51,7 +51,7 @@ jobs:
           export TEST_DIR=$PWD
           mvn clean test -Dgroups=fdo_pri_smoketest
       - name: archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: demo.tar.gz
           path: demo.tar.gz

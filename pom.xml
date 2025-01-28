@@ -68,7 +68,7 @@
     <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
     <maven-surefire-report-plugin.version>3.2.5</maven-surefire-report-plugin.version>
     <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
-    <pgpverify-plugin.version>1.14.0</pgpverify-plugin.version>
+    <pgpverify-plugin.version>1.18.2</pgpverify-plugin.version>
 
     <!-- Project Configurations -->
     <!-- Project Configurations -->
@@ -215,7 +215,7 @@
           </execution>
         </executions>
       </plugin>
-     
+
     </plugins>
   </build>
 
