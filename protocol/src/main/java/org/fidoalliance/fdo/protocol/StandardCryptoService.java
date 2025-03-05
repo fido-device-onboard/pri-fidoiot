@@ -125,7 +125,7 @@ public class StandardCryptoService implements CryptoService {
     FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
             .setSecurityStrength(256)
             .setEntropyBitsRequired(256);
-    
+
     return drgbBldr.build(nonce, false);
 
   }
@@ -575,19 +575,9 @@ public class StandardCryptoService implements CryptoService {
 
         DiffieHellman.KeyExchange ke = DiffieHellman.buildKeyExchange(kexSuiteName, random);
         KexMessage msg = new KexMessage();
-        try {
-          msg.setMessage(ke.getMessage().toByteArray());
-          msg.setState(AnyType.fromObject(ke));
-          return msg;
-        } finally {
-          try {
-            ke.destroy();
-          } catch (DestroyFailedException e) {
-            // this should never happen
-            assert false;
-            throw new RuntimeException(e);
-          }
-        }
+        msg.setMessage(ke.getMessage().toByteArray());
+        msg.setState(AnyType.fromObject(ke));
+        return msg;
       default:
         throw new InvalidMessageException("invalid key exchange " + kexSuiteName);
     }
@@ -736,8 +726,13 @@ public class StandardCryptoService implements CryptoService {
             ownState.getState().covertValue(DiffieHellman.KeyExchange.class);
 
         try {
-          return new KeyExchangeResult(
-              ke.computeSharedSecret(new BigInteger(1, message)).toByteArray(), new byte[0]);
+          byte[] shSe = ke.computeSharedSecret(new BigInteger(1, message)).toByteArray();
+          if (shSe[0] == 0x00) {
+            byte[] tmp = new byte[shSe.length - 1];
+            System.arraycopy(shSe, 1, tmp, 0, tmp.length);
+            shSe = tmp;
+          }
+          return new KeyExchangeResult(shSe, new byte[0]);
         } finally {
           try {
             ke.destroy();

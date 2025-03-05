@@ -3,6 +3,7 @@
 
 package org.fidoalliance.fdo.protocol.message;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -85,6 +86,14 @@ public final class DiffieHellman {
     @JsonProperty("mySecret")
     private BigInteger mySecret;
 
+    @JsonCreator
+    private KeyExchange(@JsonProperty("myP") BigInteger p,
+        @JsonProperty("myG") BigInteger g, @JsonProperty("mySecret") BigInteger secret) {
+      myP = p;
+      myG = g;
+      mySecret = secret;
+    }
+
     @JsonIgnore
     private KeyExchange(BigInteger p, BigInteger g, int randomSizeInBits, SecureRandom random) {
       myP = p;
@@ -97,7 +106,6 @@ public final class DiffieHellman {
       return myG.modPow(mySecret, myP);
     }
 
-
     public BigInteger computeSharedSecret(BigInteger otherMessage) {
       return otherMessage.modPow(mySecret, myP);
     }
@@ -107,6 +115,7 @@ public final class DiffieHellman {
       mySecret = null;
     }
 
+    @JsonIgnore
     @Override
     public boolean isDestroyed() {
       return null == mySecret;
