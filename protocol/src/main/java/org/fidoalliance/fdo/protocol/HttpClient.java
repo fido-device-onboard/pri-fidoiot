@@ -239,7 +239,7 @@ public abstract class HttpClient implements Runnable {
         if (getRequest().getMsgType() == MsgType.TO0_HELLO) {
           logger.info("Failed TO0 with error: " + e.getMessage());
         }
-        
+
         throw new IOException(e);
       }
 
@@ -281,6 +281,7 @@ public abstract class HttpClient implements Runnable {
 
       }
     } catch (IOException e) {
+      logger.info(e);
       throw new RuntimeException("Unable to establish connection with FDO Server");
     } catch (Throwable throwable) {
       if (getResponse() != null
