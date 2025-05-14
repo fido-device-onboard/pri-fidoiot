@@ -2,9 +2,9 @@ name: prifidoiot
 on:
   workflow_dispatch:
   push:
-    branches: [master, "*rel"]
+    branches: [master, "*rel", "omordyk:test_build"]
   pull_request:
-    branches: [master, "*rel"]
+    branches: [master, "*rel", "omordyk:test_build"]
 permissions:
   contents: read
 
