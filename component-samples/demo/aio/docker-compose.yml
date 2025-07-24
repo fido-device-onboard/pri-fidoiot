@@ -5,6 +5,24 @@ version: "3.3"
 
 services:
 
+  fdo-db:
+    image: mariadb:11.4.2
+    container_name: fdo-db
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_password.txt
+      - MARIADB_DATABASE=emdb
+    secrets:
+      - ca-cert.pem
+      - server-cert.pem
+      - server-key.pem
+      - db_password.txt
+    volumes:
+      - ./app-data:/var/lib/mysql
+      - ./custom:/etc/mysql/conf.d
+
   pri-fdo-aio:
     image: pri-fdo-aio
     container_name: pri-fdo-aio
@@ -35,6 +53,9 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 1024
+    depends_on:
+      - fdo-db
+    command: sh -c "sleep 10 && java -jar /home/fdo/aio.jar"
 
 secrets:
   ca-cert.pem:
@@ -47,3 +68,4 @@ secrets:
     file: ./secrets/api-user.pem
   db_password.txt:
     file: ./secrets/db_password.txt
+    

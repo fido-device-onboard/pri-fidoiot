@@ -19,6 +19,9 @@
 	<property name="hibernate.connection.url">jdbc:mariadb://localhost:3306/fdo</property>
         -->
 
+        <!-- for maria databse -->
+        <property name="hibernate.connection.url">jdbc:mariadb://fdo-db:3306/emdb</property>
+
         <!-- show mysql queries output in console -->
         <property name="hibernate.show_sql">true</property>
 
@@ -35,6 +38,8 @@
         <!-- <property name="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</property> -->
         <!-- for maria/mysql
         <property name="dialect">org.hibernate.dialect.MariaDBDialect</property> -->
+        <!-- for maria/mysql -->
+        <property name="dialect">org.hibernate.dialect.MariaDBDialect</property>
 
 
 
