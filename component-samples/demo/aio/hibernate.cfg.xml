@@ -36,8 +36,7 @@
 
 	<!-- for embedded database -->
         <!-- <property name="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</property> -->
-        <!-- for maria/mysql
-        <property name="dialect">org.hibernate.dialect.MariaDBDialect</property> -->
+
         <!-- for maria/mysql -->
         <property name="dialect">org.hibernate.dialect.MariaDBDialect</property>
 

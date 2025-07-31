@@ -45,12 +45,13 @@ jobs:
           chmod -R 777 secrets/
           cp -r service.env secrets/ ../aio/
           cp -r secrets/ ../db/
+          echo "useSSL=false" >> ../aio/service.env
           sed -i '/<security-constraint>/,/<.security-constraint>/d' ../aio/WEB-INF/web.xml
           sed -i '/^innodb/d' ../db/custom/config-file.cnf
           cd ${{ github.workspace }}/test-fidoiot
           export TEST_DIR=$PWD
           cd binaries/pri-fidoiot/aio
-          docker compose up -d --build || docker-compose up -d --build
+          docker compose up -d --build
           cd ../../..
           sleep 10
           mvn clean test -Dgroups=fdo_pri_smoketest
