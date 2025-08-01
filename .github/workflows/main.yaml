@@ -26,8 +26,8 @@ jobs:
       - name: checkout test-fidoiot
         uses: actions/checkout@v4
         with:
-          repository: fido-device-onboard/test-fidoiot
-          ref: master
+          repository: kroczi/test-fidoiot
+          ref: fix_docker_compose_command
           path: test-fidoiot
       - name: Add host to /etc/hosts
         run: |
