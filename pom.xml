@@ -52,7 +52,7 @@
     <!-- Database Client Version -->
     <h2db.version>2.2.224</h2db.version>
     <mariadb.version>3.0.5</mariadb.version>
-    <mysql.version>8.0.33</mysql.version>
+    <mysql.version>8.2.0</mysql.version>
     <postgresql.version>42.5.5</postgresql.version>
 
     <!-- Maven Version -->
