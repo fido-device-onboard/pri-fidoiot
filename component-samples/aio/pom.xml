@@ -14,7 +14,7 @@
   <parent>
     <artifactId>component-samples</artifactId>
     <groupId>org.fidoalliance.fdo</groupId>
-    <version>1.1.9</version>
+    <version>1.1.10</version>
   </parent>
 
   <artifactId>aio</artifactId>
