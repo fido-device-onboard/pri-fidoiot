@@ -13,7 +13,7 @@
 
   <artifactId>fdo</artifactId>
   <groupId>org.fidoalliance</groupId>
-  <version>1.1.9</version>
+  <version>1.1.10</version>
   <name>Protocol Reference Implementation</name>
   <packaging>pom</packaging>
 
@@ -24,7 +24,7 @@
   -->
   <properties>
     <!-- FDO Dependency Version -->
-    <fdo.version>1.1.9</fdo.version>
+    <fdo.version>1.1.10</fdo.version>
 
 
     <!-- Dependency Version -->
