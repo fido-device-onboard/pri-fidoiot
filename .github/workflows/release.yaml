@@ -1,0 +1,116 @@
+name: Release PRI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'PRI Version (e.g. 1.1.10)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PRI repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Configure git
+        run: |
+          git config user.name  "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Resolve parameters
+        id: vars
+        run: |
+          set -euo pipefail
+
+          VERSION="v${{ github.event.inputs.version }}"
+          RELEASE_NOTES_PATH="release/notes/release-notes-${VERSION}.md"
+          PRI="pri-fidoiot-${VERSION}"
+          PRI_TARBALL="pri-fidoiot-${VERSION}.tar.gz"
+          PRI_NOTICES_TARBALL="pri-fidoiot-NOTICES-${VERSION}.tar.gz"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_notes=$RELEASE_NOTES_PATH" >> "$GITHUB_OUTPUT"
+          echo "pri=$PRI" >> "$GITHUB_OUTPUT"
+          echo "pri_tarball=$PRI_TARBALL" >> "$GITHUB_OUTPUT"
+          echo "pri_notices_tarball=$PRI_NOTICES_TARBALL" >> "$GITHUB_OUTPUT"
+
+      - name: Verify release notes
+        run: |
+          set -euo pipefail
+          test -f "${{ steps.vars.outputs.release_notes }}" || {
+            echo "ERROR: Missing ${{ steps.vars.outputs.release_notes }} file"; exit 1; }
+          grep -q "{{SHA_PRI}}" "${{ steps.vars.outputs.release_notes }}" || {
+            echo "ERROR: ${{ steps.vars.outputs.release_notes }} must contain the {{SHA_PRI}} placeholder"; exit 1; }
+          grep -q "{{SHA_NOTICES}}" "${{ steps.vars.outputs.release_notes }}" || {
+            echo "ERROR: ${{ steps.vars.outputs.release_notes }} must contain the {{SHA_NOTICES}} placeholder"; exit 1; }
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build code
+        run: mvn -B clean install
+
+      - name: Create PRI tarball
+        run: |
+          set -euo pipefail
+          mkdir -p "dist/${{ steps.vars.outputs.pri }}"
+          cp -a component-samples/demo/* "dist/${{ steps.vars.outputs.pri }}/"
+          tar -C dist -czf "${{ steps.vars.outputs.pri_tarball }}" "${{ steps.vars.outputs.pri }}"
+          sha256sum "${{ steps.vars.outputs.pri_tarball }}" | awk '{print $1}' > pri.sha256
+
+      - name: Create NOTICES tarball
+        run: |
+          set -euo pipefail
+          [[ -f NOTICE ]] || { echo "ERROR: NOTICE fle not found"; exit 1; }
+          [[ -d NOTICES ]] || { echo "ERROR: NOTICES directory not found"; exit 1; }
+          tar -czf "${{ steps.vars.outputs.pri_notices_tarball }}" NOTICE NOTICES
+          sha256sum "${{ steps.vars.outputs.pri_notices_tarball }}" | awk '{print $1}' > notices.sha256
+
+      - name: Render release notes
+        run: |
+          set -euo pipefail
+          SHA_PRI="$(cat pri.sha256)"
+          SHA_NOTICES="$(cat notices.sha256)"
+          sed \
+            -e "s/{{SHA_PRI}}/${SHA_PRI}/g" \
+            -e "s/{{SHA_NOTICES}}/${SHA_NOTICES}/g" \
+            "${{ steps.vars.outputs.release_notes }}" > release/notes/.rendered.md
+          echo "Rendered notes:" && cat release/notes/.rendered.md
+
+      - name: Fetch tags
+        run: git fetch --tags --force
+
+      - name: Create tag
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.vars.outputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+            echo "ERROR: Tag ${TAG} already exists on origin. Aborting."; exit 1;
+          fi
+          git tag -a "$TAG" -m "pri-fidoiot $TAG"
+          git push origin "$TAG"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.version }}
+          name: ${{ steps.vars.outputs.version }}
+          body_path: release/notes/.rendered.md
+          files: |
+            ${{ steps.vars.outputs.pri_tarball }}
+            ${{ steps.vars.outputs.pri_notices_tarball }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
