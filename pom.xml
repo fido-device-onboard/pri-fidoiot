@@ -28,8 +28,8 @@
 
 
     <!-- Dependency Version -->
-    <bcfips.version>1.0.2.5</bcfips.version>
-    <bcpkix-fips.version>1.0.7</bcpkix-fips.version>
+    <bcfips.version>2.1.1</bcfips.version>
+    <bcpkix-fips.version>2.1.9</bcpkix-fips.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-codec.version>1.16.1</commons-codec.version>
     <commons-text.version>1.11.0</commons-text.version>
@@ -42,7 +42,7 @@
     <log4j.version>2.23.0</log4j.version>
     <slf4j.version>1.7.36</slf4j.version>
     <hibernate.version>6.4.4.Final</hibernate.version>
-    <tomcat.version>11.0.6</tomcat.version>
+    <tomcat.version>11.0.10</tomcat.version>
     <apache-httpcomponents.version>4.5.14</apache-httpcomponents.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <jackson-dataformat.version>2.16.1</jackson-dataformat.version>
