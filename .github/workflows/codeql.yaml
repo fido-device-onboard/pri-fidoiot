@@ -28,7 +28,7 @@ jobs:
           java-version: '17'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@cdcdbb579706841c47f7063dda365e292e5cad7a # v2.25.3
+        uses: github/codeql-action/init@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v2.25.3
         with:
           languages: java
 
@@ -36,6 +36,6 @@ jobs:
         run: mvn -B clean install -DskipTests
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@cdcdbb579706841c47f7063dda365e292e5cad7a # v2.25.3
+        uses: github/codeql-action/analyze@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v2.25.3
         with:
           category: "/language:java"
