@@ -73,8 +73,8 @@ device:
 
   key-exchange-suite: ECDH256  
 
-  max-message-size: 0
-  service-info-mtu: 1300
+  max-message-size: 65535
+  service-info-mtu: 16384
   max-retry: 1
   retry-delay: 10
 
