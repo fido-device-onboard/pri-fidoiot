@@ -124,6 +124,27 @@ public enum Mapper {
   }
 
   /**
+   * Writes the given object to CBOR encoded Bytes and wraps the result inside a CBOR byte string.
+   * This results in a CBOR byte string whose content is itself a CBOR encoded object.
+   *
+   * @param value The object to encode.
+   * @return A CBOR byte string containing the CBOR encoded object.
+   * @throws IOException An error occurred when writing the value.
+   */
+  public byte[] writeAsCborByteString(Object value) throws IOException {
+    return cborMapper.writeValueAsBytes(writeValue(value));
+  }
+
+  /**
+   * Returns a CBOR Null value.
+   *
+   * @return A CBOR Null value.
+   */
+  public byte[] cborNull() {
+    return new byte[]{(byte) 0xf6};
+  }
+
+  /**
    * Writes an Object as a yaml encoded string.
    *
    * @param value The object to encode.
@@ -189,6 +210,19 @@ public enum Mapper {
   public <T> T readValue(byte[] bytes, Class<T> t) throws IOException {
     ObjectReader reader = cborMapper.readerFor(t);
     return reader.readValue(bytes, t);
+  }
+
+  /**
+   * Reads an object from a CBOR byte string (bstr) containing CBOR encoded data.
+   *
+   * @param bytes The cbor byte string.
+   * @param t     The target class.
+   * @param <T>   The target Class type.
+   * @return The converted result.
+   * @throws IOException An error occurred when reading the content.
+   */
+  public <T> T readFromCborByteString(byte[] bytes, Class<T> t) throws IOException {
+    return readValue(readValue(bytes, byte[].class), t);
   }
 
   /**

@@ -93,7 +93,7 @@ public class FdoSimCommandDeviceModule implements ServiceInfoModule {
         break;
       case FdoSimCommandOwnerModule.ARGS:
         if (state.isActive()) {
-          commandArgs = Mapper.INSTANCE.readValue(kvPair.getValue(), String[].class);
+          commandArgs = Mapper.INSTANCE.readFromCborByteString(kvPair.getValue(), String[].class);
           logger.info("with args: " + Arrays.asList(commandArgs));
         }
         break;

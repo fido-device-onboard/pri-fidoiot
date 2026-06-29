@@ -16,9 +16,7 @@ import org.fidoalliance.fdo.protocol.message.DevModList;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoDocument;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoKeyValuePair;
 import org.fidoalliance.fdo.protocol.message.ServiceInfoModuleState;
-import org.fidoalliance.fdo.protocol.message.ServiceInfoQueue;
 import org.fidoalliance.fdo.protocol.serviceinfo.DevMod;
-import org.fidoalliance.fdo.protocol.serviceinfo.FdoSys;
 
 public class FdoSimCommandOwnerModule implements ServiceInfoModule {
 
@@ -219,7 +217,7 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
 
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(ARGS);
-          kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
+          kv.setValue(Mapper.INSTANCE.writeAsCborByteString(commandArgs));
           state.getGlobalState().getQueue().add(kv);
 
           if (instructions[i].getMayFail() != null) {
@@ -272,7 +270,7 @@ public class FdoSimCommandOwnerModule implements ServiceInfoModule {
 
           kv = new ServiceInfoKeyValuePair();
           kv.setKeyName(EXECUTE);
-          kv.setValue(Mapper.INSTANCE.writeValue(commandArgs));
+          kv.setValue(Mapper.INSTANCE.cborNull());
           state.getGlobalState().getQueue().add(kv);
 
 
