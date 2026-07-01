@@ -96,6 +96,7 @@ public class ProtocolServlet extends HttpServlet {
 
           resp.setContentLength(errorMsg.getMessage().length);
           resp.getOutputStream().write(errorMsg.getMessage());
+          resp.setContentType(HttpUtils.HTTP_APPLICATION_CBOR);
           logMessage(errorMsg);
 
 
